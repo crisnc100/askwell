@@ -271,3 +271,29 @@ def test_boolean_filter_values_are_bound(registry: Registry) -> None:
         assert list(params.values()) == [True], (dialect, sql, params)
         assert "true" not in sql.lower()
         assert "= 1" not in sql
+
+
+def test_builder_refuses_duplicate_output_labels(registry: Registry) -> None:
+    from dataclasses import replace
+
+    intent = Intent.model_validate(
+        {
+            "intent_type": "grouped_summary",
+            "entity": "work_orders",
+            "metrics": [{"agg": "count", "alias": "n"}],
+            "group_by": [{"field": "status"}],
+        }
+    )
+    plan = validate(intent, registry, now=NOW).plan
+    assert plan is not None
+    clash = replace(plan, metrics=(replace(plan.metrics[0], label="status"),))
+    with pytest.raises(ValueError, match="duplicate output label"):
+        build(clash)
+
+
+def test_datetime_normalisation_refuses_other_dialects() -> None:
+    from ledgerline.core.sqlbuild import AsDatetime
+
+    stmt = select(AsDatetime(literal(date(2026, 1, 1), Date)))
+    with pytest.raises(CompileError, match="not implemented"):
+        stmt.compile(dialect=mysql.dialect())

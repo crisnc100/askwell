@@ -21,6 +21,7 @@ from sqlalchemy import (
     Select,
     String,
     and_,
+    bindparam,
     column,
     func,
     or_,
@@ -134,6 +135,31 @@ def _grain_other(element: _Grain, compiler: SQLCompiler, **kw: Any) -> str:
     raise CompileError(f"calendar grains are not implemented for {compiler.dialect.name}")
 
 
+class AsDatetime(FunctionElement[Any]):
+    """An operand normalised to a datetime: CAST AS TIMESTAMP on Postgres; on SQLite,
+    strftime to one text format (millisecond precision), whatever format the stored
+    DATE or DATETIME text uses."""
+
+    type = DateTime()
+    name = "as_datetime"
+    inherit_cache = True
+
+
+@compiles(AsDatetime, "postgresql")
+def _as_datetime_pg(element: AsDatetime, compiler: SQLCompiler, **kw: Any) -> str:
+    return f"CAST({compiler.process(element.clauses, **kw)} AS TIMESTAMP)"
+
+
+@compiles(AsDatetime, "sqlite")
+def _as_datetime_sqlite(element: AsDatetime, compiler: SQLCompiler, **kw: Any) -> str:
+    return f"strftime('%Y-%m-%d %H:%M:%f', {compiler.process(element.clauses, **kw)})"
+
+
+@compiles(AsDatetime)
+def _as_datetime_other(element: AsDatetime, compiler: SQLCompiler, **kw: Any) -> str:
+    raise CompileError(f"datetime normalisation is not implemented for {compiler.dialect.name}")
+
+
 # --- building ---
 
 
@@ -172,15 +198,32 @@ def _fields(plan: QueryPlan) -> list[ResolvedField]:
     return out
 
 
-def _predicate(tables: _Tables, predicate: Predicate) -> ColumnElement[bool]:
+def _bind(value: Any, col: ColumnElement[Any]) -> ColumnElement[Any]:
+    """A bound parameter typed like its column. Passing a bare Python value lets
+    SQLAlchemy render some values (booleans) as SQL literals; this never does."""
+    return bindparam(None, value, type_=col.type)
+
+
+def _comparison_operands(
+    tables: _Tables, predicate: Predicate
+) -> tuple[ColumnElement[Any], ColumnElement[Any]]:
     col = tables.col(predicate.field)
+    assert predicate.other is not None
+    other = tables.col(predicate.other)
+    if {predicate.field.type, predicate.other.type} == {"date", "datetime"}:
+        # A DATE against a DATETIME: compare both as datetimes (a DATE is its midnight).
+        return AsDatetime(col), AsDatetime(other)
+    return col, other
+
+
+def _predicate(tables: _Tables, predicate: Predicate) -> ColumnElement[bool]:
     op = predicate.op
     if predicate.other is not None:
-        rhs: Any = tables.col(predicate.other)
-    elif op in ("in", "between", "is_null"):
-        rhs = None
+        col, rhs = _comparison_operands(tables, predicate)
     else:
-        rhs = predicate.values[0]
+        col = tables.col(predicate.field)
+        single = op in ("eq", "neq", "gt", "gte", "lt", "lte")
+        rhs = _bind(predicate.values[0], col) if single else None
     if op == "eq":
         return col == rhs
     if op == "neq":
@@ -194,9 +237,9 @@ def _predicate(tables: _Tables, predicate: Predicate) -> ColumnElement[bool]:
     if op == "lte":
         return col <= rhs
     if op == "between":
-        return col.between(predicate.values[0], predicate.values[1])
+        return col.between(_bind(predicate.values[0], col), _bind(predicate.values[1], col))
     if op == "in":
-        return col.in_(list(predicate.values))
+        return col.in_([_bind(v, col) for v in predicate.values])
     if op == "is_null":
         return col.is_(None) if predicate.values[0] else col.is_not(None)
     if op == "ilike_contains":
@@ -216,8 +259,8 @@ def _metric(tables: _Tables, metric: PlanMetric) -> ColumnElement[Any]:
 
 def _compare(expr: ColumnElement[Any], op: str, values: tuple[float, ...]) -> ColumnElement[bool]:
     if op == "between":
-        return expr.between(values[0], values[1])
-    value = values[0]
+        return expr.between(_bind(values[0], expr), _bind(values[1], expr))
+    value = _bind(values[0], expr)
     comparisons = {
         "eq": expr == value,
         "neq": expr != value,
@@ -227,6 +270,13 @@ def _compare(expr: ColumnElement[Any], op: str, values: tuple[float, ...]) -> Co
         "lte": expr <= value,
     }
     return comparisons[op]
+
+
+def _label(labelled: dict[str, ColumnElement[Any]], label: str, expr: ColumnElement[Any]) -> None:
+    if label in labelled:
+        # The validator rejects this (alias_collision); never let one label shadow another.
+        raise ValueError(f"duplicate output label {label!r}")
+    labelled[label] = expr
 
 
 def build(plan: QueryPlan) -> Select[Any]:
@@ -249,11 +299,11 @@ def build(plan: QueryPlan) -> Select[Any]:
                 expr = GRAINS[group.grain](expr)
             group_exprs.append(expr)
             columns.append(expr.label(group.label))
-            labelled[group.label] = expr
+            _label(labelled, group.label, expr)
         for metric in plan.metrics:
             expr = _metric(tables, metric)
             columns.append(expr.label(metric.label))
-            labelled[metric.label] = expr
+            _label(labelled, metric.label, expr)
 
     stmt = select(*columns).select_from(source)
     conditions: list[ColumnElement[bool]] = []
