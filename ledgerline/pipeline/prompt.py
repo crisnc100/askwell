@@ -101,9 +101,17 @@ def _render(registry: Registry, now: datetime, max_values: int | None, desc_len:
             if fdef.hidden:
                 continue
             lines.append(_field_line(name, fdef, max_values, desc_len))
-    if registry.relationships:
+    # A relationship whose key field is hidden is left out: listing it would name the
+    # hidden field. (The validator still uses it for joins.)
+    shown = [
+        rel
+        for rel in registry.relationships
+        if not registry.entities[rel.from_entity].fields[rel.from_field].hidden
+        and not registry.entities[rel.to_entity].fields[rel.to_field].hidden
+    ]
+    if shown:
         lines += ["", "Relationships (many-to-one; joins follow them):"]
-        for rel in registry.relationships:
+        for rel in shown:
             lines.append(f"- {rel.from_entity}.{rel.from_field} -> {rel.to_entity}.{rel.to_field}")
     return "\n".join(lines) + "\n"
 
