@@ -599,18 +599,6 @@
     {
       "error": null,
       "issue_codes": [],
-      "item_id": "fs-032",
-      "model": "openai/gpt-oss-120b",
-      "note": "The gold excludes void invoices, but the question does not say to. evals/gold/README.md says void is excluded only when the question says so. The answer kept void invoices.",
-      "outcome": "wrong",
-      "refusal": null,
-      "schema": "fieldservice",
-      "tag": "gold_issue",
-      "trial": 1
-    },
-    {
-      "error": null,
-      "issue_codes": [],
       "item_id": "fs-035",
       "model": "openai/gpt-oss-120b",
       "note": "Needs two date fields in one monthly series. The model counted completions among the orders opened each month instead of refusing: a wrong answer.",
@@ -2042,12 +2030,12 @@
     {
       "accuracy_given_attempted": {
         "ci95": [
-          0.6958318822077686,
-          0.9255613658484106
+          0.7267314055770869,
+          0.9424613230987987
         ],
-        "n": 32,
+        "n": 33,
         "of": 38,
-        "rate": 0.8421052631578947
+        "rate": 0.868421052631579
       },
       "coverage": {
         "ci95": [
@@ -2060,12 +2048,12 @@
       },
       "execution_accuracy": {
         "ci95": [
-          0.5976159650115332,
-          0.8507048287619176
+          0.6225547970219101,
+          0.8684632152061551
         ],
-        "n": 32,
+        "n": 33,
         "of": 43,
-        "rate": 0.7441860465116279
+        "rate": 0.7674418604651163
       },
       "execution_error_rate": {
         "ci95": [
@@ -2088,7 +2076,7 @@
       "items": 67,
       "mean_cost_usd": 0.0,
       "model": "openai/gpt-oss-120b",
-      "p50_latency_ms": 5.922832991927862,
+      "p50_latency_ms": 4.940332961268723,
       "pending": 0,
       "refusal_recall": {
         "ci95": [
@@ -2104,12 +2092,12 @@
       "trials": 1,
       "wrong_answer_rate_given_answered": {
         "ci95": [
-          0.07443863415158927,
-          0.3041681177922313
+          0.05753867690120133,
+          0.2732685944229131
         ],
-        "n": 6,
+        "n": 5,
         "of": 38,
-        "rate": 0.15789473684210525
+        "rate": 0.13157894736842105
       }
     },
     {
@@ -2161,7 +2149,7 @@
       "items": 67,
       "mean_cost_usd": 0.0,
       "model": "openai/gpt-oss-120b",
-      "p50_latency_ms": 1.4355839230120182,
+      "p50_latency_ms": 1.8948750803247094,
       "pending": 0,
       "refusal_recall": {
         "ci95": [
@@ -2234,7 +2222,7 @@
       "items": 50,
       "mean_cost_usd": 0.0,
       "model": "openai/gpt-oss-120b",
-      "p50_latency_ms": 4.629958013538271,
+      "p50_latency_ms": 3.5499369842000306,
       "pending": 0,
       "refusal_recall": {
         "ci95": null,
@@ -2304,7 +2292,7 @@
       "items": 50,
       "mean_cost_usd": 0.0,
       "model": "openai/gpt-oss-120b",
-      "p50_latency_ms": 0.24370849132537842,
+      "p50_latency_ms": 0.21729199215769768,
       "pending": 0,
       "refusal_recall": {
         "ci95": null,
@@ -2374,7 +2362,7 @@
       "items": 50,
       "mean_cost_usd": 0.0,
       "model": "openai/gpt-oss-120b",
-      "p50_latency_ms": 4.1914169560186565,
+      "p50_latency_ms": 3.3067080075852573,
       "pending": 0,
       "refusal_recall": {
         "ci95": null,
@@ -2444,7 +2432,7 @@
       "items": 50,
       "mean_cost_usd": 0.0,
       "model": "openai/gpt-oss-120b",
-      "p50_latency_ms": 0.2687709638848901,
+      "p50_latency_ms": 0.21049997303634882,
       "pending": 0,
       "refusal_recall": {
         "ci95": null,
@@ -2514,7 +2502,7 @@
       "items": 50,
       "mean_cost_usd": 0.0,
       "model": "openai/gpt-oss-120b",
-      "p50_latency_ms": 3.872458473779261,
+      "p50_latency_ms": 3.3032295177690685,
       "pending": 0,
       "refusal_recall": {
         "ci95": null,
@@ -2584,7 +2572,7 @@
       "items": 50,
       "mean_cost_usd": 0.0,
       "model": "openai/gpt-oss-120b",
-      "p50_latency_ms": 0.27789606247097254,
+      "p50_latency_ms": 0.2269584801979363,
       "pending": 0,
       "refusal_recall": {
         "ci95": null,
@@ -2654,7 +2642,7 @@
       "items": 50,
       "mean_cost_usd": 0.0,
       "model": "openai/gpt-oss-120b",
-      "p50_latency_ms": 4.642292042262852,
+      "p50_latency_ms": 3.8032709853723645,
       "pending": 0,
       "refusal_recall": {
         "ci95": null,
@@ -2724,7 +2712,7 @@
       "items": 50,
       "mean_cost_usd": 0.0,
       "model": "openai/gpt-oss-120b",
-      "p50_latency_ms": 0.24285406107082963,
+      "p50_latency_ms": 0.20139600383117795,
       "pending": 0,
       "refusal_recall": {
         "ci95": null,
@@ -2794,7 +2782,7 @@
       "items": 50,
       "mean_cost_usd": 0.0,
       "model": "openai/gpt-oss-120b",
-      "p50_latency_ms": 6.840229500085115,
+      "p50_latency_ms": 4.458374984096736,
       "pending": 0,
       "refusal_recall": {
         "ci95": null,
@@ -2864,7 +2852,7 @@
       "items": 50,
       "mean_cost_usd": 0.0,
       "model": "openai/gpt-oss-120b",
-      "p50_latency_ms": 1.159833453129977,
+      "p50_latency_ms": 0.752270978409797,
       "pending": 0,
       "refusal_recall": {
         "ci95": null,

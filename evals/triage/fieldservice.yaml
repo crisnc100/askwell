@@ -18,10 +18,6 @@ fs-028:
 fs-030:
   note: Needs a computed value (quantity times unit price). Refused correctly.
   tag: grammar_gap
-fs-032:
-  note: The gold excludes void invoices, but the question does not say to. evals/gold/README.md says void
-    is excluded only when the question says so. The answer kept void invoices.
-  tag: gold_issue
 fs-035:
   note: 'Needs two date fields in one monthly series. The model counted completions among the orders opened
     each month instead of refusing: a wrong answer.'

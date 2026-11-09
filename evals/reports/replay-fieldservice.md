@@ -11,7 +11,7 @@ Rates show the value, the Wilson 95% interval, and the counts. Trials are pooled
 
 | Schema | System | Model | Trials | Coverage | Exec. accuracy | Acc. given attempted | False refusals | Wrong given answered | Refusal recall | Exec. errors |
 |---|---|---|---|---|---|---|---|---|---|---|
-| fieldservice | ledgerline | openai/gpt-oss-120b | 1 | 88.4% [76-95] (38/43) | 74.4% [60-85] (32/43) | 84.2% [70-93] (32/38) | 11.6% [5-24] (5/43) | 15.8% [7-30] (6/38) | 100.0% [86-100] (24/24) | 0.0% [0-5] (0/67) |
+| fieldservice | ledgerline | openai/gpt-oss-120b | 1 | 88.4% [76-95] (38/43) | 76.7% [62-87] (33/43) | 86.8% [73-94] (33/38) | 11.6% [5-24] (5/43) | 13.2% [6-27] (5/38) | 100.0% [86-100] (24/24) | 0.0% [0-5] (0/67) |
 | fieldservice | oneshot | openai/gpt-oss-120b | 1 | 100.0% [92-100] (43/43) | 69.8% [55-81] (30/43) | 69.8% [55-81] (30/43) | 0.0% [0-8] (0/43) | 30.2% [19-45] (13/43) | 100.0% [86-100] (24/24) | 0.0% [0-5] (0/67) |
 
 ## Ledgerline misses
@@ -21,7 +21,6 @@ Rates show the value, the Wilson 95% interval, and the counts. Trials are pooled
 - `fs-025` (fieldservice, trial 1): refused — Average days to complete needs the elapsed time between work_orders.opened_at and work_orders.completed_at, and the registry has no way to compute a difference between two date fields. Metrics aggregate a single field only.. Tag: **grammar_gap**. Needs the difference between two dates (opened to completed). Refused correctly.
 - `fs-028` (fieldservice, trial 1): wrong — rows differ. Tag: **grammar_gap**. Needs a ratio of two counts. The model returned counts per status instead of refusing: a wrong answer, not a refusal.
 - `fs-030` (fieldservice, trial 1): refused — Parts revenue needs quantity times unit_price per line, and the registry has no computed line-revenue field. A metric aggregates a single field, so summing unit_price or quantity alone would give a different number.. Tag: **grammar_gap**. Needs a computed value (quantity times unit price). Refused correctly.
-- `fs-032` (fieldservice, trial 1): wrong — rows differ. Tag: **gold_issue**. The gold excludes void invoices, but the question does not say to. evals/gold/README.md says void is excluded only when the question says so. The answer kept void invoices.
 - `fs-035` (fieldservice, trial 1): wrong — rows differ. Tag: **grammar_gap**. Needs two date fields in one monthly series. The model counted completions among the orders opened each month instead of refusing: a wrong answer.
 - `fs-037` (fieldservice, trial 1): wrong — rows differ. Tag: **grammar_gap**. Needs a distinct count of months in HAVING. The model returned per-technician monthly counts instead of refusing: a wrong answer.
 - `fs-039` (fieldservice, trial 1): refused — The question needs a 2-day elapsed-time test between completed_at and opened_at and a ratio of two counts; the intent language supports neither a date arithmetic comparison nor a share metric.. Tag: **grammar_gap**. Needs date arithmetic and a ratio. Refused correctly.
