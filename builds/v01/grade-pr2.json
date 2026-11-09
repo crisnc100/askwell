@@ -1,0 +1,100 @@
+{
+  "family": "astra",
+  "model": "gpt-6-astra",
+  "criteria": [
+    {
+      "id": "L7",
+      "criterion": "POST /ask returns {intent, validation, sql, params, rows, columns, refusal, trace_id, cost_usd}; replay API tests cover answerable, out-of-registry refusal, hidden-field refusal, write refusal, retry-then-success (scripted double, labelled), and init -> ask on a Spider DB; ask_log is written; unrecorded question returns a clear 409.",
+      "verdict": "PASS",
+      "evidence": "ledgerline/api.py and AskResult.to_dict implement the response and explicit replay-miss 409. tests/pipeline/test_api_replay.py covers recorded answers, all three refusals, init→ask on dog_kennels, audit rows, and the 409. test_api_double.py explicitly labels its scripted gateway and checks retry success and required response fields. evals/replay_cases.py generates the Spider registry directly through init_registry. Database-dependent tests were assessed from source and verify.sh wiring, not rerun."
+    },
+    {
+      "id": "PIPE",
+      "criterion": "present is deterministic and no result rows are ever sent to the model (test); relative dates resolved by code; hidden fields never in the prompt; interpret prompt truncation deterministic.",
+      "verdict": "FAIL",
+      "evidence": "Presentation is deterministic, test_graph.py checks that returned customer names never enter model messages, and validation resolves relative dates in code. Prompt tests passed. However, prompt.py:104–107 renders relationship endpoints without checking hidden flags. A read-only reproduction marking invoices.work_order_id hidden still emitted '- invoices.work_order_id -> work_orders.id' in the registry prompt."
+    },
+    {
+      "id": "L9",
+      "criterion": "the replay eval reproduces the committed fieldservice replay report inside verify.sh; docs/rerecord.md (or equivalent) documents re-recording.",
+      "verdict": "FAIL",
+      "evidence": "verify.sh:32–33 invokes scripts.check_replay_report, which runs fieldservice replay in a fresh temporary directory and compares the rendered Markdown against the committed report. The committed Markdown also matched rendering of its JSON in this session. However, docs/rerecord.md is absent, and no equivalent re-recording guide was found. Existing export/import docstrings and build-log notes do not document refreshing the committed eval recordings end to end."
+    },
+    {
+      "id": "SIMRPT",
+      "criterion": "the report's first line states it is simulated with simulator and target model; notes state sql_agent not run, one target model, trials=1 with reasons; every Ledgerline miss is triaged (no untriaged); Spider items cited by ID only, with no Spider question text or data committed; Spider registries are unedited registry init output checked by hash.",
+      "verdict": "FAIL",
+      "evidence": "Both reports start with '# Eval report'; their simulation banner naming claude-haiku-5-5 and openai/gpt-oss-120b is on line 3. Notes correctly explain the deferred baseline, single target and single trial. All 116 sim-1 misses are triaged. All five regenerated Spider registry hashes matched. However, committed sim-1.md:63 includes Spider breed values BUL, ESK and HUS, independently confirmed against the read-only Spider database. Line 61 and evals/triage/spider_dog_kennels.yaml:56 also include size data values."
+    },
+    {
+      "id": "METRICS",
+      "criterion": "coverage, execution accuracy, accuracy given attempted, false-refusal, wrong-given-answered, refusal recall and Wilson 95% intervals are computed as defined in plan.md Definitions, and result comparison follows the stated rules.",
+      "verdict": "FAIL",
+      "evidence": "metrics.py uses the required denominators, and every committed report rate and Wilson interval matched recomputation. Comparison handles multisets, ordered sequences, NULL, dates, row caps and column projection. However, compare.py:37 rounds numbers to six decimal places instead of applying tolerance 1e-6. A direct reproduction comparing 1.00000051 with Decimal('1.00000049') returned False despite a difference of only 2e-8. Fourteen selected comparison, metric, prompt and manifest tests passed but do not cover this boundary."
+    },
+    {
+      "id": "L11REC",
+      "criterion": "the floor check is computed from the numbers and reported as not met with cause and planned fix; ADR-001 records prediction vs result; the gold change (revision 2) is logged in the CHANGELOG with a reason and the manifest matches.",
+      "verdict": "PASS",
+      "evidence": "report.floor_checks computes both bounds from metric values. Reports show 33/43 execution accuracy (76.7%) and 5/38 wrong given answered (13.2%), both not met, explain proxy answers to unsupported questions, and propose a refusal-first prompt followed by a fresh run. ADR-001 compares each prediction with results. CHANGELOG revision 2 explains removing fs-032's unjustified void-invoice exclusion. test_committed_gold_matches_manifest passed."
+    },
+    {
+      "id": "EXPORT",
+      "criterion": "gateway export/import validates imported answers against the request schema, records provenance per answer, and a replay miss never calls a live transport.",
+      "verdict": "FAIL",
+      "evidence": "simulate.import_answers checks key, simulator identity and response-envelope exclusivity, but never reads response_schema for validation. An in-memory reproduction imported and stored response={} for a schema requiring a string choice. Validation happens only later during replay. Provenance is stored per answer, and test_replay_miss_raises_and_never_calls_live passed when invoked directly."
+    }
+  ],
+  "findings": [
+    {
+      "likelihood": 6,
+      "impact": 5,
+      "protected": false,
+      "trigger": "A registry hides a field used as a relationship endpoint.",
+      "issue": "Relationship rendering exposes hidden field names in the model prompt.",
+      "file": "ledgerline/pipeline/prompt.py",
+      "line": "107",
+      "evidence": "Marking invoices.work_order_id hidden in a valid registry still produced '- invoices.work_order_id -> work_orders.id'. Field-list filtering does not cover relationship rendering."
+    },
+    {
+      "likelihood": 5,
+      "impact": 5,
+      "protected": false,
+      "trigger": "Numerically equivalent results straddle a six-decimal rounding boundary.",
+      "issue": "The comparator incorrectly scores results within the specified 1e-6 tolerance as wrong.",
+      "file": "ledgerline/bench/compare.py",
+      "line": "37",
+      "evidence": "results_match([(1.00000051,)], [(Decimal('1.00000049'),)], ordered=False) returned False. Their difference is 2e-8."
+    },
+    {
+      "likelihood": 6,
+      "impact": 5,
+      "protected": false,
+      "trigger": "An imported answer has valid metadata but violates its exported response schema.",
+      "issue": "Import accepts invalid answers into the replay store and normally deletes their source files without schema validation.",
+      "file": "ledgerline/llm/simulate.py",
+      "line": "117",
+      "evidence": "A mocked request requiring choice:string and an answer containing response={} yielded one imported record with raw.parsed={}. Lines 138–140 delete the request and answer after storage when remove=True."
+    },
+    {
+      "likelihood": 10,
+      "impact": 5,
+      "protected": false,
+      "trigger": "A Spider refusal or triage note quotes database values.",
+      "issue": "Reports commit Spider data through unrestricted refusal text and manually written notes despite excluding Spider recordings.",
+      "file": "ledgerline/bench/report.py",
+      "line": "154",
+      "evidence": "sim-1.md:63 commits BUL, ESK and HUS, which a read-only query confirmed are dog_kennels.breeds.breed_code values. These values enter report JSON and Markdown through the unfiltered refusal. The triage file also commits size codes and descriptions."
+    },
+    {
+      "likelihood": 5,
+      "impact": 4,
+      "protected": false,
+      "trigger": "A paid model response fails parsing before a retry succeeds or refuses.",
+      "issue": "Reported and audited cost omits failed parsing attempts; the oneshot parse-error path similarly reports zero cost.",
+      "file": "ledgerline/pipeline/graph.py",
+      "line": "57",
+      "evidence": "A local fake-transport reproduction charged the real Gateway budget guard $0.02 across two responses but produced graph cost_usd=$0.01. The ParseError branch loses the charged response's cost. bench/systems.py:185–191 explicitly returns 0.0 for the corresponding baseline failure."
+    }
+  ]
+}

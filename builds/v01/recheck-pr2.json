@@ -1,0 +1,58 @@
+{
+  "family": "astra",
+  "model": "gpt-6-astra",
+  "criteria": [
+    {
+      "id": "PIPE",
+      "criterion": "present is deterministic and no result rows are ever sent to the model (test); relative dates resolved by code; hidden fields never in the prompt; interpret prompt truncation deterministic.",
+      "verdict": "PASS",
+      "evidence": "graph.py permits model calls only before execution; present is deterministic. An in-memory service check returned identical presentation twice and confirmed returned names were absent from every prompt. test_rows_are_never_sent_to_the_model covers this boundary. validate.py:634 resolves relative dates in code. prompt.py excludes hidden fields and both hidden relationship endpoints. Prompt and date tests passed, including the new hidden-endpoint regression and deterministic truncation tests."
+    },
+    {
+      "id": "L9",
+      "criterion": "the replay eval reproduces the committed fieldservice replay report inside verify.sh; docs/rerecord.md (or equivalent) documents re-recording.",
+      "verdict": "PASS",
+      "evidence": "verify.sh invokes scripts.check_replay_report, which runs fresh fieldservice replay and compares Markdown exactly, failing on differences. docs/rerecord.md documents export, answering, import, retry requests, replay and report regeneration; its test passed. Rebuilding from the existing 134 fieldservice checkpoint records reproduced the committed Markdown exactly. Fresh end-to-end replay remains unverified in this session: the sandbox denied temporary-file creation and PostgreSQL connections."
+    },
+    {
+      "id": "SIMRPT",
+      "criterion": "the report's first line states it is simulated with simulator and target model; notes state sql_agent not run, one target model, trials=1 with reasons; every Ledgerline miss is triaged (no untriaged); Spider items cited by ID only, with no Spider question text or data committed; Spider registries are unedited registry init output checked by hash.",
+      "verdict": "PASS",
+      "evidence": "sim-1.md begins with simulator claude-haiku-5-5 and target openai/gpt-oss-120b; all three required notes give reasons. All 116 Ledgerline misses have triage tags. Privacy tests passed; a tracked-file scan found no selected Spider question text or tracked Spider data/recordings. Report generation suppresses Spider refusal/error text. Regenerated all five registries through init_registry and confirmed every SHA-256 matches the committed hash."
+    },
+    {
+      "id": "METRICS",
+      "criterion": "coverage, execution accuracy, accuracy given attempted, false-refusal, wrong-given-answered, refusal recall and Wilson 95% intervals are computed as defined in plan.md Definitions, and result comparison follows the stated rules.",
+      "verdict": "FAIL",
+      "evidence": "metrics.py implements the specified denominators and Wilson intervals; metric tests passed. However, 21d1d31 introduces two comparison defects reproduced directly: relative tolerance accepts a 0.0005 discrepancy at 1,000,000 despite the specified 1e-6 tolerance, and lexicographic numeric sorting rejects a valid unordered multiset whose rows each have a within-tolerance counterpart. Existing comparison tests pass but miss both cases."
+    },
+    {
+      "id": "EXPORT",
+      "criterion": "gateway export/import validates imported answers against the request schema, records provenance per answer, and a replay miss never calls a live transport.",
+      "verdict": "PASS",
+      "evidence": "simulate.py checks the registered model's schema against the exported schema, validates structured responses, and retains rejected answers. An isolated in-memory import check rejected an invalid Intent, accepted a valid Intent, and verified stored simulated_by/standing_in_for provenance. Raw-text recordings intentionally preserve parse failures. The existing replay-miss test passed when invoked without a temporary-directory fixture: ReplayMissError occurred with zero transport calls."
+    }
+  ],
+  "findings": [
+    {
+      "likelihood": 5,
+      "impact": 5,
+      "protected": false,
+      "trigger": "Comparing large numeric results whose absolute discrepancy exceeds 1e-6 but falls within the added relative tolerance.",
+      "issue": "21d1d31 widens the preregistered tolerance and can score incorrect answers as correct.",
+      "file": "ledgerline/bench/compare.py",
+      "line": "76",
+      "evidence": "Direct execution of results_match([(1000000.0005,)], [(Decimal('1000000'),)], ordered=True) returned True. The discrepancy is 0.0005, approximately 500 times plan.md's 1e-6 tolerance. REL_TOLERANCE=1e-9 permits this match."
+    },
+    {
+      "likelihood": 4,
+      "impact": 5,
+      "protected": false,
+      "trigger": "Unordered results contain multiple numeric columns, with near-equal leading values that change lexicographic row ordering.",
+      "issue": "21d1d31 pairs sorted rows rather than finding a valid multiset matching, producing false wrong-answer scores.",
+      "file": "ledgerline/bench/compare.py",
+      "line": "107-112",
+      "evidence": "results_match([(0.0000004,10),(0.0,20)], [(0.0,10),(0.0000004,20)], ordered=False) returned False. Comparing the corresponding rows individually returned [True, True]. Sorting reverses their pairing and compares 10 against 20; the previous six-decimal multiset implementation accepted this example."
+    }
+  ]
+}
