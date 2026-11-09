@@ -1,0 +1,52 @@
+{
+ "c1": {
+  "status": "fixed",
+  "response": "real"
+ },
+ "c2": {
+  "status": "fixed",
+  "response": "unimportant"
+ },
+ "c3": {
+  "status": "deferred",
+  "reason": "Criterion not met after its one recheck: the worst-case pre-check bounds tokens by characters, which Unicode-heavy prompts can exceed. Spend is still capped by actual charges and the OpenRouter key credit limit.",
+  "fix": "Bound tokens by UTF-8 bytes (or a tokenizer upper bound) instead of characters in pricing.py; first task of PR2."
+ },
+ "f4": {
+  "status": "fixed",
+  "response": "real"
+ },
+ "f5": {
+  "status": "fixed",
+  "response": "real"
+ },
+ "f6": {
+  "status": "fixed",
+  "response": "real"
+ },
+ "r1": {
+  "status": "deferred",
+  "reason": "Recheck finding introduced by the binding fix: HAVING thresholds are cast to the column type, so count > 1.5 becomes > 2 on Postgres.",
+  "fix": "Bind HAVING/aggregate comparison values with the aggregate's result type (numeric for avg/sum, no integer cast for fractional thresholds); first task of PR2 with a cross-engine test."
+ },
+ "r2": {
+  "status": "deferred",
+  "reason": "Recheck finding: SQLite date-vs-datetime normalization truncates to milliseconds, so a timestamp microseconds after midnight compares equal to the date.",
+  "fix": "Use '%Y-%m-%d %H:%M:%f' plus a microsecond-preserving comparison (or julianday with exact text fallback) and add a sub-millisecond test; PR2."
+ },
+ "x1": {
+  "status": "deferred",
+  "reason": "HIGH in the fix itself: roles.sql grants table-wide SELECT then revokes in separate autocommit statements, so a concurrent read-only session can see hidden columns mid-rerun. Fixed in the next commit and reviewed as its own slice.",
+  "fix": "Wrap roles.sql in one transaction (BEGIN ... COMMIT)."
+ },
+ "x2": {
+  "status": "deferred",
+  "reason": "Same defect as recheck r1 (HAVING threshold cast).",
+  "fix": "Bind thresholds without narrowing casts; PR2 first task."
+ },
+ "x3": {
+  "status": "deferred",
+  "reason": "Same defect as recheck r2 (SQLite millisecond truncation).",
+  "fix": "Microsecond-preserving normalization; PR2 first task."
+ }
+}

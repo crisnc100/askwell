@@ -194,3 +194,14 @@ The security-relevant core is reviewed apart from routine work.
 - **L13** The Playwright smoke test passes in replay mode.
 - **L14** Every ADR has a prediction committed before its result, plus the measured result. The README carries the live table.
 - **L15** No secrets are committed (detect-secrets baseline), and `.env.example` documents the OpenRouter credit limit.
+
+## Decision 2026-11-09 (Cristian): no OpenRouter key for now; simulate model behaviour
+- **The gateway gains an export/import path.**
+  - `--mode export` writes each pending model request to `evals/pending/<key>.json`: system prompt, messages, response schema, target model id.
+  - The orchestrator has a Claude subagent answer each request as the product model would, using the product's system prompt and returning exactly the response schema.
+  - `--mode import` loads those answers into the replay store with provenance `{"simulated_by": "<claude model id>", "standing_in_for": "<target model id>"}`.
+- **What changes in the plan:**
+  - **"Live" model spikes:** replaced by a simulated schema-compliance check. The real-model spike is deferred until a key exists, and ADR-004 records that.
+  - **"Live" eval runs:** become simulated runs, and every simulated report is labelled at the top: "Model responses simulated by <claude model>, standing in for <target>; not an OpenRouter measurement."
+  - **Budget caps and live mode:** stay in the code for when a key is added.
+- **Floors** apply to the simulated run, and are re-measured on a real model when a key is added.
