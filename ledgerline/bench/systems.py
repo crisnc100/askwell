@@ -191,8 +191,9 @@ class OneShotSystem:
                 [],
                 False,
                 f"unparseable answer: {exc.reason}",
-                0.0,
+                exc.cost_usd,
                 (time.perf_counter() - started) * 1000,
+                provenance=exc.provenance,
             )
         answer = result.value
         if answer.sql is None or not answer.sql.strip():

@@ -55,7 +55,13 @@ def build_graph(interpret: Interpret, check: Validate, execute: Execute) -> Any:
         try:
             result = interpret(state.get("messages", []))
         except ParseError as exc:
-            return {"intent": None, "answer": exc.raw, "parse_error": exc.reason}
+            return {
+                "intent": None,
+                "answer": exc.raw,
+                "parse_error": exc.reason,
+                "cost_usd": state.get("cost_usd", 0.0) + exc.cost_usd,
+                "provenance": exc.provenance,
+            }
         return {
             "intent": result.value,
             "answer": result.raw.content,

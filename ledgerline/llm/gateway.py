@@ -61,6 +61,19 @@ def parse_output[T: BaseModel](raw: RawResponse, schema: type[T]) -> T:
         raise ParseError(f"text did not validate: {exc.errors()[0]['msg']}", raw.content) from exc
 
 
+def _parse_charged[T: BaseModel](
+    raw: RawResponse, schema: type[T], cost_usd: float, provenance: dict[str, str] | None
+) -> T:
+    """`parse_output`, but a ParseError carries the call's cost and provenance, so a
+    failed attempt's spend is never lost."""
+    try:
+        return parse_output(raw, schema)
+    except ParseError as exc:
+        exc.cost_usd = cost_usd
+        exc.provenance = provenance
+        raise
+
+
 class Gateway:
     def __init__(
         self,
@@ -120,7 +133,9 @@ class Gateway:
             record = self.store.get(key)
             raw = RawResponse.model_validate(record["raw"])
             return LLMResult[T](
-                value=parse_output(raw, schema),
+                value=_parse_charged(
+                    raw, schema, float(record["cost_usd"]), record.get("provenance")
+                ),
                 raw=raw,
                 cost_usd=float(record["cost_usd"]),
                 cost_source="replay",
@@ -162,7 +177,7 @@ class Gateway:
             # Stored before parsing, so a replay reproduces a ParseError too.
             self.store.put(key, {"raw": raw.model_dump(), "cost_usd": cost, "model": model})
         return LLMResult[T](
-            value=parse_output(raw, schema),
+            value=_parse_charged(raw, schema, cost, None),
             raw=raw,
             cost_usd=cost,
             cost_source=source,
