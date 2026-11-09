@@ -18,6 +18,10 @@ exists, and it may pick a different default.
 Changing the target changes every recording key, so the recordings must be made again.
 That costs nothing while answers are simulated.
 
+The simulated eval uses this one target only. The plan's second model also waits for a
+key: simulating a "different vendor" with the same Claude stand-in would be fake
+diversity.
+
 ## Context
 All LLM access goes through OpenRouter on a $50/month budget shared across projects, so
 the default must be cheap. Ledgerline depends on json_schema structured output, and

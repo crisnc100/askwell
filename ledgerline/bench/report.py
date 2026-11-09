@@ -49,6 +49,31 @@ def simulation_note(records: list[dict[str, Any]]) -> str | None:
     return f"Model responses {described}. This is not an OpenRouter measurement."
 
 
+SQL_AGENT_NOT_RUN = (
+    "sql_agent baseline not run: needs a live model (multi-step tool calls can't be "
+    "honestly simulated in one pass)."
+)
+
+
+def run_notes(result: RunResult, simulated: bool) -> list[str]:
+    """Plain statements of what this run did not measure, shown under the title."""
+    notes: list[str] = []
+    if "sql_agent" not in result.systems:
+        notes.append(SQL_AGENT_NOT_RUN)
+    if simulated and len(result.models) == 1:
+        notes.append(
+            f"One target model ({result.models[0]}). A second model runs once there is an "
+            "OpenRouter key: simulating a second vendor with the same stand-in would add "
+            "no real diversity."
+        )
+    if simulated and result.trials == 1:
+        notes.append(
+            "Trials: 1. Repeating trials with the same stand-in would measure the "
+            "stand-in's variance, not the target model's."
+        )
+    return notes
+
+
 def build(result: RunResult) -> dict[str, Any]:
     groups: dict[tuple[str, str, str], list[dict[str, Any]]] = defaultdict(list)
     for record in result.records:
@@ -104,9 +129,12 @@ def build(result: RunResult) -> dict[str, Any]:
         and outcome == "correct"
         and outcomes.get("ledgerline") not in (None, "correct")
     ]
+    simulation = simulation_note(result.records)
     return {
         "run_id": result.run_id,
-        "simulation": simulation_note(result.records),
+        "simulation": simulation,
+        "notes": run_notes(result, simulation is not None),
+        "trials": result.trials,
         "status": "aborted at budget"
         if result.aborted
         else ("partial" if result.deferred else "complete"),
@@ -133,6 +161,10 @@ def render_markdown(report: dict[str, Any]) -> str:
     lines = [f"# Eval report `{report['run_id']}`", ""]
     if report["simulation"]:
         lines += [f"> **{report['simulation']}**", ""]
+    for note in report["notes"]:
+        lines.append(f"- {note}")
+    if report["notes"]:
+        lines.append("")
     lines += [
         f"Status: {report['status']}. Spend: ${report['spent_usd']:.4f}.",
         "Rates show the value, the Wilson 95% interval, and the counts. Trials are pooled.",

@@ -60,6 +60,9 @@ class RunResult:
     abort_reason: str | None = None
     spent_usd: float = 0.0
     registry_hashes: dict[str, str] = field(default_factory=dict[str, str])
+    systems: list[str] = field(default_factory=list[str])
+    models: list[str] = field(default_factory=list[str])
+    trials: int = 1
 
 
 def _schemas(
@@ -145,8 +148,8 @@ def run_eval(
             raise ValueError(f"unknown system {system!r}")
         if system == "sql_agent":
             raise NotImplementedError(
-                "sql_agent is not built yet: simulating its multi-step tool calls needs a "
-                "decision on answer rounds (builds/v01/log.md)"
+                "sql_agent is deferred: it needs a live model (multi-step tool calls "
+                "can't be honestly simulated in one pass)"
             )
     schemas, hashes = _schemas(settings, schema_ids)
     tasks = [
@@ -273,6 +276,9 @@ def run_eval(
         abort_reason=outcome.abort_reason,
         spent_usd=outcome.spent_usd,
         registry_hashes=hashes,
+        systems=systems,
+        models=models,
+        trials=trials,
     )
 
 

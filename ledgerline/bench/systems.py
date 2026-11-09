@@ -3,8 +3,8 @@
 - ledgerline: the full pipeline (intent, validator, builder, read-only executor).
 - oneshot: the model sees the schema DDL plus the registry descriptions and writes one
   SQL query, which runs read-only. No validation, no retry.
-- sql_agent: LangChain's SQL agent. Not built yet: simulating its multi-step tool calls
-  needs one answer round per step (see builds/v01/log.md).
+- sql_agent: LangChain's SQL agent. Deferred until there is a live model: its
+  multi-step tool calls can't be honestly simulated in one pass.
 """
 
 from __future__ import annotations
