@@ -71,3 +71,22 @@ def test_numbers_match_within_the_1e6_tolerance_on_both_sides_of_a_rounding_edge
     gold = [("b", Decimal("5.0000004")), ("a", Decimal("1.00000049"))]
     assert results_match(got, gold, ordered=False)
     assert not results_match([("a", 1.0), ("b", 5.0)], [("a", 5.0), ("b", 1.0)], ordered=False)
+
+
+def test_tolerance_is_absolute_1e6_only() -> None:
+    # A 0.0005 gap on a large number is far outside plan.md's 1e-6.
+    assert not results_match([(1000000.0005,)], [(Decimal("1000000"),)], ordered=True)
+    assert not results_match([(1000000.0005,)], [(Decimal("1000000"),)], ordered=False)
+    assert results_match([(1000000.0000005,)], [(Decimal("1000000"),)], ordered=True)
+
+
+def test_multiset_pairs_rows_whose_numbers_sort_differently() -> None:
+    # Sorting both sides by their numbers pairs (4e-7, 10) with (4e-7, 20): wrong. The
+    # right pairing treats 4e-7 and 0.0 as equal (within 1e-6) and matches on the 10/20.
+    got = [(0.0000004, 10), (0.0, 20)]
+    gold = [(0.0, 10), (0.0000004, 20)]
+    assert results_match(got, gold, ordered=False)
+    assert not results_match([(0.0000004, 10), (0.0, 30)], gold, ordered=False)
+    many_got = [(i * 1e-7, i % 3) for i in range(9)]
+    many_gold = [((8 - i) * 1e-7, (8 - i) % 3) for i in range(9)]
+    assert results_match(many_got, many_gold, ordered=False)
