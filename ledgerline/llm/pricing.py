@@ -61,13 +61,15 @@ class PriceBook:
         return price
 
 
-def worst_case_cost(price: ModelPrice, prompt_chars: int, max_tokens: int) -> float:
+def worst_case_cost(price: ModelPrice, prompt_bytes: int, max_tokens: int) -> float:
     """An upper bound on a call's cost before it is made.
 
-    A token is at least one character, so the prompt's character count bounds
-    its token count; the completion is bounded by `max_tokens`.
+    Byte-level tokenizers never emit a token shorter than one byte, so the prompt's
+    UTF-8 byte count bounds its token count (a character count does not: one CJK
+    character is 3 bytes and can be several tokens). The completion is bounded by
+    `max_tokens`.
     """
-    return prompt_chars * price.prompt_per_token + max_tokens * price.completion_per_token
+    return prompt_bytes * price.prompt_per_token + max_tokens * price.completion_per_token
 
 
 def cost_from_usage(

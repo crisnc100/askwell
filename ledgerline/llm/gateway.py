@@ -115,10 +115,10 @@ class Gateway:
             raise PricingUnavailableError(
                 f"no price for {model!r}: the worst-case budget pre-check cannot run"
             )
-        prompt_chars = len(canonical_json([m.model_dump() for m in messages])) + len(
-            canonical_json(json_schema)
-        )
-        self.guard.precheck(worst_case_cost(price, prompt_chars, self.max_tokens))
+        prompt_bytes = len(
+            canonical_json([m.model_dump() for m in messages]).encode("utf-8")
+        ) + len(canonical_json(json_schema).encode("utf-8"))
+        self.guard.precheck(worst_case_cost(price, prompt_bytes, self.max_tokens))
 
         def call() -> RawResponse:
             return transport(
