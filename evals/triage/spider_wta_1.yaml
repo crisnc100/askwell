@@ -1,0 +1,28 @@
+# Triage of every Ledgerline miss in eval run sim-1 (simulated answers).
+# Tags: grammar_gap | misread | validator_false_reject | builder_bug | gold_issue.
+spider:439:
+  note: '''Highest rank'' means rank 1; the model took the maximum rank number.'
+  tag: misread
+spider:451:
+  note: Two foreign keys link the same pair of tables. The intent has no way to say which join to use,
+    so the validator refuses rather than guess.
+  tag: grammar_gap
+spider:452:
+  note: Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none
+    of these.
+  tag: grammar_gap
+spider:463:
+  note: The gold reads rank points from an unaggregated column in a GROUP BY (SQLite returns an arbitrary
+    row). The answer's maximum is a defined value.
+  tag: gold_issue
+spider:464:
+  note: 'Same gold pattern as spider:463: rank points from an unaggregated column.'
+  tag: gold_issue
+spider:479:
+  note: Registry init typed ranking_date as a date (its declared type), but it holds integers like 19870119.
+    The day grain then returns NULL. Init should check the values, not just the declaration.
+  tag: builder_bug
+spider:488:
+  note: Two foreign keys link the same pair of tables. The intent has no way to say which join to use,
+    so the validator refuses rather than guess.
+  tag: grammar_gap

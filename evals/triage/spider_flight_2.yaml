@@ -1,0 +1,118 @@
+# Triage of every Ledgerline miss in eval run sim-1 (simulated answers).
+# Tags: grammar_gap | misread | validator_false_reject | builder_bug | gold_issue.
+spider:198:
+  note: 'The gold returns no rows: airport codes and cities are stored with trailing spaces, so the gold''s
+    equality joins and filters match nothing.'
+  tag: gold_issue
+spider:207:
+  note: Two foreign keys link the same pair of tables. The intent has no way to say which join to use,
+    so the validator refuses rather than guess.
+  tag: grammar_gap
+spider:208:
+  note: Two foreign keys link the same pair of tables. The intent has no way to say which join to use,
+    so the validator refuses rather than guess.
+  tag: grammar_gap
+spider:209:
+  note: Two foreign keys link the same pair of tables. The intent has no way to say which join to use,
+    so the validator refuses rather than guess.
+  tag: grammar_gap
+spider:210:
+  note: Two foreign keys link the same pair of tables. The intent has no way to say which join to use,
+    so the validator refuses rather than guess.
+  tag: grammar_gap
+spider:214:
+  note: 'Registry gap: flights.airline has no declared or inferred link to airlines (the column is not
+    named like airlines'' key), so airline names cannot be reached.'
+  tag: grammar_gap
+spider:215:
+  note: 'Registry gap: flights.airline has no declared or inferred link to airlines (the column is not
+    named like airlines'' key), so airline names cannot be reached.'
+  tag: grammar_gap
+spider:216:
+  note: 'Registry gap: flights.airline has no declared or inferred link to airlines (the column is not
+    named like airlines'' key), so airline names cannot be reached.'
+  tag: grammar_gap
+spider:217:
+  note: 'Registry gap: flights.airline has no declared or inferred link to airlines (the column is not
+    named like airlines'' key), so airline names cannot be reached.'
+  tag: grammar_gap
+spider:218:
+  note: 'Registry gap: flights.airline has no declared or inferred link to airlines (the column is not
+    named like airlines'' key), so airline names cannot be reached.'
+  tag: grammar_gap
+spider:219:
+  note: 'Registry gap: flights.airline has no declared or inferred link to airlines (the column is not
+    named like airlines'' key), so airline names cannot be reached.'
+  tag: grammar_gap
+spider:220:
+  note: 'Registry gap: flights.airline has no declared or inferred link to airlines (the column is not
+    named like airlines'' key), so airline names cannot be reached.'
+  tag: grammar_gap
+spider:224:
+  note: 'The gold returns no rows: airport codes and cities are stored with trailing spaces, so the gold''s
+    equality joins and filters match nothing.'
+  tag: gold_issue
+spider:226:
+  note: 'The gold returns no rows: airport codes and cities are stored with trailing spaces, so the gold''s
+    equality joins and filters match nothing.'
+  tag: gold_issue
+spider:228:
+  note: 'The gold returns no rows: airport codes and cities are stored with trailing spaces, so the gold''s
+    equality joins and filters match nothing.'
+  tag: gold_issue
+spider:229:
+  note: 'With no link to airlines, the model returned an airline id and count instead of refusing: a wrong
+    answer.'
+  tag: misread
+spider:230:
+  note: 'Registry gap: flights.airline has no declared or inferred link to airlines (the column is not
+    named like airlines'' key), so airline names cannot be reached.'
+  tag: grammar_gap
+spider:231:
+  note: 'Registry gap: flights.airline has no declared or inferred link to airlines (the column is not
+    named like airlines'' key), so airline names cannot be reached.'
+  tag: grammar_gap
+spider:233:
+  note: 'Registry gap: flights.airline has no declared or inferred link to airlines (the column is not
+    named like airlines'' key), so airline names cannot be reached.'
+  tag: grammar_gap
+spider:239:
+  note: Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none
+    of these.
+  tag: grammar_gap
+spider:240:
+  note: Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none
+    of these.
+  tag: grammar_gap
+spider:245:
+  note: 'Registry gap: flights.airline has no declared or inferred link to airlines (the column is not
+    named like airlines'' key), so airline names cannot be reached.'
+  tag: grammar_gap
+spider:246:
+  note: 'Registry gap: flights.airline has no declared or inferred link to airlines (the column is not
+    named like airlines'' key), so airline names cannot be reached.'
+  tag: grammar_gap
+spider:251:
+  note: Two foreign keys link the same pair of tables. The intent has no way to say which join to use,
+    so the validator refuses rather than guess.
+  tag: grammar_gap
+spider:252:
+  note: Two foreign keys link the same pair of tables. The intent has no way to say which join to use,
+    so the validator refuses rather than guess.
+  tag: grammar_gap
+spider:254:
+  note: Two foreign keys link the same pair of tables. The intent has no way to say which join to use,
+    so the validator refuses rather than guess.
+  tag: grammar_gap
+spider:255:
+  note: Two foreign keys link the same pair of tables. The intent has no way to say which join to use,
+    so the validator refuses rather than guess.
+  tag: grammar_gap
+spider:257:
+  note: Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none
+    of these.
+  tag: grammar_gap
+spider:258:
+  note: Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none
+    of these.
+  tag: grammar_gap

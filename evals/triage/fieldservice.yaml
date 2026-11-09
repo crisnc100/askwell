@@ -1,0 +1,41 @@
+# Triage of every Ledgerline miss in eval run sim-1 (simulated answers).
+# Tags: grammar_gap | misread | validator_false_reject | builder_bug | gold_issue.
+fs-022:
+  note: 'Ambiguous date: the answer filtered on completion date (when parts are used), the gold on opening
+    date. Both readings are defensible.'
+  tag: gold_issue
+fs-024:
+  note: 'Ambiguous date: ''did work for last month'' was read as completed last month; the gold uses opened
+    last month.'
+  tag: gold_issue
+fs-025:
+  note: Needs the difference between two dates (opened to completed). Refused correctly.
+  tag: grammar_gap
+fs-028:
+  note: 'Needs a ratio of two counts. The model returned counts per status instead of refusing: a wrong
+    answer, not a refusal.'
+  tag: grammar_gap
+fs-030:
+  note: Needs a computed value (quantity times unit price). Refused correctly.
+  tag: grammar_gap
+fs-032:
+  note: The gold excludes void invoices, but the question does not say to. evals/gold/README.md says void
+    is excluded only when the question says so. The answer kept void invoices.
+  tag: gold_issue
+fs-035:
+  note: 'Needs two date fields in one monthly series. The model counted completions among the orders opened
+    each month instead of refusing: a wrong answer.'
+  tag: grammar_gap
+fs-037:
+  note: 'Needs a distinct count of months in HAVING. The model returned per-technician monthly counts
+    instead of refusing: a wrong answer.'
+  tag: grammar_gap
+fs-039:
+  note: Needs date arithmetic and a ratio. Refused correctly.
+  tag: grammar_gap
+fs-041:
+  note: Needs a conditional count beside a sum. Refused correctly.
+  tag: grammar_gap
+fs-042:
+  note: Needs an anti-join (sites with no work orders). Refused correctly.
+  tag: grammar_gap
