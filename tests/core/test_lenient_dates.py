@@ -22,21 +22,34 @@ def test_non_date_values_in_date_columns_come_back_as_stored(tmp_path: Path) -> 
     writer = create_engine(f"sqlite:///{path}")
     with writer.begin() as conn:
         conn.execute(text("CREATE TABLE p (id INTEGER PRIMARY KEY, born DATE, seen DATETIME)"))
-        conn.execute(text("INSERT INTO p VALUES (1, 19800930, 'not a time'), "
-                          "(2, '1982-03-09', '2026-01-02 03:04:05.000000'), (3, NULL, NULL)"))
+        conn.execute(
+            text(
+                "INSERT INTO p VALUES (1, 19800930, 'not a time'), "
+                "(2, '1982-03-09', '2026-01-02 03:04:05.000000'), (3, NULL, NULL)"
+            )
+        )
     writer.dispose()
     registry = Registry(
         schema_version=1,
         draft=False,
-        entities={"p": EntityDef(table="p", fields={
-            "id": FieldDef(column="id", type="integer"),
-            "born": FieldDef(column="born", type="date"),
-            "seen": FieldDef(column="seen", type="datetime"),
-        })},
+        entities={
+            "p": EntityDef(
+                table="p",
+                fields={
+                    "id": FieldDef(column="id", type="integer"),
+                    "born": FieldDef(column="born", type="date"),
+                    "seen": FieldDef(column="seen", type="datetime"),
+                },
+            )
+        },
     )
     intent = Intent.model_validate(
-        {"intent_type": "row_list", "entity": "p", "select": ["id", "born", "seen"],
-         "order_by": [{"target": "id"}]}
+        {
+            "intent_type": "row_list",
+            "entity": "p",
+            "select": ["id", "born", "seen"],
+            "order_by": [{"target": "id"}],
+        }
     )
     plan = validate(intent, registry, now=NOW).plan
     assert plan is not None
