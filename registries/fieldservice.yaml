@@ -1,0 +1,884 @@
+# Fieldservice registry: drafted with `ledgerline registry init --values`, then curated
+# (descriptions, aliases, value aliases; draft: false). Spider registries are never edited.
+schema_version: 1
+draft: false
+name: fieldservice
+entities:
+  customers:
+    table: customers
+    db_schema: null
+    kind: table
+    description: Accounts we do field-service work for.
+    aliases:
+    - customer
+    - client
+    - account
+    - accounts
+    - clients
+    primary_key:
+    - id
+    fields:
+      id:
+        column: id
+        type: integer
+        description: Customer id.
+        aliases: []
+        filterable: true
+        aggregatable: false
+        hidden: false
+        categorical: false
+        allowed_values: []
+        value_aliases: {}
+      name:
+        column: name
+        type: text
+        description: Customer or company name.
+        aliases:
+        - customer name
+        filterable: true
+        aggregatable: false
+        hidden: false
+        categorical: false
+        allowed_values: []
+        value_aliases: {}
+      segment:
+        column: segment
+        type: text
+        description: Customer segment.
+        aliases: []
+        filterable: true
+        aggregatable: false
+        hidden: false
+        categorical: true
+        allowed_values:
+        - commercial
+        - industrial
+        - residential
+        value_aliases: {}
+      region:
+        column: region
+        type: text
+        description: Sales region of the customer.
+        aliases: []
+        filterable: true
+        aggregatable: false
+        hidden: false
+        categorical: true
+        allowed_values:
+        - central
+        - east
+        - north
+        - south
+        - west
+        value_aliases: {}
+      created_at:
+        column: created_at
+        type: date
+        description: Date the account was created.
+        aliases:
+        - signup date
+        filterable: true
+        aggregatable: true
+        hidden: false
+        categorical: false
+        allowed_values: []
+        value_aliases: {}
+      is_active:
+        column: is_active
+        type: boolean
+        description: Whether the account is active.
+        aliases:
+        - active
+        filterable: true
+        aggregatable: false
+        hidden: false
+        categorical: false
+        allowed_values: []
+        value_aliases: {}
+  invoices:
+    table: invoices
+    db_schema: null
+    kind: table
+    description: Invoices issued for completed work orders. A work order can have a supplemental invoice.
+    aliases:
+    - invoice
+    - bill
+    - bills
+    - billing
+    primary_key:
+    - id
+    fields:
+      id:
+        column: id
+        type: integer
+        description: Invoice id.
+        aliases: []
+        filterable: true
+        aggregatable: false
+        hidden: false
+        categorical: false
+        allowed_values: []
+        value_aliases: {}
+      work_order_id:
+        column: work_order_id
+        type: integer
+        description: The invoiced work order.
+        aliases: []
+        filterable: true
+        aggregatable: false
+        hidden: false
+        categorical: false
+        allowed_values: []
+        value_aliases: {}
+      issued_at:
+        column: issued_at
+        type: date
+        description: Issue date.
+        aliases:
+        - invoice date
+        filterable: true
+        aggregatable: true
+        hidden: false
+        categorical: false
+        allowed_values: []
+        value_aliases: {}
+      due_at:
+        column: due_at
+        type: date
+        description: Due date (30 days after issue).
+        aliases:
+        - due date
+        filterable: true
+        aggregatable: true
+        hidden: false
+        categorical: false
+        allowed_values: []
+        value_aliases: {}
+      amount:
+        column: amount
+        type: number
+        description: Invoice total, USD.
+        aliases:
+        - total
+        - value
+        filterable: true
+        aggregatable: true
+        hidden: false
+        categorical: false
+        allowed_values: []
+        value_aliases: {}
+      status:
+        column: status
+        type: text
+        description: Payment status.
+        aliases: []
+        filterable: true
+        aggregatable: false
+        hidden: false
+        categorical: true
+        allowed_values:
+        - overdue
+        - paid
+        - unpaid
+        - void
+        value_aliases: {}
+      paid_at:
+        column: paid_at
+        type: date
+        description: Date paid; empty unless paid.
+        aliases:
+        - payment date
+        filterable: true
+        aggregatable: true
+        hidden: false
+        categorical: false
+        allowed_values: []
+        value_aliases: {}
+  parts:
+    table: parts
+    db_schema: null
+    kind: table
+    description: Parts catalogue.
+    aliases:
+    - part
+    - item
+    - items
+    - catalogue
+    primary_key:
+    - id
+    fields:
+      id:
+        column: id
+        type: integer
+        description: Part id.
+        aliases: []
+        filterable: true
+        aggregatable: false
+        hidden: false
+        categorical: false
+        allowed_values: []
+        value_aliases: {}
+      sku:
+        column: sku
+        type: text
+        description: Stock-keeping unit code.
+        aliases: []
+        filterable: true
+        aggregatable: false
+        hidden: false
+        categorical: false
+        allowed_values: []
+        value_aliases: {}
+      name:
+        column: name
+        type: text
+        description: Part name.
+        aliases: []
+        filterable: true
+        aggregatable: false
+        hidden: false
+        categorical: false
+        allowed_values: []
+        value_aliases: {}
+      category:
+        column: category
+        type: text
+        description: Part category.
+        aliases:
+        - type
+        filterable: true
+        aggregatable: false
+        hidden: false
+        categorical: true
+        allowed_values:
+        - electrical
+        - hardware
+        - hvac
+        - plumbing
+        value_aliases:
+          heating: hvac
+          air conditioning: hvac
+      unit_cost:
+        column: unit_cost
+        type: number
+        description: What one unit costs us, USD.
+        aliases:
+        - cost
+        filterable: true
+        aggregatable: true
+        hidden: false
+        categorical: false
+        allowed_values: []
+        value_aliases: {}
+      unit_price:
+        column: unit_price
+        type: number
+        description: What we charge for one unit, USD.
+        aliases:
+        - price
+        filterable: true
+        aggregatable: true
+        hidden: false
+        categorical: false
+        allowed_values: []
+        value_aliases: {}
+  sites:
+    table: sites
+    db_schema: null
+    kind: table
+    description: Service locations owned by a customer.
+    aliases:
+    - site
+    - location
+    - locations
+    - service site
+    primary_key:
+    - id
+    fields:
+      id:
+        column: id
+        type: integer
+        description: Site id.
+        aliases: []
+        filterable: true
+        aggregatable: false
+        hidden: false
+        categorical: false
+        allowed_values: []
+        value_aliases: {}
+      customer_id:
+        column: customer_id
+        type: integer
+        description: The customer that owns the site.
+        aliases: []
+        filterable: true
+        aggregatable: false
+        hidden: false
+        categorical: false
+        allowed_values: []
+        value_aliases: {}
+      name:
+        column: name
+        type: text
+        description: Site name.
+        aliases: []
+        filterable: true
+        aggregatable: false
+        hidden: false
+        categorical: false
+        allowed_values: []
+        value_aliases: {}
+      city:
+        column: city
+        type: text
+        description: City of the site.
+        aliases: []
+        filterable: true
+        aggregatable: false
+        hidden: false
+        categorical: true
+        allowed_values:
+        - Atlanta
+        - Austin
+        - Baltimore
+        - Boston
+        - Charlotte
+        - Chicago
+        - Denver
+        - Des Moines
+        - Detroit
+        - Fargo
+        - Hartford
+        - Houston
+        - Kansas City
+        - Milwaukee
+        - Minneapolis
+        - Nashville
+        - Newark
+        - Omaha
+        - Philadelphia
+        - Phoenix
+        - Portland
+        - Sacramento
+        - San Diego
+        - Seattle
+        - Tulsa
+        value_aliases: {}
+      state:
+        column: state
+        type: text
+        description: US state code of the site (two letters).
+        aliases:
+        - state code
+        filterable: true
+        aggregatable: false
+        hidden: false
+        categorical: true
+        allowed_values:
+        - AZ
+        - CA
+        - CO
+        - CT
+        - GA
+        - IA
+        - IL
+        - MA
+        - MD
+        - MI
+        - MN
+        - MO
+        - NC
+        - ND
+        - NE
+        - NJ
+        - OK
+        - OR
+        - PA
+        - TN
+        - TX
+        - WA
+        - WI
+        value_aliases:
+          Texas: TX
+          California: CA
+          Wisconsin: WI
+          North Carolina: NC
+          Massachusetts: MA
+          Minnesota: MN
+          Georgia: GA
+          Tennessee: TN
+          Michigan: MI
+          North Dakota: ND
+          Illinois: IL
+          Pennsylvania: PA
+          New Jersey: NJ
+          Maryland: MD
+          Connecticut: CT
+          Washington: WA
+          Oregon: OR
+          Arizona: AZ
+          Colorado: CO
+          Missouri: MO
+          Nebraska: NE
+          Oklahoma: OK
+          Iowa: IA
+      site_type:
+        column: site_type
+        type: text
+        description: Kind of site.
+        aliases:
+        - site kind
+        filterable: true
+        aggregatable: false
+        hidden: false
+        categorical: true
+        allowed_values:
+        - office
+        - plant
+        - residence
+        - retail
+        - warehouse
+        value_aliases: {}
+  technicians:
+    table: technicians
+    db_schema: null
+    kind: table
+    description: Field technicians who do the work.
+    aliases:
+    - technician
+    - tech
+    - techs
+    - engineer
+    primary_key:
+    - id
+    fields:
+      id:
+        column: id
+        type: integer
+        description: Technician id.
+        aliases: []
+        filterable: true
+        aggregatable: false
+        hidden: false
+        categorical: false
+        allowed_values: []
+        value_aliases: {}
+      full_name:
+        column: full_name
+        type: text
+        description: Technician's full name.
+        aliases:
+        - name
+        filterable: true
+        aggregatable: false
+        hidden: false
+        categorical: false
+        allowed_values: []
+        value_aliases: {}
+      skill_level:
+        column: skill_level
+        type: text
+        description: Seniority of the technician.
+        aliases:
+        - seniority
+        - level
+        filterable: true
+        aggregatable: false
+        hidden: false
+        categorical: true
+        allowed_values:
+        - junior
+        - mid
+        - senior
+        value_aliases: {}
+      home_region:
+        column: home_region
+        type: text
+        description: Region the technician is based in.
+        aliases:
+        - region
+        filterable: true
+        aggregatable: false
+        hidden: false
+        categorical: true
+        allowed_values:
+        - central
+        - east
+        - north
+        - south
+        - west
+        value_aliases: {}
+      hourly_rate:
+        column: hourly_rate
+        type: number
+        description: Hourly labour rate charged, USD.
+        aliases:
+        - rate
+        filterable: true
+        aggregatable: true
+        hidden: false
+        categorical: false
+        allowed_values: []
+        value_aliases: {}
+      hired_at:
+        column: hired_at
+        type: date
+        description: Hire date.
+        aliases:
+        - hire date
+        filterable: true
+        aggregatable: true
+        hidden: false
+        categorical: false
+        allowed_values: []
+        value_aliases: {}
+      is_active:
+        column: is_active
+        type: boolean
+        description: Whether the technician is currently employed.
+        aliases:
+        - active
+        filterable: true
+        aggregatable: false
+        hidden: false
+        categorical: false
+        allowed_values: []
+        value_aliases: {}
+  users:
+    table: users
+    db_schema: null
+    kind: table
+    description: Back-office user logins. Emails and password hashes are hidden.
+    aliases:
+    - user
+    - login
+    - logins
+    - staff
+    primary_key:
+    - id
+    fields:
+      id:
+        column: id
+        type: integer
+        description: User id.
+        aliases: []
+        filterable: true
+        aggregatable: false
+        hidden: false
+        categorical: false
+        allowed_values: []
+        value_aliases: {}
+      username:
+        column: username
+        type: text
+        description: Login name.
+        aliases: []
+        filterable: true
+        aggregatable: false
+        hidden: false
+        categorical: false
+        allowed_values: []
+        value_aliases: {}
+      full_name:
+        column: full_name
+        type: text
+        description: User's name.
+        aliases: []
+        filterable: true
+        aggregatable: false
+        hidden: false
+        categorical: false
+        allowed_values: []
+        value_aliases: {}
+      email:
+        column: email
+        type: text
+        description: Hidden.
+        aliases: []
+        filterable: false
+        aggregatable: false
+        hidden: true
+        categorical: false
+        allowed_values: []
+        value_aliases: {}
+      password_hash:
+        column: password_hash
+        type: text
+        description: Hidden.
+        aliases: []
+        filterable: false
+        aggregatable: false
+        hidden: true
+        categorical: false
+        allowed_values: []
+        value_aliases: {}
+      role:
+        column: role
+        type: text
+        description: Back-office role.
+        aliases: []
+        filterable: true
+        aggregatable: false
+        hidden: false
+        categorical: true
+        allowed_values:
+        - admin
+        - dispatcher
+        - manager
+        value_aliases: {}
+      created_at:
+        column: created_at
+        type: datetime
+        description: When the login was created.
+        aliases: []
+        filterable: true
+        aggregatable: true
+        hidden: false
+        categorical: false
+        allowed_values: []
+        value_aliases: {}
+  work_order_parts:
+    table: work_order_parts
+    db_schema: null
+    kind: table
+    description: Parts used on a work order, one row per part per order.
+    aliases:
+    - parts used
+    - part usage
+    - line items
+    primary_key:
+    - id
+    fields:
+      id:
+        column: id
+        type: integer
+        description: Line id.
+        aliases: []
+        filterable: true
+        aggregatable: false
+        hidden: false
+        categorical: false
+        allowed_values: []
+        value_aliases: {}
+      work_order_id:
+        column: work_order_id
+        type: integer
+        description: The work order.
+        aliases: []
+        filterable: true
+        aggregatable: false
+        hidden: false
+        categorical: false
+        allowed_values: []
+        value_aliases: {}
+      part_id:
+        column: part_id
+        type: integer
+        description: The part used.
+        aliases: []
+        filterable: true
+        aggregatable: false
+        hidden: false
+        categorical: false
+        allowed_values: []
+        value_aliases: {}
+      quantity:
+        column: quantity
+        type: integer
+        description: Units used.
+        aliases:
+        - qty
+        - units
+        filterable: true
+        aggregatable: true
+        hidden: false
+        categorical: false
+        allowed_values: []
+        value_aliases: {}
+  work_orders:
+    table: work_orders
+    db_schema: null
+    kind: table
+    description: Service jobs, from opening to completion.
+    aliases:
+    - work order
+    - job
+    - jobs
+    - ticket
+    - tickets
+    - order
+    - orders
+    primary_key:
+    - id
+    fields:
+      id:
+        column: id
+        type: integer
+        description: Work order id.
+        aliases: []
+        filterable: true
+        aggregatable: false
+        hidden: false
+        categorical: false
+        allowed_values: []
+        value_aliases: {}
+      site_id:
+        column: site_id
+        type: integer
+        description: The site where the work happens.
+        aliases: []
+        filterable: true
+        aggregatable: false
+        hidden: false
+        categorical: false
+        allowed_values: []
+        value_aliases: {}
+      technician_id:
+        column: technician_id
+        type: integer
+        description: Assigned technician; empty when unassigned.
+        aliases: []
+        filterable: true
+        aggregatable: false
+        hidden: false
+        categorical: false
+        allowed_values: []
+        value_aliases: {}
+      opened_at:
+        column: opened_at
+        type: datetime
+        description: When the work order was opened (UTC).
+        aliases:
+        - opened
+        - created
+        filterable: true
+        aggregatable: true
+        hidden: false
+        categorical: false
+        allowed_values: []
+        value_aliases: {}
+      scheduled_for:
+        column: scheduled_for
+        type: date
+        description: Date the visit is scheduled for.
+        aliases: []
+        filterable: true
+        aggregatable: true
+        hidden: false
+        categorical: false
+        allowed_values: []
+        value_aliases: {}
+      completed_at:
+        column: completed_at
+        type: datetime
+        description: When the work was completed (UTC); empty unless completed.
+        aliases:
+        - completed
+        - closed
+        filterable: true
+        aggregatable: true
+        hidden: false
+        categorical: false
+        allowed_values: []
+        value_aliases: {}
+      status:
+        column: status
+        type: text
+        description: Work order status.
+        aliases: []
+        filterable: true
+        aggregatable: false
+        hidden: false
+        categorical: true
+        allowed_values:
+        - cancelled
+        - completed
+        - in_progress
+        - open
+        - scheduled
+        value_aliases:
+          done: completed
+          closed: completed
+          canceled: cancelled
+          in progress: in_progress
+      priority:
+        column: priority
+        type: text
+        description: Priority.
+        aliases: []
+        filterable: true
+        aggregatable: false
+        hidden: false
+        categorical: true
+        allowed_values:
+        - high
+        - low
+        - medium
+        - urgent
+        value_aliases: {}
+      job_type:
+        column: job_type
+        type: text
+        description: Kind of job.
+        aliases:
+        - type
+        - job kind
+        filterable: true
+        aggregatable: false
+        hidden: false
+        categorical: true
+        allowed_values:
+        - inspection
+        - installation
+        - maintenance
+        - repair
+        value_aliases: {}
+      labor_hours:
+        column: labor_hours
+        type: number
+        description: Labour hours billed; set when completed.
+        aliases:
+        - hours
+        filterable: true
+        aggregatable: true
+        hidden: false
+        categorical: false
+        allowed_values: []
+        value_aliases: {}
+relationships:
+- from_entity: invoices
+  from_field: work_order_id
+  to_entity: work_orders
+  to_field: id
+  cardinality: many_to_one
+  source: declared
+- from_entity: sites
+  from_field: customer_id
+  to_entity: customers
+  to_field: id
+  cardinality: many_to_one
+  source: declared
+- from_entity: work_order_parts
+  from_field: part_id
+  to_entity: parts
+  to_field: id
+  cardinality: many_to_one
+  source: declared
+- from_entity: work_order_parts
+  from_field: work_order_id
+  to_entity: work_orders
+  to_field: id
+  cardinality: many_to_one
+  source: declared
+- from_entity: work_orders
+  from_field: site_id
+  to_entity: sites
+  to_field: id
+  cardinality: many_to_one
+  source: declared
+- from_entity: work_orders
+  from_field: technician_id
+  to_entity: technicians
+  to_field: id
+  cardinality: many_to_one
+  source: declared

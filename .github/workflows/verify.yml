@@ -22,6 +22,7 @@ jobs:
     env:
       LEDGERLINE_DATABASE_URL: postgresql+psycopg://ledgerline_owner:ledgerline@localhost:56432/ledgerline  # pragma: allowlist secret (local CI-only DB credential)
       LEDGERLINE_DATABASE_RO_URL: postgresql+psycopg://ledgerline_ro:ledgerline_ro@localhost:56432/ledgerline  # pragma: allowlist secret (local CI-only DB credential)
+      LEDGERLINE_APP_DATABASE_URL: postgresql+psycopg://ledgerline_owner:ledgerline@localhost:56432/ledgerline_app  # pragma: allowlist secret (local CI-only DB credential)
       LEDGERLINE_LLM_MODE: replay
     steps:
       - uses: actions/checkout@v4
@@ -35,6 +36,13 @@ jobs:
         run: |
           psql -h localhost -p 56432 -U ledgerline_owner -d ledgerline \
             -v ro_password="$LEDGERLINE_RO_PASSWORD" -f infra/postgres/roles.sql
+      - name: Cache the Spider archive (checksum-pinned)
+        uses: actions/cache@v4
+        with:
+          path: data/downloads
+          key: spider-00636695dabed6b5f4b8328a16b13e069a2f16591d5efcce57660669c85b121b
+      - name: Fetch Spider (verifies the pinned checksum; data stays untracked)
+        run: uv run python -m scripts.fetch_benchmarks
       - name: Seed (the one seed path)
         run: uv run ledgerline seed
       - name: verify.sh
