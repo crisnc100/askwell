@@ -91,6 +91,9 @@ def test_export_import_replay_score_report(isolated: Path, pg_seeded: Engine) ->
     assert rows["oneshot"]["refusal_recall"]["n"] == 0
     assert len(report["misses"]) == 43  # every in_schema item refused
     assert {m["tag"] for m in report["misses"]} == {"untriaged"}
+    assert report["notes"][0] == report_module.SQL_AGENT_NOT_RUN
+    assert any(n.startswith("One target model (target/model)") for n in report["notes"])
+    assert any(n.startswith("Trials: 1.") for n in report["notes"])
     md = report_module.render_markdown(report)
     assert md.splitlines()[2].startswith("> **Model responses simulated by fixture")
     assert "| fieldservice | ledgerline | target/model | 1 |" in md
