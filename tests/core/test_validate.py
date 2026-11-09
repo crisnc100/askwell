@@ -884,3 +884,36 @@ def test_text_and_boolean_column_comparisons(registry: Registry) -> None:
         metrics=COUNT,
         filters=[{"field": "is_active", "op": "eq", "other_field": "full_name"}],
     ) == ["column_comparison_type"]
+
+
+def test_rule_alias_collision(registry: Registry) -> None:
+    # A metric alias equal to a group label would shadow the group in ORDER BY.
+    assert codes(
+        registry,
+        intent_type="grouped_summary",
+        entity="work_orders",
+        metrics=[{"agg": "count", "alias": "status"}],
+        group_by=[{"field": "status"}],
+        order_by=[{"target": "work_orders.status"}],
+    ) == ["alias_collision"]
+    # The same field grouped twice gives two identical labels.
+    assert codes(
+        registry,
+        intent_type="grouped_summary",
+        entity="work_orders",
+        metrics=COUNT,
+        group_by=[{"field": "status"}, {"field": "work_orders.status"}],
+    ) == ["alias_collision"]
+
+
+def test_default_metric_labels_step_around_group_labels() -> None:
+    reg = make_registry({"t": ["count"]}, [])
+    plan = plan_of(
+        reg,
+        intent_type="grouped_summary",
+        entity="t",
+        metrics=[{"agg": "count"}],
+        group_by=[{"field": "count"}],
+    )
+    assert [g.label for g in plan.group_by] == ["count"]
+    assert [m.label for m in plan.metrics] == ["count_2"]

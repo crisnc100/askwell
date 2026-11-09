@@ -128,3 +128,41 @@ def test_torn_last_line_is_ignored_on_resume(tmp_path: Path) -> None:
     outcome = run_checkpointed(ITEMS[:3], str, make_work(0.1, resumed_calls), checkpoint, 1)
     assert resumed_calls == ["q2"]
     assert outcome.resumed == 2
+
+
+def test_two_resumes_after_a_torn_line_keep_progress_and_spend(tmp_path: Path) -> None:
+    """A torn tail is repaired on load, so appends after it stay readable on later resumes."""
+    path = tmp_path / "run.jsonl"
+    checkpoint = Checkpoint(path)
+    calls: list[str] = []
+    run_checkpointed(ITEMS[:2], str, make_work(0.1, calls), checkpoint, budget_usd=10)
+    with path.open("a") as fh:
+        fh.write('{"key": "q2", "cost_usd": 0.1, "rec')  # killed mid-write
+
+    first_resume: list[str] = []
+    one = run_checkpointed(ITEMS[:4], str, make_work(0.1, first_resume), checkpoint, 10)
+    assert first_resume == ["q2", "q3"]
+    assert one.spent_usd == pytest.approx(0.4)
+
+    second_resume: list[str] = []
+    two = run_checkpointed(ITEMS[:6], str, make_work(0.1, second_resume), checkpoint, 10)
+    assert second_resume == ["q4", "q5"]
+    assert two.resumed == 4
+    assert [r["id"] for r in two.records] == ITEMS[:6]
+    assert two.spent_usd == pytest.approx(0.6)
+    done, spent = Checkpoint(path).load()
+    assert sorted(done) == ITEMS[:6]
+    assert spent == pytest.approx(0.6)
+
+
+def test_append_after_a_torn_line_without_load_is_still_readable(tmp_path: Path) -> None:
+    path = tmp_path / "run.jsonl"
+    checkpoint = Checkpoint(path)
+    checkpoint.append("q0", 0.1, {"id": "q0"})
+    with path.open("a") as fh:
+        fh.write('{"key": "q1", "co')
+    checkpoint.append("q1", 0.2, {"id": "q1"})
+    checkpoint.append("q2", 0.3, {"id": "q2"})
+    done, spent = checkpoint.load()
+    assert sorted(done) == ["q0", "q1", "q2"]
+    assert spent == pytest.approx(0.6)

@@ -16,10 +16,10 @@ from sqlalchemy.exc import CompileError
 
 from ledgerline.core.executor import run
 from ledgerline.core.intent import Intent
-from ledgerline.core.registry import Registry
+from ledgerline.core.registry import Registry, load_registry
 from ledgerline.core.sqlbuild import GRAINS, build, compile_sql, dialect_for
 from ledgerline.core.validate import validate
-from tests.core.conftest import NOW
+from tests.core.conftest import FIELDSERVICE_REGISTRY, NOW
 
 # --- sentinel property ---
 
@@ -37,11 +37,26 @@ float_sentinel = st.floats(min_value=1e9, max_value=2e9, allow_nan=False).map(la
 # an unknown value; parts is on the many side).
 TEXT_FIELDS = ["customers.name", "sites.name", "technicians.full_name"]
 NUM_FIELDS = ["amount", "work_orders.labor_hours", "technicians.hourly_rate", "id"]
+BOOL_FIELDS = ["customers.is_active", "technicians.is_active"]
 
 
 @st.composite
 def condition(draw: st.DrawFn) -> tuple[dict[str, Any], list[Any]]:
-    kind = draw(st.sampled_from(["text_eq", "text_in", "ilike", "num_cmp", "num_between", "date"]))
+    kind = draw(
+        st.sampled_from(
+            [
+                "text_eq",
+                "text_in",
+                "ilike",
+                "num_cmp",
+                "num_between",
+                "num_in",
+                "date",
+                "datetime",
+                "bool",
+            ]
+        )
+    )
     if kind == "text_eq":
         v = draw(text_sentinel)
         return {"field": draw(st.sampled_from(TEXT_FIELDS)), "op": "neq", "value": v}, [v]
@@ -64,20 +79,41 @@ def condition(draw: st.DrawFn) -> tuple[dict[str, Any], list[Any]]:
         lo = draw(int_sentinel)
         hi = lo + draw(st.integers(1, 10**6))
         return {"field": "amount", "op": "between", "values": [lo, hi]}, [lo, hi]
+    if kind == "num_in":
+        vs = draw(st.lists(int_sentinel, min_size=1, max_size=3, unique=True))
+        return {"field": "id", "op": "in", "values": vs}, vs
+    if kind == "datetime":
+        moment = datetime(2017, 3, 9, 7, 11, 13, 123457) + timedelta(
+            seconds=draw(st.integers(0, 10**8)), microseconds=draw(st.integers(1, 999_999))
+        )
+        op = draw(st.sampled_from(["eq", "neq", "gt", "gte", "lt", "lte"]))
+        return {"field": "work_orders.opened_at", "op": op, "value": moment.isoformat()}, [moment]
+    if kind == "bool":
+        v = draw(st.booleans())
+        field = draw(st.sampled_from(BOOL_FIELDS))
+        return {"field": field, "op": draw(st.sampled_from(["eq", "neq"])), "value": v}, [v]
     days = draw(st.integers(0, 3000))
     day = date(2017, 3, 9) + timedelta(days=days)
     return {"field": "issued_at", "op": "lte", "value": day.isoformat()}, [day]
 
 
 def _sql_mentions(sql: str, value: Any) -> bool:
+    if isinstance(value, bool):
+        # A boolean has no unique text; any TRUE/FALSE literal means one was inlined.
+        # (An inlined 1/0 on SQLite is caught by the parameter count instead.)
+        return re.search(r"\b(true|false)\b", sql, re.IGNORECASE) is not None
     if isinstance(value, str):
         return value in sql
+    if isinstance(value, datetime):
+        return value.isoformat() in sql or value.isoformat(sep=" ") in sql
     if isinstance(value, date):
         return value.isoformat() in sql
     return repr(value) in sql or str(int(value)) in sql
 
 
 def _is_bound(value: Any, bound: Any) -> bool:
+    if isinstance(value, bool) or isinstance(bound, bool):
+        return bound is value  # True == 1 in Python; a bool must be bound as a bool
     if value == bound:
         return True
     # ilike_contains binds the value with LIKE wildcards escaped by "/" (autoescape).
@@ -89,8 +125,9 @@ def _is_bound(value: Any, bound: Any) -> bool:
 @settings(max_examples=300, deadline=None, suppress_health_check=[HealthCheck.too_slow])
 @given(conditions=st.lists(condition(), min_size=1, max_size=4))
 def test_every_filter_value_is_bound_never_inlined(
-    registry: Registry, conditions: list[tuple[dict[str, Any], list[Any]]]
+    conditions: list[tuple[dict[str, Any], list[Any]]],
 ) -> None:
+    registry = load_registry(FIELDSERVICE_REGISTRY)
     intent = Intent.model_validate(
         {
             "intent_type": "row_list",
@@ -109,6 +146,9 @@ def test_every_filter_value_is_bound_never_inlined(
             for value in values:
                 assert not _sql_mentions(sql, value), (dialect, value, sql)
                 assert any(_is_bound(value, b) for b in bound), (dialect, value, params)
+        # Every filter value is its own bound parameter, and nothing else is bound: a
+        # value inlined as a literal (e.g. TRUE, or 1 on SQLite) leaves the count short.
+        assert len(params) == sum(len(values) for _, values in conditions), (dialect, params)
 
 
 # --- compile shape ---
@@ -213,3 +253,21 @@ def test_grains_agree_across_engines_on_edge_dates(
             stmt = select(GRAINS[grain](literal(value, sa_type)))
             got = run(engine, stmt).rows[0][0]
             assert got == _expected(grain, day), (grain, engine_name, value, got)
+
+
+def test_boolean_filter_values_are_bound(registry: Registry) -> None:
+    intent = Intent.model_validate(
+        {
+            "intent_type": "summary",
+            "entity": "customers",
+            "metrics": [{"agg": "count"}],
+            "filters": [{"field": "is_active", "op": "eq", "value": True}],
+        }
+    )
+    plan = validate(intent, registry, now=NOW).plan
+    assert plan is not None
+    for dialect in ("postgresql", "sqlite"):
+        sql, params = compile_sql(build(plan), dialect)
+        assert list(params.values()) == [True], (dialect, sql, params)
+        assert "true" not in sql.lower()
+        assert "= 1" not in sql
