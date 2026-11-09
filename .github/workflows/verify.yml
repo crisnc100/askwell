@@ -1,0 +1,41 @@
+name: verify
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    services:
+      db:
+        image: postgres:16
+        env:
+          POSTGRES_DB: ledgerline
+          POSTGRES_USER: ledgerline_owner
+          POSTGRES_PASSWORD: ledgerline  # pragma: allowlist secret (local CI-only DB credential)
+        ports:
+          - 55432:5432
+        options: >-
+          --health-cmd "pg_isready -U ledgerline_owner -d ledgerline"
+          --health-interval 2s --health-timeout 5s --health-retries 30
+    env:
+      LEDGERLINE_DATABASE_URL: postgresql+psycopg://ledgerline_owner:ledgerline@localhost:55432/ledgerline  # pragma: allowlist secret (local CI-only DB credential)
+      LEDGERLINE_DATABASE_RO_URL: postgresql+psycopg://ledgerline_ro:ledgerline_ro@localhost:55432/ledgerline  # pragma: allowlist secret (local CI-only DB credential)
+      LEDGERLINE_LLM_MODE: replay
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: "0.9.11"
+      - name: Create roles (same script compose runs at init)
+        env:
+          PGPASSWORD: ledgerline
+          LEDGERLINE_RO_PASSWORD: ledgerline_ro  # pragma: allowlist secret (local CI-only DB credential)
+        run: |
+          psql -h localhost -p 55432 -U ledgerline_owner -d ledgerline \
+            -v ro_password="$LEDGERLINE_RO_PASSWORD" -f infra/postgres/roles.sql
+      - name: Seed (the one seed path)
+        run: uv run ledgerline seed
+      - name: verify.sh
+        run: ./verify.sh

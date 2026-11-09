@@ -1,0 +1,72 @@
+[project]
+name = "ledgerline"
+version = "0.1.0"
+description = "A governed AI data analyst: questions become validated intents, then parameterized SQL."
+readme = "README.md"
+license = "Apache-2.0"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "fastapi",
+    "uvicorn",
+    "pydantic>=2",
+    "pydantic-settings",
+    "pyyaml",
+    "sqlalchemy>=2",
+    "psycopg[binary]",
+    "langgraph",
+    "langchain-openai",
+    "langchain-community",
+    "typer",
+    "httpx",
+    "faker",
+]
+
+[dependency-groups]
+dev = [
+    "pytest",
+    "pytest-asyncio",
+    "pytest-cov",
+    "hypothesis",
+    "ruff",
+    "pyright",
+    "detect-secrets",
+]
+
+[project.scripts]
+ledgerline = "ledgerline.cli:app"
+
+[build-system]
+requires = ["uv_build>=0.9.11,<0.10"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-name = "ledgerline"
+module-root = ""
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+extend-exclude = ["data"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "SIM", "RUF", "S", "PT", "N", "C4"]
+ignore = ["S101"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S105", "S106", "S608"]
+"ledgerline/fieldservice/seed.py" = ["S311"]
+"evals/gold/spider_selection.py" = ["S311"]
+
+[tool.pyright]
+include = ["ledgerline", "tests", "scripts", "evals"]
+exclude = ["data", ".venv"]
+pythonVersion = "3.12"
+typeCheckingMode = "standard"
+strict = ["ledgerline/core"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra --strict-markers --strict-config"
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+xfail_strict = true
