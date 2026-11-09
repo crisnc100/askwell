@@ -35,7 +35,7 @@ from sqlalchemy.ext.compiler import compiles
 from sqlalchemy.sql.compiler import SQLCompiler
 from sqlalchemy.sql.functions import FunctionElement
 from sqlalchemy.sql.type_api import TypeEngine
-from sqlalchemy.types import NullType
+from sqlalchemy.types import NullType, TypeDecorator
 
 from ledgerline.core.validate import (
     PlanMetric,
@@ -45,13 +45,47 @@ from ledgerline.core.validate import (
     ResolvedField,
 )
 
+
+class _Lenient(TypeDecorator[Any]):
+    """A DATE or DATETIME that reads values it cannot parse as they are stored.
+
+    A column's declared type is not a promise about its contents: Spider's wta_1 stores
+    birth dates as integers such as 19800930. Strict parsing would crash the whole
+    query; this returns 19800930 unchanged and still parses real dates."""
+
+    cache_ok = True
+
+    def result_processor(self, dialect: Dialect, coltype: object) -> Any:
+        strict = self.impl_instance.result_processor(dialect, coltype)
+        if strict is None:
+            return None
+
+        def process(value: Any) -> Any:
+            try:
+                return strict(value)
+            except (TypeError, ValueError):
+                return value
+
+        return process
+
+
+class LenientDate(_Lenient):
+    impl = Date
+    cache_ok = True
+
+
+class LenientDateTime(_Lenient):
+    impl = DateTime
+    cache_ok = True
+
+
 _TYPES: dict[str, TypeEngine[Any]] = {
     "integer": Integer(),
     "number": Numeric(asdecimal=False),
     "text": String(),
     "boolean": Boolean(),
-    "date": Date(),
-    "datetime": DateTime(),
+    "date": LenientDate(),
+    "datetime": LenientDateTime(),
 }
 
 
