@@ -1,6 +1,6 @@
 """A column declared DATE/DATETIME may hold values that are not dates (Spider's wta_1 stores
-birth dates as integers like 19800930). Reading them must not crash the query: values that
-parse come back as dates, others come back as stored."""
+dates as eight-digit YYYYMMDD integers; the value here is made up). Reading them must not
+crash the query: values that parse come back as dates, others come back as stored."""
 
 from __future__ import annotations
 
@@ -24,7 +24,7 @@ def test_non_date_values_in_date_columns_come_back_as_stored(tmp_path: Path) -> 
         conn.execute(text("CREATE TABLE p (id INTEGER PRIMARY KEY, born DATE, seen DATETIME)"))
         conn.execute(
             text(
-                "INSERT INTO p VALUES (1, 19800930, 'not a time'), "
+                "INSERT INTO p VALUES (1, 20010203, 'not a time'), "
                 "(2, '1982-03-09', '2026-01-02 03:04:05.000000'), (3, NULL, NULL)"
             )
         )
@@ -59,7 +59,7 @@ def test_non_date_values_in_date_columns_come_back_as_stored(tmp_path: Path) -> 
     finally:
         engine.dispose()
     assert rows == [
-        (1, 19800930, "not a time"),
+        (1, 20010203, "not a time"),
         (2, date(1982, 3, 9), datetime(2026, 1, 2, 3, 4, 5)),
         (3, None, None),
     ]

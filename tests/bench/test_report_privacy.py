@@ -71,12 +71,17 @@ def _ngrams(text: str, longest: int = 4) -> set[str]:
     return grams
 
 
+# Ordinary English words that also happen to be Spider values; the docs use them as
+# words ("a hard budget"), not as data.
+COMMON_WORDS = {"hard"}
+
+
 def test_committed_files_hold_no_spider_categorical_values() -> None:
     forbidden = set(json.loads(HASHES.read_text())["sha256"])
     assert forbidden
     hits = []
     for path in SCANNED:
-        for gram in _ngrams(path.read_text(encoding="utf-8")):
+        for gram in _ngrams(path.read_text(encoding="utf-8")) - COMMON_WORDS:
             if hashlib.sha256(gram.encode()).hexdigest() in forbidden:
                 hits.append(f"{path.relative_to(ROOT)}: {gram!r}")
     assert hits == []
