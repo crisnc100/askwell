@@ -1,6 +1,6 @@
-# Eval report `replay-fieldservice`
-
 > **Model responses simulated by claude-haiku-5-5, standing in for openai/gpt-oss-120b. This is not an OpenRouter measurement.**
+
+# Eval report `replay-fieldservice`
 
 - sql_agent baseline not run: needs a live model (multi-step tool calls can't be honestly simulated in one pass).
 - One target model (openai/gpt-oss-120b). A second model runs once there is an OpenRouter key: simulating a second vendor with the same stand-in would add no real diversity.

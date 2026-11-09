@@ -702,7 +702,7 @@
       "model": "openai/gpt-oss-120b",
       "note": "Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none of these.",
       "outcome": "refused",
-      "refusal": "Owners and professionals are not related in the registry, and the only join path (owners to dogs to treatments to professionals) answers a different question. The intent language cannot intersect the states of two unrelated entities.",
+      "refusal": "refused (unanswerable)",
       "schema": "spider_dog_kennels",
       "tag": "grammar_gap",
       "trial": 1
@@ -714,7 +714,7 @@
       "model": "openai/gpt-oss-120b",
       "note": "Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none of these.",
       "outcome": "refused",
-      "refusal": "Averaging dogs.age over dogs with at least one treatment needs a dogs-to-treatments membership test. The registry only lists treatments-to-dogs (many-to-one) joins, so a query on treatments would count a dog once per treatment, not once per dog.",
+      "refusal": "refused (unanswerable)",
       "schema": "spider_dog_kennels",
       "tag": "grammar_gap",
       "trial": 1
@@ -726,7 +726,7 @@
       "model": "openai/gpt-oss-120b",
       "note": "Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none of these.",
       "outcome": "refused",
-      "refusal": "The question joins two conditions with OR: a professional's state is Indiana, or that professional has more than 2 treatments. Filters combine only with AND, a group can only hold row-level conditions, and having applies only to grouped metrics, so this OR cannot be expressed as one intent. Split it into two questions: professionals in Indiana, and professionals with more than 2 treatments.",
+      "refusal": "refused (unanswerable)",
       "schema": "spider_dog_kennels",
       "tag": "grammar_gap",
       "trial": 1
@@ -738,7 +738,7 @@
       "model": "openai/gpt-oss-120b",
       "note": "Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none of these.",
       "outcome": "refused",
-      "refusal": "The question combines an attribute filter on professionals (state = Indiana) with an OR on a per-professional count of treatments (more than two). Filters are AND-only, groups cannot contain a count threshold, and HAVING applies only to grouped summaries, so this cannot be expressed as one intent without dropping one of the two conditions.",
+      "refusal": "refused (unanswerable)",
       "schema": "spider_dog_kennels",
       "tag": "grammar_gap",
       "trial": 1
@@ -750,7 +750,7 @@
       "model": "openai/gpt-oss-120b",
       "note": "Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none of these.",
       "outcome": "refused",
-      "refusal": "Excluding dogs by their total treatment cost needs a per-dog sum compared against 1000 and then a negated match on the dog list. The intent cannot express that. A per-treatment filter would select the wrong dogs, and a grouped having returns dog ids rather than names and leaves out dogs with no treatments.",
+      "refusal": "refused (unanswerable)",
       "schema": "spider_dog_kennels",
       "tag": "grammar_gap",
       "trial": 1
@@ -762,7 +762,7 @@
       "model": "openai/gpt-oss-120b",
       "note": "Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none of these.",
       "outcome": "refused",
-      "refusal": "Needs each owner's total treatment cost across all of their dogs, then the names of dogs whose owner's total is at most 1000. The intent format can only apply a having filter to grouped metrics, and a grouped result cannot return dog names.",
+      "refusal": "refused (unanswerable)",
       "schema": "spider_dog_kennels",
       "tag": "grammar_gap",
       "trial": 1
@@ -774,7 +774,7 @@
       "model": "openai/gpt-oss-120b",
       "note": "Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none of these.",
       "outcome": "refused",
-      "refusal": "The question needs a set difference between first names in professionals and owners and dog names. The registry has no set operators or value matching across unrelated entities, and professionals do not join to owners or dogs by name.",
+      "refusal": "refused (unanswerable)",
       "schema": "spider_dog_kennels",
       "tag": "grammar_gap",
       "trial": 1
@@ -786,7 +786,7 @@
       "model": "openai/gpt-oss-120b",
       "note": "By design: registry init hides email and phone-like fields, so the question cannot be answered. Spider's gold returns them.",
       "outcome": "refused",
-      "refusal": "The question asks for each professional's email, but the professionals entity has no email field in the registry. The fields available are professional_id, role_code, first_name, last_name, street, city, state, zip_code and cell_number.",
+      "refusal": "refused (unanswerable)",
       "schema": "spider_dog_kennels",
       "tag": "validator_false_reject",
       "trial": 1
@@ -798,7 +798,7 @@
       "model": "openai/gpt-oss-120b",
       "note": "By design: registry init hides email and phone-like fields, so the question cannot be answered. Spider's gold returns them.",
       "outcome": "refused",
-      "refusal": "The professionals entity has no email field. Its listed fields are professional_id, role_code, first_name, street, city, state, zip_code, last_name and cell_number.",
+      "refusal": "refused (unanswerable)",
       "schema": "spider_dog_kennels",
       "tag": "validator_false_reject",
       "trial": 1
@@ -834,7 +834,7 @@
       "model": "openai/gpt-oss-120b",
       "note": "Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none of these.",
       "outcome": "refused",
-      "refusal": "The question compares each treatment's cost to the average cost across all treatments. Filters can only compare a field to a literal value or another field, not to an aggregate, and the average would have to be computed rather than guessed.",
+      "refusal": "refused (unanswerable)",
       "schema": "spider_dog_kennels",
       "tag": "grammar_gap",
       "trial": 1
@@ -846,7 +846,7 @@
       "model": "openai/gpt-oss-120b",
       "note": "Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none of these.",
       "outcome": "refused",
-      "refusal": "The condition 'cost below the average' needs cost_of_treatment compared to an average computed over all treatments. Filters only compare a field to a literal value or to another field, so this comparison cannot be expressed.",
+      "refusal": "refused (unanswerable)",
       "schema": "spider_dog_kennels",
       "tag": "grammar_gap",
       "trial": 1
@@ -856,7 +856,7 @@
       "issue_codes": [],
       "item_id": "spider:951",
       "model": "openai/gpt-oss-120b",
-      "note": "The answer returns size descriptions (Large, Medium); the gold returns size codes (LGE, MED). Both answer the question.",
+      "note": "The answer returns the size description column; the gold returns the size code column. Both answer the question.",
       "outcome": "wrong",
       "refusal": null,
       "schema": "spider_dog_kennels",
@@ -870,7 +870,7 @@
       "model": "openai/gpt-oss-120b",
       "note": "Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none of these.",
       "outcome": "refused",
-      "refusal": "Finding the rarest breed needs a count of dogs per breed, followed by a filter on the breed with the lowest count. A single intent cannot express that two-step selection, so the breed would have to be guessed.",
+      "refusal": "refused (unanswerable)",
       "schema": "spider_dog_kennels",
       "tag": "grammar_gap",
       "trial": 1
@@ -882,7 +882,7 @@
       "model": "openai/gpt-oss-120b",
       "note": "Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none of these.",
       "outcome": "refused",
-      "refusal": "\"Rarest breed\" needs a lookup of breed counts followed by a filter to that breed's dogs, which one intent cannot express. Name the breed (BUL, ESK, or HUS) and I can answer for it.",
+      "refusal": "refused (unanswerable)",
       "schema": "spider_dog_kennels",
       "tag": "grammar_gap",
       "trial": 1
@@ -906,7 +906,7 @@
       "model": "openai/gpt-oss-120b",
       "note": "By design: registry init hides email and phone-like fields, so the question cannot be answered. Spider's gold returns them.",
       "outcome": "refused",
-      "refusal": "The owners entity has no email field in the registry, so the requested email cannot be returned.",
+      "refusal": "refused (unanswerable)",
       "schema": "spider_dog_kennels",
       "tag": "validator_false_reject",
       "trial": 1
@@ -918,7 +918,7 @@
       "model": "openai/gpt-oss-120b",
       "note": "By design: registry init hides email and phone-like fields, so the question cannot be answered. Spider's gold returns them.",
       "outcome": "refused",
-      "refusal": "The owners entity has no email field; the registry lists first_name, last_name and cell_number only.",
+      "refusal": "refused (unanswerable)",
       "schema": "spider_dog_kennels",
       "tag": "validator_false_reject",
       "trial": 1
@@ -930,7 +930,7 @@
       "model": "openai/gpt-oss-120b",
       "note": "Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none of these.",
       "outcome": "refused",
-      "refusal": "Comparing each dog's age to the average age needs an aggregate threshold inside the filter, and the intent format has no way to express a subquery or an aggregate comparison. Also, age is a text field with a fixed set of values, so an average over it needs confirming.",
+      "refusal": "refused (unanswerable)",
       "schema": "spider_dog_kennels",
       "tag": "grammar_gap",
       "trial": 1
@@ -944,7 +944,7 @@
       "model": "openai/gpt-oss-120b",
       "note": "Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none of these.",
       "outcome": "refused",
-      "refusal": "Counting dogs with no treatments needs an anti-join from dogs to treatments, a one-to-many edge. The registry has no way to express that without double counting, so the question cannot be answered as a single validated intent.",
+      "refusal": "refused (fan_out)",
       "schema": "spider_dog_kennels",
       "tag": "grammar_gap",
       "trial": 1
@@ -958,7 +958,7 @@
       "model": "openai/gpt-oss-120b",
       "note": "The column is declared TEXT but holds numbers. Registry init keeps the declared type, so the validator rejects the arithmetic.",
       "outcome": "refused",
-      "refusal": "The registry has no numeric field for dog age. dogs.age is text, and the only date measure is date_of_birth, so an average age cannot be computed.",
+      "refusal": "refused (aggregate_type)",
       "schema": "spider_dog_kennels",
       "tag": "validator_false_reject",
       "trial": 1
@@ -970,7 +970,7 @@
       "model": "openai/gpt-oss-120b",
       "note": "By design: registry init hides email and phone-like fields, so the question cannot be answered. Spider's gold returns them.",
       "outcome": "refused",
-      "refusal": "The professionals entity has no email or home phone field. Only cell_number is listed, so the request cannot be answered from the registry.",
+      "refusal": "refused (unanswerable)",
       "schema": "spider_dog_kennels",
       "tag": "validator_false_reject",
       "trial": 1
@@ -982,7 +982,7 @@
       "model": "openai/gpt-oss-120b",
       "note": "By design: registry init hides email and phone-like fields, so the question cannot be answered. Spider's gold returns them.",
       "outcome": "refused",
-      "refusal": "The professionals entity has no email or home phone field. It only has cell_number, so the email and home phone cannot be returned.",
+      "refusal": "refused (unanswerable)",
       "schema": "spider_dog_kennels",
       "tag": "validator_false_reject",
       "trial": 1
@@ -1030,7 +1030,7 @@
       "model": "openai/gpt-oss-120b",
       "note": "The model looked for the car in the wrong field's allowed values and refused an answerable question.",
       "outcome": "refused",
-      "refusal": "The model 'hornet sportabout (sw)' is not among the allowed car_names.model values, so the question cannot be filtered to that car.",
+      "refusal": "refused (unanswerable)",
       "schema": "spider_car_1",
       "tag": "misread",
       "trial": 1
@@ -1044,7 +1044,7 @@
       "model": "openai/gpt-oss-120b",
       "note": "The column is declared TEXT but holds numbers. Registry init keeps the declared type, so the validator rejects the arithmetic.",
       "outcome": "refused",
-      "refusal": "The mpg field in cars_data is text, so it cannot be averaged, and no numeric miles-per-gallon field is listed.",
+      "refusal": "refused (aggregate_type)",
       "schema": "spider_car_1",
       "tag": "validator_false_reject",
       "trial": 1
@@ -1058,7 +1058,7 @@
       "model": "openai/gpt-oss-120b",
       "note": "The column is declared TEXT but holds numbers. Registry init keeps the declared type, so the validator rejects the arithmetic.",
       "outcome": "refused",
-      "refusal": "horsepower is a text field in cars_data, so a numeric greater-than comparison is not supported; the registry has no numeric horsepower field to filter on.",
+      "refusal": "refused (operator_type)",
       "schema": "spider_car_1",
       "tag": "validator_false_reject",
       "trial": 1
@@ -1072,7 +1072,7 @@
       "model": "openai/gpt-oss-120b",
       "note": "The column is declared TEXT but holds numbers. Registry init keeps the declared type, so the validator rejects the arithmetic.",
       "outcome": "refused",
-      "refusal": "horsepower is a text field and cannot be averaged, and no numeric horsepower field is listed.",
+      "refusal": "refused (aggregate_type)",
       "schema": "spider_car_1",
       "tag": "validator_false_reject",
       "trial": 1
@@ -1086,7 +1086,7 @@
       "model": "openai/gpt-oss-120b",
       "note": "The column is declared TEXT but holds numbers. Registry init keeps the declared type, so the validator rejects the arithmetic.",
       "outcome": "refused",
-      "refusal": "The horsepower field on cars_data is text, so an average cannot be computed on it, and no numeric horsepower field is listed.",
+      "refusal": "refused (aggregate_type)",
       "schema": "spider_car_1",
       "tag": "validator_false_reject",
       "trial": 1
@@ -1101,7 +1101,7 @@
       "model": "openai/gpt-oss-120b",
       "note": "The question is answerable by grouping model_list by maker. The model kept the base on car_makers, hit fan_out twice and gave up.",
       "outcome": "refused",
-      "refusal": "no valid query after 2 attempts (fan_out, unknown_metric)",
+      "refusal": "refused (fan_out, unknown_metric)",
       "schema": "spider_car_1",
       "tag": "misread",
       "trial": 1
@@ -1113,7 +1113,7 @@
       "model": "openai/gpt-oss-120b",
       "note": "Registry gap: car_names.model references model_list.model, which is not a primary key, so registry init skips the link and the tables cannot be joined.",
       "outcome": "refused",
-      "refusal": "The question combines two conditions on tables with no relationship path between them: maker (model_list via car_makers) and weight (cars_data via car_names). Only car_names links to cars_data, and car_names has no link to model_list or car_makers, so an OR across them cannot be expressed as one intent.",
+      "refusal": "refused (unanswerable)",
       "schema": "spider_car_1",
       "tag": "grammar_gap",
       "trial": 1
@@ -1125,7 +1125,7 @@
       "model": "openai/gpt-oss-120b",
       "note": "Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none of these.",
       "outcome": "refused",
-      "refusal": "The question compares each car's accelerate to the accelerate of the single car with the largest horsepower. The intent language can only compare a field to a literal value or to another field on the same row, and it has no way to reference an aggregate or a sub-selected row. Also, horsepower is stored as text, so it has no numeric ordering in the registry.",
+      "refusal": "refused (unanswerable)",
       "schema": "spider_car_1",
       "tag": "grammar_gap",
       "trial": 1
@@ -1137,7 +1137,7 @@
       "model": "openai/gpt-oss-120b",
       "note": "Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none of these.",
       "outcome": "refused",
-      "refusal": "The question compares each car's accelerate to the accelerate of the single car with the most horsepower. The intent format has no scalar subquery, and horsepower is a text field, so a maximum over it would not be numeric.",
+      "refusal": "refused (unanswerable)",
       "schema": "spider_car_1",
       "tag": "grammar_gap",
       "trial": 1
@@ -1149,7 +1149,7 @@
       "model": "openai/gpt-oss-120b",
       "note": "Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none of these.",
       "outcome": "refused",
-      "refusal": "\"More than the lowest horsepower\" compares each car to a minimum computed over the table. Filters can only compare against a literal value or another column, not an aggregate. Also, horsepower is stored as text, so a numeric comparison would not be reliable.",
+      "refusal": "refused (unanswerable)",
       "schema": "spider_car_1",
       "tag": "grammar_gap",
       "trial": 1
@@ -1161,7 +1161,7 @@
       "model": "openai/gpt-oss-120b",
       "note": "Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none of these.",
       "outcome": "refused",
-      "refusal": "The question needs the dataset-wide minimum horsepower, a value computed from the data that the intent language cannot express as a filter, and horsepower is stored as text.",
+      "refusal": "refused (unanswerable)",
       "schema": "spider_car_1",
       "tag": "grammar_gap",
       "trial": 1
@@ -1175,7 +1175,7 @@
       "model": "openai/gpt-oss-120b",
       "note": "The column is declared TEXT but holds numbers. Registry init keeps the declared type, so the validator rejects the arithmetic.",
       "outcome": "refused",
-      "refusal": "MAX cannot be computed on mpg because cars_data.mpg is a text field, and no numeric mpg field is listed in the registry.",
+      "refusal": "refused (aggregate_type)",
       "schema": "spider_car_1",
       "tag": "validator_false_reject",
       "trial": 1
@@ -1187,7 +1187,7 @@
       "model": "openai/gpt-oss-120b",
       "note": "Registry gap: car_names.model references model_list.model, which is not a primary key, so registry init skips the link and the tables cannot be joined.",
       "outcome": "refused",
-      "refusal": "The weight data (cars_data) has no relationship to the manufacturer names. 'Ford Motor Company' is a fullname in car_makers, which joins only to model_list, and no listed relationship connects model_list or car_makers to cars_data or car_names. Filtering by that manufacturer would require guessing a join or a make value that is not in the registry.",
+      "refusal": "refused (unanswerable)",
       "schema": "spider_car_1",
       "tag": "grammar_gap",
       "trial": 1
@@ -1223,7 +1223,7 @@
       "model": "openai/gpt-oss-120b",
       "note": "Registry gap: car_names.model references model_list.model, which is not a primary key, so registry init skips the link and the tables cannot be joined.",
       "outcome": "refused",
-      "refusal": "The question combines two conditions that the registry cannot express together. The count of car makers per country needs an aggregate, and having is ANDed, so it cannot be OR'd with a fiat-model condition. Also, car_names has no relationship to car_makers or countries, so 'produce fiat model' cannot be linked to a country.",
+      "refusal": "refused (unanswerable)",
       "schema": "spider_car_1",
       "tag": "grammar_gap",
       "trial": 1
@@ -1249,7 +1249,7 @@
       "model": "openai/gpt-oss-120b",
       "note": "Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so the validator refuses rather than guess.",
       "outcome": "refused",
-      "refusal": "Airport city reaches flights through two relationships (sourceairport and destairport), and the registry has no way to choose the departure-side join for airports.city.",
+      "refusal": "refused (ambiguous_path)",
       "schema": "spider_flight_2",
       "tag": "grammar_gap",
       "trial": 1
@@ -1263,7 +1263,7 @@
       "model": "openai/gpt-oss-120b",
       "note": "Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so the validator refuses rather than guess.",
       "outcome": "refused",
-      "refusal": "Departures from Aberdeen need the flights.sourceairport relationship, but the registry offers two equally short paths from flights to airports (via destairport and sourceairport) and no way to choose one. The airports.city filter cannot pick the departure path, so the query is ambiguous.",
+      "refusal": "refused (ambiguous_path)",
       "schema": "spider_flight_2",
       "tag": "grammar_gap",
       "trial": 1
@@ -1277,7 +1277,7 @@
       "model": "openai/gpt-oss-120b",
       "note": "Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so the validator refuses rather than guess.",
       "outcome": "refused",
-      "refusal": "Flights reach airports through two relationships (destairport and sourceairport), and the registry cannot name which one to use. 'Arriving' needs the destination path, but the field names alone do not select it, and the city-to-airport-code mapping for Aberdeen is not in the registry.",
+      "refusal": "refused (ambiguous_path)",
       "schema": "spider_flight_2",
       "tag": "grammar_gap",
       "trial": 1
@@ -1291,7 +1291,7 @@
       "model": "openai/gpt-oss-120b",
       "note": "Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so the validator refuses rather than guess.",
       "outcome": "refused",
-      "refusal": "Ambiguous join: flights reaches airports through both destairport and sourceairport, and the registry has no way to name the arrival path, so 'arriving in Aberdeen' cannot be resolved.",
+      "refusal": "refused (ambiguous_path)",
       "schema": "spider_flight_2",
       "tag": "grammar_gap",
       "trial": 1
@@ -1303,7 +1303,7 @@
       "model": "openai/gpt-oss-120b",
       "note": "Registry gap: flights.airline has no declared or inferred link to airlines (the column is not named like airlines' key), so airline names cannot be reached.",
       "outcome": "refused",
-      "refusal": "Counting flights by airline name needs a join from flights.airline (integer) to airlines.uid, but no relationship for that join is listed. Only flights.destairport and flights.sourceairport join to airports. The airline name can't be matched to flights without it.",
+      "refusal": "refused (unanswerable)",
       "schema": "spider_flight_2",
       "tag": "grammar_gap",
       "trial": 1
@@ -1315,7 +1315,7 @@
       "model": "openai/gpt-oss-120b",
       "note": "Registry gap: flights.airline has no declared or inferred link to airlines (the column is not named like airlines' key), so airline names cannot be reached.",
       "outcome": "refused",
-      "refusal": "The registry has no relationship linking flights.airline to airlines, so 'United Airlines' cannot be joined to flights. Mapping the name to a uid would be a guess.",
+      "refusal": "refused (unanswerable)",
       "schema": "spider_flight_2",
       "tag": "grammar_gap",
       "trial": 1
@@ -1327,7 +1327,7 @@
       "model": "openai/gpt-oss-120b",
       "note": "Registry gap: flights.airline has no declared or inferred link to airlines (the column is not named like airlines' key), so airline names cannot be reached.",
       "outcome": "refused",
-      "refusal": "The airline name lives on airlines, but no relationship joins flights.airline to airlines, so 'United Airlines' cannot be filtered without guessing an airline uid.",
+      "refusal": "refused (unanswerable)",
       "schema": "spider_flight_2",
       "tag": "grammar_gap",
       "trial": 1
@@ -1339,7 +1339,7 @@
       "model": "openai/gpt-oss-120b",
       "note": "Registry gap: flights.airline has no declared or inferred link to airlines (the column is not named like airlines' key), so airline names cannot be reached.",
       "outcome": "refused",
-      "refusal": "The registry has no relationship between flights and airlines, so 'United Airlines' cannot be matched to flights.airline (an integer), and no airline uid for United is listed.",
+      "refusal": "refused (unanswerable)",
       "schema": "spider_flight_2",
       "tag": "grammar_gap",
       "trial": 1
@@ -1351,7 +1351,7 @@
       "model": "openai/gpt-oss-120b",
       "note": "Registry gap: flights.airline has no declared or inferred link to airlines (the column is not named like airlines' key), so airline names cannot be reached.",
       "outcome": "refused",
-      "refusal": "The question filters flights by airline name, but the registry has no relationship from flights.airline to airlines.uid, so joins cannot relate United Airlines to flights. Using a raw airline id would mean guessing a value that is not listed.",
+      "refusal": "refused (unanswerable)",
       "schema": "spider_flight_2",
       "tag": "grammar_gap",
       "trial": 1
@@ -1363,7 +1363,7 @@
       "model": "openai/gpt-oss-120b",
       "note": "Registry gap: flights.airline has no declared or inferred link to airlines (the column is not named like airlines' key), so airline names cannot be reached.",
       "outcome": "refused",
-      "refusal": "The registry has no relationship from flights to airlines, so the airline name 'United Airlines' cannot be matched to flights. flights.airline is an integer, and the registry does not list the uid for United Airlines.",
+      "refusal": "refused (unanswerable)",
       "schema": "spider_flight_2",
       "tag": "grammar_gap",
       "trial": 1
@@ -1375,7 +1375,7 @@
       "model": "openai/gpt-oss-120b",
       "note": "Registry gap: flights.airline has no declared or inferred link to airlines (the column is not named like airlines' key), so airline names cannot be reached.",
       "outcome": "refused",
-      "refusal": "No relationship is listed between flights.airline and airlines, so flights cannot be filtered by airline name. Filtering on a uid would require a value that is not in the registry.",
+      "refusal": "refused (unanswerable)",
       "schema": "spider_flight_2",
       "tag": "grammar_gap",
       "trial": 1
@@ -1435,7 +1435,7 @@
       "model": "openai/gpt-oss-120b",
       "note": "Registry gap: flights.airline has no declared or inferred link to airlines (the column is not named like airlines' key), so airline names cannot be reached.",
       "outcome": "refused",
-      "refusal": "The question needs the airline name from airlines.airline, but the registry has no relationship linking flights.airline to airlines.uid, so the join cannot be made.",
+      "refusal": "refused (unanswerable)",
       "schema": "spider_flight_2",
       "tag": "grammar_gap",
       "trial": 1
@@ -1447,7 +1447,7 @@
       "model": "openai/gpt-oss-120b",
       "note": "Registry gap: flights.airline has no declared or inferred link to airlines (the column is not named like airlines' key), so airline names cannot be reached.",
       "outcome": "refused",
-      "refusal": "The question needs airline abbreviation and country (airlines) ranked by flight count (flights), but no relationship between flights.airline and airlines.uid is registered, so the two cannot be joined.",
+      "refusal": "refused (unanswerable)",
       "schema": "spider_flight_2",
       "tag": "grammar_gap",
       "trial": 1
@@ -1459,7 +1459,7 @@
       "model": "openai/gpt-oss-120b",
       "note": "Registry gap: flights.airline has no declared or inferred link to airlines (the column is not named like airlines' key), so airline names cannot be reached.",
       "outcome": "refused",
-      "refusal": "The registry has no relationship between flights and airlines (flights.airline is an integer with no join to airlines.uid), so airline names cannot be linked to departing flights.",
+      "refusal": "refused (unanswerable)",
       "schema": "spider_flight_2",
       "tag": "grammar_gap",
       "trial": 1
@@ -1471,7 +1471,7 @@
       "model": "openai/gpt-oss-120b",
       "note": "Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none of these.",
       "outcome": "refused",
-      "refusal": "Finding airlines with flights from CVO and no flights from APG needs an exclusion across airlines, which this intent language cannot express (filters apply per row and having cannot count conditionally). The registry also declares no relationship between flights and airlines, so airline names cannot be joined.",
+      "refusal": "refused (unanswerable)",
       "schema": "spider_flight_2",
       "tag": "grammar_gap",
       "trial": 1
@@ -1483,7 +1483,7 @@
       "model": "openai/gpt-oss-120b",
       "note": "Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none of these.",
       "outcome": "refused",
-      "refusal": "The question needs airlines that depart from CVO and do not depart from APG. The registry has no relationship between airlines and flights, so airline names cannot be joined to departures, and the intent language cannot express the set difference (airlines absent from APG departures).",
+      "refusal": "refused (unanswerable)",
       "schema": "spider_flight_2",
       "tag": "grammar_gap",
       "trial": 1
@@ -1495,7 +1495,7 @@
       "model": "openai/gpt-oss-120b",
       "note": "Registry gap: flights.airline has no declared or inferred link to airlines (the column is not named like airlines' key), so airline names cannot be reached.",
       "outcome": "refused",
-      "refusal": "The registry has no relationship between flights.airline (integer) and airlines (uid), so flights cannot be matched to an airline name such as \"United Airlines\".",
+      "refusal": "refused (unanswerable)",
       "schema": "spider_flight_2",
       "tag": "grammar_gap",
       "trial": 1
@@ -1507,7 +1507,7 @@
       "model": "openai/gpt-oss-120b",
       "note": "Registry gap: flights.airline has no declared or inferred link to airlines (the column is not named like airlines' key), so airline names cannot be reached.",
       "outcome": "refused",
-      "refusal": "The registry has no relationship joining flights.airline to airlines, so United Airlines flights cannot be identified from the listed data.",
+      "refusal": "refused (unanswerable)",
       "schema": "spider_flight_2",
       "tag": "grammar_gap",
       "trial": 1
@@ -1521,7 +1521,7 @@
       "model": "openai/gpt-oss-120b",
       "note": "Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so the validator refuses rather than guess.",
       "outcome": "refused",
-      "refusal": "The question needs the departure airport's city, but flights reach airports through two relationships (sourceairport and destairport), and the registry has no way to choose one. The intent cannot name the path, so the query is ambiguous.",
+      "refusal": "refused (ambiguous_path)",
       "schema": "spider_flight_2",
       "tag": "grammar_gap",
       "trial": 1
@@ -1535,7 +1535,7 @@
       "model": "openai/gpt-oss-120b",
       "note": "Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so the validator refuses rather than guess.",
       "outcome": "refused",
-      "refusal": "The registry has two equally short joins from flights to airports (via destairport and sourceairport), and no way to name the sourceairport join. Filtering on airports.city would match arrivals as well as departures, and mapping Aberdeen to an airport code would mean guessing a value that is not listed.",
+      "refusal": "refused (ambiguous_path)",
       "schema": "spider_flight_2",
       "tag": "grammar_gap",
       "trial": 1
@@ -1549,7 +1549,7 @@
       "model": "openai/gpt-oss-120b",
       "note": "Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so the validator refuses rather than guess.",
       "outcome": "refused",
-      "refusal": "Aberdeen matches airports.city through two join paths (flights.destairport and flights.sourceairport), and the registry has no way to choose the arrival path, so the query is ambiguous.",
+      "refusal": "refused (ambiguous_path)",
       "schema": "spider_flight_2",
       "tag": "grammar_gap",
       "trial": 1
@@ -1563,7 +1563,7 @@
       "model": "openai/gpt-oss-120b",
       "note": "Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so the validator refuses rather than guess.",
       "outcome": "refused",
-      "refusal": "flights reaches airports through two equally short relationships (destairport and sourceairport), and the intent format cannot say which one 'landing in' should use.",
+      "refusal": "refused (ambiguous_path)",
       "schema": "spider_flight_2",
       "tag": "grammar_gap",
       "trial": 1
@@ -1575,7 +1575,7 @@
       "model": "openai/gpt-oss-120b",
       "note": "Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none of these.",
       "outcome": "refused",
-      "refusal": "Finding airports with no inbound or outbound flights needs an anti-join from airports to flights. The registry only joins flights to airports (many-to-one), so this cannot be expressed.",
+      "refusal": "refused (unanswerable)",
       "schema": "spider_flight_2",
       "tag": "grammar_gap",
       "trial": 1
@@ -1587,7 +1587,7 @@
       "model": "openai/gpt-oss-120b",
       "note": "Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none of these.",
       "outcome": "refused",
-      "refusal": "Finding airports with no departing or arriving flights needs an anti-join from airports to flights on both sourceairport and destairport. The registry only defines many-to-one joins from flights to airports, so this cannot be expressed.",
+      "refusal": "refused (unanswerable)",
       "schema": "spider_flight_2",
       "tag": "grammar_gap",
       "trial": 1
@@ -1613,7 +1613,7 @@
       "model": "openai/gpt-oss-120b",
       "note": "Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so the validator refuses rather than guess.",
       "outcome": "refused",
-      "refusal": "The first name is only reachable through players, and matches reaches players by two equally short paths (winner_id and loser_id), so the join cannot be chosen. matches has winner_name, which is a full name rather than a first name, and winner_ioc, which is a nationality code. Ask which player side (winner) and whether a full name is acceptable.",
+      "refusal": "refused (ambiguous_path)",
       "schema": "spider_wta_1",
       "tag": "grammar_gap",
       "trial": 1
@@ -1625,7 +1625,7 @@
       "model": "openai/gpt-oss-120b",
       "note": "Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none of these.",
       "outcome": "refused",
-      "refusal": "Players who won both events need an intersection of two winner sets, which a single intent cannot express. The 'won both' condition would have to be built from two separate queries.",
+      "refusal": "refused (unanswerable)",
       "schema": "spider_wta_1",
       "tag": "grammar_gap",
       "trial": 1
@@ -1659,7 +1659,7 @@
       "issue_codes": [],
       "item_id": "spider:479",
       "model": "openai/gpt-oss-120b",
-      "note": "Registry init typed ranking_date as a date (its declared type), but it holds integers like 19870119. The day grain then returns NULL. Init should check the values, not just the declaration.",
+      "note": "Registry init typed ranking_date as a date (its declared type), but it holds eight-digit integers (YYYYMMDD). The day grain then returns NULL. Init should check the values, not just the declaration.",
       "outcome": "wrong",
       "refusal": null,
       "schema": "spider_wta_1",
@@ -1675,7 +1675,7 @@
       "model": "openai/gpt-oss-120b",
       "note": "Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so the validator refuses rather than guess.",
       "outcome": "refused",
-      "refusal": "The player fields are reachable from matches through two equally short relationships (winner_id and loser_id), and the intent format cannot say which one to follow. The question's 'winner' implies winner_id, but the intent cannot specify that path.",
+      "refusal": "refused (ambiguous_path)",
       "schema": "spider_wta_1",
       "tag": "grammar_gap",
       "trial": 1
@@ -1690,7 +1690,7 @@
       "model": "openai/gpt-oss-120b",
       "note": "Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so the validator refuses rather than guess.",
       "outcome": "refused",
-      "refusal": "Names need a join from friend to highschooler, but there are two equally short paths (friend.student_id and friend.friend_id), and the registry does not say which one to use. Friend counts per student_id can be answered without names.",
+      "refusal": "refused (ambiguous_path, invalid_order_by)",
       "schema": "spider_network_1",
       "tag": "grammar_gap",
       "trial": 1
@@ -1704,7 +1704,7 @@
       "model": "openai/gpt-oss-120b",
       "note": "Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so the validator refuses rather than guess.",
       "outcome": "refused",
-      "refusal": "The name lookup is ambiguous. Friend links to highschooler two ways (friend.student_id and friend.friend_id), and the registry does not say which one counts as a friend's name, so I can't pick a join without guessing. Ask which link to use, or ask for the friend count per student_id alone.",
+      "refusal": "refused (ambiguous_path)",
       "schema": "spider_network_1",
       "tag": "grammar_gap",
       "trial": 1
@@ -1733,7 +1733,7 @@
       "model": "openai/gpt-oss-120b",
       "note": "Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so the validator refuses rather than guess.",
       "outcome": "refused",
-      "refusal": "Names cannot be reached unambiguously: friend links to highschooler through two equally short relationships (friend.student_id and friend.friend_id), and the registry gives no way to choose one. The friend-count part is answerable only as student IDs, which do not give the names asked for.",
+      "refusal": "refused (ambiguous_path, invalid_order_by)",
       "schema": "spider_network_1",
       "tag": "grammar_gap",
       "trial": 1
@@ -1745,7 +1745,7 @@
       "model": "openai/gpt-oss-120b",
       "note": "Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none of these.",
       "outcome": "refused",
-      "refusal": "The question needs two references to highschooler through friend (the Kyle side via friend.student_id and the friend's name via friend.friend_id), but the registry gives no distinct names for those joins, and Kyle's id is not listed, so the query cannot be built without guessing.",
+      "refusal": "refused (unanswerable)",
       "schema": "spider_network_1",
       "tag": "grammar_gap",
       "trial": 1
@@ -1757,7 +1757,7 @@
       "model": "openai/gpt-oss-120b",
       "note": "Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none of these.",
       "outcome": "refused",
-      "refusal": "The registry joins friend to highschooler twice (via friend.student_id and friend.friend_id) with no way to say which side the name filter 'Kyle' applies to, so the request cannot be expressed unambiguously.",
+      "refusal": "refused (unanswerable)",
       "schema": "spider_network_1",
       "tag": "grammar_gap",
       "trial": 1
@@ -1771,7 +1771,7 @@
       "model": "openai/gpt-oss-120b",
       "note": "Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so the validator refuses rather than guess.",
       "outcome": "refused",
-      "refusal": "Friend rows reach highschooler by two equally short paths (friend.student_id and friend.friend_id), and the registry gives no way to choose one, so the student-to-friend count cannot be determined without guessing.",
+      "refusal": "refused (ambiguous_path)",
       "schema": "spider_network_1",
       "tag": "grammar_gap",
       "trial": 1
@@ -1785,7 +1785,7 @@
       "model": "openai/gpt-oss-120b",
       "note": "Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so the validator refuses rather than guess.",
       "outcome": "refused",
-      "refusal": "Friend-to-highschooler has two equally short join paths (friend.student_id and friend.friend_id), and the intent format has no way to choose one, so a name filter on Kyle is ambiguous. Specify which side Kyle is on, such as 'friends where Kyle is the student' or 'friends where Kyle is the friend', and the count can be answered.",
+      "refusal": "refused (ambiguous_path)",
       "schema": "spider_network_1",
       "tag": "grammar_gap",
       "trial": 1
@@ -1799,7 +1799,7 @@
       "model": "openai/gpt-oss-120b",
       "note": "Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so the validator refuses rather than guess.",
       "outcome": "refused",
-      "refusal": "Students with no friends require an anti-join from highschooler to friend, but highschooler and friend have two equally short join paths (via friend.student_id and friend.friend_id), so the query cannot be resolved without choosing one.",
+      "refusal": "refused (ambiguous_path)",
       "schema": "spider_network_1",
       "tag": "grammar_gap",
       "trial": 1
@@ -1813,7 +1813,7 @@
       "model": "openai/gpt-oss-120b",
       "note": "Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so the validator refuses rather than guess.",
       "outcome": "refused",
-      "refusal": "Ambiguous join: highschooler reaches friend by two equally short paths (friend.student_id and friend.friend_id), and the intent format cannot choose one. Pick the path that defines a friend for this question and resubmit.",
+      "refusal": "refused (ambiguous_path)",
       "schema": "spider_network_1",
       "tag": "grammar_gap",
       "trial": 1
@@ -1827,7 +1827,7 @@
       "model": "openai/gpt-oss-120b",
       "note": "Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so the validator refuses rather than guess.",
       "outcome": "refused",
-      "refusal": "The question needs the friend table, but the link from highschooler to friend is ambiguous: friend.student_id and friend.friend_id are both one join away, and the registry gives no way to choose one.",
+      "refusal": "refused (ambiguous_path)",
       "schema": "spider_network_1",
       "tag": "grammar_gap",
       "trial": 1
@@ -1839,7 +1839,7 @@
       "model": "openai/gpt-oss-120b",
       "note": "Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none of these.",
       "outcome": "refused",
-      "refusal": "The question needs to check, for each high schooler, whether they appear in friend and whether they appear in likes as the liked person. The registry joins only run from the child table to highschooler (many-to-one), so this existence test across both relationships cannot be expressed.",
+      "refusal": "refused (unanswerable)",
       "schema": "spider_network_1",
       "tag": "grammar_gap",
       "trial": 1
@@ -1851,7 +1851,7 @@
       "model": "openai/gpt-oss-120b",
       "note": "Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none of these.",
       "outcome": "refused",
-      "refusal": "The question needs students who appear as a friend's student_id and also as a likes.student_id. The registry joins only from the child table to highschooler (many-to-one), so it cannot test for existence in friend or likes from highschooler, and there is no relationship between friend and likes.",
+      "refusal": "refused (unanswerable)",
       "schema": "spider_network_1",
       "tag": "grammar_gap",
       "trial": 1
@@ -1863,7 +1863,7 @@
       "model": "openai/gpt-oss-120b",
       "note": "Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none of these.",
       "outcome": "refused",
-      "refusal": "The question needs each student's friend and like rows, but the registry only joins from friend and likes to highschooler, not back from highschooler to them. The 'liked by someone else' check also needs a not-self comparison across those rows, which the registry cannot express.",
+      "refusal": "refused (unanswerable)",
       "schema": "spider_network_1",
       "tag": "grammar_gap",
       "trial": 1
@@ -1877,7 +1877,7 @@
       "model": "openai/gpt-oss-120b",
       "note": "Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so the validator refuses rather than guess.",
       "outcome": "refused",
-      "refusal": "Ambiguous: 'likes' links to highschooler two ways (likes.student_id, the person who likes, and likes.liked_id, the person who is liked), and the intent format cannot choose between them. Ask whether you mean likes given by each high schooler or likes received by each high schooler.",
+      "refusal": "refused (ambiguous_path)",
       "schema": "spider_network_1",
       "tag": "grammar_gap",
       "trial": 1
@@ -1891,7 +1891,7 @@
       "model": "openai/gpt-oss-120b",
       "note": "Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so the validator refuses rather than guess.",
       "outcome": "refused",
-      "refusal": "The likes table joins to highschooler through two relationships (likes.student_id and likes.liked_id), and the intent format cannot specify which one is meant. The question cannot be answered without knowing whether 'likes' means likes given or likes received.",
+      "refusal": "refused (ambiguous_path)",
       "schema": "spider_network_1",
       "tag": "grammar_gap",
       "trial": 1
@@ -1905,7 +1905,7 @@
       "model": "openai/gpt-oss-120b",
       "note": "Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so the validator refuses rather than guess.",
       "outcome": "refused",
-      "refusal": "The question needs the name of the high schooler who received the most likes. Two equally short join paths connect likes to highschooler (liked_id and student_id), and the registry does not say which one a 'like' follows, so the name cannot be resolved without guessing.",
+      "refusal": "refused (ambiguous_path)",
       "schema": "spider_network_1",
       "tag": "grammar_gap",
       "trial": 1
@@ -1919,7 +1919,7 @@
       "model": "openai/gpt-oss-120b",
       "note": "Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so the validator refuses rather than guess.",
       "outcome": "refused",
-      "refusal": "The name lookup is ambiguous: likes links to highschooler through both student_id and liked_id, and the registry does not say which one identifies the student who gives the like. Choose one path, or ask for the student's id instead of the name.",
+      "refusal": "refused (ambiguous_path)",
       "schema": "spider_network_1",
       "tag": "grammar_gap",
       "trial": 1
@@ -1934,7 +1934,7 @@
       "model": "openai/gpt-oss-120b",
       "note": "Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so the validator refuses rather than guess.",
       "outcome": "refused",
-      "refusal": "Names of students need a join from likes to highschooler, but there are two equally short paths (likes.student_id and likes.liked_id), and the registry has no way to choose one.",
+      "refusal": "refused (ambiguous_path, invalid_order_by)",
       "schema": "spider_network_1",
       "tag": "grammar_gap",
       "trial": 1
@@ -1948,7 +1948,7 @@
       "model": "openai/gpt-oss-120b",
       "note": "Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so the validator refuses rather than guess.",
       "outcome": "refused",
-      "refusal": "Student names need a join from likes to highschooler, but there are two equally short paths (likes.student_id and likes.liked_id), and the registry does not say which one to use.",
+      "refusal": "refused (ambiguous_path)",
       "schema": "spider_network_1",
       "tag": "grammar_gap",
       "trial": 1
@@ -1962,7 +1962,7 @@
       "model": "openai/gpt-oss-120b",
       "note": "Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so the validator refuses rather than guess.",
       "outcome": "refused",
-      "refusal": "A friend links to a student through two equally short paths (friend.student_id and friend.friend_id), and the registry has no way to choose one. The student names and friend counts both depend on that join, so the question can't be answered unambiguously.",
+      "refusal": "refused (ambiguous_path)",
       "schema": "spider_network_1",
       "tag": "grammar_gap",
       "trial": 1
@@ -1977,7 +1977,7 @@
       "model": "openai/gpt-oss-120b",
       "note": "Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so the validator refuses rather than guess.",
       "outcome": "refused",
-      "refusal": "The question needs highschooler.grade and highschooler.name joined from friend, but friend reaches highschooler through two equally short paths (friend.student_id and friend.friend_id), and the registry has no way to choose one.",
+      "refusal": "refused (ambiguous_path, invalid_order_by)",
       "schema": "spider_network_1",
       "tag": "grammar_gap",
       "trial": 1
@@ -1991,7 +1991,7 @@
       "model": "openai/gpt-oss-120b",
       "note": "Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so the validator refuses rather than guess.",
       "outcome": "refused",
-      "refusal": "Kyle's likes are ambiguous: the registry has two equally short paths from likes to highschooler (likes.student_id for likes Kyle gives, likes.liked_id for likes Kyle receives), and the intent cannot choose between them.",
+      "refusal": "refused (ambiguous_path)",
       "schema": "spider_network_1",
       "tag": "grammar_gap",
       "trial": 1
@@ -2005,7 +2005,7 @@
       "model": "openai/gpt-oss-120b",
       "note": "Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so the validator refuses rather than guess.",
       "outcome": "refused",
-      "refusal": "Ambiguous: 'likes Kyle has' could mean likes Kyle gave (likes.student_id) or likes Kyle received (likes.liked_id), and the registry does not allow choosing a join path.",
+      "refusal": "refused (ambiguous_path)",
       "schema": "spider_network_1",
       "tag": "grammar_gap",
       "trial": 1
@@ -2019,7 +2019,7 @@
       "model": "openai/gpt-oss-120b",
       "note": "Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so the validator refuses rather than guess.",
       "outcome": "refused",
-      "refusal": "\"Students who have friends\" needs the friend table joined to highschooler, but there are two equally short paths (friend.student_id and friend.friend_id), and the registry has no way to choose one. A join on either path would also count students once per friendship, not once per student, so the average would be wrong.",
+      "refusal": "refused (ambiguous_path)",
       "schema": "spider_network_1",
       "tag": "grammar_gap",
       "trial": 1
@@ -2031,7 +2031,7 @@
       "model": "openai/gpt-oss-120b",
       "note": "Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none of these.",
       "outcome": "refused",
-      "refusal": "The registry joins only from friend to highschooler, so a per-student average over students who have friends cannot be expressed. Averaging highschooler.grade from friend rows would count each student once per friendship.",
+      "refusal": "refused (unanswerable)",
       "schema": "spider_network_1",
       "tag": "grammar_gap",
       "trial": 1
@@ -2043,7 +2043,7 @@
       "model": "openai/gpt-oss-120b",
       "note": "Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none of these.",
       "outcome": "refused",
-      "refusal": "Finding students with no friends needs an anti-join from highschooler to friend. The registry only defines friend-to-highschooler joins (many-to-one from friend), so a 'no friend rows' condition cannot be expressed.",
+      "refusal": "refused (unanswerable)",
       "schema": "spider_network_1",
       "tag": "grammar_gap",
       "trial": 1
@@ -2115,7 +2115,7 @@
       "items": 67,
       "mean_cost_usd": 0.0,
       "model": "openai/gpt-oss-120b",
-      "p50_latency_ms": 5.630000028759241,
+      "p50_latency_ms": 5.088792066089809,
       "pending": 0,
       "refusal_recall": {
         "ci95": [
@@ -2188,7 +2188,7 @@
       "items": 67,
       "mean_cost_usd": 0.0,
       "model": "openai/gpt-oss-120b",
-      "p50_latency_ms": 1.5682080993428826,
+      "p50_latency_ms": 1.7925410065799952,
       "pending": 0,
       "refusal_recall": {
         "ci95": [
@@ -2261,7 +2261,7 @@
       "items": 50,
       "mean_cost_usd": 0.0,
       "model": "openai/gpt-oss-120b",
-      "p50_latency_ms": 3.9710624841973186,
+      "p50_latency_ms": 3.390395489986986,
       "pending": 0,
       "refusal_recall": {
         "ci95": null,
@@ -2331,7 +2331,7 @@
       "items": 50,
       "mean_cost_usd": 0.0,
       "model": "openai/gpt-oss-120b",
-      "p50_latency_ms": 0.23331254487857223,
+      "p50_latency_ms": 0.2150835352949798,
       "pending": 0,
       "refusal_recall": {
         "ci95": null,
@@ -2401,7 +2401,7 @@
       "items": 50,
       "mean_cost_usd": 0.0,
       "model": "openai/gpt-oss-120b",
-      "p50_latency_ms": 3.6177290603518486,
+      "p50_latency_ms": 3.3608534722588956,
       "pending": 0,
       "refusal_recall": {
         "ci95": null,
@@ -2471,7 +2471,7 @@
       "items": 50,
       "mean_cost_usd": 0.0,
       "model": "openai/gpt-oss-120b",
-      "p50_latency_ms": 0.23839599452912807,
+      "p50_latency_ms": 0.20543794380500913,
       "pending": 0,
       "refusal_recall": {
         "ci95": null,
@@ -2541,7 +2541,7 @@
       "items": 50,
       "mean_cost_usd": 0.0,
       "model": "openai/gpt-oss-120b",
-      "p50_latency_ms": 3.706916468217969,
+      "p50_latency_ms": 3.0238954932428896,
       "pending": 0,
       "refusal_recall": {
         "ci95": null,
@@ -2611,7 +2611,7 @@
       "items": 50,
       "mean_cost_usd": 0.0,
       "model": "openai/gpt-oss-120b",
-      "p50_latency_ms": 0.2720829797908664,
+      "p50_latency_ms": 0.21545850904658437,
       "pending": 0,
       "refusal_recall": {
         "ci95": null,
@@ -2681,7 +2681,7 @@
       "items": 50,
       "mean_cost_usd": 0.0,
       "model": "openai/gpt-oss-120b",
-      "p50_latency_ms": 3.637312038335949,
+      "p50_latency_ms": 3.9583959733136,
       "pending": 0,
       "refusal_recall": {
         "ci95": null,
@@ -2751,7 +2751,7 @@
       "items": 50,
       "mean_cost_usd": 0.0,
       "model": "openai/gpt-oss-120b",
-      "p50_latency_ms": 0.22397952852770686,
+      "p50_latency_ms": 0.18795859068632126,
       "pending": 0,
       "refusal_recall": {
         "ci95": null,
@@ -2821,7 +2821,7 @@
       "items": 50,
       "mean_cost_usd": 0.0,
       "model": "openai/gpt-oss-120b",
-      "p50_latency_ms": 4.337833030149341,
+      "p50_latency_ms": 3.8494165637530386,
       "pending": 0,
       "refusal_recall": {
         "ci95": null,
@@ -2891,7 +2891,7 @@
       "items": 50,
       "mean_cost_usd": 0.0,
       "model": "openai/gpt-oss-120b",
-      "p50_latency_ms": 0.7796669960953295,
+      "p50_latency_ms": 0.7463539950549603,
       "pending": 0,
       "refusal_recall": {
         "ci95": null,

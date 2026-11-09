@@ -53,7 +53,7 @@ spider:945:
     of these.
   tag: grammar_gap
 spider:951:
-  note: The answer returns size descriptions (Large, Medium); the gold returns size codes (LGE, MED).
+  note: The answer returns the size description column; the gold returns the size code column.
     Both answer the question.
   tag: gold_issue
 spider:954:

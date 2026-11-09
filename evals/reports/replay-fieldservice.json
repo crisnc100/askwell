@@ -252,7 +252,7 @@
       "items": 67,
       "mean_cost_usd": 0.0,
       "model": "openai/gpt-oss-120b",
-      "p50_latency_ms": 5.48891699872911,
+      "p50_latency_ms": 5.132332909852266,
       "pending": 0,
       "refusal_recall": {
         "ci95": [
@@ -325,7 +325,7 @@
       "items": 67,
       "mean_cost_usd": 0.0,
       "model": "openai/gpt-oss-120b",
-      "p50_latency_ms": 1.6309591010212898,
+      "p50_latency_ms": 1.5700829681009054,
       "pending": 0,
       "refusal_recall": {
         "ci95": [

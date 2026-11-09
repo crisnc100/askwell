@@ -76,6 +76,28 @@ def floor_checks(table: list[dict[str, Any]], path: Path | None = None) -> list[
     return out
 
 
+def _is_spider(record: dict[str, Any]) -> bool:
+    return str(record["schema_id"]).startswith("spider_")
+
+
+def _public_refusal(record: dict[str, Any]) -> str | None:
+    """Refusal text can quote data values ("name the breed: X, Y or Z"). For Spider
+    items, whose data must never be committed, only the reason codes are kept."""
+    refusal = record["detail"].get("refusal")
+    if refusal is None or not _is_spider(record):
+        return refusal
+    codes = record["detail"].get("issue_codes") or []
+    return f"refused ({', '.join(codes)})" if codes else "refused (unanswerable)"
+
+
+def _public_error(record: dict[str, Any]) -> str | None:
+    """Database errors can quote values too; Spider items keep only the fact."""
+    error = record["error"]
+    if error is None or not _is_spider(record):
+        return error
+    return "execution error"
+
+
 def simulation_note(records: list[dict[str, Any]]) -> str | None:
     pairs = sorted(
         {
@@ -151,8 +173,8 @@ def build(result: RunResult) -> dict[str, Any]:
                 "model": record["model"],
                 "outcome": record["outcome"],
                 "issue_codes": record["detail"].get("issue_codes", []),
-                "refusal": record["detail"].get("refusal"),
-                "error": record["error"],
+                "refusal": _public_refusal(record),
+                "error": _public_error(record),
                 "tag": triage.get("tag", "untriaged"),
                 "note": triage.get("note", ""),
             }
@@ -200,9 +222,11 @@ def _pct(rate: dict[str, Any]) -> str:
 
 
 def render_markdown(report: dict[str, Any]) -> str:
-    lines = [f"# Eval report `{report['run_id']}`", ""]
+    lines: list[str] = []
     if report["simulation"]:
+        # First line on purpose: nobody should read a number before knowing it is simulated.
         lines += [f"> **{report['simulation']}**", ""]
+    lines += [f"# Eval report `{report['run_id']}`", ""]
     for note in report["notes"]:
         lines.append(f"- {note}")
     if report["notes"]:

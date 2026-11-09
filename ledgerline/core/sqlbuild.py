@@ -49,9 +49,10 @@ from ledgerline.core.validate import (
 class _Lenient(TypeDecorator[Any]):
     """A DATE or DATETIME that reads values it cannot parse as they are stored.
 
-    A column's declared type is not a promise about its contents: Spider's wta_1 stores
-    birth dates as integers such as 19800930. Strict parsing would crash the whole
-    query; this returns 19800930 unchanged and still parses real dates."""
+    A column's declared type is not a promise about its contents: a DATE column can hold
+    integers such as 20010203 (some Spider databases store dates that way). Strict parsing
+    would crash the whole query; this returns 20010203 unchanged and still parses real
+    dates."""
 
     cache_ok = True
 
