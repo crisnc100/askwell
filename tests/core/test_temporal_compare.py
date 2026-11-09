@@ -115,3 +115,74 @@ def test_date_vs_datetime_comparison_including_midnight(
         got = [row[0] for row in run(engine, build(plan)).rows]
         mirror = {"gt": "lt", "gte": "lte", "lt": "gt", "lte": "gte"}.get(op, op)
         assert got == EXPECTED[mirror if flipped else op], (engine_name, left, op, right)
+
+
+MICRO_SCHEMA = "ledgerline_test_micro"
+MICRO_ROWS = [
+    (1, "2026-06-01 00:00:00.000001", "2026-06-01"),  # one microsecond after midnight
+    (2, "2026-06-01 00:00:00", "2026-06-01"),  # exactly midnight
+    (3, "2026-05-31 23:59:59.999999", "2026-06-01"),  # one microsecond before
+]
+
+
+@pytest.fixture
+def micro_engines(tmp_path: Path, pg_owner: Engine) -> Iterator[dict[str, tuple[Engine, Registry]]]:
+    path = tmp_path / "micro.sqlite"
+    writer = create_engine(f"sqlite:///{path}")
+    with writer.begin() as conn:
+        conn.execute(
+            text("CREATE TABLE jobs (id INTEGER PRIMARY KEY, done_at DATETIME, due_on DATE)")
+        )
+        for i, done, due in MICRO_ROWS:
+            stored = done if "." in done else f"{done}.000000"
+            conn.execute(
+                text("INSERT INTO jobs VALUES (:i, :d, :u)"), {"i": i, "d": stored, "u": due}
+            )
+    writer.dispose()
+    with pg_owner.begin() as conn:
+        conn.execute(text(f"DROP SCHEMA IF EXISTS {MICRO_SCHEMA} CASCADE"))
+        conn.execute(text(f"CREATE SCHEMA {MICRO_SCHEMA}"))
+        conn.execute(
+            text(
+                f"CREATE TABLE {MICRO_SCHEMA}.jobs "
+                "(id int PRIMARY KEY, done_at timestamp, due_on date)"
+            )
+        )
+        for i, done, due in MICRO_ROWS:
+            conn.execute(
+                text(
+                    f"INSERT INTO {MICRO_SCHEMA}.jobs "
+                    "VALUES (:i, CAST(:d AS timestamp), CAST(:u AS date))"
+                ),
+                {"i": i, "d": done, "u": due},
+            )
+        conn.execute(text(f"GRANT USAGE ON SCHEMA {MICRO_SCHEMA} TO ledgerline_ro"))
+        conn.execute(text(f"GRANT SELECT ON {MICRO_SCHEMA}.jobs TO ledgerline_ro"))
+    lite = readonly_engine(f"sqlite:///{path}")
+    pg = readonly_engine(get_settings().database_ro_url)
+    yield {"sqlite": (lite, _registry(None)), "postgresql": (pg, _registry(MICRO_SCHEMA))}
+    lite.dispose()
+    pg.dispose()
+    with pg_owner.begin() as conn:
+        conn.execute(text(f"DROP SCHEMA {MICRO_SCHEMA} CASCADE"))
+
+
+@pytest.mark.parametrize("engine_name", ["postgresql", "sqlite"])
+def test_date_vs_datetime_keeps_microseconds(
+    engine_name: str, micro_engines: dict[str, tuple[Engine, Registry]]
+) -> None:
+    engine, registry = micro_engines[engine_name]
+    expected = {"gt": [1], "eq": [2], "lt": [3]}
+    for op, ids in expected.items():
+        intent = Intent.model_validate(
+            {
+                "intent_type": "row_list",
+                "entity": "jobs",
+                "select": ["id"],
+                "filters": [{"field": "done_at", "op": op, "other_field": "due_on"}],
+                "order_by": [{"target": "id"}],
+            }
+        )
+        plan = validate(intent, registry, now=NOW).plan
+        assert plan is not None
+        assert [row[0] for row in run(engine, build(plan)).rows] == ids, (engine_name, op)

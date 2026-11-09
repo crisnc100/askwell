@@ -137,8 +137,9 @@ def _grain_other(element: _Grain, compiler: SQLCompiler, **kw: Any) -> str:
 
 class AsDatetime(FunctionElement[Any]):
     """An operand normalised to a datetime: CAST AS TIMESTAMP on Postgres; on SQLite,
-    strftime to one text format (millisecond precision), whatever format the stored
-    DATE or DATETIME text uses."""
+    one text format with microseconds ('YYYY-MM-DD HH:MM:SS.ffffff'), whatever format
+    the stored DATE or DATETIME text uses. A fraction followed by a UTC offset is not
+    supported on SQLite (SQLAlchemy never writes one)."""
 
     type = DateTime()
     name = "as_datetime"
@@ -152,7 +153,15 @@ def _as_datetime_pg(element: AsDatetime, compiler: SQLCompiler, **kw: Any) -> st
 
 @compiles(AsDatetime, "sqlite")
 def _as_datetime_sqlite(element: AsDatetime, compiler: SQLCompiler, **kw: Any) -> str:
-    return f"strftime('%Y-%m-%d %H:%M:%f', {compiler.process(element.clauses, **kw)})"
+    # 'YYYY-MM-DD HH:MM:SS' from any date/datetime text, then the stored fraction padded
+    # to six digits (strftime's %f stops at milliseconds). A DATE gets '.000000'.
+    x = compiler.process(element.clauses, **kw)
+    fraction = (
+        f"CASE WHEN instr({x}, '.') > 0 "
+        f"THEN substr(substr({x}, instr({x}, '.') + 1) || '000000', 1, 6) "
+        "ELSE '000000' END"
+    )
+    return f"(strftime('%Y-%m-%d %H:%M:%S', {x}) || '.' || {fraction})"
 
 
 @compiles(AsDatetime)
