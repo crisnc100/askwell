@@ -9,3 +9,4 @@ data/
 coverage.json
 .coverage
 builds/**/*.txt
+evals/pending/

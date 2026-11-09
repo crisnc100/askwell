@@ -20,6 +20,8 @@ app = typer.Typer(
 
 registry_app = typer.Typer(no_args_is_help=True, help="Create and check registries.")
 app.add_typer(registry_app, name="registry")
+replay_app = typer.Typer(no_args_is_help=True, help="Replay recordings and simulated answers.")
+app.add_typer(replay_app, name="replay")
 
 
 @app.callback()
@@ -192,3 +194,61 @@ def spike(
     if stopped:
         typer.echo(f"STOPPED: {stopped}", err=True)
     typer.echo(f"report: {path}")
+
+
+@app.command()
+def ask(
+    question: Annotated[str, typer.Argument(help="The business question.")],
+    schema: Annotated[str, typer.Option(help="Schema id from config/schemas.yaml.")] = (
+        "fieldservice"
+    ),
+    mode: Annotated[
+        str | None, typer.Option(help="replay | export | record | live (default: config).")
+    ] = None,
+) -> None:
+    """Ask one question and print the trace as JSON."""
+    import json
+
+    from ledgerline.llm.errors import ReplayMissError
+    from ledgerline.llm.simulate import PendingRequestError
+    from ledgerline.pipeline.service import AskService
+
+    service = AskService.from_settings(get_settings(), mode)
+    try:
+        result = service.ask(schema, question)
+    except PendingRequestError as exc:
+        typer.echo(f"exported for a simulated answer: {exc.path}")
+        raise typer.Exit(code=3) from exc
+    except ReplayMissError as exc:
+        typer.echo(f"no recording: {exc}", err=True)
+        raise typer.Exit(code=4) from exc
+    finally:
+        service.close()
+    typer.echo(json.dumps(result.to_dict(), indent=2, default=str))
+
+
+@replay_app.command("import")
+def replay_import(
+    pending_dir: Annotated[
+        str | None, typer.Option(help="Default: LEDGERLINE_PENDING_DIR.")
+    ] = None,
+    keep: Annotated[bool, typer.Option(help="Keep the pending files after import.")] = False,
+) -> None:
+    """Load simulated answers (<key>.answer.json) into the replay store, with provenance."""
+    from pathlib import Path
+
+    from ledgerline.llm.replay import ReplayStore
+    from ledgerline.llm.simulate import import_answers, pending_requests
+    from ledgerline.pipeline.service import RECORDINGS_FILE, ROOT
+
+    settings = get_settings()
+    pending = Path(pending_dir) if pending_dir else ROOT / settings.pending_dir
+    store = ReplayStore(ROOT / settings.replay_dir / RECORDINGS_FILE)
+    imported = import_answers(pending, store, remove=not keep)
+    for item in imported:
+        typer.echo(
+            f"imported {item.key} (simulated by {item.simulated_by}, "
+            f"standing in for {item.standing_in_for})"
+        )
+    left = pending_requests(pending) if pending.exists() else []
+    typer.echo(f"{len(imported)} imported, {len(left)} still pending")

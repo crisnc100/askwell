@@ -12,6 +12,7 @@ from __future__ import annotations
 import json
 import re
 from collections.abc import Callable
+from pathlib import Path
 from typing import Any, Protocol
 
 import httpx
@@ -22,6 +23,7 @@ from ledgerline.llm.budget import BudgetGuard, with_backoff
 from ledgerline.llm.errors import ParseError, PricingUnavailableError
 from ledgerline.llm.pricing import ModelPrice, cost_from_usage, worst_case_cost
 from ledgerline.llm.replay import ReplayStore, canonical_json, replay_key
+from ledgerline.llm.simulate import PendingRequestError, export_request
 from ledgerline.llm.types import ChatMessage, LLMResult, RawResponse
 
 
@@ -70,9 +72,12 @@ class Gateway:
         guard: BudgetGuard | None,
         max_tokens: int,
         backoff_sleep: Callable[[float], None] | None = None,
+        pending_dir: Path | None = None,
     ) -> None:
-        if mode in ("record", "replay") and store is None:
+        if mode in ("record", "replay", "export") and store is None:
             raise ValueError(f"{mode} mode needs a replay store")
+        if mode == "export" and pending_dir is None:
+            raise ValueError("export mode needs a pending directory")
         if mode in ("record", "live") and (transport is None or guard is None):
             raise ValueError(f"{mode} mode needs a transport and a budget guard")
         self.mode = mode
@@ -82,6 +87,7 @@ class Gateway:
         self.guard = guard
         self.max_tokens = max_tokens
         self._backoff_sleep = backoff_sleep
+        self.pending_dir = pending_dir
 
     def complete[T: BaseModel](
         self,
@@ -90,12 +96,26 @@ class Gateway:
         prompt_version: str,
         messages: list[ChatMessage],
         schema: type[T],
+        context: dict[str, Any] | None = None,
     ) -> LLMResult[T]:
         json_schema = schema.model_json_schema()
         key = replay_key(model, prompt_version, messages, json_schema)
 
-        if self.mode == "replay":
+        if self.mode in ("replay", "export"):
             assert self.store is not None
+            if self.mode == "export" and key not in self.store:
+                assert self.pending_dir is not None
+                path = export_request(
+                    self.pending_dir,
+                    key=key,
+                    model=model,
+                    prompt_version=prompt_version,
+                    messages=messages,
+                    schema_name=schema.__name__,
+                    response_schema=json_schema,
+                    context=context,
+                )
+                raise PendingRequestError(key, path)
             record = self.store.get(key)
             raw = RawResponse.model_validate(record["raw"])
             return LLMResult[T](
@@ -105,6 +125,7 @@ class Gateway:
                 cost_source="replay",
                 replayed=True,
                 key=key,
+                provenance=record.get("provenance"),
             )
 
         assert self.transport is not None
