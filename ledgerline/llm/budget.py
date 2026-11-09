@@ -79,11 +79,16 @@ class Checkpoint:
         self.path = Path(path)
 
     def load(self) -> tuple[dict[str, dict[str, Any]], float]:
-        """Return (finished entries by key, total spend recorded so far)."""
+        """Return (finished entries by key, total spend recorded so far).
+
+        A torn final line (a run killed mid-write: no trailing newline, not valid JSON)
+        is cut off the file, so later appends start on a clean line. Any other line that
+        is not valid JSON is skipped, never treated as the end of the file."""
         done: dict[str, dict[str, Any]] = {}
         spent = 0.0
         if not self.path.exists():
             return done, spent
+        self._repair_torn_tail()
         with self.path.open(encoding="utf-8") as fh:
             for line in fh:
                 if not line.strip():
@@ -91,17 +96,38 @@ class Checkpoint:
                 try:
                     entry = json.loads(line)
                 except json.JSONDecodeError:
-                    break  # a torn last line from a killed run; everything before it stands
+                    continue
                 spent += float(entry["cost_usd"])
                 if entry["record"] is not None:
                     done[entry["key"]] = entry
         return done, spent
 
+    def _repair_torn_tail(self) -> None:
+        data = self.path.read_bytes()
+        if not data or data.endswith(b"\n"):
+            return
+        start = data.rfind(b"\n") + 1
+        try:
+            json.loads(data[start:])
+        except json.JSONDecodeError:
+            with self.path.open("r+b") as fh:
+                fh.truncate(start)
+            return
+        with self.path.open("ab") as fh:  # complete line, missing only its newline
+            fh.write(b"\n")
+
     def append(self, key: str, cost_usd: float, record: dict[str, Any] | None) -> None:
         self.path.parent.mkdir(parents=True, exist_ok=True)
         line = json.dumps({"key": key, "cost_usd": cost_usd, "record": record}, sort_keys=True)
-        with self.path.open("a", encoding="utf-8") as fh:
-            fh.write(line + "\n")
+        with self.path.open("a+b") as fh:
+            # Never glue a record onto a torn line: start on a fresh line if needed.
+            fh.seek(0, os.SEEK_END)
+            prefix = b""
+            if fh.tell() > 0:
+                fh.seek(-1, os.SEEK_END)
+                if fh.read(1) != b"\n":
+                    prefix = b"\n"
+            fh.write(prefix + line.encode("utf-8") + b"\n")
             fh.flush()
             os.fsync(fh.fileno())
 

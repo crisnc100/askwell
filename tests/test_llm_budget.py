@@ -166,3 +166,15 @@ def test_append_after_a_torn_line_without_load_is_still_readable(tmp_path: Path)
     done, spent = checkpoint.load()
     assert sorted(done) == ["q0", "q1", "q2"]
     assert spent == pytest.approx(0.6)
+
+
+def test_a_complete_last_line_missing_its_newline_is_kept(tmp_path: Path) -> None:
+    path = tmp_path / "run.jsonl"
+    path.write_text('{"key": "q0", "cost_usd": 0.1, "record": {"id": "q0"}}')
+    checkpoint = Checkpoint(path)
+    done, spent = checkpoint.load()
+    assert list(done) == ["q0"]
+    checkpoint.append("q1", 0.2, {"id": "q1"})
+    done, spent = checkpoint.load()
+    assert sorted(done) == ["q0", "q1"]
+    assert spent == pytest.approx(0.3)
