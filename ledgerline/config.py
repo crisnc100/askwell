@@ -29,12 +29,12 @@ class Settings(BaseSettings):
     # Owner role: creates and seeds the fieldservice schema.
     database_url: str = (
         # Local compose dev credential (audited in .secrets.baseline).
-        "postgresql+psycopg://ledgerline_owner:ledgerline@localhost:55432/ledgerline"
+        "postgresql+psycopg://ledgerline_owner:ledgerline@localhost:56432/ledgerline"
     )
     # Read-only role (SELECT only): everything that answers questions uses this.
     database_ro_url: str = (
         # Local compose dev credential (audited in .secrets.baseline).
-        "postgresql+psycopg://ledgerline_ro:ledgerline_ro@localhost:55432/ledgerline"
+        "postgresql+psycopg://ledgerline_ro:ledgerline_ro@localhost:56432/ledgerline"
     )
 
     openrouter_api_key: SecretStr | None = Field(
