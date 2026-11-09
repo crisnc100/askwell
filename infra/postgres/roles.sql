@@ -17,6 +17,24 @@ ALTER DEFAULT PRIVILEGES FOR ROLE ledgerline_owner IN SCHEMA public
     GRANT SELECT ON TABLES TO ledgerline_ro;
 ALTER ROLE ledgerline_ro SET default_transaction_read_only = on;
 
+-- The table-wide grant above covers every column, so re-apply the column restriction
+-- on users after it (the same list as RO_DENIED_COLUMNS in fieldservice/schema.py;
+-- a test keeps them equal). Skipped while users does not exist yet; `ledgerline seed`
+-- applies the same restriction when it creates the table.
+SELECT 'REVOKE ALL ON public.users FROM ledgerline_ro'
+WHERE to_regclass('public.users') IS NOT NULL
+\gexec
+SELECT format(
+    'GRANT SELECT (%s) ON public.users TO ledgerline_ro',
+    string_agg(quote_ident(column_name), ', ' ORDER BY ordinal_position)
+)
+FROM information_schema.columns
+WHERE table_schema = 'public'
+  AND table_name = 'users'
+  AND column_name NOT IN ('email', 'password_hash')
+HAVING count(*) > 0
+\gexec
+
 -- The app DB holds Ledgerline's own tables (the ask_log audit). The read-only role
 -- cannot even connect to it.
 SELECT 'CREATE DATABASE ledgerline_app OWNER ledgerline_owner'
