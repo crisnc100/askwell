@@ -50,10 +50,21 @@ def pg_ro() -> Iterator[Engine]:
 
 
 @pytest.fixture(scope="session")
-def pg_seeded(pg_ro: Engine, sqlite_fieldservice: Engine) -> Engine:
-    """`pg_ro`, after checking it holds exactly the current seed data."""
+def pg_owner() -> Iterator[Engine]:
+    """The fieldservice Postgres as the owner role (reads every column, for content checks)."""
+    engine = _connect_or_fail(get_settings().database_url)
+    yield engine
+    engine.dispose()
+
+
+@pytest.fixture(scope="session")
+def pg_seeded(pg_ro: Engine, pg_owner: Engine, sqlite_fieldservice: Engine) -> Engine:
+    """`pg_ro`, after checking the database holds exactly the current seed data.
+
+    The content hash is read as the owner: the read-only role is denied
+    users.email and users.password_hash, so it cannot read every column."""
     expected = content_hash(sqlite_fieldservice)
-    actual = content_hash(pg_ro)
+    actual = content_hash(pg_owner)
     if actual != expected:
         pytest.fail(f"{NOT_SEEDED}\nPostgres content {actual} != expected seed {expected}")
     return pg_ro
