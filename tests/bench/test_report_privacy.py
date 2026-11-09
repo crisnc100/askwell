@@ -1,6 +1,7 @@
 """Spider data never reaches committed files: refusal text is replaced by its reason code
-for Spider items, and committed reports, triage notes and docs contain no value from a
-Spider categorical column (checked against a committed hash list, so CI needs no data)."""
+for Spider items, and committed reports, triage notes, docs and the build folder contain
+no value from a Spider categorical column (checked against a committed hash list, so CI
+needs no data)."""
 
 from __future__ import annotations
 
@@ -19,6 +20,7 @@ SCANNED = [
     *sorted((ROOT / "evals" / "reports").glob("*.json")),
     *sorted((ROOT / "evals" / "triage").glob("*.yaml")),
     *sorted((ROOT / "docs").rglob("*.md")),
+    *sorted(p for p in (ROOT / "builds").rglob("*") if p.is_file()),
 ]
 
 
@@ -77,6 +79,27 @@ ALLOWED_PHRASES: dict[str, tuple[str, ...]] = {
     "docs/adr/ADR-005-replay-and-budget.md": ("a hard per-run budget", "the run stops hard"),
     "docs/adr/README.md": ("a hard per-run budget",),
     "docs/rerecord.md": ("is a hard cap",),
+    # builds/: the plan, prompts and archived grades use "hard" as a difficulty level or a
+    # budget word.
+    "builds/v01/context.md": ("a hard per-run budget",),
+    "builds/v01/bounce-prompt.md": ("a hard per-run budget",),
+    "builds/v01/bounce-p5-prompt.md": (
+        "a hard per-run budget",
+        "easy|medium|hard",
+        "a hard stop at",
+        "≥10 hard",
+    ),
+    "builds/v01/plan.md": ("easy|medium|hard", "a hard stop at", "≥10 hard"),
+    "builds/v01/grade-pr1-prompt.md": (">=10 hard",),
+    "builds/v01/grade-pr1.json": (">=10 hard", "including 12 hard"),
+    "builds/v01/recheck-pr1-prompt.md": (">=10 hard",),
+    "builds/v01/recheck-pr1.json": (">=10 hard", "including 12 hard"),
+    "builds/v01/log.md": (
+        "one shared hard budget",
+        "12 hard",
+        "174 hard",
+        "one hard budget",
+    ),
 }
 
 
@@ -109,3 +132,10 @@ def test_a_bare_value_is_caught_even_where_a_phrase_is_allowed() -> None:
     assert scan("evals/reports/x.md", "- spider:1: surface hard", forbidden)
     assert scan("docs/rerecord.md", "the surface was hard", forbidden)
     assert scan("docs/rerecord.md", "`--budget` is a hard cap", forbidden) == []
+
+
+def test_a_spider_value_in_a_builds_file_fails_the_scan() -> None:
+    forbidden = _forbidden()
+    assert scan("builds/v01/grade-pr9.json", '"evidence": "value hard"', forbidden)
+    assert scan("builds/v01/plan.md", "the court surface is hard", forbidden)
+    assert any("builds" in str(path) for path in SCANNED)

@@ -24,7 +24,7 @@
       "id": "SIMRPT",
       "criterion": "the report's first line states it is simulated with simulator and target model; notes state sql_agent not run, one target model, trials=1 with reasons; every Ledgerline miss is triaged (no untriaged); Spider items cited by ID only, with no Spider question text or data committed; Spider registries are unedited registry init output checked by hash.",
       "verdict": "FAIL",
-      "evidence": "Both reports start with '# Eval report'; their simulation banner naming claude-haiku-5-5 and openai/gpt-oss-120b is on line 3. Notes correctly explain the deferred baseline, single target and single trial. All 116 sim-1 misses are triaged. All five regenerated Spider registry hashes matched. However, committed sim-1.md:63 includes Spider breed values BUL, ESK and HUS, independently confirmed against the read-only Spider database. Line 61 and evals/triage/spider_dog_kennels.yaml:56 also include size data values."
+      "evidence": "Both reports start with '# Eval report'; their simulation banner naming claude-haiku-5-5 and openai/gpt-oss-120b is on line 3. Notes correctly explain the deferred baseline, single target and single trial. All 116 sim-1 misses are triaged. All five regenerated Spider registry hashes matched. However, committed sim-1.md:63 includes Spider breed values <spider value>, <spider value> and <spider value>, independently confirmed against the read-only Spider database. Line 61 and evals/triage/spider_dog_kennels.yaml:56 also include size data values."
     },
     {
       "id": "METRICS",
@@ -84,7 +84,7 @@
       "issue": "Reports commit Spider data through unrestricted refusal text and manually written notes despite excluding Spider recordings.",
       "file": "ledgerline/bench/report.py",
       "line": "154",
-      "evidence": "sim-1.md:63 commits BUL, ESK and HUS, which a read-only query confirmed are dog_kennels.breeds.breed_code values. These values enter report JSON and Markdown through the unfiltered refusal. The triage file also commits size codes and descriptions."
+      "evidence": "sim-1.md:63 commits <spider value>, <spider value> and <spider value>, which a read-only query confirmed are dog_kennels.breeds.breed_code values. These values enter report JSON and Markdown through the unfiltered refusal. The triage file also commits size codes and descriptions."
     },
     {
       "likelihood": 5,
