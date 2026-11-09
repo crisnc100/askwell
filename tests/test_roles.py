@@ -60,3 +60,41 @@ def test_roles_sql_denies_the_same_columns_as_the_seed() -> None:
     assert match is not None
     denied = {c.strip().strip("'") for c in match.group(1).split(",")}
     assert denied == set(RO_DENIED_COLUMNS["users"])
+
+
+def test_roles_sql_is_atomic_when_interrupted_after_the_table_wide_grant(
+    pg_seeded: Engine,
+) -> None:
+    """Fail roles.sql right after `GRANT SELECT ON ALL TABLES` (a psql test hook). The
+    grant must roll back with the rest, so the hidden columns stay denied."""
+    psql = shutil.which("psql")
+    if psql is None:
+        pytest.fail("psql is required to run infra/postgres/roles.sql (tests never skip)")
+    url = make_url(get_settings().database_url).set(drivername="postgresql")
+    ro_password = make_url(get_settings().database_ro_url).password or ""
+    result = subprocess.run(
+        [
+            psql,
+            url.render_as_string(hide_password=False),
+            "-q",
+            "-v",
+            "ON_ERROR_STOP=1",
+            "-v",
+            f"ro_password={ro_password}",
+            "-v",
+            "ledgerline_test_fail_after_grant=1",
+            "-f",
+            str(ROLES_SQL),
+        ],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode != 0
+    assert "division by zero" in result.stderr
+    for column in sorted(RO_DENIED_COLUMNS["users"]):
+        with (
+            pg_seeded.connect() as conn,
+            pytest.raises(ProgrammingError, match="permission denied"),
+        ):
+            conn.execute(text(f"SELECT {column} FROM users"))

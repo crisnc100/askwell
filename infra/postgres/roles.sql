@@ -8,11 +8,19 @@ WHERE NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'ledgerline_ro')
 \gexec
 
 -- SELECT only: no CREATE, no writes, read-only transactions by default.
+-- Everything from here to COMMIT is one transaction: the table-wide GRANT below briefly
+-- covers users.email and users.password_hash until the column restriction is re-applied,
+-- and no other session may ever see that state, nor may an interrupted run leave it.
+BEGIN;
 SELECT format('GRANT CONNECT ON DATABASE %I TO ledgerline_ro', current_database())
 \gexec
 REVOKE CREATE ON SCHEMA public FROM PUBLIC;
 GRANT USAGE ON SCHEMA public TO ledgerline_ro;
 GRANT SELECT ON ALL TABLES IN SCHEMA public TO ledgerline_ro;
+-- Test hook (tests/test_roles.py): fail right after the table-wide grant.
+\if :{?ledgerline_test_fail_after_grant}
+SELECT 1 / 0 AS injected_failure_after_grant;
+\endif
 ALTER DEFAULT PRIVILEGES FOR ROLE ledgerline_owner IN SCHEMA public
     GRANT SELECT ON TABLES TO ledgerline_ro;
 ALTER ROLE ledgerline_ro SET default_transaction_read_only = on;
@@ -34,6 +42,7 @@ WHERE table_schema = 'public'
   AND column_name NOT IN ('email', 'password_hash')
 HAVING count(*) > 0
 \gexec
+COMMIT;
 
 -- The app DB holds Ledgerline's own tables (the ask_log audit). The read-only role
 -- cannot even connect to it.
