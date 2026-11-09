@@ -8,3 +8,4 @@ node_modules/
 data/
 coverage.json
 .coverage
+builds/**/*.txt
