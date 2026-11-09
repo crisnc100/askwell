@@ -178,3 +178,25 @@ def test_a_complete_last_line_missing_its_newline_is_kept(tmp_path: Path) -> Non
     done, spent = checkpoint.load()
     assert sorted(done) == ["q0", "q1"]
     assert spent == pytest.approx(0.3)
+
+
+def test_deferred_items_are_not_checkpointed_and_run_later(tmp_path: Path) -> None:
+    from ledgerline.llm.budget import ItemDeferred
+
+    checkpoint = Checkpoint(tmp_path / "run.jsonl")
+    ready = {"q0", "q2"}
+
+    def work(item: str, guard: BudgetGuard) -> ItemResult:
+        if item not in ready:
+            raise ItemDeferred(item)
+        return ItemResult(record={"id": item}, cost_usd=0.0)
+
+    first = run_checkpointed(ITEMS[:4], str, work, checkpoint, budget_usd=1)
+    assert first.deferred == 2
+    assert first.is_partial
+    assert [r["id"] for r in first.records] == ["q0", "q2"]
+    ready.update({"q1", "q3"})
+    second = run_checkpointed(ITEMS[:4], str, work, checkpoint, budget_usd=1)
+    assert second.deferred == 0
+    assert second.resumed == 2
+    assert [r["id"] for r in second.records] == ITEMS[:4]

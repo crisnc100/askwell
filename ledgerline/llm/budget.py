@@ -19,6 +19,11 @@ from typing import Any
 from ledgerline.llm.errors import BudgetExceededError, RateLimitedError
 
 
+class ItemDeferred(Exception):  # noqa: N818 - a signal, not an error
+    """Raised by `work` when an item cannot finish yet (e.g. its model request was
+    exported for a simulated answer). The item is not checkpointed; a later run retries."""
+
+
 class BudgetGuard:
     def __init__(self, limit_usd: float, spent_usd: float = 0.0) -> None:
         if limit_usd < 0:
@@ -139,6 +144,7 @@ class RunOutcome:
     newly_completed: int = 0
     total_items: int = 0
     spent_usd: float = 0.0
+    deferred: int = 0
     aborted: bool = False
     abort_reason: str | None = None
 
@@ -182,6 +188,10 @@ def run_checkpointed[T](
             outcome.aborted = True
             outcome.abort_reason = str(exc)
             break
+        except ItemDeferred:
+            _record_unfinished_spend(checkpoint, item_key, guard.spent_usd - spent_before)
+            outcome.deferred += 1
+            continue
         except BaseException:
             _record_unfinished_spend(checkpoint, item_key, guard.spent_usd - spent_before)
             raise

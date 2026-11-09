@@ -76,9 +76,18 @@ def load_schemas(settings: Settings, path: Path = SCHEMAS_FILE) -> dict[str, Sch
     return out
 
 
-def build_gateway(settings: Settings, mode: str | None = None) -> Gateway:
+def build_gateway(
+    settings: Settings,
+    mode: str | None = None,
+    *,
+    store_path: Path | None = None,
+    pending_dir: Path | None = None,
+    budget_usd: float | None = None,
+) -> Gateway:
+    """A gateway for `mode`. The eval passes its own store and pending directory so each
+    schema and system keeps separate recordings."""
     chosen = mode or settings.llm_mode
-    store = ReplayStore(ROOT / settings.replay_dir / RECORDINGS_FILE)
+    store = ReplayStore(store_path or ROOT / settings.replay_dir / RECORDINGS_FILE)
     if chosen in ("replay", "export"):
         return Gateway(
             mode=chosen,  # type: ignore[arg-type]
@@ -87,7 +96,7 @@ def build_gateway(settings: Settings, mode: str | None = None) -> Gateway:
             price_lookup=lambda _m: None,
             guard=None,
             max_tokens=settings.max_tokens,
-            pending_dir=ROOT / settings.pending_dir,
+            pending_dir=pending_dir or ROOT / settings.pending_dir,
         )
     book = PriceBook.fetch(settings.openrouter_base_url)
     return Gateway(
@@ -95,7 +104,7 @@ def build_gateway(settings: Settings, mode: str | None = None) -> Gateway:
         store=store,
         transport=OpenRouterTransport(settings),
         price_lookup=book.get,
-        guard=BudgetGuard(settings.ask_budget_usd),
+        guard=BudgetGuard(budget_usd if budget_usd is not None else settings.ask_budget_usd),
         max_tokens=settings.max_tokens,
     )
 
@@ -165,6 +174,8 @@ class AskService:
         self.gateway = gateway
         self.audit = audit
         self.model = chosen
+        # The API gives each ask its own budget; an eval run shares one guard instead.
+        self.reset_budget_per_ask = True
         self._registries: dict[str, Registry] = {}
         self._engines: dict[str, Engine] = {}
 
@@ -185,29 +196,43 @@ class AskService:
             self._engines[schema_id] = readonly_engine(self.schemas[schema_id].db_url)
         return self._engines[schema_id]
 
+    def use_engine(self, schema_id: str, engine: Engine) -> None:
+        """Share an engine the caller already opened (the eval reuses one per schema)."""
+        self._engines[schema_id] = engine
+
     def close(self) -> None:
         for engine in self._engines.values():
             engine.dispose()
         self._engines.clear()
 
-    def ask(self, schema_id: str, question: str) -> AskResult:
+    def ask(
+        self,
+        schema_id: str,
+        question: str,
+        *,
+        trial: int = 1,
+        context: dict[str, Any] | None = None,
+    ) -> AskResult:
+        """Answer one question. `trial` > 1 asks again as an independent sample: it is
+        part of the prompt version, so it gets its own recording."""
         registry = self.registry(schema_id)
         config = self.schemas[schema_id]
         trace_id = str(uuid.uuid4())
         view = registry_view(registry, self.settings.now, self.settings.prompt_budget_chars)
         for step in view.truncation:
             log.info("prompt truncation for %s: %s", schema_id, step)
-        if self.gateway.mode in ("live", "record"):
+        if self.gateway.mode in ("live", "record") and self.reset_budget_per_ask:
             self.gateway.guard = BudgetGuard(self.settings.ask_budget_usd)
-        context = {"schema_id": schema_id, "question": question}
+        prompt_version = PROMPT_VERSION if trial == 1 else f"{PROMPT_VERSION}+trial{trial}"
+        request_context = {"schema_id": schema_id, "question": question, **(context or {})}
 
         def interpret(messages: list[ChatMessage]) -> LLMResult[Intent]:
             return self.gateway.complete(
                 model=self.model,
-                prompt_version=PROMPT_VERSION,
+                prompt_version=prompt_version,
                 messages=messages,
                 schema=Intent,
-                context=context,
+                context=request_context,
             )
 
         def check(intent: Intent) -> ValidationResult:
