@@ -61,6 +61,7 @@ ErrorCode = Literal[
     "unknown_metric",
     "invalid_alias",
     "duplicate_alias",
+    "alias_collision",
     "invalid_order_by",
     "limit_out_of_range",
 ]
@@ -654,7 +655,9 @@ class _Validator:
             high = date.fromordinal(end.date().toordinal() + 1)
         return [Predicate(rfield, "gte", (low,)), Predicate(rfield, "lt", (high,))]
 
-    def check_metrics(self) -> list[PlanMetric]:
+    def check_metrics(self, group_labels: set[str]) -> list[PlanMetric]:
+        """Metric labels must be unique and must not reuse a group_by label: a metric
+        labelled like a group would shadow it in HAVING and ORDER BY."""
         out: list[PlanMetric] = []
         labels: set[str] = set()
         for index, metric in enumerate(self.intent.metrics):
@@ -683,11 +686,18 @@ class _Validator:
                     self.fail("invalid_alias", f"{loc}.alias", f"{metric.alias!r} is not a slug")
                     continue
                 label = metric.alias
+                if label in group_labels:
+                    self.fail(
+                        "alias_collision",
+                        f"{loc}.alias",
+                        f"{label!r} is already a group_by label",
+                    )
+                    continue
             else:
                 label = metric.agg if rfield is None else f"{metric.agg}_{rfield.name}"
                 suffix = 2
                 base_label = label
-                while label in labels:
+                while label in labels or label in group_labels:
                     label = f"{base_label}_{suffix}"
                     suffix += 1
             if label in labels:
@@ -710,6 +720,9 @@ class _Validator:
                 self.fail("grain_type", loc, f"{group.grain} needs a date field")
                 continue
             label = rfield.label if group.grain is None else f"{rfield.label}_{group.grain}"
+            if label in {g.label for g in out}:
+                self.fail("alias_collision", loc, f"{group.field} is grouped twice")
+                continue
             out.append(PlanGroup(label, rfield, group.grain))
         return out
 
@@ -789,10 +802,10 @@ class _Validator:
             resolved = self.resolve(ref, f"select[{index}]")
             if resolved is not None:
                 select.append(resolved[0])
-        metrics = self.check_metrics()
+        groups = self.check_group_by()
+        metrics = self.check_metrics({g.label for g in groups})
         where = self.check_filters()
         where_dates = self.check_date_range(where)
-        groups = self.check_group_by()
         having = self.check_having(metrics)
         order = self.check_order(metrics, groups)
         limit = self.check_limit()
