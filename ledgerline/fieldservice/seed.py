@@ -15,7 +15,7 @@ from decimal import ROUND_HALF_UP, Decimal
 from typing import Any
 
 from faker import Faker
-from sqlalchemy import Engine, Table, select, text
+from sqlalchemy import Connection, Engine, Table, select, text
 
 from ledgerline.fieldservice import schema
 
@@ -399,8 +399,22 @@ def load(engine: Engine, dataset: Dataset, ro_role: str | None = "ledgerline_ro"
                 text("SELECT 1 FROM pg_roles WHERE rolname = :r"), {"r": ro_role}
             ).first()
             if exists:
-                names = ", ".join(t.name for t in schema.TABLES_IN_LOAD_ORDER)
-                conn.execute(text(f'GRANT SELECT ON {names} TO "{ro_role}"'))
+                _grant_readonly(conn, ro_role)
+
+
+def _grant_readonly(conn: Connection, ro_role: str) -> None:
+    """SELECT on every table, except column-level SELECT on tables with denied columns.
+
+    A table-level grant would cover every column, so those tables get the table grant
+    revoked and a column list granted instead."""
+    for table in schema.TABLES_IN_LOAD_ORDER:
+        denied = schema.RO_DENIED_COLUMNS.get(table.name, frozenset())
+        conn.execute(text(f'REVOKE ALL ON "{table.name}" FROM "{ro_role}"'))
+        if not denied:
+            conn.execute(text(f'GRANT SELECT ON "{table.name}" TO "{ro_role}"'))
+            continue
+        allowed = ", ".join(f'"{c.name}"' for c in table.columns if c.name not in denied)
+        conn.execute(text(f'GRANT SELECT ({allowed}) ON "{table.name}" TO "{ro_role}"'))
 
 
 def content_hash(engine: Engine) -> str:

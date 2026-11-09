@@ -128,3 +128,9 @@ TABLES_IN_LOAD_ORDER = [
     invoices,
     users,
 ]
+
+# Columns the read-only role may not SELECT at all (defence in depth: the registry
+# already hides them, and the database refuses them even if a query asks).
+RO_DENIED_COLUMNS: dict[str, frozenset[str]] = {
+    "users": frozenset({"email", "password_hash"}),
+}

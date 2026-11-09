@@ -37,6 +37,14 @@ class Settings(BaseSettings):
         "postgresql+psycopg://ledgerline_ro:ledgerline_ro@localhost:56432/ledgerline"
     )
 
+    # The app DB: Ledgerline's own tables (the ask_log audit), never the data DB.
+    # Local compose dev credential (audited in .secrets.baseline).
+    app_database_url: str = (
+        "postgresql+psycopg://ledgerline_owner:ledgerline@localhost:56432/ledgerline_app"
+    )
+    row_cap: int = 1000
+    query_timeout_s: float = 5.0
+
     openrouter_api_key: SecretStr | None = Field(
         default=None,
         validation_alias=AliasChoices("OPENROUTER_API_KEY", "LEDGERLINE_OPENROUTER_API_KEY"),
