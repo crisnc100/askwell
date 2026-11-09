@@ -31,6 +31,45 @@
     }
   ],
   "deferred": {},
+  "floors": [
+    {
+      "cause": "For questions the intent grammar cannot express, the stand-in model often answers a nearby question instead of refusing. Example: asked for a percentage, it returned a count per status. Each such answer is a wrong answer, not a refusal.",
+      "checks": [
+        {
+          "met": false,
+          "metric": "execution_accuracy",
+          "rate": {
+            "ci95": [
+              0.6225547970219101,
+              0.8684632152061551
+            ],
+            "n": 33,
+            "of": 43,
+            "rate": 0.7674418604651163
+          },
+          "rule": ">= 80%"
+        },
+        {
+          "met": false,
+          "metric": "wrong_answer_rate_given_answered",
+          "rate": {
+            "ci95": [
+              0.05753867690120133,
+              0.2732685944229131
+            ],
+            "n": 5,
+            "of": 38,
+            "rate": 0.13157894736842105
+          },
+          "rule": "<= 5%"
+        }
+      ],
+      "met": false,
+      "next": "v0.2 changes the prompt to refuse first when a question needs something the grammar lacks, then measures it on a fresh run. The v0.1 prompt is not changed after seeing these results.",
+      "schema": "fieldservice",
+      "status_note": "in v0.1 (simulated run)"
+    }
+  ],
   "misses": [
     {
       "error": null,
@@ -213,7 +252,7 @@
       "items": 67,
       "mean_cost_usd": 0.0,
       "model": "openai/gpt-oss-120b",
-      "p50_latency_ms": 5.080290953628719,
+      "p50_latency_ms": 5.48891699872911,
       "pending": 0,
       "refusal_recall": {
         "ci95": [
@@ -286,7 +325,7 @@
       "items": 67,
       "mean_cost_usd": 0.0,
       "model": "openai/gpt-oss-120b",
-      "p50_latency_ms": 1.5854170778766274,
+      "p50_latency_ms": 1.6309591010212898,
       "pending": 0,
       "refusal_recall": {
         "ci95": [

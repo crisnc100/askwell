@@ -20,6 +20,11 @@ from ledgerline.bench.run import RunResult
 
 REPORTS_DIR = ROOT / "evals" / "reports"
 TRIAGE_DIR = ROOT / "evals" / "triage"
+FLOORS_FILE = ROOT / "evals" / "floors.yaml"
+METRIC_LABELS = {
+    "execution_accuracy": "Execution accuracy",
+    "wrong_answer_rate_given_answered": "Wrong answers among answered",
+}
 TRIAGE_TAGS = ("grammar_gap", "misread", "validator_false_reject", "builder_bug", "gold_issue")
 
 
@@ -33,6 +38,42 @@ def load_triage(schema_id: str) -> dict[str, dict[str, str]]:
         if entry.get("tag") not in TRIAGE_TAGS:
             raise ValueError(f"{path.name}: {item_id} has tag {entry.get('tag')!r}")
     return data
+
+
+def floor_checks(table: list[dict[str, Any]], path: Path | None = None) -> list[dict[str, Any]]:
+    """Each schema's floors from `evals/floors.yaml`, checked on the Ledgerline row."""
+    source = path or FLOORS_FILE
+    if not source.exists():
+        return []
+    config: dict[str, Any] = yaml.safe_load(source.read_text()) or {}
+    out: list[dict[str, Any]] = []
+    for schema_id, entry in config.items():
+        row = next(
+            (r for r in table if r["schema"] == schema_id and r["system"] == "ledgerline"), None
+        )
+        if row is None:
+            continue
+        checks = []
+        for metric, bound in entry["floors"].items():
+            value = row[metric]["rate"]
+            if "min" in bound:
+                ok = value is not None and value >= bound["min"]
+                rule = f">= {bound['min'] * 100:.0f}%"
+            else:
+                ok = value is not None and value <= bound["max"]
+                rule = f"<= {bound['max'] * 100:.0f}%"
+            checks.append({"metric": metric, "rule": rule, "rate": row[metric], "met": ok})
+        out.append(
+            {
+                "schema": schema_id,
+                "met": all(c["met"] for c in checks),
+                "checks": checks,
+                "status_note": entry.get("status_note"),
+                "cause": entry.get("cause"),
+                "next": entry.get("next"),
+            }
+        )
+    return out
 
 
 def simulation_note(records: list[dict[str, Any]]) -> str | None:
@@ -143,6 +184,7 @@ def build(result: RunResult) -> dict[str, Any]:
         "spent_usd": result.spent_usd,
         "registry_hashes": result.registry_hashes,
         "table": table,
+        "floors": floor_checks(table),
         "misses": misses,
         "baseline_wins": wins,
     }
@@ -181,6 +223,20 @@ def render_markdown(report: dict[str, Any]) -> str:
             f"| {_pct(row['wrong_answer_rate_given_answered'])} | {_pct(row['refusal_recall'])} "
             f"| {_pct(row['execution_error_rate'])} |"
         )
+    for floor in report.get("floors", []):
+        verdict = "met" if floor["met"] else "not met"
+        lines += ["", f"## Floor check: {floor['schema']} (plan.md L11)", ""]
+        for check in floor["checks"]:
+            mark = "met" if check["met"] else "NOT met"
+            label = METRIC_LABELS.get(check["metric"], check["metric"])
+            lines.append(f"- {label} {check['rule']}: {_pct(check['rate'])}, {mark}")
+        lines.append("")
+        note = f" {floor['status_note']}" if floor["status_note"] else ""
+        lines.append(f"Result: **{verdict}**{note}.")
+        if floor["cause"]:
+            lines.append(f"Why: {floor['cause']}")
+        if floor["next"]:
+            lines.append(f"Next: {floor['next']}")
     lines += ["", "## Ledgerline misses", ""]
     if not report["misses"]:
         lines.append("None.")

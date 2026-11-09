@@ -1,0 +1,16 @@
+# Acceptance floors (plan.md L11), checked by the eval report for Ledgerline.
+# The report computes met / not met from the numbers. `status_note`, `cause` and `next`
+# are the written explanation for the current release.
+fieldservice:
+  floors:
+    execution_accuracy: {min: 0.80}
+    wrong_answer_rate_given_answered: {max: 0.05}
+  status_note: in v0.1 (simulated run)
+  cause: >-
+    For questions the intent grammar cannot express, the stand-in model often answers a
+    nearby question instead of refusing. Example: asked for a percentage, it returned a
+    count per status. Each such answer is a wrong answer, not a refusal.
+  next: >-
+    v0.2 changes the prompt to refuse first when a question needs something the grammar
+    lacks, then measures it on a fresh run. The v0.1 prompt is not changed after seeing
+    these results.
