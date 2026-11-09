@@ -44,3 +44,15 @@ def test_empty_results() -> None:
     assert results_match([], [], ordered=False)
     assert not results_match([(1,)], [], ordered=False)
     assert not results_match([], [(1,)], ordered=False)
+
+
+def test_a_midnight_datetime_equals_the_same_date() -> None:
+    """Postgres date_trunc on a DATE returns a midnight timestamp (with time zone); a
+    builder that casts to DATE returns the date. Same value, different representation."""
+    from datetime import UTC
+
+    month = date(2025, 1, 1)
+    assert results_match([(month, 1)], [(datetime(2025, 1, 1, tzinfo=UTC), 1)], ordered=True)
+    assert results_match([(month,)], [(datetime(2025, 1, 1),)], ordered=True)
+    assert results_match([("2025-01-01 00:00:00",)], [(month,)], ordered=True)
+    assert not results_match([(month,)], [(datetime(2025, 1, 1, 0, 0, 1),)], ordered=True)
