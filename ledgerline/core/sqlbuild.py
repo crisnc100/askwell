@@ -257,10 +257,16 @@ def _metric(tables: _Tables, metric: PlanMetric) -> ColumnElement[Any]:
     return getattr(func, metric.agg)(arg)
 
 
+def _threshold(value: float) -> ColumnElement[Any]:
+    """A HAVING threshold, bound as NUMERIC whatever the aggregate's type: binding it
+    with count()'s INTEGER type would cast 1.5 to 2 on Postgres."""
+    return bindparam(None, value, type_=Numeric(asdecimal=False))
+
+
 def _compare(expr: ColumnElement[Any], op: str, values: tuple[float, ...]) -> ColumnElement[bool]:
     if op == "between":
-        return expr.between(_bind(values[0], expr), _bind(values[1], expr))
-    value = _bind(values[0], expr)
+        return expr.between(_threshold(values[0]), _threshold(values[1]))
+    value = _threshold(values[0])
     comparisons = {
         "eq": expr == value,
         "neq": expr != value,
