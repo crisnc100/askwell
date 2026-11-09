@@ -73,3 +73,17 @@ def test_retry_messages_feed_back_the_typed_errors() -> None:
     assert "unknown_field at select[0]: no field 'x' on parts" in retry[3].content
     parse = retry_messages(first, "oops", [], "not JSON")
     assert "not a valid intent: not JSON" in parse[3].content
+
+
+def test_relationships_with_a_hidden_endpoint_are_not_shown() -> None:
+    registry = load_registry(FIELDSERVICE_REGISTRY)
+    entities = dict(registry.entities)
+    invoices = entities["invoices"]
+    fields = dict(invoices.fields)
+    fields["work_order_id"] = fields["work_order_id"].model_copy(update={"hidden": True})
+    entities["invoices"] = invoices.model_copy(update={"fields": fields})
+    hidden = registry.model_copy(update={"entities": entities})
+    view = registry_view(hidden, NOW, 16000)
+    assert "work_order_id" not in view.text.split("Relationships")[1].split("work_order_parts")[0]
+    assert "- invoices.work_order_id -> work_orders.id" not in view.text
+    assert "- work_orders.site_id -> sites.id" in view.text

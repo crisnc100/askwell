@@ -95,7 +95,7 @@ def test_export_import_replay_score_report(isolated: Path, pg_seeded: Engine) ->
     assert any(n.startswith("One target model (target/model)") for n in report["notes"])
     assert any(n.startswith("Trials: 1.") for n in report["notes"])
     md = report_module.render_markdown(report)
-    assert md.splitlines()[2].startswith("> **Model responses simulated by fixture")
+    assert md.splitlines()[0].startswith("> **Model responses simulated by fixture")
     assert "| fieldservice | ledgerline | target/model | 1 |" in md
 
     # Resuming the same run finishes nothing new and keeps every record.

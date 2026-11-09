@@ -134,3 +134,20 @@ def test_export_mode_needs_a_pending_dir(tmp_path: Path) -> None:
             guard=None,
             max_tokens=1,
         )
+
+
+def test_an_answer_that_breaks_the_response_schema_is_rejected_and_kept(tmp_path: Path) -> None:
+    from ledgerline.llm.simulate import import_answers_report
+
+    with pytest.raises(PendingRequestError) as info:
+        _complete(_gateway("export", tmp_path))
+    key = info.value.key
+    _answer(tmp_path, key, simulated_by="claude-test", response={})  # `choice` is required
+    store = ReplayStore(tmp_path / "store.jsonl")
+    report = import_answers_report(tmp_path / "pending", store)
+    assert report.imported == []
+    assert [r.key for r in report.rejected] == [key]
+    assert "choice" in report.rejected[0].reason
+    assert key not in store
+    assert (tmp_path / "pending" / f"{key}.json").exists()
+    assert answer_path(tmp_path / "pending", key).exists()

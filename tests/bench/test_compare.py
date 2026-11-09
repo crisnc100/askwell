@@ -56,3 +56,18 @@ def test_a_midnight_datetime_equals_the_same_date() -> None:
     assert results_match([(month,)], [(datetime(2025, 1, 1),)], ordered=True)
     assert results_match([("2025-01-01 00:00:00",)], [(month,)], ordered=True)
     assert not results_match([(month,)], [(datetime(2025, 1, 1, 0, 0, 1),)], ordered=True)
+
+
+def test_numbers_match_within_the_1e6_tolerance_on_both_sides_of_a_rounding_edge() -> None:
+    # 1.00000051 and 1.00000049 differ by 2e-8 but round to different 6-decimal values.
+    assert results_match([(1.00000051,)], [(Decimal("1.00000049"),)], ordered=False)
+    assert results_match([(1.00000049,)], [(Decimal("1.00000051"),)], ordered=True)
+    assert results_match([(2.0000005,)], [(2.0000014,)], ordered=False)  # 9e-7 apart
+    assert not results_match([(2.0,)], [(2.0000021,)], ordered=False)  # 2.1e-6 apart
+    # Large sums: float error stays within tolerance.
+    assert results_match([(1369087.86,)], [(Decimal("1369087.8600000001"),)], ordered=False)
+    # Multisets still pair rows correctly when values are within tolerance.
+    got = [("a", 1.00000051), ("b", 5.0)]
+    gold = [("b", Decimal("5.0000004")), ("a", Decimal("1.00000049"))]
+    assert results_match(got, gold, ordered=False)
+    assert not results_match([("a", 1.0), ("b", 5.0)], [("a", 5.0), ("b", 1.0)], ordered=False)
