@@ -90,3 +90,25 @@ def test_multiset_pairs_rows_whose_numbers_sort_differently() -> None:
     many_got = [(i * 1e-7, i % 3) for i in range(9)]
     many_gold = [((8 - i) * 1e-7, (8 - i) % 3) for i in range(9)]
     assert results_match(many_got, many_gold, ordered=False)
+
+
+def _brute_force(got: list[tuple[float, int]], gold: list[tuple[float, int]]) -> bool:
+    from itertools import permutations as perms
+
+    if len(got) != len(gold):
+        return False
+    return any(
+        all(abs(a[0] - b[0]) <= 1e-6 and a[1] == b[1] for a, b in zip(got, order, strict=True))
+        for order in perms(gold)
+    )
+
+
+def test_multiset_matching_agrees_with_brute_force() -> None:
+    import random
+
+    rng = random.Random(7)  # noqa: S311 - seeded test data, not security
+    for _ in range(400):
+        n = rng.randint(1, 6)
+        got = [(rng.randint(0, 5) * 4e-7, rng.randint(0, 1)) for _ in range(n)]
+        gold = [(rng.randint(0, 5) * 4e-7, rng.randint(0, 1)) for _ in range(n)]
+        assert results_match(got, gold, ordered=False) == _brute_force(got, gold), (got, gold)

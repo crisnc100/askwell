@@ -3,8 +3,8 @@
 - Compare only as many columns as the gold has. A result with extra columns still
   matches if some of its columns, in any order, hold exactly the gold columns' values.
 - Rows compare as a multiset, or as a sequence when the gold query has ORDER BY.
-- Numbers compare as floats and match within 1e-6 (absolute; 1e-9 relative for very
-  large sums). NULL never equals 0.
+- Numbers compare as floats and match when they differ by at most 1e-6 (absolute, as
+  plan.md defines). NULL never equals 0.
 - Dates and datetimes compare as ISO text, so SQLite's date strings match Postgres dates,
   and a datetime at exactly midnight UTC matches the same date.
 - The gold is cut to the same row cap as the system's answer.
@@ -13,15 +13,15 @@
 from __future__ import annotations
 
 import math
-from collections import Counter, defaultdict
+from bisect import bisect_left, bisect_right
+from collections import defaultdict
 from collections.abc import Sequence
 from datetime import UTC, date, datetime
 from decimal import Decimal
 from itertools import permutations
 from typing import Any
 
-ABS_TOLERANCE = 1e-6
-REL_TOLERANCE = 1e-9
+TOLERANCE = 1e-6
 MAX_COLUMN_ORDERS = 5000
 
 Cell = tuple[str, Any]
@@ -73,7 +73,7 @@ def _close(a: Row, b: Row) -> bool:
         if kind_a != kind_b:
             return False
         if kind_a == "num":
-            if not math.isclose(x, y, rel_tol=REL_TOLERANCE, abs_tol=ABS_TOLERANCE):
+            if abs(x - y) > TOLERANCE:
                 return False
         elif x != y:
             return False
@@ -85,8 +85,66 @@ def _signature(row: Row) -> tuple[Any, ...]:
     return tuple((kind, None if kind == "num" else value) for kind, value in row)
 
 
-def _numbers(row: Row) -> tuple[float, ...]:
-    return tuple(value for kind, value in row if kind == "num")
+def _candidate_edges(left: list[Row], right: list[Row]) -> list[list[int]]:
+    """For each left row, the right rows it can pair with. Rows are first narrowed by their
+    first number (a sorted window of +-tolerance), so large results stay fast."""
+    numeric = [i for i, (kind, _) in enumerate(left[0]) if kind == "num"] if left else []
+    if not numeric:
+        return [[j for j, r in enumerate(right) if _close(row, r)] for row in left]
+    col = numeric[0]
+    order = sorted(range(len(right)), key=lambda j: right[j][col][1])
+    keys = [right[j][col][1] for j in order]
+    edges: list[list[int]] = []
+    for row in left:
+        x = row[col][1]
+        lo = bisect_left(keys, x - TOLERANCE)
+        hi = bisect_right(keys, x + TOLERANCE)
+        edges.append([order[k] for k in range(lo, hi) if _close(row, right[order[k]])])
+    return edges
+
+
+def _pair_all(left: list[Row], right: list[Row]) -> bool:
+    """Can every row in `left` be paired with its own row in `right` within tolerance?
+
+    A bipartite matching (augmenting paths), so the answer never depends on how the rows
+    happen to sort. Pairing exact duplicates first would be wrong: (4e-7, 0) may be
+    needed for a 1.2e-6 row while its exact twin pairs elsewhere."""
+    rest_left, rest_right = left, right
+    if len(rest_left) != len(rest_right):
+        return False
+    edges = _candidate_edges(rest_left, rest_right)
+    owner: list[int | None] = [None] * len(rest_right)  # right index -> left index
+    for start in range(len(rest_left)):
+        # Breadth-first search for an augmenting path from `start` (no recursion, so
+        # a thousand rows cannot hit Python's recursion limit).
+        came_from: dict[int, int] = {}  # right index -> the left index that reached it
+        frontier = [start]
+        found: int | None = None
+        while frontier and found is None:
+            following: list[int] = []
+            for i in frontier:
+                for j in edges[i]:
+                    if j in came_from:
+                        continue
+                    came_from[j] = i
+                    if owner[j] is None:
+                        found = j
+                        break
+                    following.append(owner[j])  # type: ignore[arg-type]
+                if found is not None:
+                    break
+            frontier = following
+        if found is None:
+            return False
+        j = found
+        while True:  # flip the path back to `start`
+            i = came_from[j]
+            previous = next((k for k, o in enumerate(owner) if o == i), None)
+            owner[j] = i
+            if i == start or previous is None:
+                break
+            j = previous
+    return True
 
 
 def _same(a: list[Row], b: list[Row], ordered: bool) -> bool:
@@ -100,17 +158,9 @@ def _same(a: list[Row], b: list[Row], ordered: bool) -> bool:
         groups_a[_signature(row)].append(row)
     for row in b:
         groups_b[_signature(row)].append(row)
-    if Counter({k: len(v) for k, v in groups_a.items()}) != Counter(
-        {k: len(v) for k, v in groups_b.items()}
-    ):
+    if {k: len(v) for k, v in groups_a.items()} != {k: len(v) for k, v in groups_b.items()}:
         return False
-    # Within a signature, pair rows in numeric order; within-tolerance values sort alike.
-    for key, rows_a in groups_a.items():
-        left = sorted(rows_a, key=_numbers)
-        right = sorted(groups_b[key], key=_numbers)
-        if not all(_close(x, y) for x, y in zip(left, right, strict=True)):
-            return False
-    return True
+    return all(_pair_all(rows, groups_b[key]) for key, rows in groups_a.items())
 
 
 def results_match(
