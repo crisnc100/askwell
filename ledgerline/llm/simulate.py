@@ -9,15 +9,20 @@ would and writes `<pending>/<key>.answer.json`:
      "response_text": "..."        # raw text, when the answer is not a JSON object
 
 `import_answers` loads the answers into the replay store with provenance
-`{"simulated_by", "standing_in_for"}`. This module never invents an answer.
+`{"simulated_by", "standing_in_for"}`. A "response" must validate against the request's
+response schema; one that does not is rejected, left on disk and reported. A
+"response_text" answer claims no schema and replays as a parse error. This module never
+invents an answer.
 """
 
 from __future__ import annotations
 
 import json
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
+
+from pydantic import BaseModel, ValidationError
 
 from ledgerline.llm.errors import LLMError
 from ledgerline.llm.replay import ReplayStore
@@ -86,6 +91,42 @@ def pending_requests(pending_dir: Path) -> list[Path]:
     return sorted(p for p in pending_dir.glob("*.json") if not p.name.endswith(".answer.json"))
 
 
+_RESPONSE_MODELS: dict[str, type[BaseModel]] = {}
+
+
+def register_response_model(model: type[BaseModel]) -> None:
+    """Make `model` available to validate imported answers whose request named it."""
+    _RESPONSE_MODELS[model.__name__] = model
+
+
+def _schema_problem(request: dict[str, Any], response: Any) -> str | None:
+    name = str(request.get("response_schema_name", ""))
+    model = _RESPONSE_MODELS.get(name)
+    if model is None:
+        return f"no response model named {name!r} is registered"
+    if model.model_json_schema() != request.get("response_schema"):
+        return f"the request's {name} schema differs from the current one; re-export it"
+    try:
+        model.model_validate(response)
+    except ValidationError as exc:
+        first = exc.errors()[0]
+        where = ".".join(str(part) for part in first["loc"]) or "(root)"
+        return f"does not match {name}: {where}: {first['msg']}"
+    return None
+
+
+@dataclass(frozen=True)
+class Rejected:
+    key: str
+    reason: str
+
+
+@dataclass
+class ImportReport:
+    imported: list[Imported] = field(default_factory=list["Imported"])
+    rejected: list[Rejected] = field(default_factory=list[Rejected])
+
+
 @dataclass(frozen=True)
 class Imported:
     key: str
@@ -94,8 +135,17 @@ class Imported:
 
 
 def import_answers(pending_dir: Path, store: ReplayStore, *, remove: bool = True) -> list[Imported]:
-    """Load every answered pending request into `store`. Unanswered requests stay put."""
-    imported: list[Imported] = []
+    """Load every valid answer into `store` and return what was imported."""
+    return import_answers_report(pending_dir, store, remove=remove).imported
+
+
+def import_answers_report(
+    pending_dir: Path, store: ReplayStore, *, remove: bool = True
+) -> ImportReport:
+    """Load every answered pending request into `store`. Unanswered requests stay put;
+    answers that break their response schema are rejected and stay put too."""
+    report = ImportReport()
+    imported = report.imported
     for request_file in pending_requests(pending_dir):
         request = json.loads(request_file.read_text(encoding="utf-8"))
         key = str(request["key"])
@@ -116,6 +166,10 @@ def import_answers(pending_dir: Path, store: ReplayStore, *, remove: bool = True
             )
         if has_object:
             response = answer["response"]
+            problem = _schema_problem(request, response)
+            if problem is not None:
+                report.rejected.append(Rejected(key, problem))
+                continue
             content = json.dumps(response, ensure_ascii=False)
             parsed = response if isinstance(response, dict) else None
         else:
@@ -138,4 +192,4 @@ def import_answers(pending_dir: Path, store: ReplayStore, *, remove: bool = True
         if remove:
             request_file.unlink()
             answer_file.unlink()
-    return imported
+    return report

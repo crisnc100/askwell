@@ -23,6 +23,7 @@ from ledgerline.core.registry import Registry
 from ledgerline.llm.budget import BudgetGuard
 from ledgerline.llm.errors import ParseError
 from ledgerline.llm.gateway import Gateway
+from ledgerline.llm.simulate import register_response_model
 from ledgerline.llm.types import ChatMessage
 from ledgerline.pipeline.service import AskService
 
@@ -52,6 +53,9 @@ class OneShotAnswer(BaseModel):
 
     sql: str | None
     refusal_reason: str | None
+
+
+register_response_model(OneShotAnswer)
 
 
 @dataclass

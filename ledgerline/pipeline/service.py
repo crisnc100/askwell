@@ -25,11 +25,13 @@ from ledgerline.llm.budget import BudgetGuard
 from ledgerline.llm.gateway import Gateway, OpenRouterTransport
 from ledgerline.llm.pricing import PriceBook
 from ledgerline.llm.replay import ReplayStore
+from ledgerline.llm.simulate import register_response_model
 from ledgerline.llm.types import ChatMessage, LLMResult
 from ledgerline.pipeline.graph import AskState, build_graph
 from ledgerline.pipeline.prompt import PROMPT_VERSION, first_messages, registry_view
 
 log = logging.getLogger("ledgerline.ask")
+register_response_model(Intent)
 
 ROOT = Path(__file__).resolve().parents[2]
 SCHEMAS_FILE = ROOT / "config" / "schemas.yaml"

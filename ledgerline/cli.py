@@ -238,20 +238,25 @@ def replay_import(
     from pathlib import Path
 
     from ledgerline.llm.replay import ReplayStore
-    from ledgerline.llm.simulate import import_answers, pending_requests
+    from ledgerline.llm.simulate import import_answers_report, pending_requests
     from ledgerline.pipeline.service import RECORDINGS_FILE, ROOT
 
     settings = get_settings()
     pending = Path(pending_dir) if pending_dir else ROOT / settings.pending_dir
     store = ReplayStore(ROOT / settings.replay_dir / RECORDINGS_FILE)
-    imported = import_answers(pending, store, remove=not keep)
-    for item in imported:
+    report = import_answers_report(pending, store, remove=not keep)
+    for item in report.imported:
         typer.echo(
             f"imported {item.key} (simulated by {item.simulated_by}, "
             f"standing in for {item.standing_in_for})"
         )
+    for rejected in report.rejected:
+        typer.echo(f"REJECTED {rejected.key}: {rejected.reason}", err=True)
     left = pending_requests(pending) if pending.exists() else []
-    typer.echo(f"{len(imported)} imported, {len(left)} still pending")
+    typer.echo(
+        f"{len(report.imported)} imported, {len(report.rejected)} rejected (kept on disk), "
+        f"{len(left)} still pending"
+    )
 
 
 @app.command("eval")
@@ -281,16 +286,18 @@ def eval_command(
     from ledgerline.bench.items import spider_databases
     from ledgerline.bench.run import EVAL_PENDING, EVAL_RECORDINGS, pending_counts, run_eval
     from ledgerline.llm.replay import ReplayStore
-    from ledgerline.llm.simulate import import_answers
+    from ledgerline.llm.simulate import import_answers_report
 
     if mode == "import":
         total = 0
         for directory in sorted(p for p in EVAL_PENDING.glob("*/*") if p.is_dir()):
             schema_id, system = directory.parent.name, directory.name
             store = ReplayStore(EVAL_RECORDINGS / schema_id / f"{system}.jsonl")
-            done = import_answers(directory, store)
-            total += len(done)
-            typer.echo(f"{schema_id}/{system}: imported {len(done)}")
+            result = import_answers_report(directory, store)
+            total += len(result.imported)
+            typer.echo(f"{schema_id}/{system}: imported {len(result.imported)}")
+            for rejected in result.rejected:
+                typer.echo(f"  REJECTED {rejected.key}: {rejected.reason}", err=True)
         typer.echo(f"{total} imported; still pending: {pending_counts() or 'none'}")
         return
 

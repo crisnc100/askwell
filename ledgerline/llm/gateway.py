@@ -23,7 +23,7 @@ from ledgerline.llm.budget import BudgetGuard, with_backoff
 from ledgerline.llm.errors import ParseError, PricingUnavailableError
 from ledgerline.llm.pricing import ModelPrice, cost_from_usage, worst_case_cost
 from ledgerline.llm.replay import ReplayStore, canonical_json, replay_key
-from ledgerline.llm.simulate import PendingRequestError, export_request
+from ledgerline.llm.simulate import PendingRequestError, export_request, register_response_model
 from ledgerline.llm.types import ChatMessage, LLMResult, RawResponse
 
 
@@ -105,6 +105,7 @@ class Gateway:
             assert self.store is not None
             if self.mode == "export" and key not in self.store:
                 assert self.pending_dir is not None
+                register_response_model(schema)
                 path = export_request(
                     self.pending_dir,
                     key=key,
