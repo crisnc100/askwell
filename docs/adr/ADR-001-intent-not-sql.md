@@ -40,8 +40,9 @@ On the fieldservice gold set (43 in_schema items, default model, mean of 3 trial
    with zero hidden-field values returned.
 
 ## How it is measured
-`ledgerline eval --schema fieldservice --systems ledgerline,oneshot,sql_agent --trials 3`,
-metrics as defined in `builds/v01/plan.md` (Definitions), Wilson 95% intervals. With 43
+`ledgerline eval --schema fieldservice --systems ledgerline,oneshot --trials 3`, metrics
+as defined in `builds/v01/plan.md` (Definitions), Wilson 95% intervals. The sql_agent
+baseline is planned but waits for a live model ([ADR-006](ADR-006-benchmark-methodology.md)). With 43
 items one question is about 2.3 points, so differences under about 10 points are within
 noise.
 

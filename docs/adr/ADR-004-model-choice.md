@@ -7,7 +7,7 @@
 
 ## Interim target (2026-11-09)
 There is no OpenRouter key yet, so no real model runs. Until there is, a Claude model
-writes the model's answers instead ("simulated answers", plan.md, Decision 2026-11-09).
+writes the model's answers instead ("simulated answers"; see [docs/rerecord.md](../rerecord.md)).
 Each simulated answer is recorded as standing in for one target model:
 `openai/gpt-oss-120b`. It is the `LEDGERLINE_DEFAULT_MODEL` default.
 

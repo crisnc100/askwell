@@ -12,8 +12,8 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 DEFAULT_NOW = datetime(2026, 6, 30, tzinfo=UTC)
 
 # replay: recordings only. export: recordings, and every unrecorded request is written
-# to the pending directory for a simulated answer (no API key; see plan.md, Decision
-# 2026-11-09). record / live: OpenRouter, budget-guarded.
+# to the pending directory for a simulated answer (no API key needed; see
+# docs/rerecord.md). record / live: OpenRouter, budget-guarded.
 LLMMode = Literal["record", "replay", "live", "export"]
 
 
