@@ -124,6 +124,9 @@ def run(
                 {"stream_results": True, "max_row_buffer": row_cap + 1} if _is_query(stmt) else {}
             )
             result = conn.execute(stmt, execution_options=options)
+            if not result.returns_rows:
+                # e.g. a comment-only statement: nothing ran, and there is nothing to read.
+                raise ExecutionError("the statement returned no result set")
             columns = list(result.keys())
             rows = [tuple(row) for row in result.fetchmany(row_cap + 1)]
         except DBAPIError as exc:
