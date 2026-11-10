@@ -107,7 +107,9 @@ def _schema_problem(request: dict[str, Any], response: Any) -> str | None:
     if model.model_json_schema() != request.get("response_schema"):
         return f"the request's {name} schema differs from the current one; re-export it"
     try:
-        model.model_validate(response)
+        # Strict, from JSON: no coercion, so "5" is not accepted for an integer. What is
+        # stored must be what the exported schema asked for.
+        model.model_validate_json(json.dumps(response), strict=True)
     except ValidationError as exc:
         first = exc.errors()[0]
         where = ".".join(str(part) for part in first["loc"]) or "(root)"
