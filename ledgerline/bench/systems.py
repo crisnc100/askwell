@@ -112,6 +112,7 @@ class LedgerlineSystem:
                 "refusal": result.refusal,
                 "attempts": len(attempts),
                 "issue_codes": sorted({i["code"] for a in attempts for i in a["issues"]}),
+                "attempt_provenance": [a.get("provenance") for a in attempts],
             },
             provenance=result.provenance,
         )

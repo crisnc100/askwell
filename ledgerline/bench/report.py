@@ -99,13 +99,14 @@ def _public_error(record: dict[str, Any]) -> str | None:
 
 
 def simulation_note(records: list[dict[str, Any]]) -> str | None:
-    pairs = sorted(
-        {
-            (r["provenance"]["simulated_by"], r["provenance"]["standing_in_for"])
-            for r in records
-            if r.get("provenance")
-        }
-    )
+    # Every attempt counts: a retry can come from a different source than the first
+    # answer, and either alone may carry the simulation mark.
+    marks: list[dict[str, str]] = []
+    for r in records:
+        if r.get("provenance"):
+            marks.append(r["provenance"])
+        marks += [p for p in (r.get("detail") or {}).get("attempt_provenance", []) if p]
+    pairs = sorted({(m["simulated_by"], m["standing_in_for"]) for m in marks})
     if not pairs:
         return None
     described = "; ".join(f"simulated by {by}, standing in for {target}" for by, target in pairs)

@@ -27,6 +27,9 @@ class Attempt(TypedDict):
     intent: dict[str, Any] | None
     parse_error: str | None
     issues: list[dict[str, str]]
+    # Where this attempt's answer came from (e.g. a simulated answer); a retry may come
+    # from a different source than the first answer.
+    provenance: dict[str, str] | None
 
 
 class AskState(TypedDict, total=False):
@@ -86,6 +89,7 @@ def build_graph(interpret: Interpret, check: Validate, execute: Execute) -> Any:
             "issues": [
                 {"code": i.code, "location": i.location, "message": i.message} for i in issues
             ],
+            "provenance": state.get("provenance"),
         }
         out["attempts"] = [*state.get("attempts", []), attempt]
         out["issues"] = issues
