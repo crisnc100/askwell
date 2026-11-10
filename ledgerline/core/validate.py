@@ -50,6 +50,7 @@ ErrorCode = Literal[
     "value_type",
     "value_shape",
     "value_not_allowed",
+    "ambiguous_value",
     "column_comparison_type",
     "empty_in",
     "reversed_between",
@@ -417,15 +418,26 @@ class _Validator:
         return out
 
     def categorical(self, value: Value, fdef: FieldDef, location: str) -> Value | None:
+        """An exact allowed value wins. Otherwise a case-insensitive match is used only if
+        exactly one value (or alias target) matches; two that differ only by case are
+        ambiguous, never silently swapped."""
         if not (fdef.categorical and fdef.allowed_values and isinstance(value, str)):
             return value
+        if value in fdef.allowed_values:
+            return value
         lowered = value.lower()
-        for allowed in fdef.allowed_values:
-            if allowed.lower() == lowered:
-                return allowed
-        for alias, target in fdef.value_aliases.items():
-            if alias.lower() == lowered:
-                return target
+        matches = {allowed for allowed in fdef.allowed_values if allowed.lower() == lowered}
+        if not matches:
+            matches = {t for alias, t in fdef.value_aliases.items() if alias.lower() == lowered}
+        if len(matches) == 1:
+            return matches.pop()
+        if len(matches) > 1:
+            self.fail(
+                "ambiguous_value",
+                location,
+                f"{value!r} matches {sorted(matches)} in {fdef.column}; use the exact value",
+            )
+            return None
         self.fail(
             "value_not_allowed",
             location,
