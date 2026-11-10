@@ -65,6 +65,7 @@
         }
       ],
       "met": false,
+      "model": "openai/gpt-oss-120b",
       "next": "v0.2 changes the prompt to refuse first when a question needs something the grammar lacks, then measures it on a fresh run. The v0.1 prompt is not changed after seeing these results.",
       "schema": "fieldservice",
       "status_note": "in v0.1 (simulated run)"
@@ -252,7 +253,7 @@
       "items": 67,
       "mean_cost_usd": 0.0,
       "model": "openai/gpt-oss-120b",
-      "p50_latency_ms": 5.132332909852266,
+      "p50_latency_ms": 5.720874993130565,
       "pending": 0,
       "refusal_recall": {
         "ci95": [
@@ -325,7 +326,7 @@
       "items": 67,
       "mean_cost_usd": 0.0,
       "model": "openai/gpt-oss-120b",
-      "p50_latency_ms": 1.5700829681009054,
+      "p50_latency_ms": 2.3195409448817372,
       "pending": 0,
       "refusal_recall": {
         "ci95": [

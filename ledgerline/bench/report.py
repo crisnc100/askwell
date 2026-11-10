@@ -17,6 +17,7 @@ import yaml
 from ledgerline.bench.items import ROOT
 from ledgerline.bench.metrics import ItemOutcome, summarise
 from ledgerline.bench.run import RunResult
+from ledgerline.config import get_settings
 
 REPORTS_DIR = ROOT / "evals" / "reports"
 TRIAGE_DIR = ROOT / "evals" / "triage"
@@ -40,19 +41,24 @@ def load_triage(schema_id: str) -> dict[str, dict[str, str]]:
     return data
 
 
-def floor_checks(table: list[dict[str, Any]], path: Path | None = None) -> list[dict[str, Any]]:
-    """Each schema's floors from `evals/floors.yaml`, checked on the Ledgerline row."""
+def floor_checks(
+    table: list[dict[str, Any]], path: Path | None = None, default_model: str | None = None
+) -> list[dict[str, Any]]:
+    """Each schema's floors from `evals/floors.yaml`, checked on Ledgerline's row for the
+    configured default model (plan.md L11), never on whichever model sorts first. With
+    no default model given, a schema is checked only if it has exactly one model row."""
     source = path or FLOORS_FILE
     if not source.exists():
         return []
     config: dict[str, Any] = yaml.safe_load(source.read_text()) or {}
     out: list[dict[str, Any]] = []
     for schema_id, entry in config.items():
-        row = next(
-            (r for r in table if r["schema"] == schema_id and r["system"] == "ledgerline"), None
-        )
-        if row is None:
+        rows = [r for r in table if r["schema"] == schema_id and r["system"] == "ledgerline"]
+        if default_model is not None:
+            rows = [r for r in rows if r.get("model") == default_model]
+        if len(rows) != 1:
             continue
+        row = rows[0]
         checks = []
         for metric, bound in entry["floors"].items():
             value = row[metric]["rate"]
@@ -66,6 +72,7 @@ def floor_checks(table: list[dict[str, Any]], path: Path | None = None) -> list[
         out.append(
             {
                 "schema": schema_id,
+                "model": row.get("model"),
                 "met": all(c["met"] for c in checks),
                 "checks": checks,
                 "status_note": entry.get("status_note"),
@@ -207,7 +214,7 @@ def build(result: RunResult) -> dict[str, Any]:
         "spent_usd": result.spent_usd,
         "registry_hashes": result.registry_hashes,
         "table": table,
-        "floors": floor_checks(table),
+        "floors": floor_checks(table, default_model=get_settings().default_model),
         "misses": misses,
         "baseline_wins": wins,
     }
@@ -250,7 +257,7 @@ def render_markdown(report: dict[str, Any]) -> str:
         )
     for floor in report.get("floors", []):
         verdict = "met" if floor["met"] else "not met"
-        lines += ["", f"## Floor check: {floor['schema']} (plan.md L11)", ""]
+        lines += ["", f"## Floor check: {floor['schema']}, {floor['model']} (plan.md L11)", ""]
         for check in floor["checks"]:
             mark = "met" if check["met"] else "NOT met"
             label = METRIC_LABELS.get(check["metric"], check["metric"])

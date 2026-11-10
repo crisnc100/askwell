@@ -24,7 +24,7 @@ Rates show the value, the Wilson 95% interval, and the counts. Trials are pooled
 | spider_wta_1 | ledgerline | openai/gpt-oss-120b | 1 | 94.0% [84-98] (47/50) | 86.0% [74-93] (43/50) | 91.5% [80-97] (43/47) | 6.0% [2-16] (3/50) | 8.5% [3-20] (4/47) | n/a | 0.0% [0-7] (0/50) |
 | spider_wta_1 | oneshot | openai/gpt-oss-120b | 1 | 100.0% [93-100] (50/50) | 82.0% [69-90] (41/50) | 82.0% [69-90] (41/50) | 0.0% [0-7] (0/50) | 16.3% [9-29] (8/49) | n/a | 2.0% [0-10] (1/50) |
 
-## Floor check: fieldservice (plan.md L11)
+## Floor check: fieldservice, openai/gpt-oss-120b (plan.md L11)
 
 - Execution accuracy >= 80%: 76.7% [62-87] (33/43), NOT met
 - Wrong answers among answered <= 5%: 13.2% [6-27] (5/38), NOT met

@@ -569,6 +569,7 @@
         }
       ],
       "met": false,
+      "model": "openai/gpt-oss-120b",
       "next": "v0.2 changes the prompt to refuse first when a question needs something the grammar lacks, then measures it on a fresh run. The v0.1 prompt is not changed after seeing these results.",
       "schema": "fieldservice",
       "status_note": "in v0.1 (simulated run)"
@@ -2115,7 +2116,7 @@
       "items": 67,
       "mean_cost_usd": 0.0,
       "model": "openai/gpt-oss-120b",
-      "p50_latency_ms": 5.088792066089809,
+      "p50_latency_ms": 5.728917079977691,
       "pending": 0,
       "refusal_recall": {
         "ci95": [
@@ -2188,7 +2189,7 @@
       "items": 67,
       "mean_cost_usd": 0.0,
       "model": "openai/gpt-oss-120b",
-      "p50_latency_ms": 1.7925410065799952,
+      "p50_latency_ms": 2.433125046081841,
       "pending": 0,
       "refusal_recall": {
         "ci95": [
@@ -2261,7 +2262,7 @@
       "items": 50,
       "mean_cost_usd": 0.0,
       "model": "openai/gpt-oss-120b",
-      "p50_latency_ms": 3.390395489986986,
+      "p50_latency_ms": 3.5344999632798135,
       "pending": 0,
       "refusal_recall": {
         "ci95": null,
@@ -2331,7 +2332,7 @@
       "items": 50,
       "mean_cost_usd": 0.0,
       "model": "openai/gpt-oss-120b",
-      "p50_latency_ms": 0.2150835352949798,
+      "p50_latency_ms": 0.25664549320936203,
       "pending": 0,
       "refusal_recall": {
         "ci95": null,
@@ -2401,7 +2402,7 @@
       "items": 50,
       "mean_cost_usd": 0.0,
       "model": "openai/gpt-oss-120b",
-      "p50_latency_ms": 3.3608534722588956,
+      "p50_latency_ms": 3.901312535163015,
       "pending": 0,
       "refusal_recall": {
         "ci95": null,
@@ -2471,7 +2472,7 @@
       "items": 50,
       "mean_cost_usd": 0.0,
       "model": "openai/gpt-oss-120b",
-      "p50_latency_ms": 0.20543794380500913,
+      "p50_latency_ms": 0.23810402490198612,
       "pending": 0,
       "refusal_recall": {
         "ci95": null,
@@ -2541,7 +2542,7 @@
       "items": 50,
       "mean_cost_usd": 0.0,
       "model": "openai/gpt-oss-120b",
-      "p50_latency_ms": 3.0238954932428896,
+      "p50_latency_ms": 3.497187455650419,
       "pending": 0,
       "refusal_recall": {
         "ci95": null,
@@ -2611,7 +2612,7 @@
       "items": 50,
       "mean_cost_usd": 0.0,
       "model": "openai/gpt-oss-120b",
-      "p50_latency_ms": 0.21545850904658437,
+      "p50_latency_ms": 0.2381670637987554,
       "pending": 0,
       "refusal_recall": {
         "ci95": null,
@@ -2681,7 +2682,7 @@
       "items": 50,
       "mean_cost_usd": 0.0,
       "model": "openai/gpt-oss-120b",
-      "p50_latency_ms": 3.9583959733136,
+      "p50_latency_ms": 3.5387909738346934,
       "pending": 0,
       "refusal_recall": {
         "ci95": null,
@@ -2751,7 +2752,7 @@
       "items": 50,
       "mean_cost_usd": 0.0,
       "model": "openai/gpt-oss-120b",
-      "p50_latency_ms": 0.18795859068632126,
+      "p50_latency_ms": 0.19835401326417923,
       "pending": 0,
       "refusal_recall": {
         "ci95": null,
@@ -2821,7 +2822,7 @@
       "items": 50,
       "mean_cost_usd": 0.0,
       "model": "openai/gpt-oss-120b",
-      "p50_latency_ms": 3.8494165637530386,
+      "p50_latency_ms": 4.2420414974913,
       "pending": 0,
       "refusal_recall": {
         "ci95": null,
@@ -2891,7 +2892,7 @@
       "items": 50,
       "mean_cost_usd": 0.0,
       "model": "openai/gpt-oss-120b",
-      "p50_latency_ms": 0.7463539950549603,
+      "p50_latency_ms": 0.6227914709597826,
       "pending": 0,
       "refusal_recall": {
         "ci95": null,

@@ -14,7 +14,7 @@ Rates show the value, the Wilson 95% interval, and the counts. Trials are pooled
 | fieldservice | ledgerline | openai/gpt-oss-120b | 1 | 88.4% [76-95] (38/43) | 76.7% [62-87] (33/43) | 86.8% [73-94] (33/38) | 11.6% [5-24] (5/43) | 13.2% [6-27] (5/38) | 100.0% [86-100] (24/24) | 0.0% [0-5] (0/67) |
 | fieldservice | oneshot | openai/gpt-oss-120b | 1 | 100.0% [92-100] (43/43) | 69.8% [55-81] (30/43) | 69.8% [55-81] (30/43) | 0.0% [0-8] (0/43) | 30.2% [19-45] (13/43) | 100.0% [86-100] (24/24) | 0.0% [0-5] (0/67) |
 
-## Floor check: fieldservice (plan.md L11)
+## Floor check: fieldservice, openai/gpt-oss-120b (plan.md L11)
 
 - Execution accuracy >= 80%: 76.7% [62-87] (33/43), NOT met
 - Wrong answers among answered <= 5%: 13.2% [6-27] (5/38), NOT met
