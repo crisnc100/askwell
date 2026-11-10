@@ -1,0 +1,2 @@
+{"f1":{"status":"fixed","response":"real"},"f2":{"status":"fixed","response":"real"},"f3":{"status":"fixed","response":"real"},"f4":{"status":"fixed","response":"real"},
+ "x1":{"status":"deferred","reason":"Fix-check: the SQLite canonical datetime form is NULL when strftime cannot parse a stored value, so aggregates/grouping over such rows treat them as NULL.","fix":"Fall back to the stored text when strftime returns NULL (COALESCE), with a test on an unparseable value; first task in the pipeline merge."}}
