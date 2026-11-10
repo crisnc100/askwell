@@ -241,6 +241,28 @@ def _categorical_values(engine: Engine, t: _Table, col_name: str) -> list[str] |
         return sorted({str(row[0]) for row in rows})
 
 
+def _stored_temporal_type(
+    engine: Engine, t: _Table, col_name: str, declared: FieldType
+) -> FieldType:
+    """SQLite stores whatever it is given, so a DATE column can hold integers such as
+    YYYYMMDD. SQLite's date functions read those as day numbers, so a calendar grain
+    would turn them into NULL. If every stored value is a number, type the field as one
+    (a grain on it is then refused at validation). This reads only each value's storage
+    type, never the values themselves."""
+    ref = table(t.name, column(col_name))
+    kind = func.typeof(ref.c[col_name])
+    with engine.connect() as conn:
+        kinds = {
+            str(row[0])
+            for row in conn.execute(
+                select(kind).select_from(ref).where(ref.c[col_name].is_not(None)).distinct()
+            )
+        }
+    if not kinds or not kinds <= {"integer", "real"}:
+        return declared
+    return "integer" if kinds == {"integer"} else "number"
+
+
 def write_privilege_warning(
     engine: Engine, table_names: list[str], sqlite_path: str | None = None
 ) -> str | None:
@@ -302,6 +324,8 @@ def init_registry(
             col_name = str(col["name"])
             fslug = field_slugs[t.name][col_name]
             ftype = field_type(col["type"])
+            if ftype in TEMPORAL_TYPES and engine.dialect.name == "sqlite":
+                ftype = _stored_temporal_type(engine, t, col_name, ftype)
             hidden = bool(SENSITIVE.search(col_name))
             is_key = (
                 col_name in t.pk or (slug, fslug) in key_columns or bool(_ID_SUFFIX.match(col_name))
