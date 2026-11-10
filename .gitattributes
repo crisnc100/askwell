@@ -1,0 +1,3 @@
+evals/gold/*.jsonl -text
+evals/gold/*.json -text
+evals/gold/*.py -text

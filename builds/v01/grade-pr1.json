@@ -1,0 +1,104 @@
+{
+  "family": "astra",
+  "model": "gpt-6-astra",
+  "criteria": [
+    {
+      "id": "L1a",
+      "criterion": "./verify.sh runs ruff, pyright (strict on ledgerline/core), pytest with zero skips enforced, per-module branch coverage, detect-secrets; the GitHub Actions workflow runs the same script.",
+      "verdict": "PASS",
+      "evidence": "verify.sh:11-30 runs every required check; pyproject.toml:65 enables strict core typing; tests/conftest.py:13 loads the zero-skips plugin, whose session-finish hook fails skipped runs. .github/workflows/verify.yml:49 invokes ./verify.sh. Ruff, formatting, pyright with the project interpreter, and the tracked-file secret scan passed here. The complete gate could not run in the read-only sandbox."
+    },
+    {
+      "id": "L2",
+      "criterion": "Per-module branch coverage floors: >=95% validate.py and sqlbuild.py; >=85% executor.py and registry_init.py, enforced per module.",
+      "verdict": "PASS",
+      "evidence": "scripts/check_coverage.py:17-45 enforces the four individual branch floors and rejects missing modules. Running it against the existing coverage.json passed: validate 100.0%, sqlbuild 98.8%, executor 90.9%, registry_init 98.6%. These are existing coverage measurements, not a fresh full-suite run."
+    },
+    {
+      "id": "L3",
+      "criterion": "A named passing test exists for every validator rule in plan P2.4 (incl. fan_out and ambiguous_path), and a test fails if any rule code lacks one.",
+      "verdict": "PASS",
+      "evidence": "tests/core/test_validate.py passed all 102 tests in this session. Lines 46-49 enumerate ErrorCode and require test_rule_<code> for every code, including fan_out and ambiguous_path. ledgerline/core/validate.py:33 sets MAX_HOPS=3; the suite includes the revised path limit and column-comparison checks."
+    },
+    {
+      "id": "L4",
+      "criterion": "The sentinel-value Hypothesis property shows filter values only in bound params, never SQL text; injection fixtures leave the DB unchanged; the 30-intent differential oracle passes on Postgres and SQLite against independent reference queries.",
+      "verdict": "FAIL",
+      "evidence": "Boolean filter values are inlined. Reproduced customers.is_active eq true: PostgreSQL SQL contains '= true', SQLite contains '= 1', and both return params={}. ledgerline/core/sqlbuild.py:183-187 passes Python booleans directly to SQLAlchemy. The 300-example property passed, but tests/core/test_sqlbuild.py:44 excludes Boolean generators. The 32 SQLite injection cases preserved the content hash. All 30 SQLite oracle intents executed non-empty; the independent PostgreSQL reference comparisons at tests/core/test_oracle.py:42-48 could not be rerun because sandbox networking is denied."
+    },
+    {
+      "id": "L5",
+      "criterion": "Writes fail and timeouts fire on both engines (Postgres BEGIN READ ONLY + statement_timeout; SQLite mode=ro + progress-handler interrupt); row cap enforced.",
+      "verdict": "PASS",
+      "evidence": "ledgerline/core/executor.py:63-91 establishes SQLite mode=ro/query_only and PostgreSQL read-only sessions; lines 109-130 enforce read-only transactions, statement_timeout, SQLite interruption, and cap+1 fetching. PostgreSQL SET TRANSACTION READ ONLY supplies the required transaction semantics. tests/core/test_executor.py:53-103 covers writes, both timeouts, recovery, caps, and denied users columns. SQLite timeout, connection reuse, and row-cap behavior were verified here; PostgreSQL execution could not be rerun in this sandbox."
+    },
+    {
+      "id": "L6",
+      "criterion": "registry init is deterministic, auto-hides sensitive fields, infers relationships when FKs are missing, and loads, on fieldservice and every sampled Spider DB.",
+      "verdict": "PASS",
+      "evidence": "Verified byte-identical repeated initialization and YAML/model reload for dog_kennels, car_1, flight_2, wta_1, and network_1. Verified repeated fieldservice initialization, hidden email/password_hash fields, and the three expected inferred relationships on an in-memory schema without FKs. Implementation: ledgerline/core/registry_init.py:120-194,250-302; committed cross-engine fieldservice tests: tests/core/test_registry_init.py:29-62."
+    },
+    {
+      "id": "L8",
+      "criterion": "Gold set meets P1.5 counts (>=60 items, >=35 in_schema with >=10 hard, >=12 out_of_schema, >=10 should_refuse), every in_schema gold executes non-empty and deterministic, manifest matches; gold, Spider IDs and ADR predictions were committed before ledgerline/core/intent.py first appears (check git log).",
+      "verdict": "FAIL",
+      "evidence": "Verified 67 items: 43 in_schema, including 12 hard; 13 out_of_schema; 11 should_refuse. Manifest check passed. Git history confirms gold 979d700, Spider IDs d04db4f, and ADR predictions 1d03610 precede intent.py's introduction in fedbc02. tests/test_gold.py:79-87 requires all 43 gold queries to execute twice, return non-empty/non-null results, and match. However, those PostgreSQL executions could not be verified here: connections fail with 'Operation not permitted'. Under the requested strict bar, the execution requirement remains unproven."
+    },
+    {
+      "id": "L11b",
+      "criterion": "Budget guard does a worst-case pre-check before each call, aborts at the cap with a partial outcome, resumes from checkpoint; a replay miss raises without calling the transport.",
+      "verdict": "FAIL",
+      "evidence": "Checkpoint recovery loses subsequent progress after a torn final line. ledgerline/llm/budget.py:91-94 stops reading at malformed JSON, but append at lines 100-106 neither removes nor separates that damaged tail. Reproduced using the actual load/append methods with in-memory file handles: after q0=$0.10, a torn q1 line, and successful resumed appends q1=$0.20/q2=$0.30, load still returns only q0 and $0.10. Later resumes repeat completed calls and undercount spend. tests/test_llm_budget.py:120-130 checks only the first resume. Replay-miss and ordinary precheck tests passed when invoked here."
+    },
+    {
+      "id": "L12",
+      "criterion": "No Spider question text or data is committed; fetch script pins a checksum and states the licence.",
+      "verdict": "PASS",
+      "evidence": "Tracked files contain the Spider ID selection and selection algorithm, with no tracked data/ files. .gitignore excludes data/. scripts/fetch_benchmarks.py:5-7 states CC BY-SA 4.0; line 30 pins SHA-256; lines 73-79 reject checksum mismatches; lines 32-42 provide the licence notice."
+    },
+    {
+      "id": "L15",
+      "criterion": "No secrets committed; .env.example documents setting an OpenRouter credit limit.",
+      "verdict": "PASS",
+      "evidence": "The detect-secrets hook over tracked files exited 0. Reviewed baseline entries are local development credentials and checksums; OPENROUTER_API_KEY is empty in .env.example. Its lines 4-6 explicitly instruct setting an OpenRouter key credit limit."
+    },
+    {
+      "id": "TEST-CHANGE",
+      "criterion": "Commit ecdaf95 changes an existing test fixture. Check whether any assertion got weaker or would now pass on broken code. PASS only if the guarded behaviour is unchanged.",
+      "verdict": "PASS",
+      "evidence": "git show ecdaf95 confirms the same complete content-hash equality check remains. Only the connection performing the full-column hash changes from pg_ro to pg_owner, allowing inspection of the deliberately denied columns. tests/conftest.py:65-70 still compares against the independently seeded SQLite database, fails on mismatch, and returns pg_ro for downstream tests. No assertion or hashed column was removed."
+    }
+  ],
+  "findings": [
+    {
+      "likelihood": 5,
+      "impact": 6,
+      "protected": false,
+      "trigger": "Compile a grouped_summary on work_orders with group_by status, count(*) aliased status, and order_by target work_orders.status.",
+      "issue": "A metric alias can overwrite a group label and silently change the requested ordering.",
+      "file": "ledgerline/core/sqlbuild.py",
+      "line": "256",
+      "evidence": "Reproduced: validation returns no issues, but SQL is 'SELECT t0.status AS status, count(*) AS status ... ORDER BY count(*) ASC'. The qualified order target explicitly resolves to the status group, yet labelled[metric.label] overwrites the group's expression. validate.py:693 checks collisions only between metrics."
+    },
+    {
+      "likelihood": 4,
+      "impact": 6,
+      "protected": false,
+      "trigger": "Compare a DATETIME field to a DATE field using other_field, for example work_orders.completed_at eq scheduled_for when completion is midnight on the scheduled date.",
+      "issue": "Accepted mixed temporal column comparisons use SQLite string comparison and return incorrect boundary results.",
+      "file": "ledgerline/core/sqlbuild.py",
+      "line": "178-185",
+      "evidence": "validate.py:819-823 treats date and datetime as compatible. Reproduced a row containing completed_at='2026-06-01 00:00:00.000000' and scheduled_for='2026-06-01': the validated equality query returned [], while an independent datetime-normalized comparison returned [(1,)]. The builder does not normalize the operands."
+    },
+    {
+      "likelihood": 4,
+      "impact": 8,
+      "protected": true,
+      "trigger": "Rerun infra/postgres/roles.sql against an already seeded database, as its idempotent usage permits.",
+      "issue": "Role initialization restores table-wide SELECT on users, undoing the sensitive-column restriction until another seed run.",
+      "file": "infra/postgres/roles.sql",
+      "line": "15",
+      "evidence": "'GRANT SELECT ON ALL TABLES IN SCHEMA public TO ledgerline_ro' includes users. The subsequent statements never reapply its restricted column list. That restriction exists only in ledgerline/fieldservice/seed.py:405-417; a table-wide grant covers email and password_hash regardless of the narrower column grants."
+    }
+  ]
+}

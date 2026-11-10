@@ -1,0 +1,46 @@
+{
+  "family": "astra",
+  "model": "gpt-6-astra",
+  "criteria": [
+    {
+      "id": "L4",
+      "criterion": "The sentinel-value Hypothesis property shows filter values only in bound params, never SQL text; injection fixtures leave the DB unchanged; the 30-intent differential oracle passes on Postgres and SQLite against independent reference queries.",
+      "verdict": "PASS",
+      "evidence": "Locally reran the 300-example sentinel property successfully. tests/core/test_sqlbuild.py:125-151 checks both dialects, parameter membership, absence from SQL, and exact parameter counts, including booleans and datetimes. test_injection.py executes 32 hostile-value queries per engine and compares database content hashes before/after. test_oracle.py checks 30 distinct intents on both engines against independently written SQL in oracle_cases.py. builds/v01/verify-recheck.txt records all 428 tests passing, including all injection and oracle tests. Postgres results rely on the supplied run."
+    },
+    {
+      "id": "L8",
+      "criterion": "Gold set meets P1.5 counts (>=60 items, >=35 in_schema with >=10 hard, >=12 out_of_schema, >=10 should_refuse), every in_schema gold executes non-empty and deterministic, manifest matches; gold, Spider IDs and ADR predictions were committed before ledgerline/core/intent.py first appears (check git log).",
+      "verdict": "PASS",
+      "evidence": "Directly counted 67 items: 43 in_schema, including 12 hard; 13 out_of_schema; 11 should_refuse. Manifest problems() returned []; count and manifest tests also passed locally. tests/test_gold.py:79-87 executes every in_schema query twice, requires non-empty/non-all-NULL results, and compares canonical results respecting ordered flags. gold-recheck.txt records 48 passing tests; verify-recheck.txt independently records the suite passing. Git history places gold at 979d700, Spider IDs at d04db4f, manifest at df80d74, and ADR predictions at 1d03610, all before intent.py first appears in fedbc02."
+    },
+    {
+      "id": "L11b",
+      "criterion": "Budget guard does a worst-case pre-check before each call, aborts at the cap with a partial outcome, resumes from checkpoint; a replay miss raises without calling the transport.",
+      "verdict": "FAIL",
+      "evidence": "Checkpoint and replay requirements are supported: tests/test_llm_budget.py covers partial aborts, retained spend, repeated resumes after a torn tail, direct append after a torn line, and complete lines missing their newline; test_llm_gateway.py asserts a replay miss makes zero transport calls. All pass in verify-recheck.txt. However, the pre-check is not a valid worst-case bound: gateway.py:118-121 counts Unicode characters through canonical_json(..., ensure_ascii=False), and pricing.py:64-70 assumes token count cannot exceed character count. Unicode characters can require multiple tokens, so sufficiently long such prompts can exceed the admitted budget; BudgetGuard.charge merely adds actual spend. This existing limitation remains after the fixes."
+    }
+  ],
+  "findings": [
+    {
+      "likelihood": 5,
+      "impact": 5,
+      "protected": false,
+      "trigger": "A valid HAVING condition compares an integer-valued aggregate against a fractional threshold, such as count > 1.5.",
+      "issue": "The new binding code coerces the threshold to INTEGER on Postgres, changing comparison semantics and breaking agreement with SQLite.",
+      "file": "ledgerline/core/sqlbuild.py",
+      "line": "263",
+      "evidence": "Introduced by a1ff012. Locally validated a grouped count with HAVING > 1.5; validation returned no issues. Compiling with the production psycopg dialect produced HAVING count(*) > %(param_1)s::INTEGER with param_1=1.5. Postgres rounds that cast to 2, excluding groups containing two rows. The same built query executed against in-memory SQLite and returned [('expert', 2)]. Postgres execution itself was unavailable."
+    },
+    {
+      "likelihood": 3,
+      "impact": 4,
+      "protected": false,
+      "trigger": "SQLite compares a DATETIME just after midnight, such as 2026-06-01 00:00:00.000001, against the DATE 2026-06-01.",
+      "issue": "The new datetime normalization loses sub-millisecond precision, making distinct timestamps compare equal and returning incorrect filter results.",
+      "file": "ledgerline/core/sqlbuild.py",
+      "line": "155",
+      "evidence": "Introduced by a1ff012. Executed validated, built queries against an in-memory SQLite row with that timestamp/date pair: eq returned the row, gt returned none, and lte returned the row. Independent Python datetime comparison confirmed the timestamp is greater. strftime('%Y-%m-%d %H:%M:%f', ...) collapses both operands to midnight at millisecond precision. The new temporal tests use only whole-second timestamps and therefore miss this regression."
+    }
+  ]
+}

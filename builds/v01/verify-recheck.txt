@@ -1,0 +1,80 @@
+
+==> uv sync (locked)
+
+==> ruff check
+All checks passed!
+
+==> ruff format --check
+78 files already formatted
+
+==> pyright (strict on ledgerline/core)
+0 errors, 0 warnings, 0 informations
+
+==> detect-secrets (against .secrets.baseline)
+
+==> pytest (zero skips, branch coverage)
+============================= test session starts ==============================
+platform darwin -- Python 3.12.12, pytest-9.2.0, pluggy-1.7.0
+rootdir: /Users/cortega/Documents/Projects/ledgerline/ledgerline-v01
+configfile: pyproject.toml
+testpaths: tests
+plugins: Faker-40.52.0, hypothesis-6.170.15, langsmith-0.14.17, cov-7.1.0, anyio-4.16.0, asyncio-1.4.1.post1
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+collected 428 items
+
+tests/core/test_dates.py ......................                          [  5%]
+tests/core/test_executor.py ..........................                   [ 11%]
+tests/core/test_injection.py ........                                    [ 13%]
+tests/core/test_oracle.py .............................................. [ 23%]
+...............                                                          [ 27%]
+tests/core/test_registry.py ................                             [ 31%]
+tests/core/test_registry_init.py .................                       [ 35%]
+tests/core/test_sqlbuild.py ..................                           [ 39%]
+tests/core/test_temporal_compare.py ............                         [ 42%]
+tests/core/test_validate.py ............................................ [ 52%]
+............................................................             [ 66%]
+tests/test_check_coverage.py ....                                        [ 67%]
+tests/test_cli.py .                                                      [ 67%]
+tests/test_cli_core.py ...                                               [ 68%]
+tests/test_fetch_benchmarks.py ......                                    [ 69%]
+tests/test_gold.py ................................................      [ 80%]
+tests/test_gold_manifest.py .......                                      [ 82%]
+tests/test_llm_budget.py ...........                                     [ 85%]
+tests/test_llm_gateway.py ..........................                     [ 91%]
+tests/test_llm_openrouter.py ....                                        [ 92%]
+tests/test_roles.py ..                                                   [ 92%]
+tests/test_seed.py ............                                          [ 95%]
+tests/test_spider_selection.py ...........                               [ 97%]
+tests/test_spike.py ....                                                 [ 98%]
+tests/test_zero_skips.py .....                                           [100%]
+
+================================ tests coverage ================================
+______________ coverage: platform darwin, python 3.12.12-final-0 _______________
+
+Name                               Stmts   Miss Branch BrPart  Cover
+--------------------------------------------------------------------
+ledgerline/cli.py                     94     23     16      1    73%
+ledgerline/config.py                  32      1      2      1    94%
+ledgerline/core/executor.py          106      0     22      2    98%
+ledgerline/core/registry_init.py     157      1     74      1    99%
+ledgerline/core/sqlbuild.py          211      1     84      1    99%
+ledgerline/fieldservice/seed.py      213     13     76      2    93%
+ledgerline/gold.py                    50      9     22      7    78%
+ledgerline/llm/budget.py             135      2     34      2    98%
+ledgerline/llm/pricing.py             50      8      8      0    86%
+ledgerline/llm/replay.py              52      1     10      1    97%
+ledgerline/llm/spike.py               95      6      6      0    94%
+--------------------------------------------------------------------
+TOTAL                               2174     65    684     18    97%
+
+13 files skipped due to complete coverage.
+Coverage JSON written to file coverage.json
+============================= 428 passed in 23.54s =============================
+
+==> per-module branch coverage floors
+ledgerline/core/validate.py: branch 100.0% (floor 95%), combined 100.0% ok
+ledgerline/core/sqlbuild.py: branch 98.8% (floor 95%), combined 99.3% ok
+ledgerline/core/executor.py: branch 90.9% (floor 85%), combined 98.4% ok
+ledgerline/core/registry_init.py: branch 98.6% (floor 85%), combined 99.1% ok
+
+verify.sh: all checks passed
