@@ -1,4 +1,8 @@
-"""The `ask_log` audit table in the app DB. It never stores result rows or raw params."""
+"""The `ask_log` audit table in the app DB.
+
+It never stores result rows, and never the bound parameter values (the filter values a
+query ran with): only a SHA-256 of them, which proves which values ran without keeping
+them."""
 
 from __future__ import annotations
 
