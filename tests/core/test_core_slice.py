@@ -229,3 +229,60 @@ def test_order_by_does_not_force_an_inner_join(
             )
         ).scalar_one()
     assert run(engine, build(plan), row_cap=10_000).row_count == expected
+
+
+def test_unparseable_datetime_text_is_kept_not_turned_into_null(tmp_path: Path) -> None:
+    """strftime returns NULL for text it cannot read; the canonical form falls back to the
+    stored text, so such values still count, group and compare as themselves."""
+    path = tmp_path / "odd.sqlite"
+    writer = create_engine(f"sqlite:///{path}")
+    with writer.begin() as conn:
+        conn.execute(text("CREATE TABLE ev (id INTEGER PRIMARY KEY, at DATETIME)"))
+        conn.execute(
+            text(
+                "INSERT INTO ev VALUES (1, 'not a time'), (2, 'also not a time'), "
+                "(3, '2026-06-01 10:30:00'), (4, 'not a time')"
+            )
+        )
+    writer.dispose()
+    engine = readonly_engine(f"sqlite:///{path}")
+    registry = Registry(
+        schema_version=1,
+        draft=False,
+        entities={
+            "ev": EntityDef(
+                table="ev",
+                fields={
+                    "id": FieldDef(column="id", type="integer"),
+                    "at": FieldDef(column="at", type="datetime"),
+                },
+            )
+        },
+    )
+    try:
+        distinct = _plan(
+            registry,
+            intent_type="summary",
+            entity="ev",
+            metrics=[{"agg": "count_distinct", "field": "at"}],
+        )
+        assert run(engine, build(distinct)).rows == [(3,)]
+        groups = _plan(
+            registry,
+            intent_type="grouped_summary",
+            entity="ev",
+            metrics=[{"agg": "count"}],
+            group_by=[{"field": "at"}],
+        )
+        counts = sorted(r[1] for r in run(engine, build(groups)).rows)
+        assert counts == [1, 1, 2]
+        same = _plan(
+            registry,
+            intent_type="summary",
+            entity="ev",
+            metrics=[{"agg": "count"}],
+            filters=[{"field": "at", "op": "eq", "other_field": "at"}],
+        )
+        assert run(engine, build(same)).rows == [(4,)]
+    finally:
+        engine.dispose()
