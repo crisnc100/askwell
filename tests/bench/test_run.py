@@ -173,12 +173,16 @@ def test_changing_the_prompt_or_registry_never_resumes_old_results(
         import_answers(isolated / "pending" / "fieldservice" / system, store)
     assert len(_run("export").records) == 134
 
-    monkeypatch.setattr(service_module, "PROMPT_VERSION", "interpret-v999")
-    changed_prompt = _run("export")
+    # A separate MonkeyPatch: undoing it must not undo the fixture's directory patches,
+    # or the rest of the test would write into the real evals/ directories.
+    with pytest.MonkeyPatch.context() as prompt_patch:
+        prompt_patch.setattr(service_module, "PROMPT_VERSION", "interpret-v999")
+        changed_prompt = _run("export")
     assert changed_prompt.deferred == {"fieldservice/ledgerline": 67}
     assert {r["system"] for r in changed_prompt.records} == {"oneshot"}
+    assert run_module.RUNS_DIR == isolated / "runs"
+    assert run_module.EVAL_PENDING == isolated / "pending"
 
-    monkeypatch.undo()
     edited = isolated / "fieldservice.yaml"
     from tests.core.conftest import FIELDSERVICE_REGISTRY
 
