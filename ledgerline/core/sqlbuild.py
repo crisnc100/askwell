@@ -198,6 +198,33 @@ def _fields(plan: QueryPlan) -> list[ResolvedField]:
     return out
 
 
+def _required_aliases(plan: QueryPlan) -> set[str]:
+    """Table aliases a row must have a match in. A join used only inside `any_of`
+    groups is optional: an inner join there would drop rows that satisfy another branch
+    of the OR (an urgent work order with no technician). Every other use (select,
+    metrics, group_by, order_by, AND filters) keeps inner-join semantics."""
+    used: list[ResolvedField] = list(plan.select)
+    used += [m.field for m in plan.metrics if m.field is not None]
+    used += [g.field for g in plan.group_by]
+    used += [o.field for o in plan.order_by if o.field is not None]
+    for item in plan.where:
+        if isinstance(item, PredicateGroup) and item.mode == "any_of":
+            continue
+        predicates = item.predicates if isinstance(item, PredicateGroup) else (item,)
+        for predicate in predicates:
+            used.append(predicate.field)
+            if predicate.other is not None:
+                used.append(predicate.other)
+    parents = {join.alias: join.parent_alias for join in plan.joins}
+    required: set[str] = set()
+    for rfield in used:
+        alias: str | None = rfield.alias
+        while alias is not None and alias not in required:
+            required.add(alias)
+            alias = parents.get(alias)
+    return required
+
+
 def _bind(value: Any, col: ColumnElement[Any]) -> ColumnElement[Any]:
     """A bound parameter typed like its column. Passing a bare Python value lets
     SQLAlchemy render some values (booleans) as SQL literals; this never does."""
@@ -282,10 +309,15 @@ def _label(labelled: dict[str, ColumnElement[Any]], label: str, expr: ColumnElem
 def build(plan: QueryPlan) -> Select[Any]:
     tables = _Tables(plan)
     source = tables.tables[plan.base_alias]
+    required = _required_aliases(plan)
     for join in plan.joins:
         parent = tables.tables[join.parent_alias]
         child = tables.tables[join.alias]
-        source = source.join(child, parent.c[join.parent_column] == child.c[join.column])
+        source = source.join(
+            child,
+            parent.c[join.parent_column] == child.c[join.column],
+            isouter=join.alias not in required,
+        )
 
     labelled: dict[str, ColumnElement[Any]] = {}
     group_exprs: list[ColumnElement[Any]] = []
