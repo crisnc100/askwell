@@ -101,7 +101,13 @@ def run(
 ) -> QueryResult:
     """Run one statement in a read-only transaction, then roll back."""
     dialect = engine.dialect.name
-    with engine.connect() as conn:
+    try:
+        connection = engine.connect()
+    except DBAPIError as exc:
+        # Connecting is part of executing: a down or refusing database is an
+        # ExecutionError, so callers (and the audit log) handle it like any failure.
+        raise ExecutionError(f"could not connect to the database: {exc.orig}") from exc
+    with connection as conn:
         raw: Any = conn.connection.dbapi_connection
         try:
             if dialect == "postgresql":
