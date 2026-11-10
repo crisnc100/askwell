@@ -153,13 +153,16 @@ def _as_datetime_pg(element: AsDatetime, compiler: SQLCompiler, **kw: Any) -> st
 
 
 def _sqlite_canonical_datetime(x: str) -> str:
-    """SQLite text for `x` as 'YYYY-MM-DD HH:MM:SS.ffffff', whatever format it was stored
-    in (a space or 'T', with or without a fraction, or a plain DATE). strftime's %f stops
-    at milliseconds, so the stored fraction is padded to six digits instead."""
+    """SQLite text for `x` as 'YYYY-MM-DD HH:MM:SS.ffffff' in UTC, whatever format it was
+    stored in: a space or 'T', with or without a fraction, a 'Z' or a +HH:MM offset, or a
+    plain DATE. strftime converts the offset to UTC, but its %f stops at milliseconds, so
+    the stored fraction (without any zone suffix) is padded to six digits instead."""
+    raw = f"substr({x}, instr({x}, '.') + 1)"
+    no_z = f"replace({raw}, 'Z', '')"
+    no_plus = f"substr({no_z}, 1, instr({no_z} || '+', '+') - 1)"
+    digits = f"substr({no_plus}, 1, instr({no_plus} || '-', '-') - 1)"
     fraction = (
-        f"CASE WHEN instr({x}, '.') > 0 "
-        f"THEN substr(substr({x}, instr({x}, '.') + 1) || '000000', 1, 6) "
-        "ELSE '000000' END"
+        f"CASE WHEN instr({x}, '.') > 0 THEN substr({digits} || '000000', 1, 6) ELSE '000000' END"
     )
     return f"(strftime('%Y-%m-%d %H:%M:%S', {x}) || '.' || {fraction})"
 
@@ -217,6 +220,14 @@ class _Tables:
     def col(self, rfield: ResolvedField) -> ColumnElement[Any]:
         return self.tables[rfield.alias].c[rfield.column]
 
+    def value(self, rfield: ResolvedField) -> ColumnElement[Any]:
+        """The field as compared, aggregated, grouped or ordered. A DATETIME gets one
+        canonical text form on SQLite (a no-op elsewhere), so equal instants stored in
+        different text formats are equal. Selected columns use `col` and come back as
+        stored."""
+        raw = self.col(rfield)
+        return SqliteDatetimeText(raw) if rfield.type == "datetime" else raw
+
 
 def _fields(plan: QueryPlan) -> list[ResolvedField]:
     out: list[ResolvedField] = list(plan.select)
@@ -268,13 +279,11 @@ def _bind(value: Any, col: ColumnElement[Any]) -> ColumnElement[Any]:
 def _comparison_operands(
     tables: _Tables, predicate: Predicate
 ) -> tuple[ColumnElement[Any], ColumnElement[Any]]:
-    col = tables.col(predicate.field)
     assert predicate.other is not None
-    other = tables.col(predicate.other)
     if {predicate.field.type, predicate.other.type} == {"date", "datetime"}:
         # A DATE against a DATETIME: compare both as datetimes (a DATE is its midnight).
-        return AsDatetime(col), AsDatetime(other)
-    return col, other
+        return AsDatetime(tables.col(predicate.field)), AsDatetime(tables.col(predicate.other))
+    return tables.value(predicate.field), tables.value(predicate.other)
 
 
 def _predicate(tables: _Tables, predicate: Predicate) -> ColumnElement[bool]:
@@ -324,7 +333,7 @@ def _predicate(tables: _Tables, predicate: Predicate) -> ColumnElement[bool]:
 def _metric(tables: _Tables, metric: PlanMetric) -> ColumnElement[Any]:
     if metric.field is None:
         return func.count()
-    col = tables.col(metric.field)
+    col = tables.value(metric.field)
     arg = col.distinct() if metric.distinct else col
     if metric.agg in ("count", "count_distinct"):
         return func.count(arg)
@@ -373,7 +382,7 @@ def build(plan: QueryPlan) -> Select[Any]:
         columns = [tables.col(f).label(f.label) for f in plan.select]
     else:
         for group in plan.group_by:
-            expr = tables.col(group.field)
+            expr = tables.value(group.field)
             if group.grain is not None:
                 expr = GRAINS[group.grain](expr)
             group_exprs.append(expr)
@@ -402,7 +411,7 @@ def build(plan: QueryPlan) -> Select[Any]:
         )
     order: list[ColumnElement[Any]] = []
     for item in plan.order_by:
-        expr = tables.col(item.field) if item.field is not None else labelled[item.label or ""]
+        expr = tables.value(item.field) if item.field is not None else labelled[item.label or ""]
         order.append(expr.desc() if item.direction == "desc" else expr.asc())
     if order:
         stmt = stmt.order_by(*order)
