@@ -134,7 +134,6 @@ def generate(now: datetime, seed: int = DEFAULT_SEED) -> Dataset:
     start = _months_before(end, WINDOW_MONTHS)
     today = end.date()
 
-    # --- customers and sites ---
     customers: list[Row] = []
     sites: list[Row] = []
     for cid in range(1, N_CUSTOMERS + 1):
@@ -177,7 +176,6 @@ def generate(now: datetime, seed: int = DEFAULT_SEED) -> Dataset:
                 }
             )
 
-    # --- technicians ---
     technicians: list[Row] = []
     for tid in range(1, N_TECHNICIANS + 1):
         skill = rng.choices(["junior", "mid", "senior"], [0.3, 0.45, 0.25])[0]
@@ -195,7 +193,6 @@ def generate(now: datetime, seed: int = DEFAULT_SEED) -> Dataset:
             }
         )
 
-    # --- parts ---
     parts: list[Row] = []
     categories = list(PART_NAMES)
     seen_names: set[str] = set()
@@ -219,7 +216,7 @@ def generate(now: datetime, seed: int = DEFAULT_SEED) -> Dataset:
             }
         )
 
-    # --- work orders: volume grows ~40% across the window ---
+    # Work-order volume grows about 40% across the window.
     window_seconds = int((end - start).total_seconds())
     opened_times: list[datetime] = []
     while len(opened_times) < N_WORK_ORDERS:
@@ -318,7 +315,6 @@ def generate(now: datetime, seed: int = DEFAULT_SEED) -> Dataset:
                     _invoice(rng, len(invoices) + 1, woid, extra_issued, extra_amount, today)
                 )
 
-    # --- back-office users (hidden-field fixtures) ---
     users: list[Row] = []
     for uid in range(1, N_USERS + 1):
         full_name = fake.name()

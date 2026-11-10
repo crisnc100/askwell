@@ -92,9 +92,6 @@ _TYPES: dict[str, TypeEngine[Any]] = {
 }
 
 
-# --- calendar grains ---
-
-
 class _Grain(FunctionElement[Any]):
     type = Date()
     inherit_cache = True
@@ -230,9 +227,6 @@ def _datetime_text_other(element: SqliteDatetimeText, compiler: SQLCompiler, **k
 @compiles(AsDatetime)
 def _as_datetime_other(element: AsDatetime, compiler: SQLCompiler, **kw: Any) -> str:
     raise CompileError(f"datetime normalisation is not implemented for {compiler.dialect.name}")
-
-
-# --- building ---
 
 
 class _Tables:

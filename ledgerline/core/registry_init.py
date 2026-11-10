@@ -194,10 +194,10 @@ def _relationships(
     for t in tables:
         for col in t.columns:
             col_name = str(col["name"])
-            # A declared key that was skipped says where the column points; guessing a
-            # different target from its name would invent a wrong join.
             if (t.name, col_name) in rels or t.pk == [col_name]:
                 continue
+            # A declared key that was skipped says where the column points; guessing a
+            # different target from its name would invent a wrong join.
             if (t.name, col_name.lower()) in skipped:
                 continue
             candidates: list[str] = []
