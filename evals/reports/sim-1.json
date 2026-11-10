@@ -499,13 +499,6 @@
       "trial": 1
     },
     {
-      "item_id": "spider:439",
-      "model": "openai/gpt-oss-120b",
-      "schema": "spider_wta_1",
-      "system": "oneshot",
-      "trial": 1
-    },
-    {
       "item_id": "spider:451",
       "model": "openai/gpt-oss-120b",
       "schema": "spider_wta_1",
@@ -514,13 +507,6 @@
     },
     {
       "item_id": "spider:463",
-      "model": "openai/gpt-oss-120b",
-      "schema": "spider_wta_1",
-      "system": "oneshot",
-      "trial": 1
-    },
-    {
-      "item_id": "spider:479",
       "model": "openai/gpt-oss-120b",
       "schema": "spider_wta_1",
       "system": "oneshot",
@@ -1596,27 +1582,13 @@
     {
       "error": null,
       "issue_codes": [],
-      "item_id": "spider:439",
+      "item_id": "spider:451",
       "model": "openai/gpt-oss-120b",
-      "note": "'Highest rank' means rank 1; the model took the maximum rank number.",
+      "note": "The names and country codes need a join with two equally short paths (winner or loser). The model grouped by winner_id instead of refusing, so it returned ids rather than the requested columns: a wrong answer.",
       "outcome": "wrong",
       "refusal": null,
       "schema": "spider_wta_1",
       "tag": "misread",
-      "trial": 1
-    },
-    {
-      "error": null,
-      "issue_codes": [
-        "ambiguous_path"
-      ],
-      "item_id": "spider:451",
-      "model": "openai/gpt-oss-120b",
-      "note": "Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so the validator refuses rather than guess.",
-      "outcome": "refused",
-      "refusal": "refused (ambiguous_path)",
-      "schema": "spider_wta_1",
-      "tag": "grammar_gap",
       "trial": 1
     },
     {
@@ -1658,25 +1630,23 @@
     {
       "error": null,
       "issue_codes": [],
-      "item_id": "spider:479",
+      "item_id": "spider:472",
       "model": "openai/gpt-oss-120b",
-      "note": "Registry init typed ranking_date as a date (its declared type), but it holds eight-digit integers (YYYYMMDD). The day grain then returns NULL. Init should check the values, not just the declaration.",
+      "note": "The gold groups by first name, which merges different players who share one; the answer totals per player.",
       "outcome": "wrong",
       "refusal": null,
       "schema": "spider_wta_1",
-      "tag": "builder_bug",
+      "tag": "gold_issue",
       "trial": 1
     },
     {
       "error": null,
-      "issue_codes": [
-        "ambiguous_path"
-      ],
+      "issue_codes": [],
       "item_id": "spider:488",
       "model": "openai/gpt-oss-120b",
       "note": "Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so the validator refuses rather than guess.",
       "outcome": "refused",
-      "refusal": "refused (ambiguous_path)",
+      "refusal": "refused (unanswerable)",
       "schema": "spider_wta_1",
       "tag": "grammar_gap",
       "trial": 1
@@ -2060,7 +2030,7 @@
     "spider_dog_kennels": "ba7277f7739fd820d7ec8f4cfda282af060e5d4aa09828dcca20d512683bde78",
     "spider_flight_2": "e69b8206b5403470249e458ce75b56ba6e3421c53b73d982f53e2fbe1646c940",
     "spider_network_1": "b9991de76b27c3ecc644274d209d7c543c7c27dcd2ec7298e7ab729212639d4b",
-    "spider_wta_1": "afc40c0f94f040485945f79fb21fafab91fd69e9278211a15b94442190f7f54b"
+    "spider_wta_1": "807a938123c3f5467290fcab18b29cc9d79c341a9dab73eff6d096b5cb43345a"
   },
   "run_id": "sim-1",
   "simulation": "Model responses simulated by claude-haiku-5-5, standing in for openai/gpt-oss-120b. This is not an OpenRouter measurement.",
@@ -2116,7 +2086,7 @@
       "items": 67,
       "mean_cost_usd": 0.0,
       "model": "openai/gpt-oss-120b",
-      "p50_latency_ms": 5.728917079977691,
+      "p50_latency_ms": 8.93775001168251,
       "pending": 0,
       "refusal_recall": {
         "ci95": [
@@ -2189,7 +2159,7 @@
       "items": 67,
       "mean_cost_usd": 0.0,
       "model": "openai/gpt-oss-120b",
-      "p50_latency_ms": 2.433125046081841,
+      "p50_latency_ms": 4.186708014458418,
       "pending": 0,
       "refusal_recall": {
         "ci95": [
@@ -2262,7 +2232,7 @@
       "items": 50,
       "mean_cost_usd": 0.0,
       "model": "openai/gpt-oss-120b",
-      "p50_latency_ms": 3.5344999632798135,
+      "p50_latency_ms": 4.387833003420383,
       "pending": 0,
       "refusal_recall": {
         "ci95": null,
@@ -2332,7 +2302,7 @@
       "items": 50,
       "mean_cost_usd": 0.0,
       "model": "openai/gpt-oss-120b",
-      "p50_latency_ms": 0.25664549320936203,
+      "p50_latency_ms": 0.34383300226181746,
       "pending": 0,
       "refusal_recall": {
         "ci95": null,
@@ -2402,7 +2372,7 @@
       "items": 50,
       "mean_cost_usd": 0.0,
       "model": "openai/gpt-oss-120b",
-      "p50_latency_ms": 3.901312535163015,
+      "p50_latency_ms": 5.53937500808388,
       "pending": 0,
       "refusal_recall": {
         "ci95": null,
@@ -2472,7 +2442,7 @@
       "items": 50,
       "mean_cost_usd": 0.0,
       "model": "openai/gpt-oss-120b",
-      "p50_latency_ms": 0.23810402490198612,
+      "p50_latency_ms": 0.30647945823147893,
       "pending": 0,
       "refusal_recall": {
         "ci95": null,
@@ -2542,7 +2512,7 @@
       "items": 50,
       "mean_cost_usd": 0.0,
       "model": "openai/gpt-oss-120b",
-      "p50_latency_ms": 3.497187455650419,
+      "p50_latency_ms": 4.014958452899009,
       "pending": 0,
       "refusal_recall": {
         "ci95": null,
@@ -2612,7 +2582,7 @@
       "items": 50,
       "mean_cost_usd": 0.0,
       "model": "openai/gpt-oss-120b",
-      "p50_latency_ms": 0.2381670637987554,
+      "p50_latency_ms": 0.33518695272505283,
       "pending": 0,
       "refusal_recall": {
         "ci95": null,
@@ -2682,7 +2652,7 @@
       "items": 50,
       "mean_cost_usd": 0.0,
       "model": "openai/gpt-oss-120b",
-      "p50_latency_ms": 3.5387909738346934,
+      "p50_latency_ms": 7.381999981589615,
       "pending": 0,
       "refusal_recall": {
         "ci95": null,
@@ -2752,7 +2722,7 @@
       "items": 50,
       "mean_cost_usd": 0.0,
       "model": "openai/gpt-oss-120b",
-      "p50_latency_ms": 0.19835401326417923,
+      "p50_latency_ms": 0.2669580280780792,
       "pending": 0,
       "refusal_recall": {
         "ci95": null,
@@ -2776,30 +2746,30 @@
     {
       "accuracy_given_attempted": {
         "ci95": [
-          0.8006846221303541,
-          0.9664058765420744
+          0.8044669820963272,
+          0.9671162431819081
         ],
-        "n": 43,
-        "of": 47,
-        "rate": 0.9148936170212766
+        "n": 44,
+        "of": 48,
+        "rate": 0.9166666666666666
       },
       "coverage": {
         "ci95": [
-          0.8378290831116182,
-          0.979385029651026
+          0.8653990931249297,
+          0.9889611156723802
         ],
-        "n": 47,
+        "n": 48,
         "of": 50,
-        "rate": 0.94
+        "rate": 0.96
       },
       "execution_accuracy": {
         "ci95": [
-          0.7381380628941446,
-          0.9304916657298371
+          0.7619518261679701,
+          0.9438239984906773
         ],
-        "n": 43,
+        "n": 44,
         "of": 50,
-        "rate": 0.86
+        "rate": 0.88
       },
       "execution_error_rate": {
         "ci95": [
@@ -2812,17 +2782,17 @@
       },
       "false_refusal_rate": {
         "ci95": [
-          0.02061497034897397,
-          0.16217091688838173
+          0.011038884327619805,
+          0.1346009068750702
         ],
-        "n": 3,
+        "n": 2,
         "of": 50,
-        "rate": 0.06
+        "rate": 0.04
       },
       "items": 50,
       "mean_cost_usd": 0.0,
       "model": "openai/gpt-oss-120b",
-      "p50_latency_ms": 4.2420414974913,
+      "p50_latency_ms": 7.043729478027672,
       "pending": 0,
       "refusal_recall": {
         "ci95": null,
@@ -2835,12 +2805,12 @@
       "trials": 1,
       "wrong_answer_rate_given_answered": {
         "ci95": [
-          0.03359412345792552,
-          0.19931537786964587
+          0.032883756818091775,
+          0.1955330179036728
         ],
         "n": 4,
-        "of": 47,
-        "rate": 0.0851063829787234
+        "of": 48,
+        "rate": 0.08333333333333333
       }
     },
     {
@@ -2892,7 +2862,7 @@
       "items": 50,
       "mean_cost_usd": 0.0,
       "model": "openai/gpt-oss-120b",
-      "p50_latency_ms": 0.6227914709597826,
+      "p50_latency_ms": 2.4152499972842634,
       "pending": 0,
       "refusal_recall": {
         "ci95": null,

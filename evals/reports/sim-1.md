@@ -21,7 +21,7 @@ Rates show the value, the Wilson 95% interval, and the counts. Trials are pooled
 | spider_flight_2 | oneshot | openai/gpt-oss-120b | 1 | 100.0% [93-100] (50/50) | 88.0% [76-94] (44/50) | 88.0% [76-94] (44/50) | 0.0% [0-7] (0/50) | 12.0% [6-24] (6/50) | n/a | 0.0% [0-7] (0/50) |
 | spider_network_1 | ledgerline | openai/gpt-oss-120b | 1 | 48.0% [35-61] (24/50) | 46.0% [33-60] (23/50) | 95.8% [80-99] (23/24) | 52.0% [39-65] (26/50) | 4.2% [1-20] (1/24) | n/a | 0.0% [0-7] (0/50) |
 | spider_network_1 | oneshot | openai/gpt-oss-120b | 1 | 100.0% [93-100] (50/50) | 86.0% [74-93] (43/50) | 86.0% [74-93] (43/50) | 0.0% [0-7] (0/50) | 14.0% [7-26] (7/50) | n/a | 0.0% [0-7] (0/50) |
-| spider_wta_1 | ledgerline | openai/gpt-oss-120b | 1 | 94.0% [84-98] (47/50) | 86.0% [74-93] (43/50) | 91.5% [80-97] (43/47) | 6.0% [2-16] (3/50) | 8.5% [3-20] (4/47) | n/a | 0.0% [0-7] (0/50) |
+| spider_wta_1 | ledgerline | openai/gpt-oss-120b | 1 | 96.0% [87-99] (48/50) | 88.0% [76-94] (44/50) | 91.7% [80-97] (44/48) | 4.0% [1-13] (2/50) | 8.3% [3-20] (4/48) | n/a | 0.0% [0-7] (0/50) |
 | spider_wta_1 | oneshot | openai/gpt-oss-120b | 1 | 100.0% [93-100] (50/50) | 82.0% [69-90] (41/50) | 82.0% [69-90] (41/50) | 0.0% [0-7] (0/50) | 16.3% [9-29] (8/49) | n/a | 2.0% [0-10] (1/50) |
 
 ## Floor check: fieldservice, openai/gpt-oss-120b (plan.md L11)
@@ -117,13 +117,12 @@ Next: v0.2 changes the prompt to refuse first when a question needs something th
 - `spider:255` (spider_flight_2, trial 1): refused — refused (ambiguous_path). Tag: **grammar_gap**. Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so the validator refuses rather than guess.
 - `spider:257` (spider_flight_2, trial 1): refused — refused (unanswerable). Tag: **grammar_gap**. Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none of these.
 - `spider:258` (spider_flight_2, trial 1): refused — refused (unanswerable). Tag: **grammar_gap**. Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none of these.
-- `spider:439` (spider_wta_1, trial 1): wrong — rows differ. Tag: **misread**. 'Highest rank' means rank 1; the model took the maximum rank number.
-- `spider:451` (spider_wta_1, trial 1): refused — refused (ambiguous_path). Tag: **grammar_gap**. Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so the validator refuses rather than guess.
+- `spider:451` (spider_wta_1, trial 1): wrong — rows differ. Tag: **misread**. The names and country codes need a join with two equally short paths (winner or loser). The model grouped by winner_id instead of refusing, so it returned ids rather than the requested columns: a wrong answer.
 - `spider:452` (spider_wta_1, trial 1): refused — refused (unanswerable). Tag: **grammar_gap**. Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none of these.
 - `spider:463` (spider_wta_1, trial 1): wrong — rows differ. Tag: **gold_issue**. The gold reads rank points from an unaggregated column in a GROUP BY (SQLite returns an arbitrary row). The answer's maximum is a defined value.
 - `spider:464` (spider_wta_1, trial 1): wrong — rows differ. Tag: **gold_issue**. Same gold pattern as spider:463: rank points from an unaggregated column.
-- `spider:479` (spider_wta_1, trial 1): wrong — rows differ. Tag: **builder_bug**. Registry init typed ranking_date as a date (its declared type), but it holds eight-digit integers (YYYYMMDD). The day grain then returns NULL. Init should check the values, not just the declaration.
-- `spider:488` (spider_wta_1, trial 1): refused — refused (ambiguous_path). Tag: **grammar_gap**. Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so the validator refuses rather than guess.
+- `spider:472` (spider_wta_1, trial 1): wrong — rows differ. Tag: **gold_issue**. The gold groups by first name, which merges different players who share one; the answer totals per player.
+- `spider:488` (spider_wta_1, trial 1): refused — refused (unanswerable). Tag: **grammar_gap**. Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so the validator refuses rather than guess.
 - `spider:885` (spider_network_1, trial 1): refused — refused (ambiguous_path, invalid_order_by). Tag: **grammar_gap**. Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so the validator refuses rather than guess.
 - `spider:886` (spider_network_1, trial 1): refused — refused (ambiguous_path). Tag: **grammar_gap**. Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so the validator refuses rather than guess.
 - `spider:887` (spider_network_1, trial 1): wrong — ambiguous_path. Tag: **misread**. After the validator refused the ambiguous join, the model answered with student ids instead of names: a wrong answer.
@@ -225,10 +224,8 @@ Next: v0.2 changes the prompt to refuse first when a question needs something th
 - `spider:914` (spider_network_1, trial 1): oneshot
 - `spider:915` (spider_network_1, trial 1): oneshot
 - `spider:917` (spider_network_1, trial 1): oneshot
-- `spider:439` (spider_wta_1, trial 1): oneshot
 - `spider:451` (spider_wta_1, trial 1): oneshot
 - `spider:463` (spider_wta_1, trial 1): oneshot
-- `spider:479` (spider_wta_1, trial 1): oneshot
 - `spider:488` (spider_wta_1, trial 1): oneshot
 
 ## Spider registries (generated by `registry init`, unedited, draft)
@@ -237,4 +234,4 @@ Next: v0.2 changes the prompt to refuse first when a question needs something th
 - spider_dog_kennels: `ba7277f7739fd820d7ec8f4cfda282af060e5d4aa09828dcca20d512683bde78`
 - spider_flight_2: `e69b8206b5403470249e458ce75b56ba6e3421c53b73d982f53e2fbe1646c940`
 - spider_network_1: `b9991de76b27c3ecc644274d209d7c543c7c27dcd2ec7298e7ab729212639d4b`
-- spider_wta_1: `afc40c0f94f040485945f79fb21fafab91fd69e9278211a15b94442190f7f54b`
+- spider_wta_1: `807a938123c3f5467290fcab18b29cc9d79c341a9dab73eff6d096b5cb43345a`
