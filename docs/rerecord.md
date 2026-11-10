@@ -69,6 +69,11 @@ its first line.
 
    The report lands in `evals/reports/sim-1.md` and `.json`. Delete `evals/runs/sim-1/`
    first if you want a clean re-score (the run resumes from its checkpoint otherwise).
+
+   After changing a prompt or a registry, start a **new run id** (for example `sim-2`).
+   A run never reuses a result made with a different prompt version or registry (both
+   are part of each checkpoint key), so the old checkpoint would only hold results that
+   no longer count.
    Tag every Ledgerline miss in `evals/triage/<schema>.yaml`.
 
 Spider recordings stay on your machine (`evals/recordings/eval/spider_*/` is gitignored),

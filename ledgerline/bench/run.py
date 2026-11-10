@@ -7,6 +7,7 @@ no recording is exported and left unfinished; import the answers and run again.
 
 from __future__ import annotations
 
+import hashlib
 import json
 from collections import Counter
 from collections.abc import Callable
@@ -45,10 +46,27 @@ class Task:
     trial: int
     system: str
     item: EvalItem
+    prompt_version: str = ""
+    registry_sha: str = ""
 
     @property
     def key(self) -> str:
-        return f"{self.schema_id}|{self.model}|t{self.trial}|{self.system}|{self.item.id}"
+        """The checkpoint key. It holds the prompt version and the registry's hash, so a
+        result is reused only for the same prompt and the same registry."""
+        return (
+            f"{self.schema_id}|{self.model}|t{self.trial}|{self.system}|{self.item.id}"
+            f"|{self.prompt_version}|{self.registry_sha[:16]}"
+        )
+
+
+def prompt_version_for(system: str) -> str:
+    """The prompt version a system sends now (read at call time, never cached)."""
+    from ledgerline.bench import systems as systems_module
+    from ledgerline.pipeline import service as service_module
+
+    if system == "ledgerline":
+        return str(service_module.PROMPT_VERSION)
+    return str(systems_module.ONESHOT_PROMPT_VERSION)
 
 
 @dataclass
@@ -152,8 +170,20 @@ def run_eval(
                 "can't be honestly simulated in one pass)"
             )
     schemas, hashes = _schemas(settings, schema_ids)
+    registry_sha = {
+        schema_id: hashlib.sha256(config.registry_path.read_bytes()).hexdigest()
+        for schema_id, config in schemas.items()
+    }
     tasks = [
-        Task(schema_id, model, trial, system, item)
+        Task(
+            schema_id,
+            model,
+            trial,
+            system,
+            item,
+            prompt_version_for(system),
+            registry_sha[schema_id],
+        )
         for schema_id in schema_ids
         for model in models
         for trial in range(1, trials_for(schema_id, trials) + 1)
