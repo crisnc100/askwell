@@ -73,6 +73,10 @@
       {
        "claim": "Apache-2.0 license",
        "at": "pyproject.toml:6"
+      },
+      {
+       "claim": "the tests need psql to run roles.sql",
+       "at": "tests/test_roles.py:22"
       }
      ]
     }
@@ -287,12 +291,28 @@
        "at": "ledgerline/core/executor.py:186"
       },
       {
-       "claim": "audit stores a params hash, never values or rows",
+       "claim": "ask_log lives in a separate app database the read-only role cannot connect to",
+       "at": "infra/postgres/roles.sql:52"
+      },
+      {
+       "claim": "audit row columns: trace id, time, schema, question, intent, validation, SQL, params hash, row count, cost, model, outcome",
+       "at": "ledgerline/core/audit.py:26"
+      },
+      {
+       "claim": "question and intent are stored as given, so typed values reach the log",
+       "at": "ledgerline/core/executor.py:172"
+      },
+      {
+       "claim": "the entry is persisted field for field",
+       "at": "ledgerline/core/audit.py:76"
+      },
+      {
+       "claim": "bound parameters are stored only as a SHA-256",
        "at": "ledgerline/core/audit.py:47"
       },
       {
-       "claim": "ask_log lives in a separate app database the read-only role cannot connect to",
-       "at": "infra/postgres/roles.sql:52"
+       "claim": "no result rows: the entry has only a row count",
+       "at": "ledgerline/core/executor.py:189"
       }
      ]
     }
