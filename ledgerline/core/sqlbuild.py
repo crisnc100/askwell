@@ -137,8 +137,8 @@ def _grain_other(element: _Grain, compiler: SQLCompiler, **kw: Any) -> str:
 
 class AsDatetime(FunctionElement[Any]):
     """An operand normalised to a datetime: CAST AS TIMESTAMP on Postgres; on SQLite,
-    strftime to one text format (millisecond precision), whatever format the stored
-    DATE or DATETIME text uses."""
+    one text format with microseconds, whatever format the stored DATE or DATETIME text
+    uses."""
 
     type = DateTime()
     name = "as_datetime"
@@ -150,9 +150,41 @@ def _as_datetime_pg(element: AsDatetime, compiler: SQLCompiler, **kw: Any) -> st
     return f"CAST({compiler.process(element.clauses, **kw)} AS TIMESTAMP)"
 
 
+def _sqlite_canonical_datetime(x: str) -> str:
+    """SQLite text for `x` as 'YYYY-MM-DD HH:MM:SS.ffffff', whatever format it was stored
+    in (a space or 'T', with or without a fraction, or a plain DATE). strftime's %f stops
+    at milliseconds, so the stored fraction is padded to six digits instead."""
+    fraction = (
+        f"CASE WHEN instr({x}, '.') > 0 "
+        f"THEN substr(substr({x}, instr({x}, '.') + 1) || '000000', 1, 6) "
+        "ELSE '000000' END"
+    )
+    return f"(strftime('%Y-%m-%d %H:%M:%S', {x}) || '.' || {fraction})"
+
+
 @compiles(AsDatetime, "sqlite")
 def _as_datetime_sqlite(element: AsDatetime, compiler: SQLCompiler, **kw: Any) -> str:
-    return f"strftime('%Y-%m-%d %H:%M:%f', {compiler.process(element.clauses, **kw)})"
+    return _sqlite_canonical_datetime(compiler.process(element.clauses, **kw))
+
+
+class SqliteDatetimeText(FunctionElement[Any]):
+    """A DATETIME operand in a filter. On SQLite, timestamps are text and compare as
+    text, so '10:30:00' and '10:30:00.000000' differ; this puts both sides in one format.
+    Elsewhere it is the operand unchanged (Postgres compares real timestamps)."""
+
+    type = DateTime()
+    name = "sqlite_datetime_text"
+    inherit_cache = True
+
+
+@compiles(SqliteDatetimeText, "sqlite")
+def _datetime_text_sqlite(element: SqliteDatetimeText, compiler: SQLCompiler, **kw: Any) -> str:
+    return _sqlite_canonical_datetime(compiler.process(element.clauses, **kw))
+
+
+@compiles(SqliteDatetimeText)
+def _datetime_text_other(element: SqliteDatetimeText, compiler: SQLCompiler, **kw: Any) -> str:
+    return compiler.process(element.clauses, **kw)
 
 
 @compiles(AsDatetime)
@@ -248,9 +280,22 @@ def _predicate(tables: _Tables, predicate: Predicate) -> ColumnElement[bool]:
     if predicate.other is not None:
         col, rhs = _comparison_operands(tables, predicate)
     else:
-        col = tables.col(predicate.field)
+        raw = tables.col(predicate.field)
+
+        def bound(value: Any) -> ColumnElement[Any]:
+            if predicate.field.type == "datetime":
+                return SqliteDatetimeText(_bind(value, raw))
+            return _bind(value, raw)
+
+        col = SqliteDatetimeText(raw) if predicate.field.type == "datetime" else raw
+        if op == "is_null":
+            col = raw
         single = op in ("eq", "neq", "gt", "gte", "lt", "lte")
-        rhs = _bind(predicate.values[0], col) if single else None
+        rhs = bound(predicate.values[0]) if single else None
+        if op == "between":
+            return col.between(bound(predicate.values[0]), bound(predicate.values[1]))
+        if op == "in":
+            return col.in_([bound(v) for v in predicate.values])
     if op == "eq":
         return col == rhs
     if op == "neq":
