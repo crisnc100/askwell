@@ -10,7 +10,7 @@ import hashlib
 import json
 from dataclasses import dataclass
 from datetime import UTC, datetime
-from typing import Any, Literal
+from typing import Any, Literal, Protocol
 
 from sqlalchemy import (
     Column,
@@ -68,6 +68,12 @@ class AuditEntry:
     cost_usd: float | None
     model: str | None
     outcome: Outcome
+
+
+class AuditSink(Protocol):
+    """Anything that records audit entries (the AuditLog, or a per-ask wrapper)."""
+
+    def record(self, entry: AuditEntry) -> None: ...
 
 
 class AuditLog:

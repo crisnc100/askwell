@@ -26,7 +26,7 @@ from sqlalchemy.exc import DBAPIError
 from sqlalchemy.pool import NullPool
 from sqlalchemy.sql import Executable, Select, TextClause
 
-from ledgerline.core.audit import AuditEntry, AuditLog, params_hash
+from ledgerline.core.audit import AuditEntry, AuditSink, params_hash
 from ledgerline.core.sqlbuild import build, compile_sql
 from ledgerline.core.validate import QueryPlan
 
@@ -170,7 +170,7 @@ class Executor:
         self,
         engine: Engine,
         *,
-        audit: AuditLog | None = None,
+        audit: AuditSink | None = None,
         timeout_s: float = DEFAULT_TIMEOUT_S,
         row_cap: int = DEFAULT_ROW_CAP,
     ) -> None:

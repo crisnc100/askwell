@@ -22,7 +22,7 @@ from ledgerline.core.intent import Intent
 from ledgerline.core.registry import Registry, load_registry
 from ledgerline.core.validate import QueryPlan, ValidationResult, validate
 from ledgerline.llm.budget import BudgetGuard
-from ledgerline.llm.errors import ParseError, ReplayMissError
+from ledgerline.llm.errors import ReplayMissError
 from ledgerline.llm.gateway import Gateway, OpenRouterTransport
 from ledgerline.llm.pricing import PriceBook
 from ledgerline.llm.replay import ReplayStore
@@ -217,41 +217,64 @@ class AskService:
         context: dict[str, Any] | None = None,
     ) -> AskResult:
         """Answer one question. `trial` > 1 asks again as an independent sample: it is
-        part of the prompt version, so it gets its own recording."""
-        registry = self.registry(schema_id)
-        config = self.schemas[schema_id]
+        part of the prompt version, so it gets its own recording.
+
+        This is the one place that guarantees every ask exactly one audit row. The paths
+        inside (answered, refused, query error, budget stop) write their own row; any
+        failure that leaves before one was written (a missing registry or database, a
+        gateway or recording error) gets an error row here, then is re-raised so the
+        API status and CLI exit code stay the same."""
         trace_id = str(uuid.uuid4())
-        view = registry_view(registry, self.settings.now, self.settings.prompt_budget_chars)
-        for step in view.truncation:
-            log.info("prompt truncation for %s: %s", schema_id, step)
+        audit = _OneRow(self.audit)
         # A fresh guard per ask, held here rather than on the shared gateway, so
         # concurrent requests never reset or charge each other's budget. (The eval turns
-        # this off and shares one run-wide guard through gateway.guard.)
+        # this off and shares one run-wide guard through gateway.guard.) The guard is
+        # charged when a call is paid for, so its total is the ask's spend even when a
+        # later step fails.
         ask_guard = (
             BudgetGuard(self.settings.ask_budget_usd)
             if self.gateway.mode in ("live", "record") and self.reset_budget_per_ask
             else None
         )
+        try:
+            return self._ask(schema_id, question, trace_id, audit, ask_guard, trial, context)
+        except Exception as exc:
+            if not audit.written:
+                spent = ask_guard.spent_usd if ask_guard is not None else 0.0
+                try:
+                    self._audit_failure(audit, schema_id, question, trace_id, exc, spent)
+                except Exception:
+                    # Never let a broken audit database hide the error that matters.
+                    log.exception("could not write the audit row for ask %s", trace_id)
+            raise
+
+    def _ask(
+        self,
+        schema_id: str,
+        question: str,
+        trace_id: str,
+        audit: _OneRow,
+        ask_guard: BudgetGuard | None,
+        trial: int,
+        context: dict[str, Any] | None,
+    ) -> AskResult:
+        registry = self.registry(schema_id)
+        config = self.schemas[schema_id]
+        view = registry_view(registry, self.settings.now, self.settings.prompt_budget_chars)
+        for step in view.truncation:
+            log.info("prompt truncation for %s: %s", schema_id, step)
         prompt_version = PROMPT_VERSION if trial == 1 else f"{PROMPT_VERSION}+trial{trial}"
         request_context = {"schema_id": schema_id, "question": question, **(context or {})}
 
-        spent = [0.0]  # what this ask has paid, for the audit row if the gateway fails
-
         def interpret(messages: list[ChatMessage]) -> LLMResult[Intent]:
-            try:
-                result = self.gateway.complete(
-                    guard=ask_guard,
-                    model=self.model,
-                    prompt_version=prompt_version,
-                    messages=messages,
-                    schema=Intent,
-                    context=request_context,
-                )
-            except ParseError as exc:
-                spent[0] += exc.cost_usd
-                raise
-            spent[0] += result.cost_usd
-            return result
+            return self.gateway.complete(
+                guard=ask_guard,
+                model=self.model,
+                prompt_version=prompt_version,
+                messages=messages,
+                schema=Intent,
+                context=request_context,
+            )
 
         def check(intent: Intent) -> ValidationResult:
             return validate(
@@ -264,7 +287,7 @@ class AskService:
 
         executor = Executor(
             self.engine(schema_id),
-            audit=self.audit,
+            audit=audit if audit.enabled else None,
             timeout_s=self.settings.query_timeout_s,
             row_cap=self.settings.row_cap,
         )
@@ -282,24 +305,22 @@ class AskService:
             )
 
         graph = build_graph(interpret, check, execute, refuse_on_budget=self.reset_budget_per_ask)
-        try:
-            state: AskState = graph.invoke(
-                {"question": question, "messages": first_messages(view, question), "attempts": []}
-            )
-        except Exception as exc:
-            # A gateway failure (replay miss, export, provider error) leaves the graph
-            # before any audit write. Record it once, then let the caller map it to its
-            # status or exit code as before.
-            self._audit_failure(schema_id, question, trace_id, _failure_reason(exc), spent[0])
-            raise
-        return self._result(schema_id, question, trace_id, state, view.truncation)
+        state: AskState = graph.invoke(
+            {"question": question, "messages": first_messages(view, question), "attempts": []}
+        )
+        return self._result(audit, schema_id, question, trace_id, state, view.truncation)
 
     def _audit_failure(
-        self, schema_id: str, question: str, trace_id: str, reason: str, cost_usd: float
+        self,
+        audit: _OneRow,
+        schema_id: str,
+        question: str,
+        trace_id: str,
+        exc: Exception,
+        cost_usd: float,
     ) -> None:
-        if self.audit is None:
-            return
-        self.audit.record(
+        reason = _failure_reason(exc)
+        audit.record(
             AuditEntry(
                 trace_id=trace_id,
                 schema_id=schema_id,
@@ -317,6 +338,7 @@ class AskService:
 
     def _result(
         self,
+        audit: _OneRow,
         schema_id: str,
         question: str,
         trace_id: str,
@@ -330,9 +352,9 @@ class AskService:
             refusal = f"the query failed: {error}"
         intent = state.get("intent")
         validation = _validation(state)
-        if execution is None and self.audit is not None and error is None:
+        if execution is None and error is None:
             # Answered and failed executions are audited by the executor; refusals here.
-            self.audit.record(
+            audit.record(
                 AuditEntry(
                     trace_id=trace_id,
                     schema_id=schema_id,
@@ -366,14 +388,34 @@ class AskService:
         )
 
 
+class _OneRow:
+    """The audit log as seen by one ask: it remembers whether that ask's row was written,
+    so `ask` can add the error row exactly when no other path wrote one."""
+
+    def __init__(self, log: AuditLog | None) -> None:
+        self.log = log
+        self.written = False
+
+    @property
+    def enabled(self) -> bool:
+        return self.log is not None
+
+    def record(self, entry: AuditEntry) -> None:
+        if self.log is None:
+            return
+        self.log.record(entry)
+        self.written = True
+
+
 def _failure_reason(exc: Exception) -> str:
-    """A short reason for the audit row. Provider error text is left out: it can carry
-    request details; the exception type is enough to find the failure in the logs."""
+    """A short reason for the audit row. The exception's message is left out (a provider
+    or driver message can carry request details); its type is enough to find the
+    failure in the logs."""
     if isinstance(exc, PendingRequestError):
         return "no recording; the model request was exported for a simulated answer"
     if isinstance(exc, ReplayMissError):
         return "no recorded model answer (replay mode)"
-    return f"model call failed: {type(exc).__name__}"
+    return f"ask failed: {type(exc).__name__}"
 
 
 def _intent_json(state: AskState) -> str:
