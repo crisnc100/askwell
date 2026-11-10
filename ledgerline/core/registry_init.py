@@ -126,6 +126,7 @@ def _relationships(
     by_lower = {t.name.lower(): t for t in tables}
     single_pk = {t.name: t.pk[0] for t in tables if len(t.pk) == 1}
     rels: dict[tuple[str, str], Relationship] = {}
+    skipped: set[tuple[str, str]] = set()  # (table, lowercased column) of skipped keys
 
     for t in tables:
         for fk in t.fks:
@@ -134,6 +135,7 @@ def _relationships(
             target = by_lower.get(str(fk.get("referred_table") or "").lower())
             if len(src_cols) != 1 or len(dst_cols) != 1 or target is None:
                 warnings.append(f"skipped foreign key on {t.name}: not single-column or unknown")
+                skipped.update((t.name, c.lower()) for c in src_cols)
                 continue
             dst_col = next(
                 (c for c in field_slugs[target.name] if c.lower() == dst_cols[0].lower()), None
@@ -145,6 +147,7 @@ def _relationships(
                 warnings.append(
                     f"skipped foreign key {t.name}.{src_cols[0]}: target is not a primary key"
                 )
+                skipped.add((t.name, src_cols[0].lower()))
                 continue
             key = (t.name, src_col)
             rels.setdefault(
@@ -166,7 +169,11 @@ def _relationships(
     for t in tables:
         for col in t.columns:
             col_name = str(col["name"])
-            if (t.name, col_name) in rels or (t.pk == [col_name]):
+            # A declared key that was skipped says where the column points; guessing a
+            # different target from its name would invent a wrong join.
+            if (t.name, col_name) in rels or t.pk == [col_name]:
+                continue
+            if (t.name, col_name.lower()) in skipped:
                 continue
             candidates: list[str] = []
             match = _ID_SUFFIX.match(col_name)
