@@ -117,6 +117,76 @@ class LedgerlineSystem:
         )
 
 
+class UnsafeSqlError(ValueError):
+    """Model-written SQL that is not exactly one SELECT (or WITH ... SELECT)."""
+
+
+def single_select(sql: str) -> str:
+    """Return `sql` if it is exactly one SELECT or WITH statement, else raise.
+
+    Model SQL is untrusted. A batch such as "ROLLBACK; BEGIN READ WRITE; ..." would end
+    the read-only transaction and run anything after it, so a second statement is never
+    allowed. The scan skips quoted strings ('...', "...", $tag$...$tag$) and comments
+    (-- and /* */), allows one trailing semicolon, and requires the first word to be
+    SELECT or WITH. The executor then runs it inside a read-only transaction, and on
+    Postgres through a server-side cursor, which also accepts only one statement."""
+    i, n = 0, len(sql)
+    code: list[str] = []  # the SQL with strings blanked and comments removed
+    while i < n:
+        ch = sql[i]
+        if sql.startswith("--", i):
+            end = sql.find("\n", i)
+            i = n if end == -1 else end
+            code.append(" ")
+        elif sql.startswith("/*", i):
+            end = sql.find("*/", i + 2)
+            if end == -1:
+                raise UnsafeSqlError("unclosed comment")
+            i = end + 2
+            code.append(" ")
+        elif ch in ("'", '"'):
+            end = i + 1
+            while True:
+                end = sql.find(ch, end)
+                if end == -1:
+                    raise UnsafeSqlError("unclosed quote")
+                if sql.startswith(ch * 2, end):  # doubled quote inside the string
+                    end += 2
+                    continue
+                break
+            i = end + 1
+            code.append(" x ")
+        elif ch == "$":
+            tag_end = sql.find("$", i + 1)
+            tag = sql[i : tag_end + 1] if tag_end != -1 else ""
+            if tag and (tag == "$$" or tag[1:-1].replace("_", "").isalnum()):
+                end = sql.find(tag, tag_end + 1)
+                if end == -1:
+                    raise UnsafeSqlError("unclosed dollar quote")
+                i = end + len(tag)
+                code.append(" x ")
+            else:
+                code.append(ch)
+                i += 1
+        else:
+            code.append(ch)
+            i += 1
+    body = "".join(code).strip()
+    if body.endswith(";"):
+        if not sql.rstrip().endswith(";"):
+            raise UnsafeSqlError("nothing may follow the closing semicolon")
+        body = body[:-1].rstrip()
+    if not body:
+        raise UnsafeSqlError("no statement")
+    if ";" in body:
+        raise UnsafeSqlError("only a single statement is allowed")
+    first = body.split(None, 1)[0].lower()
+    if first not in ("select", "with"):
+        raise UnsafeSqlError(f"only a single SELECT is allowed, not {first.upper()}")
+    trimmed = sql.strip()
+    return trimmed[:-1].rstrip() if trimmed.endswith(";") else trimmed
+
+
 def raw_sql(sql: str) -> TextClause:
     """Model-written or gold SQL as-is: colons are escaped so SQLAlchemy never reads
     `:name` inside the query as a bind parameter."""
@@ -207,10 +277,13 @@ class OneShotSystem:
                 provenance=result.provenance,
             )
         try:
+            query = single_select(answer.sql)
             rows = run(
-                self.engine, raw_sql(answer.sql), timeout_s=self.timeout_s, row_cap=self.row_cap
+                self.engine, raw_sql(query), timeout_s=self.timeout_s, row_cap=self.row_cap
             ).rows
             error = None
+        except UnsafeSqlError as exc:
+            rows, error = [], f"refused model SQL: {exc}"
         except ExecutionError as exc:
             rows, error = [], str(exc)
         return SystemAnswer(
