@@ -1,4 +1,4 @@
-"""Eval metrics with Wilson 95% intervals (plan.md, Definitions, metrics)."""
+"""Eval metrics with Wilson 95% intervals (the list in ADR-006)."""
 
 from __future__ import annotations
 
@@ -56,7 +56,7 @@ class ItemOutcome:
 
 
 def summarise(outcomes: list[ItemOutcome]) -> dict[str, Any]:
-    """Every rate in plan.md's metric list, over the finished (non-pending) outcomes.
+    """Every metric ADR-006 lists, over the finished (non-pending) outcomes.
 
     - in_schema item: correct (rows match gold), wrong (rows differ), refused, or error
       (the SQL failed to run).

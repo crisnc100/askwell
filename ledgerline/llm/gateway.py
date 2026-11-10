@@ -5,6 +5,8 @@ Modes:
 - `record`: call OpenRouter and append the response to the replay store.
 - `replay`: answer only from the replay store. A miss raises `ReplayMissError`;
   replay never falls back to a live call.
+- `export`: like replay, but a miss writes the request to the pending directory for a
+  simulated answer (`ledgerline.llm.simulate`) and raises `PendingRequestError`.
 """
 
 from __future__ import annotations

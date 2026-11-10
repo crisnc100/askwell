@@ -1,5 +1,5 @@
 """Re-run the fieldservice eval from the committed recordings and compare the result with
-the committed replay report (plan.md P4.3). Exit 1 on any difference.
+the committed replay report. Exit 1 on any difference.
 
     uv run python -m scripts.check_replay_report           # check
     uv run python -m scripts.check_replay_report --write   # rewrite the committed report

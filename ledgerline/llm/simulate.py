@@ -1,8 +1,8 @@
-"""Simulated model answers (plan.md, Decision 2026-11-09: no OpenRouter key yet).
+"""Simulated model answers, for running without an OpenRouter key (docs/rerecord.md).
 
-`export` writes each unrecorded request to `<pending>/<key>.json`. Someone outside this
-codebase (the orchestrator's Claude subagent) answers each one as the target model
-would and writes `<pending>/<key>.answer.json`:
+`export` writes each unrecorded request to `<pending>/<key>.json`. A stand-in model,
+outside this codebase, answers each one as the target model would and writes
+`<pending>/<key>.answer.json`:
 
     {"key": "<key>", "simulated_by": "<claude model id>",
      "response": {...}}            # the JSON object the model returned, or

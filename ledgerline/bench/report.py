@@ -45,7 +45,7 @@ def floor_checks(
     table: list[dict[str, Any]], path: Path | None = None, default_model: str | None = None
 ) -> list[dict[str, Any]]:
     """Each schema's floors from `evals/floors.yaml`, checked on Ledgerline's row for the
-    configured default model (plan.md L11), never on whichever model sorts first. With
+    configured default model, never on whichever model sorts first. With
     no default model given, a schema is checked only if it has exactly one model row."""
     source = path or FLOORS_FILE
     if not source.exists():

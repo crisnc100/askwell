@@ -117,7 +117,7 @@ def items_for(schema_id: str) -> list[EvalItem]:
 
 
 def trials_for(schema_id: str, trials: int) -> int:
-    """Fieldservice runs every trial asked for; Spider runs one (plan.md)."""
+    """Fieldservice runs every trial asked for; Spider runs one (ADR-006)."""
     return trials if schema_id == "fieldservice" else 1
 
 

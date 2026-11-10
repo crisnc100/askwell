@@ -1,10 +1,10 @@
-"""Does a system's result match the gold result? (plan.md, Definitions, result comparison)
+"""Does a system's result match the gold result?
 
 - Compare only as many columns as the gold has. A result with extra columns still
   matches if some of its columns, in any order, hold exactly the gold columns' values.
 - Rows compare as a multiset, or as a sequence when the gold query has ORDER BY.
-- Numbers compare as floats and match when they differ by at most 1e-6 (absolute, as
-  plan.md defines). NULL never equals 0.
+- Numbers compare as floats and match when they differ by at most 1e-6 (absolute, not
+  relative). NULL never equals 0.
 - Dates and datetimes compare as ISO text, so SQLite's date strings match Postgres dates,
   and a datetime at exactly midnight UTC matches the same date.
 - The gold is cut to the same row cap as the system's answer.

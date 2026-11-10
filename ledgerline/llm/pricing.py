@@ -67,9 +67,8 @@ def worst_case_cost(price: ModelPrice, prompt_bytes: int, max_tokens: int) -> fl
     `prompt_bytes` is the UTF-8 size of the messages and the response schema, serialised
     as JSON. Every token covers at least one byte of the text, so this bounds the
     prompt's tokens. A character count would not: '日' is one character but three bytes,
-    and can be up to three tokens. The JSON
-    keys and quotes also outweigh the few tokens a chat template adds. The completion is
-    bounded by `max_tokens`.
+    and can be up to three tokens. The JSON keys and quotes also outweigh the few tokens
+    a chat template adds. The completion is bounded by `max_tokens`.
     """
     return prompt_bytes * price.prompt_per_token + max_tokens * price.completion_per_token
 
