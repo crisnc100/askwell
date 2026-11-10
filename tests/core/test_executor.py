@@ -227,3 +227,12 @@ def test_readonly_role_cannot_reach_the_app_db() -> None:
             pass
     finally:
         engine.dispose()
+
+
+def test_a_statement_that_returns_no_rows_object_is_an_execution_error(
+    sqlite_ro: Engine,
+) -> None:
+    """A comment-only statement has no result set; it must be an item error, not a
+    ResourceClosedError that aborts a whole eval run."""
+    with pytest.raises(ExecutionError, match="no result"):
+        run(sqlite_ro, text("-- nothing to run"))

@@ -4,7 +4,7 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 uv run detect-secrets scan --baseline .secrets.baseline \
-  --exclude-files '^(\.venv/|\.git/|uv\.lock$|data/|\.pytest_cache/|\.ruff_cache/|evals/gold/MANIFEST\.json$)' --all-files
+  --exclude-files '^(\.venv/|\.git/|uv\.lock$|data/|\.pytest_cache/|\.ruff_cache/|evals/gold/MANIFEST\.json$|evals/recordings/|evals/spider_registries\.json$|evals/pending/|evals/runs/|evals/reports/|evals/spider_forbidden_values\.json$)' --all-files
 python3 - <<'PY'
 import json
 b = json.load(open(".secrets.baseline"))

@@ -9,3 +9,7 @@ data/
 coverage.json
 .coverage
 builds/**/*.txt
+evals/pending/
+evals/runs/
+# Spider recordings can hold Spider data values (CC BY-SA): never committed.
+evals/recordings/eval/spider_*/

@@ -14,6 +14,9 @@ class ParseError(LLMError):
         super().__init__(f"unparseable model output: {reason}")
         self.reason = reason
         self.raw = raw
+        # Set by the gateway: an unparseable answer was still paid for.
+        self.cost_usd = 0.0
+        self.provenance: dict[str, str] | None = None
 
 
 class ReplayMissError(LLMError):

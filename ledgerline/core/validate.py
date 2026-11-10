@@ -82,9 +82,6 @@ class Issue:
     message: str
 
 
-# --- the plan ---
-
-
 @dataclass(frozen=True)
 class JoinStep:
     """JOIN `table` AS `alias` ON `parent_alias`.`parent_column` = `alias`.`column`.
@@ -192,9 +189,6 @@ class ValidationResult:
         return [issue.code for issue in self.issues]
 
 
-# --- paths ---
-
-
 @dataclass(frozen=True)
 class _Edge:
     rel: int
@@ -259,9 +253,6 @@ def _shortest_paths(registry: Registry, base: str) -> dict[str, _PathInfo]:
     return out
 
 
-# --- the validator ---
-
-
 class _Validator:
     def __init__(self, intent: Intent, registry: Registry, now: datetime, row_cap: int) -> None:
         self.intent = intent
@@ -278,8 +269,6 @@ class _Validator:
 
     def fail(self, code: ErrorCode, location: str, message: str) -> None:
         self.issues.append(Issue(code, location, message))
-
-    # entity and field lookup
 
     def _find_entity(self, name: str) -> str | None:
         lowered = name.lower()
@@ -384,8 +373,6 @@ class _Validator:
         )
         return resolved, fdef
 
-    # values
-
     def convert(self, value: Scalar | None, ftype: FieldType, location: str) -> Value | None:
         ok = True
         out: Value | None = None
@@ -445,8 +432,6 @@ class _Validator:
             f"{value!r} is not one of {fdef.column}'s allowed values",
         )
         return None
-
-    # sections
 
     def check_shape(self) -> bool:
         intent = self.intent

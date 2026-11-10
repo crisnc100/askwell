@@ -22,7 +22,8 @@ headline numbers is fixed before the system exists.
   run with `allow_draft`, labelled in the report.
 - **Metrics:** coverage, execution accuracy, accuracy given attempted, false-refusal rate,
   wrong-answer rate given answered, refusal recall, execution-error rate, mean cost, p50
-  latency, all rates with Wilson 95% intervals. Result comparison as defined in the plan.
+  latency, all rates with Wilson 95% intervals. Results are compared as
+  `ledgerline/bench/compare.py` describes.
 - **Every Ledgerline miss is triaged** (`grammar_gap | misread | validator_false_reject |
   builder_bug | gold_issue`), and every question where a baseline beat Ledgerline is
   listed (by ID only for Spider).
@@ -42,4 +43,7 @@ model:
    `builder_bug` under 5%.
 
 ## Result
-PENDING.
+PENDING. The simulated run `sim-1` ([evals/reports/sim-1.md](../../evals/reports/sim-1.md))
+covers all six databases with Ledgerline and oneshot, one trial, and is not a measurement
+of the target model. The sql_agent baseline is not built yet: its many tool calls per
+question cannot be honestly simulated, so it waits for a live model.

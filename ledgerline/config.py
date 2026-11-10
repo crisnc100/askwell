@@ -11,7 +11,10 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 DEFAULT_NOW = datetime(2026, 6, 30, tzinfo=UTC)
 
-LLMMode = Literal["record", "replay", "live"]
+# replay: recordings only. export: recordings, and every unrecorded request is written
+# to the pending directory for a simulated answer (no API key needed; see
+# docs/rerecord.md). record / live: OpenRouter, budget-guarded.
+LLMMode = Literal["record", "replay", "live", "export"]
 
 
 class Settings(BaseSettings):
@@ -51,12 +54,18 @@ class Settings(BaseSettings):
     )
     openrouter_base_url: str = "https://openrouter.ai/api/v1"
 
-    # Model ids come from config only. Unset until the model spike picks them (ADR-004).
-    default_model: str | None = None
+    # Model ids come from config only. The real spike (ADR-004) is deferred until a key
+    # exists; this provisional target is what simulated answers stand in for.
+    default_model: str | None = "openai/gpt-oss-120b"
     second_model: str | None = None
 
     llm_mode: LLMMode = "replay"
     replay_dir: str = "evals/recordings"
+    pending_dir: str = "evals/pending"
+    # Hard budget for one live `ask` (all its calls), USD.
+    ask_budget_usd: float = 0.05
+    # The interpret prompt's registry view is truncated deterministically past this size.
+    prompt_budget_chars: int = 16000
     max_tokens: int = 1024
 
     @field_validator("now")

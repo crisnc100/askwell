@@ -1,0 +1,26 @@
+# Triage of every Ledgerline miss in eval run sim-1 (simulated answers).
+# Tags: grammar_gap | misread | validator_false_reject | builder_bug | gold_issue.
+spider:451:
+  note: 'The names and country codes need a join with two equally short paths (winner or loser). The model
+    grouped by winner_id instead of refusing, so it returned ids rather than the requested columns: a
+    wrong answer.'
+  tag: misread
+spider:452:
+  note: Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none
+    of these.
+  tag: grammar_gap
+spider:463:
+  note: The gold reads rank points from an unaggregated column in a GROUP BY (SQLite returns an arbitrary
+    row). The answer's maximum is a defined value.
+  tag: gold_issue
+spider:464:
+  note: 'Same gold pattern as spider:463: rank points from an unaggregated column.'
+  tag: gold_issue
+spider:472:
+  note: The gold groups by first name, which merges different players who share one; the answer totals
+    per player.
+  tag: gold_issue
+spider:488:
+  note: Two foreign keys link the same pair of tables. The intent has no way to say which join to use,
+    so the validator refuses rather than guess.
+  tag: grammar_gap

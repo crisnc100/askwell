@@ -29,4 +29,7 @@ uv run pytest --cov=ledgerline --cov-branch --cov-report=json:coverage.json --co
 step "per-module branch coverage floors"
 uv run python -m scripts.check_coverage coverage.json
 
+step "replay eval reproduces the committed report"
+uv run python -m scripts.check_replay_report
+
 printf '\nverify.sh: all checks passed\n'

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import shutil
 from pathlib import Path
 
@@ -43,19 +44,28 @@ def test_changing_gold_needs_a_reason(gold_copy: Path) -> None:
     assert problems(gold_copy)
 
 
+def _revision(gold_dir: Path) -> int:
+    return int(json.loads((gold_dir / "MANIFEST.json").read_text())["revision"])
+
+
 def test_update_with_reason_bumps_revision_and_logs_it(gold_copy: Path) -> None:
+    before = _revision(gold_copy)
     (gold_copy / "fieldservice.jsonl").write_text("{}\n")
-    assert update("fs-007 gold used the wrong status", gold_copy, today="2026-12-01") == 2
+    assert update("fs-007 gold used the wrong status", gold_copy, today="2026-12-01") == before + 1
     assert problems(gold_copy) == []
     changelog = (gold_copy / "CHANGELOG.md").read_text()
-    assert "## Revision 2 — 2026-12-01\n\nfs-007 gold used the wrong status" in changelog
+    assert (
+        f"## Revision {before + 1} — 2026-12-01\n\nfs-007 gold used the wrong status" in changelog
+    )
 
 
 def test_manifest_bump_without_changelog_entry_is_detected(gold_copy: Path) -> None:
+    before = _revision(gold_copy)
     update("a reason", gold_copy, today="2026-12-01")
     changelog = gold_copy / "CHANGELOG.md"
-    changelog.write_text(changelog.read_text().split("\n## Revision 2")[0] + "\n")
-    assert any("CHANGELOG revisions [1]" in p for p in problems(gold_copy))
+    changelog.write_text(changelog.read_text().split(f"\n## Revision {before + 1}")[0] + "\n")
+    expected = list(range(1, before + 1))
+    assert any(f"CHANGELOG revisions {expected}" in p for p in problems(gold_copy))
 
 
 def test_changelog_entry_without_reason_is_detected(gold_copy: Path) -> None:

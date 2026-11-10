@@ -1,4 +1,8 @@
-"""The `ask_log` audit table in the app DB. It never stores result rows or raw params."""
+"""The `ask_log` audit table in the app DB.
+
+It never stores result rows, and never the bound parameter values (the filter values a
+query ran with): only a SHA-256 of them, which proves which values ran without keeping
+them."""
 
 from __future__ import annotations
 
@@ -6,7 +10,7 @@ import hashlib
 import json
 from dataclasses import dataclass
 from datetime import UTC, datetime
-from typing import Any, Literal
+from typing import Any, Literal, Protocol
 
 from sqlalchemy import (
     Column,
@@ -64,6 +68,12 @@ class AuditEntry:
     cost_usd: float | None
     model: str | None
     outcome: Outcome
+
+
+class AuditSink(Protocol):
+    """Anything that records audit entries (the AuditLog, or a per-ask wrapper)."""
+
+    def record(self, entry: AuditEntry) -> None: ...
 
 
 class AuditLog:

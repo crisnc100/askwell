@@ -12,17 +12,19 @@ total, and an eval that loops over hundreds of questions can overspend quickly.
 - **Replay:** structured calls are recorded in JSONL keyed by hash(model, prompt_version,
   messages, schema); agent baselines are recorded per (system, question_id, model,
   prompt_version) because their messages contain DB rows whose order varies. Modes are
-  `record | replay | live`; a replay miss raises and never falls back to live.
-- **Budget:** before every live call, a worst-case cost (prompt characters × prompt price
-  + `max_tokens` × completion price) is checked against what is left; the run stops hard
-  at `--budget`. Actual cost comes from OpenRouter's reported usage cost, else from
-  models-endpoint pricing. Results are checkpointed per item, so a stopped run resumes,
-  carries its spend forward, and still yields a partial report. 429s back off
-  exponentially. The OpenRouter key also has a credit limit as a backstop.
-- **Known limit:** counting characters bounds tokens only for plain ASCII text. Text
-  with many non-ASCII characters can take more tokens than characters, so the pre-check
-  can come in low there. Each call's actual cost is still charged before the next
-  pre-check, and the key's credit limit still applies.
+  `record | replay | live | export`; a replay miss raises and never falls back to live.
+  Export is replay plus one step: a request with no recording is written to
+  `evals/pending/` for a simulated answer (see [docs/rerecord.md](../rerecord.md)).
+- **Budget:** before every live call, a worst-case cost (prompt bytes × prompt price
+  + `max_tokens` × completion price) is checked against what is left. The prompt bytes
+  are the UTF-8 size of the messages and the response schema as JSON. Every token covers
+  at least one byte, so this bounds the prompt's tokens for any text. In an eval,
+  the run stops hard at `--budget`. An API or CLI ask has its own limit
+  (`LEDGERLINE_ASK_BUDGET_USD`), and going over it refuses that one question. Actual
+  cost comes from OpenRouter's reported usage cost, else from models-endpoint pricing.
+  Results are checkpointed per item, so a stopped run resumes, carries its spend
+  forward, and still yields a partial report. 429s back off exponentially. The
+  OpenRouter key also has a credit limit as a backstop.
 
 ## Prediction (pre-registered)
 1. The replay eval reproduces the committed replay report byte for byte in CI, with zero

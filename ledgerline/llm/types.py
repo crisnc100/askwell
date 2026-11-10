@@ -34,3 +34,5 @@ class LLMResult[T: BaseModel](BaseModel):
     cost_source: Literal["openrouter", "estimated", "replay"]
     replayed: bool
     key: str
+    # Set for simulated answers: {"simulated_by": ..., "standing_in_for": ...}.
+    provenance: dict[str, str] | None = None

@@ -61,13 +61,16 @@ class PriceBook:
         return price
 
 
-def worst_case_cost(price: ModelPrice, prompt_chars: int, max_tokens: int) -> float:
+def worst_case_cost(price: ModelPrice, prompt_bytes: int, max_tokens: int) -> float:
     """An upper bound on a call's cost before it is made.
 
-    A token is at least one character, so the prompt's character count bounds
-    its token count; the completion is bounded by `max_tokens`.
+    `prompt_bytes` is the UTF-8 size of the messages and the response schema, serialised
+    as JSON. Every token covers at least one byte of the text, so this bounds the
+    prompt's tokens. A character count would not: '日' is one character but three bytes,
+    and can be up to three tokens. The JSON keys and quotes also outweigh the few tokens
+    a chat template adds. The completion is bounded by `max_tokens`.
     """
-    return prompt_chars * price.prompt_per_token + max_tokens * price.completion_per_token
+    return prompt_bytes * price.prompt_per_token + max_tokens * price.completion_per_token
 
 
 def cost_from_usage(

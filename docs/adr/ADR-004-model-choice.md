@@ -5,6 +5,23 @@
   and no result below is filled in.
 - **Result:** PENDING.
 
+## Interim target (2026-11-09)
+There is no OpenRouter key yet, so no real model runs. Until there is, a Claude model
+writes the model's answers instead ("simulated answers"; see [docs/rerecord.md](../rerecord.md)).
+Each simulated answer is recorded as standing in for one target model:
+`openai/gpt-oss-120b`. It is the `LEDGERLINE_DEFAULT_MODEL` default.
+
+Why this one: it is cheap, and OpenRouter lists it as supporting structured output.
+That listing is a claim, not a measurement. The spike below still has to run once a key
+exists, and it may pick a different default.
+
+Changing the target changes every recording key, so the recordings must be made again.
+That costs nothing while answers are simulated.
+
+The simulated eval uses this one target only. The plan's second model also waits for a
+key: simulating a "different vendor" with the same Claude stand-in would be fake
+diversity.
+
 ## Context
 All LLM access goes through OpenRouter on a $50/month budget shared across projects, so
 the default must be cheap. Ledgerline depends on json_schema structured output, and

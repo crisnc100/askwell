@@ -1,265 +1,46 @@
 {
  "rows": [
   {
-   "behavior": "Project setup, demo database seeding and roles",
+   "behavior": "LangGraph ask pipeline: interpret, validate, one retry with the validator's errors, execute, deterministic present",
    "files": [
-    "docker-compose.yml",
-    "infra/postgres/roles.sql",
-    "infra/postgres/init/10-roles.sh",
+    "ledgerline/pipeline/__init__.py",
+    "ledgerline/pipeline/graph.py",
+    "ledgerline/pipeline/prompt.py",
+    "ledgerline/llm/types.py",
+    "ledgerline/llm/errors.py"
+   ],
+   "docs": [
+    {
+     "path": "README.md",
+     "claims": [
+      {
+       "claim": "one retry with the validator's errors; a second failure is a refusal",
+       "at": "ledgerline/pipeline/graph.py:22"
+      },
+      {
+       "claim": "retry message carries the validator's errors",
+       "at": "ledgerline/pipeline/prompt.py:151"
+      },
+      {
+       "claim": "the answer is built by code; present is deterministic",
+       "at": "ledgerline/pipeline/graph.py:142"
+      },
+      {
+       "claim": "result rows are never sent to the model (retry messages hold only the answer and issues)",
+       "at": "ledgerline/pipeline/prompt.py:153"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "behavior": "`ledgerline ask` and POST /ask, GET /schemas, GET /schemas/{id}/examples; per-ask budget; one ask_log row per ask",
+   "files": [
+    "ledgerline/api.py",
     "ledgerline/cli.py",
+    "ledgerline/pipeline/service.py",
     "ledgerline/config.py",
-    "ledgerline/__init__.py",
-    "ledgerline/fieldservice/__init__.py",
-    "ledgerline/fieldservice/schema.py",
-    "ledgerline/fieldservice/seed.py",
-    ".env.example",
-    "pyproject.toml",
-    "uv.lock",
-    ".python-version",
-    "LICENSE"
-   ],
-   "docs": [
-    {
-     "path": "README.md",
-     "claims": [
-      {
-       "claim": "docker compose up -d starts Postgres, then runs ledgerline seed once",
-       "at": "docker-compose.yml:39"
-      },
-      {
-       "claim": "Postgres listens on localhost:56432",
-       "at": "docker-compose.yml:14"
-      },
-      {
-       "claim": "first start creates ledgerline_ro, which can only read",
-       "at": "infra/postgres/roles.sql:6"
-      },
-      {
-       "claim": "defaults in ledgerline/config.py match the compose roles",
-       "at": "ledgerline/config.py:30"
-      },
-      {
-       "claim": "model calls default to replay mode; no API key needed",
-       "at": "ledgerline/config.py:58"
-      },
-      {
-       "claim": "only ledgerline spike calls a model live (exits without a key)",
-       "at": "ledgerline/cli.py:176"
-      },
-      {
-       "claim": "seed drops and rebuilds the fieldservice tables",
-       "at": "ledgerline/fieldservice/seed.py:386"
-      },
-      {
-       "claim": "reference time LEDGERLINE_NOW defaults to 2026-06-30 00:00 UTC",
-       "at": "ledgerline/config.py:12"
-      },
-      {
-       "claim": "seed prints a content SHA-256",
-       "at": "ledgerline/cli.py:147"
-      },
-      {
-       "claim": "read-only role cannot read users.email or users.password_hash",
-       "at": "ledgerline/fieldservice/schema.py:134"
-      },
-      {
-       "claim": "read-only role column restriction is also applied by roles.sql",
-       "at": "infra/postgres/roles.sql:32"
-      },
-      {
-       "claim": "the registry hides the same two fields",
-       "at": "registries/fieldservice.yaml:600"
-      },
-      {
-       "claim": "Apache-2.0 license",
-       "at": "pyproject.toml:6"
-      },
-      {
-       "claim": "the tests need psql to run roles.sql",
-       "at": "tests/test_roles.py:22"
-      }
-     ]
-    }
-   ]
-  },
-  {
-   "behavior": "Registry format, registry init and registry check",
-   "files": [
-    "ledgerline/core/__init__.py",
-    "ledgerline/core/registry.py",
-    "ledgerline/core/registry_init.py"
-   ],
-   "docs": [
-    {
-     "path": "README.md",
-     "claims": [
-      {
-       "claim": "fields carry type, description, aliases, filterable, aggregatable, hidden, categorical",
-       "at": "ledgerline/core/registry.py:38"
-      },
-      {
-       "claim": "any visible field can be counted; sum/avg/min/max need aggregatable",
-       "at": "ledgerline/core/validate.py:679"
-      },
-      {
-       "claim": "hidden fields may not appear anywhere in an intent",
-       "at": "ledgerline/core/validate.py:333"
-      },
-      {
-       "claim": "case is ignored only when it leaves exactly one allowed value; value_aliases map to allowed values",
-       "at": "ledgerline/core/validate.py:408"
-      },
-      {
-       "claim": "relationships go from the many side to a key on the one side",
-       "at": "ledgerline/core/registry.py:74"
-      },
-      {
-       "claim": "a draft registry is refused unless drafts are allowed",
-       "at": "ledgerline/core/validate.py:796"
-      },
-      {
-       "claim": "registry init opens the database read-only",
-       "at": "ledgerline/cli.py:54"
-      },
-      {
-       "claim": "registry init reads tables and views",
-       "at": "ledgerline/core/registry_init.py:103"
-      },
-      {
-       "claim": "relationship inferred from <x>_id columns when no foreign key is declared",
-       "at": "ledgerline/core/registry_init.py:53"
-      },
-      {
-       "claim": "sensitive-looking names start hidden",
-       "at": "ledgerline/core/registry_init.py:50"
-      },
-      {
-       "claim": "--values marks text fields with at most 50 distinct values categorical, skipping name-like fields",
-       "at": "ledgerline/core/registry_init.py:278"
-      },
-      {
-       "claim": "output is always draft: true",
-       "at": "ledgerline/core/registry_init.py:304"
-      },
-      {
-       "claim": "warns when the connecting role could write",
-       "at": "ledgerline/core/registry_init.py:219"
-      }
-     ]
-    }
-   ]
-  },
-  {
-   "behavior": "Intent model, relative dates, validator rules and SQL builder",
-   "files": [
-    "ledgerline/core/intent.py",
-    "ledgerline/core/dates.py",
-    "ledgerline/core/validate.py",
-    "ledgerline/core/sqlbuild.py"
-   ],
-   "docs": [
-    {
-     "path": "README.md",
-     "claims": [
-      {
-       "claim": "intent types summary, grouped_summary, row_list, unanswerable",
-       "at": "ledgerline/core/intent.py:13"
-      },
-      {
-       "claim": "filters group one level deep and can compare two columns",
-       "at": "ledgerline/core/intent.py:57"
-      },
-      {
-       "claim": "calendar grains day, iso_week, month, quarter, year",
-       "at": "ledgerline/core/intent.py:19"
-      },
-      {
-       "claim": "relative tokens resolved by code against the reference time",
-       "at": "ledgerline/core/dates.py:38"
-      },
-      {
-       "claim": "validator never raises for a bad intent; returns typed errors",
-       "at": "ledgerline/core/validate.py:865"
-      },
-      {
-       "claim": "ErrorCode lists every error",
-       "at": "ledgerline/core/validate.py:36"
-      },
-      {
-       "claim": "ambiguous paths refused",
-       "at": "ledgerline/core/validate.py:345"
-      },
-      {
-       "claim": "fan_out on aggregates across a one-to-many join",
-       "at": "ledgerline/core/validate.py:353"
-      },
-      {
-       "claim": "every value is a bound parameter",
-       "at": "ledgerline/core/sqlbuild.py:256"
-      },
-      {
-       "claim": "joins at most 3 hops",
-       "at": "ledgerline/core/validate.py:33"
-      },
-      {
-       "claim": "a join used only inside any_of is a LEFT JOIN",
-       "at": "ledgerline/core/sqlbuild.py:360"
-      },
-      {
-       "claim": "Postgres and SQLite supported",
-       "at": "ledgerline/core/sqlbuild.py:408"
-      },
-      {
-       "claim": "compile example prints SQL then params; work_orders base gives fan_out (both run in this pass)",
-       "at": "ledgerline/cli.py:117"
-      }
-     ]
-    },
-    {
-     "path": "docs/adr/ADR-001-intent-not-sql.md",
-     "claims": [
-      {
-       "claim": "intent has entity, select, metrics, filters, having, group_by, date range, order, limit or unanswerable with a reason",
-       "at": "ledgerline/core/intent.py:96"
-      },
-      {
-       "claim": "validator returns typed errors",
-       "at": "ledgerline/core/validate.py:36"
-      }
-     ]
-    },
-    {
-     "path": "docs/adr/ADR-003-fan-out-rule.md",
-     "claims": [
-      {
-       "claim": "a row list reaching the many side is rejected (one_to_many_join)",
-       "at": "ledgerline/core/validate.py:360"
-      },
-      {
-       "claim": "ambiguous paths rejected (ambiguous_path)",
-       "at": "ledgerline/core/validate.py:345"
-      }
-     ]
-    },
-    {
-     "path": "docs/adr/README.md",
-     "claims": [
-      {
-       "claim": "the intent module is ledgerline/core/intent.py",
-       "at": "ledgerline/core/intent.py:1"
-      },
-      {
-       "claim": "results are filled after the live eval in P4",
-       "at": "builds/v01/plan.md:150"
-      }
-     ]
-    }
-   ]
-  },
-  {
-   "behavior": "Read-only executor and audit log",
-   "files": [
-    "ledgerline/core/executor.py",
+    "config/schemas.yaml",
     "ledgerline/core/audit.py"
    ],
    "docs": [
@@ -267,88 +48,56 @@
      "path": "README.md",
      "claims": [
       {
-       "claim": "read-only transaction on Postgres",
-       "at": "ledgerline/core/executor.py:114"
+       "claim": "ledgerline ask prints the trace as JSON",
+       "at": "ledgerline/cli.py:227"
       },
       {
-       "claim": "timeout 5 s and row cap 1000 by default",
-       "at": "ledgerline/core/executor.py:32"
+       "claim": "--schema picks a schema from config/schemas.yaml, default fieldservice",
+       "at": "ledgerline/cli.py:202"
       },
       {
-       "claim": "result says when rows were cut off",
-       "at": "ledgerline/core/executor.py:130"
+       "claim": "uvicorn --factory works: create_app() with no service builds one from settings",
+       "at": "ledgerline/api.py:27"
       },
       {
-       "claim": "SQLite opened read-only",
-       "at": "ledgerline/core/executor.py:74"
+       "claim": "GET /schemas lists schemas",
+       "at": "ledgerline/api.py:42"
       },
       {
-       "claim": "a failed connection is audited too",
-       "at": "ledgerline/core/executor.py:109"
+       "claim": "GET /schemas/{id}/examples lists example questions",
+       "at": "ledgerline/api.py:49"
       },
       {
-       "claim": "audit row on failure and success",
-       "at": "ledgerline/core/executor.py:186"
+       "claim": "a question with no recording gets a 409 in replay mode",
+       "at": "ledgerline/api.py:66"
       },
       {
-       "claim": "ask_log lives in a separate app database the read-only role cannot connect to",
-       "at": "infra/postgres/roles.sql:52"
+       "claim": "the CLI exits with code 4 on a replay miss",
+       "at": "ledgerline/cli.py:224"
       },
       {
-       "claim": "audit row columns: trace id, time, schema, question, intent, validation, SQL, params hash, row count, cost, model, outcome",
-       "at": "ledgerline/core/audit.py:26"
+       "claim": "refused asks get an audit row from the service; answered and failed ones from the executor",
+       "at": "ledgerline/pipeline/service.py:310"
       },
       {
-       "claim": "question and intent are stored as given, so typed values reach the log",
-       "at": "ledgerline/core/executor.py:172"
+       "claim": "each live/record ask has its own budget guard",
+       "at": "ledgerline/pipeline/service.py:229"
       },
       {
-       "claim": "the entry is persisted field for field",
-       "at": "ledgerline/core/audit.py:76"
+       "claim": "LEDGERLINE_ASK_BUDGET_USD default $0.05",
+       "at": "ledgerline/config.py:66"
       },
       {
-       "claim": "bound parameters are stored only as a SHA-256",
-       "at": "ledgerline/core/audit.py:47"
+       "claim": "a budget stop on an ask is a refusal",
+       "at": "ledgerline/pipeline/graph.py:52"
       },
       {
-       "claim": "no result rows: the entry has only a row count",
-       "at": "ledgerline/core/executor.py:189"
-      }
-     ]
-    }
-   ]
-  },
-  {
-   "behavior": "Model gateway, replay, cost and budget guard, spike",
-   "files": [
-    "ledgerline/llm/__init__.py",
-    "ledgerline/llm/budget.py",
-    "ledgerline/llm/errors.py",
-    "ledgerline/llm/gateway.py",
-    "ledgerline/llm/pricing.py",
-    "ledgerline/llm/replay.py",
-    "ledgerline/llm/spike.py",
-    "ledgerline/llm/types.py"
-   ],
-   "docs": [
-    {
-     "path": "README.md",
-     "claims": [
-      {
-       "claim": "modes record, replay, live; replay miss never falls back to live",
-       "at": "ledgerline/llm/gateway.py:6"
+       "claim": "record/live need OPENROUTER_API_KEY",
+       "at": "ledgerline/llm/gateway.py:212"
       },
       {
-       "claim": "worst-case pre-check against what is left of the budget before each live call",
-       "at": "ledgerline/llm/gateway.py:121"
-      },
-      {
-       "claim": "finished items are checkpointed; a stopped run resumes and its spend counts",
-       "at": "ledgerline/llm/budget.py:156"
-      },
-      {
-       "claim": "spike has not run; no model chosen",
-       "at": "ledgerline/config.py:55"
+       "claim": "--mode option on ask: replay | export | record | live",
+       "at": "ledgerline/cli.py:205"
       }
      ]
     },
@@ -356,187 +105,265 @@
      "path": "docs/adr/ADR-005-replay-and-budget.md",
      "claims": [
       {
-       "claim": "the pre-check counts prompt characters, not bytes or tokens",
-       "at": "ledgerline/llm/gateway.py:118"
-      },
-      {
-       "claim": "actual cost is charged after each call, before the next pre-check",
-       "at": "ledgerline/llm/gateway.py:137"
+       "claim": "an API or CLI ask has its own limit, going over refuses that question",
+       "at": "ledgerline/pipeline/service.py:229"
       }
      ]
     }
    ]
   },
   {
-   "behavior": "Pre-registered gold set, manifest and Spider selection",
+   "behavior": "Simulation: export mode, strict import with provenance, simulated labels on results and reports",
    "files": [
-    "evals/__init__.py",
-    "evals/gold/__init__.py",
-    "evals/gold/manifest.py",
-    "evals/gold/spider_selection.py",
-    "evals/gold/fieldservice.jsonl",
-    "evals/gold/MANIFEST.json",
-    "evals/gold/spider_ids.json",
-    "ledgerline/gold.py",
-    "scripts/__init__.py",
-    "scripts/fetch_benchmarks.py",
-    ".gitattributes"
+    "ledgerline/llm/gateway.py",
+    "ledgerline/llm/simulate.py",
+    "ledgerline/llm/budget.py",
+    "evals/replay_cases.py",
+    ".gitignore",
+    "docs/rerecord.md",
+    "docs/adr/ADR-004-model-choice.md"
    ],
    "docs": [
     {
-     "path": "evals/gold/README.md",
+     "path": "README.md",
      "claims": [
       {
-       "claim": "three files are frozen and hashed",
-       "at": "evals/gold/manifest.py:25"
+       "claim": "four gateway modes including export",
+       "at": "ledgerline/config.py:17"
       },
       {
-       "claim": "a test fails if a hash is off",
-       "at": "evals/gold/manifest.py:43"
+       "claim": "export writes every unrecorded request to evals/pending/",
+       "at": "ledgerline/llm/gateway.py:124"
       },
       {
-       "claim": "--update rewrites hashes, bumps revision, appends the reason to CHANGELOG.md",
-       "at": "evals/gold/manifest.py:65"
+       "claim": "pending dir default evals/pending",
+       "at": "ledgerline/config.py:64"
       },
       {
-       "claim": "--check compares without writing",
-       "at": "evals/gold/manifest.py:82"
+       "claim": "replay import loads answers",
+       "at": "ledgerline/cli.py:247"
       },
       {
-       "claim": "Spider IDs are 0-based indices in dev.json; only IDs committed",
-       "at": "evals/gold/spider_selection.py:8"
+       "claim": "eval --mode import loads answers",
+       "at": "ledgerline/cli.py:291"
       },
       {
-       "claim": "fetch_benchmarks downloads into data/ and checks a pinned SHA-256",
-       "at": "scripts/fetch_benchmarks.py:73"
+       "claim": "JSON answers are validated strictly against the response schema",
+       "at": "ledgerline/llm/simulate.py:112"
       },
       {
-       "claim": "5 databases with a fixed seed, 50 questions each",
-       "at": "evals/gold/spider_selection.py:36"
+       "claim": "each recording is marked simulated_by / standing_in_for",
+       "at": "ledgerline/llm/simulate.py:182"
       },
       {
-       "claim": "--check recomputes and compares with the committed file",
-       "at": "evals/gold/spider_selection.py:200"
+       "claim": "ask and /ask return provenance",
+       "at": "ledgerline/pipeline/service.py:157"
+      },
+      {
+       "claim": "simulated reports say so on their first line",
+       "at": "ledgerline/bench/report.py:236"
+      },
+      {
+       "claim": "default model is the provisional target openai/gpt-oss-120b",
+       "at": "ledgerline/config.py:59"
       }
      ]
     },
     {
-     "path": "README.md",
+     "path": "docs/adr/ADR-005-replay-and-budget.md",
      "claims": [
       {
-       "claim": "Spider data is downloaded, never committed",
-       "at": "scripts/fetch_benchmarks.py:5"
+       "claim": "export mode: a request with no recording is written to the pending dir",
+       "at": "ledgerline/llm/gateway.py:124"
+      },
+      {
+       "claim": "worst case uses UTF-8 prompt bytes of messages and schema",
+       "at": "ledgerline/llm/gateway.py:161"
+      }
+     ]
+    },
+    {
+     "path": "docs/adr/ADR-004-model-choice.md",
+     "claims": [
+      {
+       "claim": "simulated answers loop is described in docs/rerecord.md",
+       "at": "docs/rerecord.md:22"
       }
      ]
     }
    ]
   },
   {
-   "behavior": "verify.sh gate, CI, coverage floors, zero-skips rule",
+   "behavior": "Evaluation: systems, scoring, metrics, checkpoints, floors, reports, Spider registries and privacy check",
    "files": [
+    "ledgerline/bench/__init__.py",
+    "ledgerline/bench/compare.py",
+    "ledgerline/bench/items.py",
+    "ledgerline/bench/metrics.py",
+    "ledgerline/bench/privacy.py",
+    "ledgerline/bench/report.py",
+    "ledgerline/bench/run.py",
+    "ledgerline/bench/spider.py",
+    "ledgerline/bench/systems.py",
+    "scripts/check_replay_report.py",
+    "scripts/spider_forbidden_values.py",
     "verify.sh",
-    ".github/workflows/verify.yml",
-    "scripts/check_coverage.py",
-    "scripts/update_secrets_baseline.sh",
-    ".secrets.baseline",
-    ".gitignore"
+    "evals/floors.yaml",
+    "evals/reports/sim-1.md",
+    "evals/reports/sim-1.json",
+    "evals/reports/replay-fieldservice.md",
+    "evals/reports/replay-fieldservice.json",
+    "evals/spider_registries.json",
+    "evals/spider_forbidden_values.json",
+    "evals/triage/fieldservice.yaml",
+    "evals/triage/spider_car_1.yaml",
+    "evals/triage/spider_dog_kennels.yaml",
+    "evals/triage/spider_flight_2.yaml",
+    "evals/triage/spider_network_1.yaml",
+    "evals/triage/spider_wta_1.yaml",
+    "docs/adr/ADR-006-benchmark-methodology.md",
+    "docs/adr/ADR-001-intent-not-sql.md",
+    "docs/adr/README.md",
+    "README.md"
    ],
    "docs": [
     {
      "path": "README.md",
      "claims": [
       {
-       "claim": "locked uv sync",
-       "at": "verify.sh:9"
+       "claim": "one-shot baseline writes SQL from the schema DDL and registry descriptions",
+       "at": "ledgerline/bench/systems.py:248"
       },
       {
-       "claim": "pyright strict on ledgerline/core",
-       "at": "pyproject.toml:65"
+       "claim": "baseline SQL must be one SELECT",
+       "at": "ledgerline/bench/systems.py:189"
       },
       {
-       "claim": "detect-secrets against .secrets.baseline",
-       "at": "verify.sh:23"
+       "claim": "the driver refuses a second statement (untrusted path)",
+       "at": "ledgerline/bench/systems.py:295"
       },
       {
-       "claim": "per-module coverage floors",
-       "at": "verify.sh:30"
+       "claim": "Spider registries are hash-checked; the eval stops on a mismatch",
+       "at": "ledgerline/bench/spider.py:61"
       },
       {
-       "claim": "a skipped test fails the run",
-       "at": "tests/plugins/zero_skips.py:29"
+       "claim": "sim-1 headline numbers and simulated banner",
+       "at": "evals/reports/sim-1.md:1"
       },
       {
-       "claim": "CI runs the same script",
-       "at": ".github/workflows/verify.yml:49"
+       "claim": "fieldservice floors: execution accuracy >= 80%, wrong answers <= 5%",
+       "at": "evals/floors.yaml:6"
+      },
+      {
+       "claim": "floor not met in v0.1",
+       "at": "evals/reports/sim-1.md:32"
+      },
+      {
+       "claim": "verify.sh checks the replay report reproduces",
+       "at": "verify.sh:33"
+      }
+     ]
+    },
+    {
+     "path": "docs/adr/ADR-006-benchmark-methodology.md",
+     "claims": [
+      {
+       "claim": "result comparison rules live in compare.py's docstring",
+       "at": "ledgerline/bench/compare.py:1"
+      },
+      {
+       "claim": "sql_agent is not built; it waits for a live model",
+       "at": "ledgerline/bench/run.py:176"
+      },
+      {
+       "claim": "sim-1 covers six schemas with ledgerline and oneshot, one trial",
+       "at": "evals/reports/sim-1.md:14"
+      }
+     ]
+    },
+    {
+     "path": "docs/adr/ADR-001-intent-not-sql.md",
+     "claims": [
+      {
+       "claim": "the measuring command runs ledgerline and oneshot; sql_agent is refused",
+       "at": "ledgerline/bench/run.py:176"
       }
      ]
     }
    ]
   },
   {
-   "behavior": "Tests for every behavior above",
+   "behavior": "registry init types number-only SQLite DATE/DATETIME columns as numbers; lenient date reads; executor untrusted path",
    "files": [
-    "tests/__init__.py",
-    "tests/conftest.py",
-    "tests/core/__init__.py",
-    "tests/core/conftest.py",
-    "tests/core/oracle_cases.py",
-    "tests/core/rows.py",
-    "tests/core/test_dates.py",
-    "tests/core/test_executor.py",
-    "tests/core/test_injection.py",
-    "tests/core/test_oracle.py",
-    "tests/core/test_pr1_review.py",
-    "tests/core/test_registry.py",
-    "tests/core/test_registry_init.py",
-    "tests/core/test_sqlbuild.py",
-    "tests/core/test_temporal_compare.py",
-    "tests/core/test_validate.py",
-    "tests/plugins/__init__.py",
-    "tests/plugins/zero_skips.py",
-    "tests/test_check_coverage.py",
-    "tests/test_cli.py",
-    "tests/test_cli_core.py",
-    "tests/test_fetch_benchmarks.py",
-    "tests/test_gold.py",
-    "tests/test_gold_manifest.py",
-    "tests/test_llm_budget.py",
-    "tests/test_llm_gateway.py",
-    "tests/test_llm_openrouter.py",
-    "tests/test_roles.py",
-    "tests/test_seed.py",
-    "tests/test_spider_selection.py",
-    "tests/test_spike.py",
-    "tests/test_zero_skips.py"
+    "ledgerline/core/registry_init.py",
+    "ledgerline/core/sqlbuild.py",
+    "ledgerline/core/executor.py",
+    "ledgerline/core/validate.py",
+    "ledgerline/fieldservice/seed.py"
    ],
-   "none": "Tests are their own record of behavior; the docs above cite the code they exercise."
+   "docs": [
+    {
+     "path": "README.md",
+     "claims": [
+      {
+       "claim": "on SQLite a temporal column holding only numbers is typed as a number",
+       "at": "ledgerline/core/registry_init.py:328"
+      },
+      {
+       "claim": "only integer/real storage types trigger the change",
+       "at": "ledgerline/core/registry_init.py:261"
+      },
+      {
+       "claim": "the executor writes one ask_log row per query it runs",
+       "at": "ledgerline/core/executor.py:208"
+      }
+     ]
+    }
+   ]
   },
   {
-   "behavior": "Build folder (plan, reviews, status)",
+   "behavior": "Gold revision 2 (fs-032 corrected)",
    "files": [
-    "builds/v01/bounce.err",
-    "builds/v01/bounce.exit",
-    "builds/v01/context-brief.json",
-    "builds/v01/gold-recheck.txt",
-    "builds/v01/grade-pr1.err",
-    "builds/v01/grade-pr1.json",
-    "builds/v01/recheck-pr1.err",
-    "builds/v01/recheck-pr1.json",
-    "builds/v01/status-pr1-full.json",
-    "builds/v01/status-pr1.json",
-    "builds/v01/status-pr2.json",
-    "builds/v01/status-x1.json",
-    "builds/v01/testchange.err",
-    "builds/v01/verify-recheck.txt"
+    "evals/gold/fieldservice.jsonl",
+    "evals/gold/MANIFEST.json",
+    "evals/gold/CHANGELOG.md"
    ],
-   "none": "Process records for the orchestrator, not reader docs; untouchable in this pass."
+   "none": "Recorded in evals/gold/CHANGELOG.md and ADR-001's Result; the gold README's conventions already match the corrected item."
   },
   {
-   "behavior": "Curated fieldservice registry data",
+   "behavior": "Secrets baseline and its update script",
    "files": [
-    "registries/fieldservice.yaml"
+    ".secrets.baseline",
+    "scripts/update_secrets_baseline.sh"
    ],
-   "none": "Data the README points to by path; untouchable in this pass."
+   "none": "Tooling only; README's Checks section already names detect-secrets against .secrets.baseline."
+  },
+  {
+   "behavior": "Cost bound counts UTF-8 bytes, not characters",
+   "files": [
+    "ledgerline/llm/pricing.py",
+    "docs/adr/ADR-005-replay-and-budget.md"
+   ],
+   "docs": [
+    {
+     "path": "docs/adr/ADR-005-replay-and-budget.md",
+     "claims": [
+      {
+       "claim": "worst case is prompt bytes x prompt price + max_tokens x completion price",
+       "at": "ledgerline/llm/pricing.py:64"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "behavior": "Replay recordings of simulated model answers for the fieldservice eval and the ask examples",
+   "files": [
+    "evals/recordings/eval/fieldservice/ledgerline.jsonl",
+    "evals/recordings/eval/fieldservice/oneshot.jsonl",
+    "evals/recordings/interpret.jsonl"
+   ],
+   "none": "Generated data written by the gateway's import step; docs/rerecord.md already describes how they are made."
   }
  ]
 }

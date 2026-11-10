@@ -35,7 +35,7 @@ from sqlalchemy.ext.compiler import compiles
 from sqlalchemy.sql.compiler import SQLCompiler
 from sqlalchemy.sql.functions import FunctionElement
 from sqlalchemy.sql.type_api import TypeEngine
-from sqlalchemy.types import NullType
+from sqlalchemy.types import NullType, TypeDecorator
 
 from ledgerline.core.validate import (
     PlanMetric,
@@ -45,6 +45,41 @@ from ledgerline.core.validate import (
     ResolvedField,
 )
 
+
+class _Lenient(TypeDecorator[Any]):
+    """A DATE or DATETIME that reads values it cannot parse as they are stored.
+
+    A column's declared type is not a promise about its contents: a DATE column can hold
+    integers such as 20010203 (some Spider databases store dates that way). Strict parsing
+    would crash the whole query; this returns 20010203 unchanged and still parses real
+    dates."""
+
+    cache_ok = True
+
+    def result_processor(self, dialect: Dialect, coltype: object) -> Any:
+        strict = self.impl_instance.result_processor(dialect, coltype)
+        if strict is None:
+            return None
+
+        def process(value: Any) -> Any:
+            try:
+                return strict(value)
+            except (TypeError, ValueError):
+                return value
+
+        return process
+
+
+class LenientDate(_Lenient):
+    impl = Date
+    cache_ok = True
+
+
+class LenientDateTime(_Lenient):
+    impl = DateTime
+    cache_ok = True
+
+
 _TYPES: dict[str, TypeEngine[Any]] = {
     # BIGINT for every integer field: binding a 64-bit id as INTEGER would narrow it to
     # 32 bits on Postgres. Comparing an INTEGER column with a BIGINT value is exact.
@@ -52,12 +87,9 @@ _TYPES: dict[str, TypeEngine[Any]] = {
     "number": Numeric(asdecimal=False),
     "text": String(),
     "boolean": Boolean(),
-    "date": Date(),
-    "datetime": DateTime(),
+    "date": LenientDate(),
+    "datetime": LenientDateTime(),
 }
-
-
-# --- calendar grains ---
 
 
 class _Grain(FunctionElement[Any]):
@@ -164,7 +196,10 @@ def _sqlite_canonical_datetime(x: str) -> str:
     fraction = (
         f"CASE WHEN instr({x}, '.') > 0 THEN substr({digits} || '000000', 1, 6) ELSE '000000' END"
     )
-    return f"(strftime('%Y-%m-%d %H:%M:%S', {x}) || '.' || {fraction})"
+    canonical = f"(strftime('%Y-%m-%d %H:%M:%S', {x}) || '.' || {fraction})"
+    # strftime gives NULL for text it cannot read; keep the stored text instead, so an
+    # odd value still counts, groups and compares as itself rather than vanishing.
+    return f"COALESCE({canonical}, {x})"
 
 
 @compiles(AsDatetime, "sqlite")
@@ -177,7 +212,7 @@ class SqliteDatetimeText(FunctionElement[Any]):
     text, so '10:30:00' and '10:30:00.000000' differ; this puts both sides in one format.
     Elsewhere it is the operand unchanged (Postgres compares real timestamps)."""
 
-    type = DateTime()
+    type = LenientDateTime()  # an unreadable stored value comes back as stored
     name = "sqlite_datetime_text"
     inherit_cache = True
 
@@ -195,9 +230,6 @@ def _datetime_text_other(element: SqliteDatetimeText, compiler: SQLCompiler, **k
 @compiles(AsDatetime)
 def _as_datetime_other(element: AsDatetime, compiler: SQLCompiler, **kw: Any) -> str:
     raise CompileError(f"datetime normalisation is not implemented for {compiler.dialect.name}")
-
-
-# --- building ---
 
 
 class _Tables:

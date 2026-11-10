@@ -20,6 +20,8 @@ app = typer.Typer(
 
 registry_app = typer.Typer(no_args_is_help=True, help="Create and check registries.")
 app.add_typer(registry_app, name="registry")
+replay_app = typer.Typer(no_args_is_help=True, help="Replay recordings and simulated answers.")
+app.add_typer(replay_app, name="replay")
 
 
 @app.callback()
@@ -192,3 +194,138 @@ def spike(
     if stopped:
         typer.echo(f"STOPPED: {stopped}", err=True)
     typer.echo(f"report: {path}")
+
+
+@app.command()
+def ask(
+    question: Annotated[str, typer.Argument(help="The business question.")],
+    schema: Annotated[str, typer.Option(help="Schema id from config/schemas.yaml.")] = (
+        "fieldservice"
+    ),
+    mode: Annotated[
+        str | None, typer.Option(help="replay | export | record | live (default: config).")
+    ] = None,
+) -> None:
+    """Ask one question and print the trace as JSON."""
+    import json
+
+    from ledgerline.llm.errors import ReplayMissError
+    from ledgerline.llm.simulate import PendingRequestError
+    from ledgerline.pipeline.service import AskService
+
+    service = AskService.from_settings(get_settings(), mode)
+    try:
+        result = service.ask(schema, question)
+    except PendingRequestError as exc:
+        typer.echo(f"exported for a simulated answer: {exc.path}")
+        raise typer.Exit(code=3) from exc
+    except ReplayMissError as exc:
+        typer.echo(f"no recording: {exc}", err=True)
+        raise typer.Exit(code=4) from exc
+    finally:
+        service.close()
+    typer.echo(json.dumps(result.to_dict(), indent=2, default=str))
+
+
+@replay_app.command("import")
+def replay_import(
+    pending_dir: Annotated[
+        str | None, typer.Option(help="Default: LEDGERLINE_PENDING_DIR.")
+    ] = None,
+    keep: Annotated[bool, typer.Option(help="Keep the pending files after import.")] = False,
+) -> None:
+    """Load simulated answers (<key>.answer.json) into the replay store, with provenance."""
+    from pathlib import Path
+
+    from ledgerline.llm.replay import ReplayStore
+    from ledgerline.llm.simulate import import_answers_report, pending_requests
+    from ledgerline.pipeline.service import RECORDINGS_FILE, ROOT
+
+    settings = get_settings()
+    pending = Path(pending_dir) if pending_dir else ROOT / settings.pending_dir
+    store = ReplayStore(ROOT / settings.replay_dir / RECORDINGS_FILE)
+    report = import_answers_report(pending, store, remove=not keep)
+    for item in report.imported:
+        typer.echo(
+            f"imported {item.key} (simulated by {item.simulated_by}, "
+            f"standing in for {item.standing_in_for})"
+        )
+    for rejected in report.rejected:
+        typer.echo(f"REJECTED {rejected.key}: {rejected.reason}", err=True)
+    left = pending_requests(pending) if pending.exists() else []
+    typer.echo(
+        f"{len(report.imported)} imported, {len(report.rejected)} rejected (kept on disk), "
+        f"{len(left)} still pending"
+    )
+
+
+@app.command("eval")
+def eval_command(
+    schema: Annotated[
+        list[str] | None,
+        typer.Option("--schema", help="Schema id (repeatable), e.g. fieldservice, spider_car_1."),
+    ] = None,
+    all_schemas: Annotated[
+        bool, typer.Option("--all", help="fieldservice and every pre-registered Spider DB.")
+    ] = False,
+    systems: Annotated[str, typer.Option(help="Comma-separated systems.")] = "ledgerline,oneshot",
+    mode: Annotated[str, typer.Option(help="replay | export | import | record | live")] = "replay",
+    models: Annotated[
+        str | None, typer.Option(help="Comma-separated model ids (default: config).")
+    ] = None,
+    trials: Annotated[int, typer.Option(help="Trials on fieldservice (Spider runs 1).")] = 1,
+    budget: Annotated[float, typer.Option(help="Hard budget for the whole run, USD.")] = 1.0,
+    run_id: Annotated[str | None, typer.Option(help="Resume or name a run.")] = None,
+) -> None:
+    """Run the benchmark and write evals/reports/<run id>.md and .json.
+
+    Export mode writes every unrecorded model request to evals/pending/eval/ and stops
+    those items; `--mode import` loads the answers; then run again in replay mode.
+    """
+    from ledgerline.bench import report as report_module
+    from ledgerline.bench.items import spider_databases
+    from ledgerline.bench.run import EVAL_PENDING, EVAL_RECORDINGS, pending_counts, run_eval
+    from ledgerline.llm.replay import ReplayStore
+    from ledgerline.llm.simulate import import_answers_report
+
+    if mode == "import":
+        total = 0
+        for directory in sorted(p for p in EVAL_PENDING.glob("*/*") if p.is_dir()):
+            schema_id, system = directory.parent.name, directory.name
+            store = ReplayStore(EVAL_RECORDINGS / schema_id / f"{system}.jsonl")
+            result = import_answers_report(directory, store)
+            total += len(result.imported)
+            typer.echo(f"{schema_id}/{system}: imported {len(result.imported)}")
+            for rejected in result.rejected:
+                typer.echo(f"  REJECTED {rejected.key}: {rejected.reason}", err=True)
+        typer.echo(f"{total} imported; still pending: {pending_counts() or 'none'}")
+        return
+
+    settings = get_settings()
+    schema_ids = list(schema or [])
+    if all_schemas:
+        schema_ids = ["fieldservice", *(f"spider_{db}" for db in spider_databases())]
+    if not schema_ids:
+        typer.echo("give --schema or --all", err=True)
+        raise typer.Exit(code=2)
+    model_ids = [m.strip() for m in models.split(",")] if models else [settings.default_model or ""]
+    name = run_id or f"{mode}-{'-'.join(schema_ids) if len(schema_ids) < 3 else 'all'}"
+    result = run_eval(
+        settings,
+        run_id=name,
+        schema_ids=schema_ids,
+        systems=[s.strip() for s in systems.split(",")],
+        mode=mode,
+        models=model_ids,
+        trials=trials,
+        budget_usd=budget,
+    )
+    if result.deferred:
+        typer.echo("exported for simulated answers (pending requests per schema/system):")
+        for key, count in sorted(pending_counts().items()):
+            typer.echo(f"  {key}: {count}")
+    data = report_module.build(result)
+    md, _ = report_module.write(data)
+    typer.echo(
+        f"{len(result.records)} finished, {sum(result.deferred.values())} deferred; report: {md}"
+    )

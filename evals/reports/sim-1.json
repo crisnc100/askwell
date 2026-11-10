@@ -1,0 +1,2888 @@
+{
+  "abort_reason": null,
+  "baseline_wins": [
+    {
+      "item_id": "fs-025",
+      "model": "openai/gpt-oss-120b",
+      "schema": "fieldservice",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "item_id": "fs-030",
+      "model": "openai/gpt-oss-120b",
+      "schema": "fieldservice",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "item_id": "fs-037",
+      "model": "openai/gpt-oss-120b",
+      "schema": "fieldservice",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "item_id": "fs-042",
+      "model": "openai/gpt-oss-120b",
+      "schema": "fieldservice",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "item_id": "spider:101",
+      "model": "openai/gpt-oss-120b",
+      "schema": "spider_car_1",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "item_id": "spider:111",
+      "model": "openai/gpt-oss-120b",
+      "schema": "spider_car_1",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "item_id": "spider:117",
+      "model": "openai/gpt-oss-120b",
+      "schema": "spider_car_1",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "item_id": "spider:135",
+      "model": "openai/gpt-oss-120b",
+      "schema": "spider_car_1",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "item_id": "spider:136",
+      "model": "openai/gpt-oss-120b",
+      "schema": "spider_car_1",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "item_id": "spider:150",
+      "model": "openai/gpt-oss-120b",
+      "schema": "spider_car_1",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "item_id": "spider:152",
+      "model": "openai/gpt-oss-120b",
+      "schema": "spider_car_1",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "item_id": "spider:171",
+      "model": "openai/gpt-oss-120b",
+      "schema": "spider_car_1",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "item_id": "spider:178",
+      "model": "openai/gpt-oss-120b",
+      "schema": "spider_car_1",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "item_id": "spider:919",
+      "model": "openai/gpt-oss-120b",
+      "schema": "spider_dog_kennels",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "item_id": "spider:922",
+      "model": "openai/gpt-oss-120b",
+      "schema": "spider_dog_kennels",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "item_id": "spider:923",
+      "model": "openai/gpt-oss-120b",
+      "schema": "spider_dog_kennels",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "item_id": "spider:924",
+      "model": "openai/gpt-oss-120b",
+      "schema": "spider_dog_kennels",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "item_id": "spider:927",
+      "model": "openai/gpt-oss-120b",
+      "schema": "spider_dog_kennels",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "item_id": "spider:928",
+      "model": "openai/gpt-oss-120b",
+      "schema": "spider_dog_kennels",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "item_id": "spider:929",
+      "model": "openai/gpt-oss-120b",
+      "schema": "spider_dog_kennels",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "item_id": "spider:972",
+      "model": "openai/gpt-oss-120b",
+      "schema": "spider_dog_kennels",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "item_id": "spider:973",
+      "model": "openai/gpt-oss-120b",
+      "schema": "spider_dog_kennels",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "item_id": "spider:974",
+      "model": "openai/gpt-oss-120b",
+      "schema": "spider_dog_kennels",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "item_id": "spider:978",
+      "model": "openai/gpt-oss-120b",
+      "schema": "spider_dog_kennels",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "item_id": "spider:987",
+      "model": "openai/gpt-oss-120b",
+      "schema": "spider_dog_kennels",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "item_id": "spider:994",
+      "model": "openai/gpt-oss-120b",
+      "schema": "spider_dog_kennels",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "item_id": "spider:995",
+      "model": "openai/gpt-oss-120b",
+      "schema": "spider_dog_kennels",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "item_id": "spider:207",
+      "model": "openai/gpt-oss-120b",
+      "schema": "spider_flight_2",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "item_id": "spider:208",
+      "model": "openai/gpt-oss-120b",
+      "schema": "spider_flight_2",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "item_id": "spider:209",
+      "model": "openai/gpt-oss-120b",
+      "schema": "spider_flight_2",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "item_id": "spider:210",
+      "model": "openai/gpt-oss-120b",
+      "schema": "spider_flight_2",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "item_id": "spider:214",
+      "model": "openai/gpt-oss-120b",
+      "schema": "spider_flight_2",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "item_id": "spider:215",
+      "model": "openai/gpt-oss-120b",
+      "schema": "spider_flight_2",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "item_id": "spider:216",
+      "model": "openai/gpt-oss-120b",
+      "schema": "spider_flight_2",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "item_id": "spider:217",
+      "model": "openai/gpt-oss-120b",
+      "schema": "spider_flight_2",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "item_id": "spider:218",
+      "model": "openai/gpt-oss-120b",
+      "schema": "spider_flight_2",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "item_id": "spider:219",
+      "model": "openai/gpt-oss-120b",
+      "schema": "spider_flight_2",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "item_id": "spider:220",
+      "model": "openai/gpt-oss-120b",
+      "schema": "spider_flight_2",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "item_id": "spider:224",
+      "model": "openai/gpt-oss-120b",
+      "schema": "spider_flight_2",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "item_id": "spider:233",
+      "model": "openai/gpt-oss-120b",
+      "schema": "spider_flight_2",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "item_id": "spider:239",
+      "model": "openai/gpt-oss-120b",
+      "schema": "spider_flight_2",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "item_id": "spider:240",
+      "model": "openai/gpt-oss-120b",
+      "schema": "spider_flight_2",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "item_id": "spider:245",
+      "model": "openai/gpt-oss-120b",
+      "schema": "spider_flight_2",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "item_id": "spider:246",
+      "model": "openai/gpt-oss-120b",
+      "schema": "spider_flight_2",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "item_id": "spider:251",
+      "model": "openai/gpt-oss-120b",
+      "schema": "spider_flight_2",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "item_id": "spider:252",
+      "model": "openai/gpt-oss-120b",
+      "schema": "spider_flight_2",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "item_id": "spider:254",
+      "model": "openai/gpt-oss-120b",
+      "schema": "spider_flight_2",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "item_id": "spider:255",
+      "model": "openai/gpt-oss-120b",
+      "schema": "spider_flight_2",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "item_id": "spider:257",
+      "model": "openai/gpt-oss-120b",
+      "schema": "spider_flight_2",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "item_id": "spider:258",
+      "model": "openai/gpt-oss-120b",
+      "schema": "spider_flight_2",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "item_id": "spider:886",
+      "model": "openai/gpt-oss-120b",
+      "schema": "spider_network_1",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "item_id": "spider:887",
+      "model": "openai/gpt-oss-120b",
+      "schema": "spider_network_1",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "item_id": "spider:889",
+      "model": "openai/gpt-oss-120b",
+      "schema": "spider_network_1",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "item_id": "spider:890",
+      "model": "openai/gpt-oss-120b",
+      "schema": "spider_network_1",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "item_id": "spider:891",
+      "model": "openai/gpt-oss-120b",
+      "schema": "spider_network_1",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "item_id": "spider:892",
+      "model": "openai/gpt-oss-120b",
+      "schema": "spider_network_1",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "item_id": "spider:893",
+      "model": "openai/gpt-oss-120b",
+      "schema": "spider_network_1",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "item_id": "spider:896",
+      "model": "openai/gpt-oss-120b",
+      "schema": "spider_network_1",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "item_id": "spider:897",
+      "model": "openai/gpt-oss-120b",
+      "schema": "spider_network_1",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "item_id": "spider:898",
+      "model": "openai/gpt-oss-120b",
+      "schema": "spider_network_1",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "item_id": "spider:899",
+      "model": "openai/gpt-oss-120b",
+      "schema": "spider_network_1",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "item_id": "spider:900",
+      "model": "openai/gpt-oss-120b",
+      "schema": "spider_network_1",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "item_id": "spider:908",
+      "model": "openai/gpt-oss-120b",
+      "schema": "spider_network_1",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "item_id": "spider:909",
+      "model": "openai/gpt-oss-120b",
+      "schema": "spider_network_1",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "item_id": "spider:910",
+      "model": "openai/gpt-oss-120b",
+      "schema": "spider_network_1",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "item_id": "spider:911",
+      "model": "openai/gpt-oss-120b",
+      "schema": "spider_network_1",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "item_id": "spider:912",
+      "model": "openai/gpt-oss-120b",
+      "schema": "spider_network_1",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "item_id": "spider:913",
+      "model": "openai/gpt-oss-120b",
+      "schema": "spider_network_1",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "item_id": "spider:914",
+      "model": "openai/gpt-oss-120b",
+      "schema": "spider_network_1",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "item_id": "spider:915",
+      "model": "openai/gpt-oss-120b",
+      "schema": "spider_network_1",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "item_id": "spider:917",
+      "model": "openai/gpt-oss-120b",
+      "schema": "spider_network_1",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "item_id": "spider:451",
+      "model": "openai/gpt-oss-120b",
+      "schema": "spider_wta_1",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "item_id": "spider:463",
+      "model": "openai/gpt-oss-120b",
+      "schema": "spider_wta_1",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "item_id": "spider:488",
+      "model": "openai/gpt-oss-120b",
+      "schema": "spider_wta_1",
+      "system": "oneshot",
+      "trial": 1
+    }
+  ],
+  "deferred": {},
+  "floors": [
+    {
+      "cause": "For questions the intent grammar cannot express, the stand-in model often answers a nearby question instead of refusing. Example: asked for a percentage, it returned a count per status. Each such answer is a wrong answer, not a refusal.",
+      "checks": [
+        {
+          "met": false,
+          "metric": "execution_accuracy",
+          "rate": {
+            "ci95": [
+              0.6225547970219101,
+              0.8684632152061551
+            ],
+            "n": 33,
+            "of": 43,
+            "rate": 0.7674418604651163
+          },
+          "rule": ">= 80%"
+        },
+        {
+          "met": false,
+          "metric": "wrong_answer_rate_given_answered",
+          "rate": {
+            "ci95": [
+              0.05753867690120133,
+              0.2732685944229131
+            ],
+            "n": 5,
+            "of": 38,
+            "rate": 0.13157894736842105
+          },
+          "rule": "<= 5%"
+        }
+      ],
+      "met": false,
+      "model": "openai/gpt-oss-120b",
+      "next": "v0.2 changes the prompt to refuse first when a question needs something the grammar lacks, then measures it on a fresh run. The v0.1 prompt is not changed after seeing these results.",
+      "schema": "fieldservice",
+      "status_note": "in v0.1 (simulated run)"
+    }
+  ],
+  "misses": [
+    {
+      "error": null,
+      "issue_codes": [],
+      "item_id": "fs-022",
+      "model": "openai/gpt-oss-120b",
+      "note": "Ambiguous date: the answer filtered on completion date (when parts are used), the gold on opening date. Both readings are defensible.",
+      "outcome": "wrong",
+      "refusal": null,
+      "schema": "fieldservice",
+      "tag": "gold_issue",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [],
+      "item_id": "fs-024",
+      "model": "openai/gpt-oss-120b",
+      "note": "Ambiguous date: 'did work for last month' was read as completed last month; the gold uses opened last month.",
+      "outcome": "wrong",
+      "refusal": null,
+      "schema": "fieldservice",
+      "tag": "gold_issue",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [],
+      "item_id": "fs-025",
+      "model": "openai/gpt-oss-120b",
+      "note": "Needs the difference between two dates (opened to completed). Refused correctly.",
+      "outcome": "refused",
+      "refusal": "Average days to complete needs the elapsed time between work_orders.opened_at and work_orders.completed_at, and the registry has no way to compute a difference between two date fields. Metrics aggregate a single field only.",
+      "schema": "fieldservice",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [],
+      "item_id": "fs-028",
+      "model": "openai/gpt-oss-120b",
+      "note": "Needs a ratio of two counts. The model returned counts per status instead of refusing: a wrong answer, not a refusal.",
+      "outcome": "wrong",
+      "refusal": null,
+      "schema": "fieldservice",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [],
+      "item_id": "fs-030",
+      "model": "openai/gpt-oss-120b",
+      "note": "Needs a computed value (quantity times unit price). Refused correctly.",
+      "outcome": "refused",
+      "refusal": "Parts revenue needs quantity times unit_price per line, and the registry has no computed line-revenue field. A metric aggregates a single field, so summing unit_price or quantity alone would give a different number.",
+      "schema": "fieldservice",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [],
+      "item_id": "fs-035",
+      "model": "openai/gpt-oss-120b",
+      "note": "Needs two date fields in one monthly series. The model counted completions among the orders opened each month instead of refusing: a wrong answer.",
+      "outcome": "wrong",
+      "refusal": null,
+      "schema": "fieldservice",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [],
+      "item_id": "fs-037",
+      "model": "openai/gpt-oss-120b",
+      "note": "Needs a distinct count of months in HAVING. The model returned per-technician monthly counts instead of refusing: a wrong answer.",
+      "outcome": "wrong",
+      "refusal": null,
+      "schema": "fieldservice",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [],
+      "item_id": "fs-039",
+      "model": "openai/gpt-oss-120b",
+      "note": "Needs date arithmetic and a ratio. Refused correctly.",
+      "outcome": "refused",
+      "refusal": "The question needs a 2-day elapsed-time test between completed_at and opened_at and a ratio of two counts; the intent language supports neither a date arithmetic comparison nor a share metric.",
+      "schema": "fieldservice",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [],
+      "item_id": "fs-041",
+      "model": "openai/gpt-oss-120b",
+      "note": "Needs a conditional count beside a sum. Refused correctly.",
+      "outcome": "refused",
+      "refusal": "The question needs two different row sets at once: a sum over unpaid and overdue invoices, and a count of overdue invoices only per customer. Filters apply to every row and having applies to whole groups, so the registry cannot express a conditional count alongside the sum.",
+      "schema": "fieldservice",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [],
+      "item_id": "fs-042",
+      "model": "openai/gpt-oss-120b",
+      "note": "Needs an anti-join (sites with no work orders). Refused correctly.",
+      "outcome": "refused",
+      "refusal": "Finding sites with no work orders in a window needs an anti-join (sites with no matching work_orders rows), which this intent format cannot express. Filters on work_orders fields only return sites that do have matching rows.",
+      "schema": "fieldservice",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [],
+      "item_id": "spider:919",
+      "model": "openai/gpt-oss-120b",
+      "note": "Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none of these.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_dog_kennels",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [],
+      "item_id": "spider:920",
+      "model": "openai/gpt-oss-120b",
+      "note": "Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none of these.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_dog_kennels",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [],
+      "item_id": "spider:922",
+      "model": "openai/gpt-oss-120b",
+      "note": "Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none of these.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_dog_kennels",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [],
+      "item_id": "spider:923",
+      "model": "openai/gpt-oss-120b",
+      "note": "Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none of these.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_dog_kennels",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [],
+      "item_id": "spider:924",
+      "model": "openai/gpt-oss-120b",
+      "note": "Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none of these.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_dog_kennels",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [],
+      "item_id": "spider:925",
+      "model": "openai/gpt-oss-120b",
+      "note": "Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none of these.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_dog_kennels",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [],
+      "item_id": "spider:927",
+      "model": "openai/gpt-oss-120b",
+      "note": "Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none of these.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_dog_kennels",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [],
+      "item_id": "spider:928",
+      "model": "openai/gpt-oss-120b",
+      "note": "By design: registry init hides email and phone-like fields, so the question cannot be answered. Spider's gold returns them.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_dog_kennels",
+      "tag": "validator_false_reject",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [],
+      "item_id": "spider:929",
+      "model": "openai/gpt-oss-120b",
+      "note": "By design: registry init hides email and phone-like fields, so the question cannot be answered. Spider's gold returns them.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_dog_kennels",
+      "tag": "validator_false_reject",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [],
+      "item_id": "spider:937",
+      "model": "openai/gpt-oss-120b",
+      "note": "The gold ranks owners by number of treatments; the question asks who spent the most. The answer sums cost.",
+      "outcome": "wrong",
+      "refusal": null,
+      "schema": "spider_dog_kennels",
+      "tag": "gold_issue",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [],
+      "item_id": "spider:942",
+      "model": "openai/gpt-oss-120b",
+      "note": "The gold counts treatments; the question asks for at least two types of treatment. The answer counts distinct types.",
+      "outcome": "wrong",
+      "refusal": null,
+      "schema": "spider_dog_kennels",
+      "tag": "gold_issue",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [],
+      "item_id": "spider:944",
+      "model": "openai/gpt-oss-120b",
+      "note": "Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none of these.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_dog_kennels",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [],
+      "item_id": "spider:945",
+      "model": "openai/gpt-oss-120b",
+      "note": "Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none of these.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_dog_kennels",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [],
+      "item_id": "spider:951",
+      "model": "openai/gpt-oss-120b",
+      "note": "The answer returns the size description column; the gold returns the size code column. Both answer the question.",
+      "outcome": "wrong",
+      "refusal": null,
+      "schema": "spider_dog_kennels",
+      "tag": "gold_issue",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [],
+      "item_id": "spider:954",
+      "model": "openai/gpt-oss-120b",
+      "note": "Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none of these.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_dog_kennels",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [],
+      "item_id": "spider:955",
+      "model": "openai/gpt-oss-120b",
+      "note": "Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none of these.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_dog_kennels",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [],
+      "item_id": "spider:961",
+      "model": "openai/gpt-oss-120b",
+      "note": "Ambiguous: youngest by the age column (gold) or by date of birth (the answer). The two columns disagree in this data.",
+      "outcome": "wrong",
+      "refusal": null,
+      "schema": "spider_dog_kennels",
+      "tag": "gold_issue",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [],
+      "item_id": "spider:972",
+      "model": "openai/gpt-oss-120b",
+      "note": "By design: registry init hides email and phone-like fields, so the question cannot be answered. Spider's gold returns them.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_dog_kennels",
+      "tag": "validator_false_reject",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [],
+      "item_id": "spider:973",
+      "model": "openai/gpt-oss-120b",
+      "note": "By design: registry init hides email and phone-like fields, so the question cannot be answered. Spider's gold returns them.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_dog_kennels",
+      "tag": "validator_false_reject",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [],
+      "item_id": "spider:974",
+      "model": "openai/gpt-oss-120b",
+      "note": "Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none of these.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_dog_kennels",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [
+        "fan_out"
+      ],
+      "item_id": "spider:978",
+      "model": "openai/gpt-oss-120b",
+      "note": "Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none of these.",
+      "outcome": "refused",
+      "refusal": "refused (fan_out)",
+      "schema": "spider_dog_kennels",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [
+        "aggregate_type"
+      ],
+      "item_id": "spider:987",
+      "model": "openai/gpt-oss-120b",
+      "note": "The column is declared TEXT but holds numbers. Registry init keeps the declared type, so the validator rejects the arithmetic.",
+      "outcome": "refused",
+      "refusal": "refused (aggregate_type)",
+      "schema": "spider_dog_kennels",
+      "tag": "validator_false_reject",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [],
+      "item_id": "spider:994",
+      "model": "openai/gpt-oss-120b",
+      "note": "By design: registry init hides email and phone-like fields, so the question cannot be answered. Spider's gold returns them.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_dog_kennels",
+      "tag": "validator_false_reject",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [],
+      "item_id": "spider:995",
+      "model": "openai/gpt-oss-120b",
+      "note": "By design: registry init hides email and phone-like fields, so the question cannot be answered. Spider's gold returns them.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_dog_kennels",
+      "tag": "validator_false_reject",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [],
+      "item_id": "spider:998",
+      "model": "openai/gpt-oss-120b",
+      "note": "The gold needs DISTINCT rows; row lists in the intent grammar cannot ask for distinct rows.",
+      "outcome": "wrong",
+      "refusal": null,
+      "schema": "spider_dog_kennels",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [],
+      "item_id": "spider:999",
+      "model": "openai/gpt-oss-120b",
+      "note": "Same as spider:998: needs DISTINCT rows.",
+      "outcome": "wrong",
+      "refusal": null,
+      "schema": "spider_dog_kennels",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [],
+      "item_id": "spider:101",
+      "model": "openai/gpt-oss-120b",
+      "note": "Needs a subquery for the earliest year. The model returned all cars sorted by year instead of refusing: a wrong answer.",
+      "outcome": "wrong",
+      "refusal": null,
+      "schema": "spider_car_1",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [],
+      "item_id": "spider:111",
+      "model": "openai/gpt-oss-120b",
+      "note": "The model looked for the car in the wrong field's allowed values and refused an answerable question.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_car_1",
+      "tag": "misread",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [
+        "aggregate_type"
+      ],
+      "item_id": "spider:117",
+      "model": "openai/gpt-oss-120b",
+      "note": "The column is declared TEXT but holds numbers. Registry init keeps the declared type, so the validator rejects the arithmetic.",
+      "outcome": "refused",
+      "refusal": "refused (aggregate_type)",
+      "schema": "spider_car_1",
+      "tag": "validator_false_reject",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [
+        "operator_type"
+      ],
+      "item_id": "spider:126",
+      "model": "openai/gpt-oss-120b",
+      "note": "The column is declared TEXT but holds numbers. Registry init keeps the declared type, so the validator rejects the arithmetic.",
+      "outcome": "refused",
+      "refusal": "refused (operator_type)",
+      "schema": "spider_car_1",
+      "tag": "validator_false_reject",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [
+        "aggregate_type"
+      ],
+      "item_id": "spider:135",
+      "model": "openai/gpt-oss-120b",
+      "note": "The column is declared TEXT but holds numbers. Registry init keeps the declared type, so the validator rejects the arithmetic.",
+      "outcome": "refused",
+      "refusal": "refused (aggregate_type)",
+      "schema": "spider_car_1",
+      "tag": "validator_false_reject",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [
+        "aggregate_type"
+      ],
+      "item_id": "spider:136",
+      "model": "openai/gpt-oss-120b",
+      "note": "The column is declared TEXT but holds numbers. Registry init keeps the declared type, so the validator rejects the arithmetic.",
+      "outcome": "refused",
+      "refusal": "refused (aggregate_type)",
+      "schema": "spider_car_1",
+      "tag": "validator_false_reject",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [
+        "fan_out",
+        "unknown_metric"
+      ],
+      "item_id": "spider:150",
+      "model": "openai/gpt-oss-120b",
+      "note": "The question is answerable by grouping model_list by maker. The model kept the base on car_makers, hit fan_out twice and gave up.",
+      "outcome": "refused",
+      "refusal": "refused (fan_out, unknown_metric)",
+      "schema": "spider_car_1",
+      "tag": "misread",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [],
+      "item_id": "spider:152",
+      "model": "openai/gpt-oss-120b",
+      "note": "Registry gap: car_names.model references model_list.model, which is not a primary key, so registry init skips the link and the tables cannot be joined.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_car_1",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [],
+      "item_id": "spider:159",
+      "model": "openai/gpt-oss-120b",
+      "note": "Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none of these.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_car_1",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [],
+      "item_id": "spider:160",
+      "model": "openai/gpt-oss-120b",
+      "note": "Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none of these.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_car_1",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [],
+      "item_id": "spider:167",
+      "model": "openai/gpt-oss-120b",
+      "note": "Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none of these.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_car_1",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [],
+      "item_id": "spider:168",
+      "model": "openai/gpt-oss-120b",
+      "note": "Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none of these.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_car_1",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [
+        "aggregate_type"
+      ],
+      "item_id": "spider:170",
+      "model": "openai/gpt-oss-120b",
+      "note": "The column is declared TEXT but holds numbers. Registry init keeps the declared type, so the validator rejects the arithmetic.",
+      "outcome": "refused",
+      "refusal": "refused (aggregate_type)",
+      "schema": "spider_car_1",
+      "tag": "validator_false_reject",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [],
+      "item_id": "spider:171",
+      "model": "openai/gpt-oss-120b",
+      "note": "Registry gap: car_names.model references model_list.model, which is not a primary key, so registry init skips the link and the tables cannot be joined.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_car_1",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [],
+      "item_id": "spider:172",
+      "model": "openai/gpt-oss-120b",
+      "note": "With no join path to the maker, the model filtered on the model name instead of refusing, and added a count column: a wrong answer.",
+      "outcome": "wrong",
+      "refusal": null,
+      "schema": "spider_car_1",
+      "tag": "misread",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [],
+      "item_id": "spider:175",
+      "model": "openai/gpt-oss-120b",
+      "note": "Needs an INTERSECT of two conditions. The model answered only the first: a wrong answer.",
+      "outcome": "wrong",
+      "refusal": null,
+      "schema": "spider_car_1",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [],
+      "item_id": "spider:178",
+      "model": "openai/gpt-oss-120b",
+      "note": "Registry gap: car_names.model references model_list.model, which is not a primary key, so registry init skips the link and the tables cannot be joined.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_car_1",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [],
+      "item_id": "spider:198",
+      "model": "openai/gpt-oss-120b",
+      "note": "The gold returns no rows: airport codes and cities are stored with trailing spaces, so the gold's equality joins and filters match nothing.",
+      "outcome": "wrong",
+      "refusal": null,
+      "schema": "spider_flight_2",
+      "tag": "gold_issue",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [
+        "ambiguous_path"
+      ],
+      "item_id": "spider:207",
+      "model": "openai/gpt-oss-120b",
+      "note": "Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so the validator refuses rather than guess.",
+      "outcome": "refused",
+      "refusal": "refused (ambiguous_path)",
+      "schema": "spider_flight_2",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [
+        "ambiguous_path"
+      ],
+      "item_id": "spider:208",
+      "model": "openai/gpt-oss-120b",
+      "note": "Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so the validator refuses rather than guess.",
+      "outcome": "refused",
+      "refusal": "refused (ambiguous_path)",
+      "schema": "spider_flight_2",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [
+        "ambiguous_path"
+      ],
+      "item_id": "spider:209",
+      "model": "openai/gpt-oss-120b",
+      "note": "Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so the validator refuses rather than guess.",
+      "outcome": "refused",
+      "refusal": "refused (ambiguous_path)",
+      "schema": "spider_flight_2",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [
+        "ambiguous_path"
+      ],
+      "item_id": "spider:210",
+      "model": "openai/gpt-oss-120b",
+      "note": "Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so the validator refuses rather than guess.",
+      "outcome": "refused",
+      "refusal": "refused (ambiguous_path)",
+      "schema": "spider_flight_2",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [],
+      "item_id": "spider:214",
+      "model": "openai/gpt-oss-120b",
+      "note": "Registry gap: flights.airline has no declared or inferred link to airlines (the column is not named like airlines' key), so airline names cannot be reached.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_flight_2",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [],
+      "item_id": "spider:215",
+      "model": "openai/gpt-oss-120b",
+      "note": "Registry gap: flights.airline has no declared or inferred link to airlines (the column is not named like airlines' key), so airline names cannot be reached.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_flight_2",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [],
+      "item_id": "spider:216",
+      "model": "openai/gpt-oss-120b",
+      "note": "Registry gap: flights.airline has no declared or inferred link to airlines (the column is not named like airlines' key), so airline names cannot be reached.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_flight_2",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [],
+      "item_id": "spider:217",
+      "model": "openai/gpt-oss-120b",
+      "note": "Registry gap: flights.airline has no declared or inferred link to airlines (the column is not named like airlines' key), so airline names cannot be reached.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_flight_2",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [],
+      "item_id": "spider:218",
+      "model": "openai/gpt-oss-120b",
+      "note": "Registry gap: flights.airline has no declared or inferred link to airlines (the column is not named like airlines' key), so airline names cannot be reached.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_flight_2",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [],
+      "item_id": "spider:219",
+      "model": "openai/gpt-oss-120b",
+      "note": "Registry gap: flights.airline has no declared or inferred link to airlines (the column is not named like airlines' key), so airline names cannot be reached.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_flight_2",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [],
+      "item_id": "spider:220",
+      "model": "openai/gpt-oss-120b",
+      "note": "Registry gap: flights.airline has no declared or inferred link to airlines (the column is not named like airlines' key), so airline names cannot be reached.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_flight_2",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [],
+      "item_id": "spider:224",
+      "model": "openai/gpt-oss-120b",
+      "note": "The gold returns no rows: airport codes and cities are stored with trailing spaces, so the gold's equality joins and filters match nothing.",
+      "outcome": "wrong",
+      "refusal": null,
+      "schema": "spider_flight_2",
+      "tag": "gold_issue",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [],
+      "item_id": "spider:226",
+      "model": "openai/gpt-oss-120b",
+      "note": "The gold returns no rows: airport codes and cities are stored with trailing spaces, so the gold's equality joins and filters match nothing.",
+      "outcome": "wrong",
+      "refusal": null,
+      "schema": "spider_flight_2",
+      "tag": "gold_issue",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [],
+      "item_id": "spider:228",
+      "model": "openai/gpt-oss-120b",
+      "note": "The gold returns no rows: airport codes and cities are stored with trailing spaces, so the gold's equality joins and filters match nothing.",
+      "outcome": "wrong",
+      "refusal": null,
+      "schema": "spider_flight_2",
+      "tag": "gold_issue",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [],
+      "item_id": "spider:229",
+      "model": "openai/gpt-oss-120b",
+      "note": "With no link to airlines, the model returned an airline id and count instead of refusing: a wrong answer.",
+      "outcome": "wrong",
+      "refusal": null,
+      "schema": "spider_flight_2",
+      "tag": "misread",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [],
+      "item_id": "spider:230",
+      "model": "openai/gpt-oss-120b",
+      "note": "Registry gap: flights.airline has no declared or inferred link to airlines (the column is not named like airlines' key), so airline names cannot be reached.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_flight_2",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [],
+      "item_id": "spider:231",
+      "model": "openai/gpt-oss-120b",
+      "note": "Registry gap: flights.airline has no declared or inferred link to airlines (the column is not named like airlines' key), so airline names cannot be reached.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_flight_2",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [],
+      "item_id": "spider:233",
+      "model": "openai/gpt-oss-120b",
+      "note": "Registry gap: flights.airline has no declared or inferred link to airlines (the column is not named like airlines' key), so airline names cannot be reached.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_flight_2",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [],
+      "item_id": "spider:239",
+      "model": "openai/gpt-oss-120b",
+      "note": "Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none of these.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_flight_2",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [],
+      "item_id": "spider:240",
+      "model": "openai/gpt-oss-120b",
+      "note": "Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none of these.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_flight_2",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [],
+      "item_id": "spider:245",
+      "model": "openai/gpt-oss-120b",
+      "note": "Registry gap: flights.airline has no declared or inferred link to airlines (the column is not named like airlines' key), so airline names cannot be reached.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_flight_2",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [],
+      "item_id": "spider:246",
+      "model": "openai/gpt-oss-120b",
+      "note": "Registry gap: flights.airline has no declared or inferred link to airlines (the column is not named like airlines' key), so airline names cannot be reached.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_flight_2",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [
+        "ambiguous_path"
+      ],
+      "item_id": "spider:251",
+      "model": "openai/gpt-oss-120b",
+      "note": "Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so the validator refuses rather than guess.",
+      "outcome": "refused",
+      "refusal": "refused (ambiguous_path)",
+      "schema": "spider_flight_2",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [
+        "ambiguous_path"
+      ],
+      "item_id": "spider:252",
+      "model": "openai/gpt-oss-120b",
+      "note": "Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so the validator refuses rather than guess.",
+      "outcome": "refused",
+      "refusal": "refused (ambiguous_path)",
+      "schema": "spider_flight_2",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [
+        "ambiguous_path"
+      ],
+      "item_id": "spider:254",
+      "model": "openai/gpt-oss-120b",
+      "note": "Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so the validator refuses rather than guess.",
+      "outcome": "refused",
+      "refusal": "refused (ambiguous_path)",
+      "schema": "spider_flight_2",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [
+        "ambiguous_path"
+      ],
+      "item_id": "spider:255",
+      "model": "openai/gpt-oss-120b",
+      "note": "Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so the validator refuses rather than guess.",
+      "outcome": "refused",
+      "refusal": "refused (ambiguous_path)",
+      "schema": "spider_flight_2",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [],
+      "item_id": "spider:257",
+      "model": "openai/gpt-oss-120b",
+      "note": "Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none of these.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_flight_2",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [],
+      "item_id": "spider:258",
+      "model": "openai/gpt-oss-120b",
+      "note": "Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none of these.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_flight_2",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [],
+      "item_id": "spider:451",
+      "model": "openai/gpt-oss-120b",
+      "note": "The names and country codes need a join with two equally short paths (winner or loser). The model grouped by winner_id instead of refusing, so it returned ids rather than the requested columns: a wrong answer.",
+      "outcome": "wrong",
+      "refusal": null,
+      "schema": "spider_wta_1",
+      "tag": "misread",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [],
+      "item_id": "spider:452",
+      "model": "openai/gpt-oss-120b",
+      "note": "Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none of these.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_wta_1",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [],
+      "item_id": "spider:463",
+      "model": "openai/gpt-oss-120b",
+      "note": "The gold reads rank points from an unaggregated column in a GROUP BY (SQLite returns an arbitrary row). The answer's maximum is a defined value.",
+      "outcome": "wrong",
+      "refusal": null,
+      "schema": "spider_wta_1",
+      "tag": "gold_issue",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [],
+      "item_id": "spider:464",
+      "model": "openai/gpt-oss-120b",
+      "note": "Same gold pattern as spider:463: rank points from an unaggregated column.",
+      "outcome": "wrong",
+      "refusal": null,
+      "schema": "spider_wta_1",
+      "tag": "gold_issue",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [],
+      "item_id": "spider:472",
+      "model": "openai/gpt-oss-120b",
+      "note": "The gold groups by first name, which merges different players who share one; the answer totals per player.",
+      "outcome": "wrong",
+      "refusal": null,
+      "schema": "spider_wta_1",
+      "tag": "gold_issue",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [],
+      "item_id": "spider:488",
+      "model": "openai/gpt-oss-120b",
+      "note": "Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so the validator refuses rather than guess.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_wta_1",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [
+        "ambiguous_path",
+        "invalid_order_by"
+      ],
+      "item_id": "spider:885",
+      "model": "openai/gpt-oss-120b",
+      "note": "Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so the validator refuses rather than guess.",
+      "outcome": "refused",
+      "refusal": "refused (ambiguous_path, invalid_order_by)",
+      "schema": "spider_network_1",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [
+        "ambiguous_path"
+      ],
+      "item_id": "spider:886",
+      "model": "openai/gpt-oss-120b",
+      "note": "Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so the validator refuses rather than guess.",
+      "outcome": "refused",
+      "refusal": "refused (ambiguous_path)",
+      "schema": "spider_network_1",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [
+        "ambiguous_path"
+      ],
+      "item_id": "spider:887",
+      "model": "openai/gpt-oss-120b",
+      "note": "After the validator refused the ambiguous join, the model answered with student ids instead of names: a wrong answer.",
+      "outcome": "wrong",
+      "refusal": null,
+      "schema": "spider_network_1",
+      "tag": "misread",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [
+        "ambiguous_path",
+        "invalid_order_by"
+      ],
+      "item_id": "spider:889",
+      "model": "openai/gpt-oss-120b",
+      "note": "Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so the validator refuses rather than guess.",
+      "outcome": "refused",
+      "refusal": "refused (ambiguous_path, invalid_order_by)",
+      "schema": "spider_network_1",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [],
+      "item_id": "spider:890",
+      "model": "openai/gpt-oss-120b",
+      "note": "Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none of these.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_network_1",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [],
+      "item_id": "spider:891",
+      "model": "openai/gpt-oss-120b",
+      "note": "Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none of these.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_network_1",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [
+        "ambiguous_path"
+      ],
+      "item_id": "spider:892",
+      "model": "openai/gpt-oss-120b",
+      "note": "Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so the validator refuses rather than guess.",
+      "outcome": "refused",
+      "refusal": "refused (ambiguous_path)",
+      "schema": "spider_network_1",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [
+        "ambiguous_path"
+      ],
+      "item_id": "spider:893",
+      "model": "openai/gpt-oss-120b",
+      "note": "Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so the validator refuses rather than guess.",
+      "outcome": "refused",
+      "refusal": "refused (ambiguous_path)",
+      "schema": "spider_network_1",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [
+        "ambiguous_path"
+      ],
+      "item_id": "spider:894",
+      "model": "openai/gpt-oss-120b",
+      "note": "Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so the validator refuses rather than guess.",
+      "outcome": "refused",
+      "refusal": "refused (ambiguous_path)",
+      "schema": "spider_network_1",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [
+        "ambiguous_path"
+      ],
+      "item_id": "spider:896",
+      "model": "openai/gpt-oss-120b",
+      "note": "Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so the validator refuses rather than guess.",
+      "outcome": "refused",
+      "refusal": "refused (ambiguous_path)",
+      "schema": "spider_network_1",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [
+        "ambiguous_path"
+      ],
+      "item_id": "spider:897",
+      "model": "openai/gpt-oss-120b",
+      "note": "Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so the validator refuses rather than guess.",
+      "outcome": "refused",
+      "refusal": "refused (ambiguous_path)",
+      "schema": "spider_network_1",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [],
+      "item_id": "spider:898",
+      "model": "openai/gpt-oss-120b",
+      "note": "Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none of these.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_network_1",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [],
+      "item_id": "spider:899",
+      "model": "openai/gpt-oss-120b",
+      "note": "Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none of these.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_network_1",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [],
+      "item_id": "spider:900",
+      "model": "openai/gpt-oss-120b",
+      "note": "Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none of these.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_network_1",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [
+        "ambiguous_path"
+      ],
+      "item_id": "spider:904",
+      "model": "openai/gpt-oss-120b",
+      "note": "Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so the validator refuses rather than guess.",
+      "outcome": "refused",
+      "refusal": "refused (ambiguous_path)",
+      "schema": "spider_network_1",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [
+        "ambiguous_path"
+      ],
+      "item_id": "spider:905",
+      "model": "openai/gpt-oss-120b",
+      "note": "Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so the validator refuses rather than guess.",
+      "outcome": "refused",
+      "refusal": "refused (ambiguous_path)",
+      "schema": "spider_network_1",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [
+        "ambiguous_path"
+      ],
+      "item_id": "spider:906",
+      "model": "openai/gpt-oss-120b",
+      "note": "Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so the validator refuses rather than guess.",
+      "outcome": "refused",
+      "refusal": "refused (ambiguous_path)",
+      "schema": "spider_network_1",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [
+        "ambiguous_path"
+      ],
+      "item_id": "spider:907",
+      "model": "openai/gpt-oss-120b",
+      "note": "Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so the validator refuses rather than guess.",
+      "outcome": "refused",
+      "refusal": "refused (ambiguous_path)",
+      "schema": "spider_network_1",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [
+        "ambiguous_path",
+        "invalid_order_by"
+      ],
+      "item_id": "spider:908",
+      "model": "openai/gpt-oss-120b",
+      "note": "Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so the validator refuses rather than guess.",
+      "outcome": "refused",
+      "refusal": "refused (ambiguous_path, invalid_order_by)",
+      "schema": "spider_network_1",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [
+        "ambiguous_path"
+      ],
+      "item_id": "spider:909",
+      "model": "openai/gpt-oss-120b",
+      "note": "Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so the validator refuses rather than guess.",
+      "outcome": "refused",
+      "refusal": "refused (ambiguous_path)",
+      "schema": "spider_network_1",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [
+        "ambiguous_path"
+      ],
+      "item_id": "spider:910",
+      "model": "openai/gpt-oss-120b",
+      "note": "Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so the validator refuses rather than guess.",
+      "outcome": "refused",
+      "refusal": "refused (ambiguous_path)",
+      "schema": "spider_network_1",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [
+        "ambiguous_path",
+        "invalid_order_by"
+      ],
+      "item_id": "spider:911",
+      "model": "openai/gpt-oss-120b",
+      "note": "Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so the validator refuses rather than guess.",
+      "outcome": "refused",
+      "refusal": "refused (ambiguous_path, invalid_order_by)",
+      "schema": "spider_network_1",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [
+        "ambiguous_path"
+      ],
+      "item_id": "spider:912",
+      "model": "openai/gpt-oss-120b",
+      "note": "Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so the validator refuses rather than guess.",
+      "outcome": "refused",
+      "refusal": "refused (ambiguous_path)",
+      "schema": "spider_network_1",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [
+        "ambiguous_path"
+      ],
+      "item_id": "spider:913",
+      "model": "openai/gpt-oss-120b",
+      "note": "Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so the validator refuses rather than guess.",
+      "outcome": "refused",
+      "refusal": "refused (ambiguous_path)",
+      "schema": "spider_network_1",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [
+        "ambiguous_path"
+      ],
+      "item_id": "spider:914",
+      "model": "openai/gpt-oss-120b",
+      "note": "Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so the validator refuses rather than guess.",
+      "outcome": "refused",
+      "refusal": "refused (ambiguous_path)",
+      "schema": "spider_network_1",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [],
+      "item_id": "spider:915",
+      "model": "openai/gpt-oss-120b",
+      "note": "Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none of these.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_network_1",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [],
+      "item_id": "spider:917",
+      "model": "openai/gpt-oss-120b",
+      "note": "Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none of these.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_network_1",
+      "tag": "grammar_gap",
+      "trial": 1
+    }
+  ],
+  "notes": [
+    "sql_agent baseline not run: needs a live model (multi-step tool calls can't be honestly simulated in one pass).",
+    "One target model (openai/gpt-oss-120b). A second model runs once there is an OpenRouter key: simulating a second vendor with the same stand-in would add no real diversity.",
+    "Trials: 1. Repeating trials with the same stand-in would measure the stand-in's variance, not the target model's."
+  ],
+  "registry_hashes": {
+    "spider_car_1": "bfafa604590eb78ac55d142c41ebbbdf52308f2b0b98baded2aa8868d7309ca2",
+    "spider_dog_kennels": "ba7277f7739fd820d7ec8f4cfda282af060e5d4aa09828dcca20d512683bde78",
+    "spider_flight_2": "e69b8206b5403470249e458ce75b56ba6e3421c53b73d982f53e2fbe1646c940",
+    "spider_network_1": "b9991de76b27c3ecc644274d209d7c543c7c27dcd2ec7298e7ab729212639d4b",
+    "spider_wta_1": "807a938123c3f5467290fcab18b29cc9d79c341a9dab73eff6d096b5cb43345a"
+  },
+  "run_id": "sim-1",
+  "simulation": "Model responses simulated by claude-haiku-5-5, standing in for openai/gpt-oss-120b. This is not an OpenRouter measurement.",
+  "spent_usd": 0.0,
+  "status": "complete",
+  "table": [
+    {
+      "accuracy_given_attempted": {
+        "ci95": [
+          0.7267314055770869,
+          0.9424613230987987
+        ],
+        "n": 33,
+        "of": 38,
+        "rate": 0.868421052631579
+      },
+      "coverage": {
+        "ci95": [
+          0.7552083818991787,
+          0.9492957226019584
+        ],
+        "n": 38,
+        "of": 43,
+        "rate": 0.8837209302325582
+      },
+      "execution_accuracy": {
+        "ci95": [
+          0.6225547970219101,
+          0.8684632152061551
+        ],
+        "n": 33,
+        "of": 43,
+        "rate": 0.7674418604651163
+      },
+      "execution_error_rate": {
+        "ci95": [
+          0.0,
+          0.05422613939130178
+        ],
+        "n": 0,
+        "of": 67,
+        "rate": 0.0
+      },
+      "false_refusal_rate": {
+        "ci95": [
+          0.05070427739804166,
+          0.24479161810082128
+        ],
+        "n": 5,
+        "of": 43,
+        "rate": 0.11627906976744186
+      },
+      "items": 67,
+      "mean_cost_usd": 0.0,
+      "model": "openai/gpt-oss-120b",
+      "p50_latency_ms": 8.93775001168251,
+      "pending": 0,
+      "refusal_recall": {
+        "ci95": [
+          0.8620237953250198,
+          1.0
+        ],
+        "n": 24,
+        "of": 24,
+        "rate": 1.0
+      },
+      "schema": "fieldservice",
+      "system": "ledgerline",
+      "trials": 1,
+      "wrong_answer_rate_given_answered": {
+        "ci95": [
+          0.05753867690120133,
+          0.2732685944229131
+        ],
+        "n": 5,
+        "of": 38,
+        "rate": 0.13157894736842105
+      }
+    },
+    {
+      "accuracy_given_attempted": {
+        "ci95": [
+          0.5489463582227039,
+          0.8139799986415182
+        ],
+        "n": 30,
+        "of": 43,
+        "rate": 0.6976744186046512
+      },
+      "coverage": {
+        "ci95": [
+          0.9179901967742088,
+          1.0
+        ],
+        "n": 43,
+        "of": 43,
+        "rate": 1.0
+      },
+      "execution_accuracy": {
+        "ci95": [
+          0.5489463582227039,
+          0.8139799986415182
+        ],
+        "n": 30,
+        "of": 43,
+        "rate": 0.6976744186046512
+      },
+      "execution_error_rate": {
+        "ci95": [
+          0.0,
+          0.05422613939130178
+        ],
+        "n": 0,
+        "of": 67,
+        "rate": 0.0
+      },
+      "false_refusal_rate": {
+        "ci95": [
+          0.0,
+          0.08200980322579117
+        ],
+        "n": 0,
+        "of": 43,
+        "rate": 0.0
+      },
+      "items": 67,
+      "mean_cost_usd": 0.0,
+      "model": "openai/gpt-oss-120b",
+      "p50_latency_ms": 4.186708014458418,
+      "pending": 0,
+      "refusal_recall": {
+        "ci95": [
+          0.8620237953250198,
+          1.0
+        ],
+        "n": 24,
+        "of": 24,
+        "rate": 1.0
+      },
+      "schema": "fieldservice",
+      "system": "oneshot",
+      "trials": 1,
+      "wrong_answer_rate_given_answered": {
+        "ci95": [
+          0.1860200013584818,
+          0.45105364177729607
+        ],
+        "n": 13,
+        "of": 43,
+        "rate": 0.3023255813953488
+      }
+    },
+    {
+      "accuracy_given_attempted": {
+        "ci95": [
+          0.7817330875072737,
+          0.9712513886640066
+        ],
+        "n": 33,
+        "of": 36,
+        "rate": 0.9166666666666666
+      },
+      "coverage": {
+        "ci95": [
+          0.5833487630404344,
+          0.8252582933408878
+        ],
+        "n": 36,
+        "of": 50,
+        "rate": 0.72
+      },
+      "execution_accuracy": {
+        "ci95": [
+          0.521538260502326,
+          0.7756305077749992
+        ],
+        "n": 33,
+        "of": 50,
+        "rate": 0.66
+      },
+      "execution_error_rate": {
+        "ci95": [
+          6.938893903907228e-18,
+          0.07134759913335872
+        ],
+        "n": 0,
+        "of": 50,
+        "rate": 0.0
+      },
+      "false_refusal_rate": {
+        "ci95": [
+          0.17474170665911232,
+          0.4166512369595657
+        ],
+        "n": 14,
+        "of": 50,
+        "rate": 0.28
+      },
+      "items": 50,
+      "mean_cost_usd": 0.0,
+      "model": "openai/gpt-oss-120b",
+      "p50_latency_ms": 4.387833003420383,
+      "pending": 0,
+      "refusal_recall": {
+        "ci95": null,
+        "n": 0,
+        "of": 0,
+        "rate": null
+      },
+      "schema": "spider_car_1",
+      "system": "ledgerline",
+      "trials": 1,
+      "wrong_answer_rate_given_answered": {
+        "ci95": [
+          0.02874861133599338,
+          0.2182669124927263
+        ],
+        "n": 3,
+        "of": 36,
+        "rate": 0.08333333333333333
+      }
+    },
+    {
+      "accuracy_given_attempted": {
+        "ci95": [
+          0.6044684273515117,
+          0.8412847250644762
+        ],
+        "n": 37,
+        "of": 50,
+        "rate": 0.74
+      },
+      "coverage": {
+        "ci95": [
+          0.9286524008666414,
+          1.0
+        ],
+        "n": 50,
+        "of": 50,
+        "rate": 1.0
+      },
+      "execution_accuracy": {
+        "ci95": [
+          0.6044684273515117,
+          0.8412847250644762
+        ],
+        "n": 37,
+        "of": 50,
+        "rate": 0.74
+      },
+      "execution_error_rate": {
+        "ci95": [
+          6.938893903907228e-18,
+          0.07134759913335872
+        ],
+        "n": 0,
+        "of": 50,
+        "rate": 0.0
+      },
+      "false_refusal_rate": {
+        "ci95": [
+          6.938893903907228e-18,
+          0.07134759913335872
+        ],
+        "n": 0,
+        "of": 50,
+        "rate": 0.0
+      },
+      "items": 50,
+      "mean_cost_usd": 0.0,
+      "model": "openai/gpt-oss-120b",
+      "p50_latency_ms": 0.34383300226181746,
+      "pending": 0,
+      "refusal_recall": {
+        "ci95": null,
+        "n": 0,
+        "of": 0,
+        "rate": null
+      },
+      "schema": "spider_car_1",
+      "system": "oneshot",
+      "trials": 1,
+      "wrong_answer_rate_given_answered": {
+        "ci95": [
+          0.15871527493552393,
+          0.39553157264848837
+        ],
+        "n": 13,
+        "of": 50,
+        "rate": 0.26
+      }
+    },
+    {
+      "accuracy_given_attempted": {
+        "ci95": [
+          0.6269430358685175,
+          0.9049489282271013
+        ],
+        "n": 24,
+        "of": 30,
+        "rate": 0.8
+      },
+      "coverage": {
+        "ci95": [
+          0.4618143774758936,
+          0.7239161026974346
+        ],
+        "n": 30,
+        "of": 50,
+        "rate": 0.6
+      },
+      "execution_accuracy": {
+        "ci95": [
+          0.34797135286578046,
+          0.6148825510995539
+        ],
+        "n": 24,
+        "of": 50,
+        "rate": 0.48
+      },
+      "execution_error_rate": {
+        "ci95": [
+          6.938893903907228e-18,
+          0.07134759913335872
+        ],
+        "n": 0,
+        "of": 50,
+        "rate": 0.0
+      },
+      "false_refusal_rate": {
+        "ci95": [
+          0.27608389730256544,
+          0.5381856225241064
+        ],
+        "n": 20,
+        "of": 50,
+        "rate": 0.4
+      },
+      "items": 50,
+      "mean_cost_usd": 0.0,
+      "model": "openai/gpt-oss-120b",
+      "p50_latency_ms": 5.53937500808388,
+      "pending": 0,
+      "refusal_recall": {
+        "ci95": null,
+        "n": 0,
+        "of": 0,
+        "rate": null
+      },
+      "schema": "spider_dog_kennels",
+      "system": "ledgerline",
+      "trials": 1,
+      "wrong_answer_rate_given_answered": {
+        "ci95": [
+          0.0950510717728987,
+          0.3730569641314825
+        ],
+        "n": 6,
+        "of": 30,
+        "rate": 0.2
+      }
+    },
+    {
+      "accuracy_given_attempted": {
+        "ci95": [
+          0.562496495355466,
+          0.8089644649911906
+        ],
+        "n": 35,
+        "of": 50,
+        "rate": 0.7
+      },
+      "coverage": {
+        "ci95": [
+          0.9286524008666414,
+          1.0
+        ],
+        "n": 50,
+        "of": 50,
+        "rate": 1.0
+      },
+      "execution_accuracy": {
+        "ci95": [
+          0.562496495355466,
+          0.8089644649911906
+        ],
+        "n": 35,
+        "of": 50,
+        "rate": 0.7
+      },
+      "execution_error_rate": {
+        "ci95": [
+          6.938893903907228e-18,
+          0.07134759913335872
+        ],
+        "n": 0,
+        "of": 50,
+        "rate": 0.0
+      },
+      "false_refusal_rate": {
+        "ci95": [
+          6.938893903907228e-18,
+          0.07134759913335872
+        ],
+        "n": 0,
+        "of": 50,
+        "rate": 0.0
+      },
+      "items": 50,
+      "mean_cost_usd": 0.0,
+      "model": "openai/gpt-oss-120b",
+      "p50_latency_ms": 0.30647945823147893,
+      "pending": 0,
+      "refusal_recall": {
+        "ci95": null,
+        "n": 0,
+        "of": 0,
+        "rate": null
+      },
+      "schema": "spider_dog_kennels",
+      "system": "oneshot",
+      "trials": 1,
+      "wrong_answer_rate_given_answered": {
+        "ci95": [
+          0.19103553500880954,
+          0.437503504644534
+        ],
+        "n": 15,
+        "of": 50,
+        "rate": 0.3
+      }
+    },
+    {
+      "accuracy_given_attempted": {
+        "ci95": [
+          0.6212374288068301,
+          0.9149293885105758
+        ],
+        "n": 21,
+        "of": 26,
+        "rate": 0.8076923076923077
+      },
+      "coverage": {
+        "ci95": [
+          0.38511744890044614,
+          0.6520286471342196
+        ],
+        "n": 26,
+        "of": 50,
+        "rate": 0.52
+      },
+      "execution_accuracy": {
+        "ci95": [
+          0.2937500335471198,
+          0.5576655823142176
+        ],
+        "n": 21,
+        "of": 50,
+        "rate": 0.42
+      },
+      "execution_error_rate": {
+        "ci95": [
+          6.938893903907228e-18,
+          0.07134759913335872
+        ],
+        "n": 0,
+        "of": 50,
+        "rate": 0.0
+      },
+      "false_refusal_rate": {
+        "ci95": [
+          0.34797135286578046,
+          0.6148825510995539
+        ],
+        "n": 24,
+        "of": 50,
+        "rate": 0.48
+      },
+      "items": 50,
+      "mean_cost_usd": 0.0,
+      "model": "openai/gpt-oss-120b",
+      "p50_latency_ms": 4.014958452899009,
+      "pending": 0,
+      "refusal_recall": {
+        "ci95": null,
+        "n": 0,
+        "of": 0,
+        "rate": null
+      },
+      "schema": "spider_flight_2",
+      "system": "ledgerline",
+      "trials": 1,
+      "wrong_answer_rate_given_answered": {
+        "ci95": [
+          0.0850706114894241,
+          0.3787625711931699
+        ],
+        "n": 5,
+        "of": 26,
+        "rate": 0.19230769230769232
+      }
+    },
+    {
+      "accuracy_given_attempted": {
+        "ci95": [
+          0.7619518261679701,
+          0.9438239984906773
+        ],
+        "n": 44,
+        "of": 50,
+        "rate": 0.88
+      },
+      "coverage": {
+        "ci95": [
+          0.9286524008666414,
+          1.0
+        ],
+        "n": 50,
+        "of": 50,
+        "rate": 1.0
+      },
+      "execution_accuracy": {
+        "ci95": [
+          0.7619518261679701,
+          0.9438239984906773
+        ],
+        "n": 44,
+        "of": 50,
+        "rate": 0.88
+      },
+      "execution_error_rate": {
+        "ci95": [
+          6.938893903907228e-18,
+          0.07134759913335872
+        ],
+        "n": 0,
+        "of": 50,
+        "rate": 0.0
+      },
+      "false_refusal_rate": {
+        "ci95": [
+          6.938893903907228e-18,
+          0.07134759913335872
+        ],
+        "n": 0,
+        "of": 50,
+        "rate": 0.0
+      },
+      "items": 50,
+      "mean_cost_usd": 0.0,
+      "model": "openai/gpt-oss-120b",
+      "p50_latency_ms": 0.33518695272505283,
+      "pending": 0,
+      "refusal_recall": {
+        "ci95": null,
+        "n": 0,
+        "of": 0,
+        "rate": null
+      },
+      "schema": "spider_flight_2",
+      "system": "oneshot",
+      "trials": 1,
+      "wrong_answer_rate_given_answered": {
+        "ci95": [
+          0.05617600150932274,
+          0.23804817383202992
+        ],
+        "n": 6,
+        "of": 50,
+        "rate": 0.12
+      }
+    },
+    {
+      "accuracy_given_attempted": {
+        "ci95": [
+          0.7975819352134406,
+          0.9926065438344942
+        ],
+        "n": 23,
+        "of": 24,
+        "rate": 0.9583333333333334
+      },
+      "coverage": {
+        "ci95": [
+          0.34797135286578046,
+          0.6148825510995539
+        ],
+        "n": 24,
+        "of": 50,
+        "rate": 0.48
+      },
+      "execution_accuracy": {
+        "ci95": [
+          0.3296965219222435,
+          0.5960112860084253
+        ],
+        "n": 23,
+        "of": 50,
+        "rate": 0.46
+      },
+      "execution_error_rate": {
+        "ci95": [
+          6.938893903907228e-18,
+          0.07134759913335872
+        ],
+        "n": 0,
+        "of": 50,
+        "rate": 0.0
+      },
+      "false_refusal_rate": {
+        "ci95": [
+          0.38511744890044614,
+          0.6520286471342196
+        ],
+        "n": 26,
+        "of": 50,
+        "rate": 0.52
+      },
+      "items": 50,
+      "mean_cost_usd": 0.0,
+      "model": "openai/gpt-oss-120b",
+      "p50_latency_ms": 7.381999981589615,
+      "pending": 0,
+      "refusal_recall": {
+        "ci95": null,
+        "n": 0,
+        "of": 0,
+        "rate": null
+      },
+      "schema": "spider_network_1",
+      "system": "ledgerline",
+      "trials": 1,
+      "wrong_answer_rate_given_answered": {
+        "ci95": [
+          0.0073934561655057685,
+          0.20241806478655938
+        ],
+        "n": 1,
+        "of": 24,
+        "rate": 0.041666666666666664
+      }
+    },
+    {
+      "accuracy_given_attempted": {
+        "ci95": [
+          0.7381380628941446,
+          0.9304916657298371
+        ],
+        "n": 43,
+        "of": 50,
+        "rate": 0.86
+      },
+      "coverage": {
+        "ci95": [
+          0.9286524008666414,
+          1.0
+        ],
+        "n": 50,
+        "of": 50,
+        "rate": 1.0
+      },
+      "execution_accuracy": {
+        "ci95": [
+          0.7381380628941446,
+          0.9304916657298371
+        ],
+        "n": 43,
+        "of": 50,
+        "rate": 0.86
+      },
+      "execution_error_rate": {
+        "ci95": [
+          6.938893903907228e-18,
+          0.07134759913335872
+        ],
+        "n": 0,
+        "of": 50,
+        "rate": 0.0
+      },
+      "false_refusal_rate": {
+        "ci95": [
+          6.938893903907228e-18,
+          0.07134759913335872
+        ],
+        "n": 0,
+        "of": 50,
+        "rate": 0.0
+      },
+      "items": 50,
+      "mean_cost_usd": 0.0,
+      "model": "openai/gpt-oss-120b",
+      "p50_latency_ms": 0.2669580280780792,
+      "pending": 0,
+      "refusal_recall": {
+        "ci95": null,
+        "n": 0,
+        "of": 0,
+        "rate": null
+      },
+      "schema": "spider_network_1",
+      "system": "oneshot",
+      "trials": 1,
+      "wrong_answer_rate_given_answered": {
+        "ci95": [
+          0.06950833427016294,
+          0.2618619371058554
+        ],
+        "n": 7,
+        "of": 50,
+        "rate": 0.14
+      }
+    },
+    {
+      "accuracy_given_attempted": {
+        "ci95": [
+          0.8044669820963272,
+          0.9671162431819081
+        ],
+        "n": 44,
+        "of": 48,
+        "rate": 0.9166666666666666
+      },
+      "coverage": {
+        "ci95": [
+          0.8653990931249297,
+          0.9889611156723802
+        ],
+        "n": 48,
+        "of": 50,
+        "rate": 0.96
+      },
+      "execution_accuracy": {
+        "ci95": [
+          0.7619518261679701,
+          0.9438239984906773
+        ],
+        "n": 44,
+        "of": 50,
+        "rate": 0.88
+      },
+      "execution_error_rate": {
+        "ci95": [
+          6.938893903907228e-18,
+          0.07134759913335872
+        ],
+        "n": 0,
+        "of": 50,
+        "rate": 0.0
+      },
+      "false_refusal_rate": {
+        "ci95": [
+          0.011038884327619805,
+          0.1346009068750702
+        ],
+        "n": 2,
+        "of": 50,
+        "rate": 0.04
+      },
+      "items": 50,
+      "mean_cost_usd": 0.0,
+      "model": "openai/gpt-oss-120b",
+      "p50_latency_ms": 7.043729478027672,
+      "pending": 0,
+      "refusal_recall": {
+        "ci95": null,
+        "n": 0,
+        "of": 0,
+        "rate": null
+      },
+      "schema": "spider_wta_1",
+      "system": "ledgerline",
+      "trials": 1,
+      "wrong_answer_rate_given_answered": {
+        "ci95": [
+          0.032883756818091775,
+          0.1955330179036728
+        ],
+        "n": 4,
+        "of": 48,
+        "rate": 0.08333333333333333
+      }
+    },
+    {
+      "accuracy_given_attempted": {
+        "ci95": [
+          0.6920394632569922,
+          0.9022980732976582
+        ],
+        "n": 41,
+        "of": 50,
+        "rate": 0.82
+      },
+      "coverage": {
+        "ci95": [
+          0.9286524008666414,
+          1.0
+        ],
+        "n": 50,
+        "of": 50,
+        "rate": 1.0
+      },
+      "execution_accuracy": {
+        "ci95": [
+          0.6920394632569922,
+          0.9022980732976582
+        ],
+        "n": 41,
+        "of": 50,
+        "rate": 0.82
+      },
+      "execution_error_rate": {
+        "ci95": [
+          0.003539259271646236,
+          0.10495443589637815
+        ],
+        "n": 1,
+        "of": 50,
+        "rate": 0.02
+      },
+      "false_refusal_rate": {
+        "ci95": [
+          6.938893903907228e-18,
+          0.07134759913335872
+        ],
+        "n": 0,
+        "of": 50,
+        "rate": 0.0
+      },
+      "items": 50,
+      "mean_cost_usd": 0.0,
+      "model": "openai/gpt-oss-120b",
+      "p50_latency_ms": 2.4152499972842634,
+      "pending": 0,
+      "refusal_recall": {
+        "ci95": null,
+        "n": 0,
+        "of": 0,
+        "rate": null
+      },
+      "schema": "spider_wta_1",
+      "system": "oneshot",
+      "trials": 1,
+      "wrong_answer_rate_given_answered": {
+        "ci95": [
+          0.08512698370728837,
+          0.2903633843391683
+        ],
+        "n": 8,
+        "of": 49,
+        "rate": 0.16326530612244897
+      }
+    }
+  ],
+  "trials": 1
+}

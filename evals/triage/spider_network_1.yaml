@@ -1,0 +1,110 @@
+# Triage of every Ledgerline miss in eval run sim-1 (simulated answers).
+# Tags: grammar_gap | misread | validator_false_reject | builder_bug | gold_issue.
+spider:885:
+  note: Two foreign keys link the same pair of tables. The intent has no way to say which join to use,
+    so the validator refuses rather than guess.
+  tag: grammar_gap
+spider:886:
+  note: Two foreign keys link the same pair of tables. The intent has no way to say which join to use,
+    so the validator refuses rather than guess.
+  tag: grammar_gap
+spider:887:
+  note: 'After the validator refused the ambiguous join, the model answered with student ids instead of
+    names: a wrong answer.'
+  tag: misread
+spider:889:
+  note: Two foreign keys link the same pair of tables. The intent has no way to say which join to use,
+    so the validator refuses rather than guess.
+  tag: grammar_gap
+spider:890:
+  note: Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none
+    of these.
+  tag: grammar_gap
+spider:891:
+  note: Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none
+    of these.
+  tag: grammar_gap
+spider:892:
+  note: Two foreign keys link the same pair of tables. The intent has no way to say which join to use,
+    so the validator refuses rather than guess.
+  tag: grammar_gap
+spider:893:
+  note: Two foreign keys link the same pair of tables. The intent has no way to say which join to use,
+    so the validator refuses rather than guess.
+  tag: grammar_gap
+spider:894:
+  note: Two foreign keys link the same pair of tables. The intent has no way to say which join to use,
+    so the validator refuses rather than guess.
+  tag: grammar_gap
+spider:896:
+  note: Two foreign keys link the same pair of tables. The intent has no way to say which join to use,
+    so the validator refuses rather than guess.
+  tag: grammar_gap
+spider:897:
+  note: Two foreign keys link the same pair of tables. The intent has no way to say which join to use,
+    so the validator refuses rather than guess.
+  tag: grammar_gap
+spider:898:
+  note: Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none
+    of these.
+  tag: grammar_gap
+spider:899:
+  note: Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none
+    of these.
+  tag: grammar_gap
+spider:900:
+  note: Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none
+    of these.
+  tag: grammar_gap
+spider:904:
+  note: Two foreign keys link the same pair of tables. The intent has no way to say which join to use,
+    so the validator refuses rather than guess.
+  tag: grammar_gap
+spider:905:
+  note: Two foreign keys link the same pair of tables. The intent has no way to say which join to use,
+    so the validator refuses rather than guess.
+  tag: grammar_gap
+spider:906:
+  note: Two foreign keys link the same pair of tables. The intent has no way to say which join to use,
+    so the validator refuses rather than guess.
+  tag: grammar_gap
+spider:907:
+  note: Two foreign keys link the same pair of tables. The intent has no way to say which join to use,
+    so the validator refuses rather than guess.
+  tag: grammar_gap
+spider:908:
+  note: Two foreign keys link the same pair of tables. The intent has no way to say which join to use,
+    so the validator refuses rather than guess.
+  tag: grammar_gap
+spider:909:
+  note: Two foreign keys link the same pair of tables. The intent has no way to say which join to use,
+    so the validator refuses rather than guess.
+  tag: grammar_gap
+spider:910:
+  note: Two foreign keys link the same pair of tables. The intent has no way to say which join to use,
+    so the validator refuses rather than guess.
+  tag: grammar_gap
+spider:911:
+  note: Two foreign keys link the same pair of tables. The intent has no way to say which join to use,
+    so the validator refuses rather than guess.
+  tag: grammar_gap
+spider:912:
+  note: Two foreign keys link the same pair of tables. The intent has no way to say which join to use,
+    so the validator refuses rather than guess.
+  tag: grammar_gap
+spider:913:
+  note: Two foreign keys link the same pair of tables. The intent has no way to say which join to use,
+    so the validator refuses rather than guess.
+  tag: grammar_gap
+spider:914:
+  note: Two foreign keys link the same pair of tables. The intent has no way to say which join to use,
+    so the validator refuses rather than guess.
+  tag: grammar_gap
+spider:915:
+  note: Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none
+    of these.
+  tag: grammar_gap
+spider:917:
+  note: Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none
+    of these.
+  tag: grammar_gap

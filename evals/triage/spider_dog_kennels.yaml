@@ -1,0 +1,104 @@
+# Triage of every Ledgerline miss in eval run sim-1 (simulated answers).
+# Tags: grammar_gap | misread | validator_false_reject | builder_bug | gold_issue.
+spider:919:
+  note: Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none
+    of these.
+  tag: grammar_gap
+spider:920:
+  note: Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none
+    of these.
+  tag: grammar_gap
+spider:922:
+  note: Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none
+    of these.
+  tag: grammar_gap
+spider:923:
+  note: Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none
+    of these.
+  tag: grammar_gap
+spider:924:
+  note: Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none
+    of these.
+  tag: grammar_gap
+spider:925:
+  note: Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none
+    of these.
+  tag: grammar_gap
+spider:927:
+  note: Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none
+    of these.
+  tag: grammar_gap
+spider:928:
+  note: 'By design: registry init hides email and phone-like fields, so the question cannot be answered.
+    Spider''s gold returns them.'
+  tag: validator_false_reject
+spider:929:
+  note: 'By design: registry init hides email and phone-like fields, so the question cannot be answered.
+    Spider''s gold returns them.'
+  tag: validator_false_reject
+spider:937:
+  note: The gold ranks owners by number of treatments; the question asks who spent the most. The answer
+    sums cost.
+  tag: gold_issue
+spider:942:
+  note: The gold counts treatments; the question asks for at least two types of treatment. The answer
+    counts distinct types.
+  tag: gold_issue
+spider:944:
+  note: Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none
+    of these.
+  tag: grammar_gap
+spider:945:
+  note: Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none
+    of these.
+  tag: grammar_gap
+spider:951:
+  note: The answer returns the size description column; the gold returns the size code column.
+    Both answer the question.
+  tag: gold_issue
+spider:954:
+  note: Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none
+    of these.
+  tag: grammar_gap
+spider:955:
+  note: Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none
+    of these.
+  tag: grammar_gap
+spider:961:
+  note: 'Ambiguous: youngest by the age column (gold) or by date of birth (the answer). The two columns
+    disagree in this data.'
+  tag: gold_issue
+spider:972:
+  note: 'By design: registry init hides email and phone-like fields, so the question cannot be answered.
+    Spider''s gold returns them.'
+  tag: validator_false_reject
+spider:973:
+  note: 'By design: registry init hides email and phone-like fields, so the question cannot be answered.
+    Spider''s gold returns them.'
+  tag: validator_false_reject
+spider:974:
+  note: Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none
+    of these.
+  tag: grammar_gap
+spider:978:
+  note: Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none
+    of these.
+  tag: grammar_gap
+spider:987:
+  note: The column is declared TEXT but holds numbers. Registry init keeps the declared type, so the validator
+    rejects the arithmetic.
+  tag: validator_false_reject
+spider:994:
+  note: 'By design: registry init hides email and phone-like fields, so the question cannot be answered.
+    Spider''s gold returns them.'
+  tag: validator_false_reject
+spider:995:
+  note: 'By design: registry init hides email and phone-like fields, so the question cannot be answered.
+    Spider''s gold returns them.'
+  tag: validator_false_reject
+spider:998:
+  note: The gold needs DISTINCT rows; row lists in the intent grammar cannot ask for distinct rows.
+  tag: grammar_gap
+spider:999:
+  note: 'Same as spider:998: needs DISTINCT rows.'
+  tag: grammar_gap

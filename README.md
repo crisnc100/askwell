@@ -10,10 +10,11 @@ The model never writes SQL, so it cannot invent a column or slip a value into th
 text. The cost is coverage: a question the intent cannot express is refused.
 [ADR-001](docs/adr/ADR-001-intent-not-sql.md) explains the choice.
 
-**Status.** This version holds the foundations and the correctness core: the registry,
-the intent, the validator, the SQL builder and the read-only executor, plus the model
-gateway and the frozen eval set. The step that asks a model for an intent is not built
-yet. Today you write an intent by hand and compile it to SQL (see below).
+**Status.** v0.1 runs end to end: ask a question from the command line or over HTTP, and
+get the rows back with the SQL that produced them. There is no OpenRouter key yet, so
+every model answer in this repo is *simulated*: another model wrote it, standing in for
+the target model (see [Simulated answers](#simulated-answers)). The eval results are
+labelled that way, and the accuracy floor for fieldservice is not met in v0.1.
 
 ## Quick start
 
@@ -32,7 +33,44 @@ defaults in `ledgerline/config.py` match them. To change them, copy `.env.exampl
 `.env`.
 
 No API key is needed. Model calls default to replay mode, which answers only from
-recorded responses. Only `ledgerline spike` calls a model live.
+recorded responses. A model is called live only with `--mode record` or `--mode live`,
+with `LEDGERLINE_LLM_MODE=record` or `live` in the environment (it sets the mode for
+`ledgerline ask` and the API when no `--mode` is given), or by `ledgerline spike`. Each
+of those needs `OPENROUTER_API_KEY`.
+
+## Asking a question
+
+```sh
+uv run ledgerline ask "How many invoices are still unpaid?"
+```
+
+It prints the whole trace as JSON: the intent, each attempt and its validation result,
+the SQL with its parameters, the columns and rows, or a refusal with its reason.
+`--schema` picks a schema from `config/schemas.yaml` (default `fieldservice`).
+
+The same pipeline is an HTTP API:
+
+```sh
+uv run uvicorn ledgerline.api:create_app --factory
+curl -s localhost:8000/ask -H 'content-type: application/json' \
+  -d '{"schema_id": "fieldservice", "question": "How many invoices are still unpaid?"}'
+```
+
+`GET /schemas` lists the schemas, and `GET /schemas/{id}/examples` lists the example
+questions. In replay mode only those examples have recorded answers; any other question
+gets a 409 (the CLI exits with code 4).
+
+Each question goes through the same steps. The model makes one call and returns an
+intent. The validator checks it. If the intent is invalid, the model gets one retry, with
+the validator's errors in the message; a second failure is a refusal. A valid intent
+becomes SQL and runs read-only. The answer is built by code, not by a model, and the
+result rows are never sent to the model. [ADR-002](docs/adr/ADR-002-langgraph-boundary.md)
+explains why the graph (built with LangGraph) does no more than that.
+
+Every `ask` and `/ask` writes one row to the audit log (`ask_log`, below), whether it
+was answered, refused or failed. In live or record mode each ask also has its own
+spending limit (`LEDGERLINE_ASK_BUDGET_USD`, default $0.05). A question that would go
+over it is refused, and that refusal is audited too.
 
 ## The demo database
 
@@ -75,7 +113,9 @@ keys. Where no foreign key is declared, it infers a relationship from a column s
 `customer_id` that names another table's key. Fields with sensitive-looking names
 (password, token, email, phone and similar) start hidden. With `--values` it reads the
 data and marks a text field categorical when it has at most 50 distinct values (names,
-notes and addresses are skipped). The output is always `draft: true`, and the same
+notes and addresses are skipped). On SQLite, a DATE or DATETIME column that holds only
+numbers (such as `20010203`) is typed as a number, so a calendar grain on it is refused
+rather than returning nulls. The output is always `draft: true`, and the same
 database gives the same file. It warns when the connecting role could write.
 
 ## Intents, validation and SQL
@@ -105,13 +145,13 @@ branch. Postgres and SQLite are supported.
 The executor (`ledgerline/core/executor.py`) runs the query in a read-only transaction
 with a timeout (5 seconds by default) and a row cap (1000 by default); the result says
 when rows were cut off. SQLite files are opened read-only. Given an audit log, it writes
-one row to `ask_log` for every run, including one that could not connect. The row holds
-the question and the intent as given, the validation outcome, the SQL with placeholders,
-a SHA-256 of the bound parameters, the row count, the cost, the model and the outcome.
-The question and intent can contain the values a person typed, such as a customer name
-in a filter, so those values do reach the log. The row never holds the result rows or
-the separate list of bound parameters. `ask_log` lives in a separate app database that
-the read-only role cannot connect to.
+one row to `ask_log` for every query it runs, including one that could not connect. The
+row holds the question and the intent as given, the validation outcome, the SQL with
+placeholders, a SHA-256 of the bound parameters, the row count, the cost, the model and
+the outcome. The question and intent can contain the values a person typed, such as a
+customer name in a filter, so those values do reach the log. The row never holds the
+result rows or the separate list of bound parameters. `ask_log` lives in a separate app
+database that the read-only role cannot connect to.
 
 Try it with an intent file, for example `revenue.json`:
 
@@ -135,16 +175,30 @@ instead, because a work order can have more than one invoice.
 ## Model gateway
 
 `ledgerline/llm/` makes one structured-output call to a model on OpenRouter, through
-LangChain. It has three modes: `record`, `replay` and `live`. In replay mode a missing
-recording is an error; it never falls back to a live call. Before each live call, a
-budget guard checks the call's worst-case cost against what is left of the run's
-budget, and stops the run when it would go over. A long run saves each finished item,
-so a stopped run can resume and its spend still counts.
+LangChain. It has four modes: `record`, `replay`, `live` and `export`. In replay mode a
+missing recording is an error; it never falls back to a live call. Before each live
+call, a budget guard checks the call's worst-case cost against what is left of the
+budget, and stops when it would go over. A long eval run saves each finished item, so a
+stopped run can resume and its spend still counts.
 [ADR-005](docs/adr/ADR-005-replay-and-budget.md) has the details.
 
 `ledgerline spike` checks which candidate models return valid structured output. It
-has not run yet, so no model is chosen; see
-[ADR-004](docs/adr/ADR-004-model-choice.md).
+has not run yet. Until it does, the default model is a provisional target,
+`openai/gpt-oss-120b`; see [ADR-004](docs/adr/ADR-004-model-choice.md).
+
+## Simulated answers
+
+Without a key, a stand-in model makes the recordings. Export mode writes every request
+that has no recording to `evals/pending/`. The stand-in (here a Claude model) answers
+each one as the target model would. `ledgerline replay import` (or `ledgerline eval --mode
+import`) checks each JSON answer strictly against the response schema and stores it as a
+recording, marked with who wrote it and which model it stands in for.
+That mark reaches every result: `ask` and `/ask` return it as `provenance`, and every
+eval report built from simulated answers says so on its first line.
+
+A simulated result shows that the pipeline, the validator and the scoring work. It does
+not measure the target model. [docs/rerecord.md](docs/rerecord.md) gives the full loop,
+when recordings go stale, and how to record with a real key.
 
 ## Evaluation
 
@@ -154,13 +208,37 @@ benchmark; its data is downloaded, never committed. See
 [evals/gold/README.md](evals/gold/README.md) and
 [ADR-006](docs/adr/ADR-006-benchmark-methodology.md).
 
+`ledgerline eval` scores Ledgerline against a *one-shot baseline*: the same model writes
+SQL directly from the schema, and that SQL runs read-only. The baseline's SQL must be a
+single SELECT, and the database driver refuses a second statement, so it cannot leave
+the read-only transaction. Spider registries come from `registry init` with no edits,
+and the eval stops if one no longer matches its committed hash.
+
+Results of the simulated run `sim-1` are in
+[evals/reports/sim-1.md](evals/reports/sim-1.md). Every answer in it was written by
+claude-haiku-5-5 standing in for `openai/gpt-oss-120b`, so these are simulated numbers,
+not a measurement of that model. On fieldservice:
+
+| Simulated, fieldservice | Ledgerline | one-shot |
+|---|---|---|
+| Execution accuracy (rows match the gold) | 76.7% (33/43) | 69.8% (30/43) |
+| Wrong answers among answered | 13.2% (5/38) | 30.2% (13/43) |
+| Refusal recall (refused what it should) | 100% (24/24) | 100% (24/24) |
+
+The floor for fieldservice, the minimum v0.1 set out to reach (execution accuracy at
+least 80%, wrong answers at most 5%), is **not met in v0.1**. The report lists every
+Ledgerline miss with a tag for its cause;
+[ADR-001](docs/adr/ADR-001-intent-not-sql.md) explains the result against its
+prediction. `./verify.sh` replays the committed fieldservice recordings and checks that
+they reproduce `evals/reports/replay-fieldservice.md`.
+
 ## Checks
 
 `./verify.sh` is the one gate, locally and in CI. It runs a locked `uv sync`, ruff
 (lint and format), pyright (strict on `ledgerline/core`), detect-secrets against
-`.secrets.baseline`, pytest with branch coverage, and per-module coverage floors
-(`scripts/check_coverage.py`). A skipped test fails the run, so a missing database
-shows up as a failure, not a pass.
+`.secrets.baseline`, pytest with branch coverage, per-module coverage floors
+(`scripts/check_coverage.py`) and the replay check above. A skipped test fails the run,
+so a missing database shows up as a failure, not a pass.
 
 ## Decisions
 

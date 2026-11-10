@@ -205,3 +205,40 @@ The security-relevant core is reviewed apart from routine work.
   - **"Live" eval runs:** become simulated runs, and every simulated report is labelled at the top: "Model responses simulated by <claude model>, standing in for <target>; not an OpenRouter measurement."
   - **Budget caps and live mode:** stay in the code for when a key is added.
 - **Floors** apply to the simulated run, and are re-measured on a real model when a key is added.
+
+## P5 rev 3 (replaces P5): bring-your-own-data product flow + results page (PR3)
+Decided by Cristian, 2026-11-09. v0.1 must be a usable product: a stranger prepares data, uploads it, gets a clear pass/fail, confirms the fields, then asks questions and sees the SQL.
+
+### Pages (Vite + TypeScript static build served by FastAPI; plain, calm UI)
+1. **Prepare your data:** plain instructions with one worked example.
+   - Rules: one table per CSV; a header row; snake_case or plain column names; ISO dates (`2025-03-04`); one ID column per table; foreign-key columns named `<table>_id`; UTF-8; ≤ 10 MB per file and ≤ 10 files.
+   - Downloadable template and sample dataset.
+2. **Upload:** drag-and-drop CSVs into a private workspace. Each workspace gets a random id and its own SQLite file under a data directory, and is never shared. It's deleted after 7 days or on "Delete my data".
+3. **Check:** a per-file pass/fail report. Every problem names the file, row and column, what's wrong, and the exact fix ("row 14, `invoice_date`: '3/4/25' isn't a date — use 2025-03-04"). Checks:
+   - encoding
+   - header present and unique
+   - empty file
+   - ragged rows
+   - type consistency per column
+   - ID column present and unique
+   - `<x>_id` values that don't match any ID in table x (warning, not error)
+   - size limits
+
+   Loading is all-or-nothing per workspace.
+4. **Confirm:** shows the registry drafted by `registry init`: tables, fields, types, detected links, and auto-hidden fields. The user can rename display names, add descriptions or aliases, hide or unhide fields, and see exactly what the model will be shown, because category values are sent to the model and the user can hide them. Confirming sets `draft: false` for that workspace.
+5. **Ask:** the existing trace view: question → understood intent → safety check → SQL + params → table, or the refusal reason.
+6. **Results:** the benchmark, rendered from committed report JSON. It shows per-schema metrics with intervals, plain-English definitions of each metric, the simulated banner, and links to the triage. The simulated benchmark adds **3 more synthetic domains**, built with the same seeded generator approach: retail orders, a clinic appointment schedule and a SaaS subscription business. Each gets ≥ 25 gold questions written before it is run, using the same categories, and is simulated like sim-1.
+
+### Server
+- Upload API and workspace lifecycle: create, upload, validate, load, confirm, delete, plus a scheduled sweep for expiry.
+- Ask on a workspace uses the same pipeline. The executor is SQLite read-only on the workspace file.
+- No auth in v0.1. Workspace ids are unguessable (128-bit), and data is isolated per workspace. There are rate limits per IP and per workspace.
+- No data rows are ever sent to the model (already true). The prompt shows only the schema and the allowed category values the user didn't hide.
+
+### Acceptance criteria (add to L-list)
+- **L16** Validation catches each listed problem with a named test, and each message names the file, row, column and fix.
+- **L17** Upload → check → confirm → ask works end to end on the sample dataset (Playwright, replay mode). A failing file blocks loading and shows its fixes.
+- **L18** Workspaces are isolated: workspace A's id can't read B's data (test). Delete removes the file and the registry. The expiry sweep removes workspaces older than 7 days (test with a fake clock).
+- **L19** Hidden fields and hidden category values never appear in the model prompt (test on the exported request).
+- **L20** The Results page renders all schemas from the committed JSON, including the 3 new domains, with the simulated banner and metric definitions.
+- **L21** Docs follow Cristian's rule: plain, deliberate, terms defined on first use. The README walks a stranger through the flow in under 2 minutes of reading.

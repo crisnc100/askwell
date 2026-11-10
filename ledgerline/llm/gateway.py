@@ -5,6 +5,8 @@ Modes:
 - `record`: call OpenRouter and append the response to the replay store.
 - `replay`: answer only from the replay store. A miss raises `ReplayMissError`;
   replay never falls back to a live call.
+- `export`: like replay, but a miss writes the request to the pending directory for a
+  simulated answer (`ledgerline.llm.simulate`) and raises `PendingRequestError`.
 """
 
 from __future__ import annotations
@@ -12,6 +14,7 @@ from __future__ import annotations
 import json
 import re
 from collections.abc import Callable
+from pathlib import Path
 from typing import Any, Protocol
 
 import httpx
@@ -22,6 +25,7 @@ from ledgerline.llm.budget import BudgetGuard, with_backoff
 from ledgerline.llm.errors import ParseError, PricingUnavailableError
 from ledgerline.llm.pricing import ModelPrice, cost_from_usage, worst_case_cost
 from ledgerline.llm.replay import ReplayStore, canonical_json, replay_key
+from ledgerline.llm.simulate import PendingRequestError, export_request, register_response_model
 from ledgerline.llm.types import ChatMessage, LLMResult, RawResponse
 
 
@@ -59,6 +63,19 @@ def parse_output[T: BaseModel](raw: RawResponse, schema: type[T]) -> T:
         raise ParseError(f"text did not validate: {exc.errors()[0]['msg']}", raw.content) from exc
 
 
+def _parse_charged[T: BaseModel](
+    raw: RawResponse, schema: type[T], cost_usd: float, provenance: dict[str, str] | None
+) -> T:
+    """`parse_output`, but a ParseError carries the call's cost and provenance, so a
+    failed attempt's spend is never lost."""
+    try:
+        return parse_output(raw, schema)
+    except ParseError as exc:
+        exc.cost_usd = cost_usd
+        exc.provenance = provenance
+        raise
+
+
 class Gateway:
     def __init__(
         self,
@@ -70,9 +87,12 @@ class Gateway:
         guard: BudgetGuard | None,
         max_tokens: int,
         backoff_sleep: Callable[[float], None] | None = None,
+        pending_dir: Path | None = None,
     ) -> None:
-        if mode in ("record", "replay") and store is None:
+        if mode in ("record", "replay", "export") and store is None:
             raise ValueError(f"{mode} mode needs a replay store")
+        if mode == "export" and pending_dir is None:
+            raise ValueError("export mode needs a pending directory")
         if mode in ("record", "live") and (transport is None or guard is None):
             raise ValueError(f"{mode} mode needs a transport and a budget guard")
         self.mode = mode
@@ -82,6 +102,7 @@ class Gateway:
         self.guard = guard
         self.max_tokens = max_tokens
         self._backoff_sleep = backoff_sleep
+        self.pending_dir = pending_dir
 
     def complete[T: BaseModel](
         self,
@@ -90,35 +111,57 @@ class Gateway:
         prompt_version: str,
         messages: list[ChatMessage],
         schema: type[T],
+        context: dict[str, Any] | None = None,
+        guard: BudgetGuard | None = None,
     ) -> LLMResult[T]:
+        """One structured call. `guard` overrides the gateway's own budget guard, so
+        concurrent callers (one per API request) never share or replace each other's."""
         json_schema = schema.model_json_schema()
         key = replay_key(model, prompt_version, messages, json_schema)
 
-        if self.mode == "replay":
+        if self.mode in ("replay", "export"):
             assert self.store is not None
+            if self.mode == "export" and key not in self.store:
+                assert self.pending_dir is not None
+                register_response_model(schema)
+                path = export_request(
+                    self.pending_dir,
+                    key=key,
+                    model=model,
+                    prompt_version=prompt_version,
+                    messages=messages,
+                    schema_name=schema.__name__,
+                    response_schema=json_schema,
+                    context=context,
+                )
+                raise PendingRequestError(key, path)
             record = self.store.get(key)
             raw = RawResponse.model_validate(record["raw"])
             return LLMResult[T](
-                value=parse_output(raw, schema),
+                value=_parse_charged(
+                    raw, schema, float(record["cost_usd"]), record.get("provenance")
+                ),
                 raw=raw,
                 cost_usd=float(record["cost_usd"]),
                 cost_source="replay",
                 replayed=True,
                 key=key,
+                provenance=record.get("provenance"),
             )
 
         assert self.transport is not None
-        assert self.guard is not None
+        budget = guard or self.guard
+        assert budget is not None
         transport = self.transport
         price = self.price_lookup(model)
         if price is None:
             raise PricingUnavailableError(
                 f"no price for {model!r}: the worst-case budget pre-check cannot run"
             )
-        prompt_chars = len(canonical_json([m.model_dump() for m in messages])) + len(
-            canonical_json(json_schema)
-        )
-        self.guard.precheck(worst_case_cost(price, prompt_chars, self.max_tokens))
+        prompt_bytes = len(
+            canonical_json([m.model_dump() for m in messages]).encode("utf-8")
+        ) + len(canonical_json(json_schema).encode("utf-8"))
+        budget.precheck(worst_case_cost(price, prompt_bytes, self.max_tokens))
 
         def call() -> RawResponse:
             return transport(
@@ -134,13 +177,13 @@ class Gateway:
         else:
             raw = with_backoff(call, sleep=self._backoff_sleep)
         cost, source = cost_from_usage(raw.usage, price)
-        self.guard.charge(cost)
+        budget.charge(cost)
         if self.mode == "record":
             assert self.store is not None
             # Stored before parsing, so a replay reproduces a ParseError too.
             self.store.put(key, {"raw": raw.model_dump(), "cost_usd": cost, "model": model})
         return LLMResult[T](
-            value=parse_output(raw, schema),
+            value=_parse_charged(raw, schema, cost, None),
             raw=raw,
             cost_usd=cost,
             cost_source=source,

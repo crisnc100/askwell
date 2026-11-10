@@ -1,0 +1,2 @@
+{"f1":{"status":"fixed","response":"real"},"f2":{"status":"fixed","response":"real"},
+ "x1":{"status":"deferred","reason":"LOW: in replay and export modes an error row's cost is 0.0 even when an earlier replayed attempt carried a recorded cost. Replay spends no real money, so the audit understates only simulated cost; tracked for PR3.","fix":"Take replayed costs into the per-ask spend in every mode."}}

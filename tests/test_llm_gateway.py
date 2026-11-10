@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
 from typing import Any
 
@@ -304,3 +305,28 @@ def test_other_errors_are_not_retried(tmp_path: Path) -> None:
     with pytest.raises(RuntimeError, match="boom"):
         complete(gateway("live", tmp_path, transport))
     assert len(transport.calls) == 1
+
+
+def test_precheck_bounds_unicode_prompts_by_utf8_bytes(tmp_path: Path) -> None:
+    """A token is at least one byte, not one character: 'ü' is 2 bytes, '日' is 3. A
+    character-count bound under-estimates a Unicode-heavy prompt."""
+    text = "日本語の請求書とüñíçødé" * 200
+    messages = [ChatMessage(role="user", content=text)]
+    payload_bytes = len(
+        json.dumps(
+            [m.model_dump() for m in messages],
+            sort_keys=True,
+            separators=(",", ":"),
+            ensure_ascii=False,
+        ).encode()
+    )
+    price = ModelPrice(prompt_per_token=1e-6, completion_per_token=0.0)
+    chars_estimate = len(text) * 1e-6
+    # Budget above the character-based bound but below the byte-based one.
+    limit = (chars_estimate + payload_bytes * 1e-6) / 2
+    assert payload_bytes > 2 * len(text)
+    transport = FakeTransport([ok({"label": "a", "score": 1})])
+    gw = gateway("live", tmp_path, transport, limit=limit, price=price)
+    with pytest.raises(BudgetExceededError):
+        gw.complete(model=MODEL, prompt_version="v1", messages=messages, schema=Answer)
+    assert transport.calls == []

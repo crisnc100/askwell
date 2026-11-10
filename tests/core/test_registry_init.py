@@ -261,3 +261,33 @@ def test_every_sampled_spider_db(db_id: str, tmp_path: Path) -> None:
     assert registry.draft
     assert registry.entities
     assert all(f.column for e in registry.entities.values() for f in e.fields.values())
+
+
+def test_date_columns_holding_integers_are_typed_integer(tmp_path: Path) -> None:
+    """A DATE column storing YYYYMMDD integers is not a date to SQLite's date functions;
+    typed as integer, a calendar grain on it is refused at validation (grain_type)."""
+    from ledgerline.core.intent import Intent
+    from ledgerline.core.validate import validate
+    from tests.core.conftest import NOW
+
+    engine = _sqlite(
+        tmp_path,
+        [
+            "CREATE TABLE r (id INTEGER PRIMARY KEY, day DATE, real_day DATE)",
+            "INSERT INTO r VALUES (1, 20010203, '2001-02-03'), (2, 20010204, '2001-02-04')",
+        ],
+    )
+    registry = init_registry(engine).registry
+    fields = registry.entities["r"].fields
+    assert fields["day"].type == "integer"
+    assert fields["real_day"].type == "date"
+    intent = Intent.model_validate(
+        {
+            "intent_type": "grouped_summary",
+            "entity": "r",
+            "metrics": [{"agg": "count"}],
+            "group_by": [{"field": "day", "grain": "month"}],
+        }
+    )
+    result = validate(intent, registry, now=NOW, allow_draft=True)
+    assert result.codes == ["grain_type"]
