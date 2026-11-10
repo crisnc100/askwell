@@ -15,7 +15,7 @@ from langgraph.graph import END, START, StateGraph
 from ledgerline.core.executor import Execution, ExecutionError
 from ledgerline.core.intent import Intent
 from ledgerline.core.validate import Issue, QueryPlan, ValidationResult
-from ledgerline.llm.errors import ParseError
+from ledgerline.llm.errors import BudgetExceededError, ParseError
 from ledgerline.llm.types import ChatMessage, LLMResult
 from ledgerline.pipeline.prompt import retry_messages
 
@@ -46,17 +46,34 @@ class AskState(TypedDict, total=False):
     execution_error: str | None
     cost_usd: float
     provenance: dict[str, str] | None
+    budget_stopped: bool
 
+
+BUDGET_REFUSAL = "this question hit the spending limit"
 
 Interpret = Callable[[list[ChatMessage]], LLMResult[Intent]]
 Validate = Callable[[Intent], ValidationResult]
 Execute = Callable[[QueryPlan, AskState], Execution]
 
 
-def build_graph(interpret: Interpret, check: Validate, execute: Execute) -> Any:
+def build_graph(
+    interpret: Interpret,
+    check: Validate,
+    execute: Execute,
+    *,
+    refuse_on_budget: bool = False,
+) -> Any:
+    """With `refuse_on_budget`, a budget stop ends the ask as a refusal (the API: one
+    request, its own limit). Without it, the stop propagates (the eval: one run-wide
+    budget that must abort the whole run)."""
+
     def interpret_node(state: AskState) -> AskState:
         try:
             result = interpret(state.get("messages", []))
+        except BudgetExceededError:
+            if not refuse_on_budget:
+                raise
+            return {"refusal": BUDGET_REFUSAL, "budget_stopped": True, "plan": None}
         except ParseError as exc:
             return {
                 "intent": None,
@@ -142,7 +159,11 @@ def build_graph(interpret: Interpret, check: Validate, execute: Execute) -> Any:
     graph.add_node("execute", execute_node)
     graph.add_node("present", present_node)
     graph.add_edge(START, "interpret")
-    graph.add_edge("interpret", "validate")
+    graph.add_conditional_edges(
+        "interpret",
+        lambda state: "present" if state.get("budget_stopped") else "validate",
+        ["present", "validate"],
+    )
     graph.add_conditional_edges("validate", route, ["execute", "present", "retry"])
     graph.add_edge("retry", "interpret")
     graph.add_edge("execute", "present")

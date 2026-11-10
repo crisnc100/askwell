@@ -272,7 +272,7 @@ class AskService:
                 trace_id=trace_id,
             )
 
-        graph = build_graph(interpret, check, execute)
+        graph = build_graph(interpret, check, execute, refuse_on_budget=self.reset_budget_per_ask)
         state: AskState = graph.invoke(
             {"question": question, "messages": first_messages(view, question), "attempts": []}
         )
@@ -336,4 +336,7 @@ def _intent_json(state: AskState) -> str:
 
 def _validation(state: AskState) -> dict[str, Any]:
     attempts = state.get("attempts", [])
-    return {"ok": state.get("plan") is not None, "attempts": attempts}
+    out: dict[str, Any] = {"ok": state.get("plan") is not None, "attempts": attempts}
+    if state.get("budget_stopped"):
+        out["stopped"] = state.get("refusal")
+    return out
