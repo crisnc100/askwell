@@ -52,11 +52,13 @@ class Task:
     @property
     def key(self) -> str:
         """The checkpoint key. It holds the prompt version, the registry's hash and a hash
-        of the item's question and gold SQL, so a result is reused only when none of them
-        changed (a gold correction under the same item id is scored again)."""
-        item = hashlib.sha256(
-            f"{self.item.question}\0{self.item.gold_sql or ''}".encode()
-        ).hexdigest()
+        of everything that decides the item's score (question, gold SQL, category,
+        ordering), so a result is reused only when none of them changed (a gold correction
+        under the same item id is scored again)."""
+        scored = json.dumps(
+            [self.item.question, self.item.gold_sql, self.item.category, self.item.ordered]
+        )
+        item = hashlib.sha256(scored.encode()).hexdigest()
         return (
             f"{self.schema_id}|{self.model}|t{self.trial}|{self.system}|{self.item.id}"
             f"|{self.prompt_version}|{self.registry_sha[:16]}|{item[:16]}"

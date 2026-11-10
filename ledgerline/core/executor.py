@@ -99,8 +99,16 @@ def run(
     *,
     timeout_s: float = DEFAULT_TIMEOUT_S,
     row_cap: int = DEFAULT_ROW_CAP,
+    untrusted: bool = False,
 ) -> QueryResult:
-    """Run one statement in a read-only transaction, then roll back."""
+    """Run one statement in a read-only transaction, then roll back.
+
+    `untrusted=True` is for SQL Ledgerline did not build (a baseline model's query). The
+    database driver then guarantees it is a single statement, so a batch such as
+    "ROLLBACK; BEGIN READ WRITE; ..." can never end the read-only transaction: on
+    Postgres it always runs through a server-side cursor, which uses the extended query
+    protocol and refuses more than one command; SQLite's execute runs only one statement
+    and refuses the rest."""
     dialect = engine.dialect.name
     try:
         connection = engine.connect()
@@ -120,9 +128,8 @@ def run(
             # A server-side cursor on Postgres: rows arrive in batches as they are fetched,
             # so at most row_cap + 1 rows ever reach this process. (SQLite's cursor is
             # already incremental.)
-            options = (
-                {"stream_results": True, "max_row_buffer": row_cap + 1} if _is_query(stmt) else {}
-            )
+            stream = untrusted or _is_query(stmt)
+            options = {"stream_results": True, "max_row_buffer": row_cap + 1} if stream else {}
             result = conn.execute(stmt, execution_options=options)
             if not result.returns_rows:
                 # e.g. a comment-only statement: nothing ran, and there is nothing to read.

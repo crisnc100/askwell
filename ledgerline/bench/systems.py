@@ -128,11 +128,13 @@ def single_select(sql: str) -> str:
     Model SQL is untrusted. A batch such as "ROLLBACK; BEGIN READ WRITE; ..." would end
     the read-only transaction and run anything after it, so a second statement is never
     allowed. The scan skips quoted strings ('...', "...", $tag$...$tag$) and comments
-    (-- and /* */), allows one trailing semicolon, and requires the first word to be
-    SELECT or WITH. The executor then runs it inside a read-only transaction, and on
-    Postgres through a server-side cursor, which also accepts only one statement."""
+    (-- and /* */), allows one trailing semicolon (and a comment after it), and requires
+    the first word to be SELECT or WITH. This is the early, friendly refusal; the real
+    guarantee is the driver: run(..., untrusted=True) executes through a path that
+    accepts only one statement."""
     i, n = 0, len(sql)
     code: list[str] = []  # the SQL with strings blanked and comments removed
+    last_code_end = 0  # index just past the last character that is code, not comment
     while i < n:
         ch = sql[i]
         if sql.startswith("--", i):
@@ -157,6 +159,7 @@ def single_select(sql: str) -> str:
                 break
             i = end + 1
             code.append(" x ")
+            last_code_end = i
         elif ch == "$":
             tag_end = sql.find("$", i + 1)
             tag = sql[i : tag_end + 1] if tag_end != -1 else ""
@@ -166,16 +169,19 @@ def single_select(sql: str) -> str:
                     raise UnsafeSqlError("unclosed dollar quote")
                 i = end + len(tag)
                 code.append(" x ")
+                last_code_end = i
             else:
                 code.append(ch)
                 i += 1
+                last_code_end = i
         else:
             code.append(ch)
             i += 1
+            if not ch.isspace():
+                last_code_end = i
     body = "".join(code).strip()
-    if body.endswith(";"):
-        if not sql.rstrip().endswith(";"):
-            raise UnsafeSqlError("nothing may follow the closing semicolon")
+    closing = body.endswith(";")
+    if closing:
         body = body[:-1].rstrip()
     if not body:
         raise UnsafeSqlError("no statement")
@@ -184,8 +190,10 @@ def single_select(sql: str) -> str:
     first = body.split(None, 1)[0].lower()
     if first not in ("select", "with"):
         raise UnsafeSqlError(f"only a single SELECT is allowed, not {first.upper()}")
-    trimmed = sql.strip()
-    return trimmed[:-1].rstrip() if trimmed.endswith(";") else trimmed
+    # The statement itself: up to the last code character, minus a closing semicolon and
+    # any comment after it.
+    statement = sql[:last_code_end].strip()
+    return statement[:-1].rstrip() if closing else statement
 
 
 def raw_sql(sql: str) -> TextClause:
@@ -280,7 +288,11 @@ class OneShotSystem:
         try:
             query = single_select(answer.sql)
             rows = run(
-                self.engine, raw_sql(query), timeout_s=self.timeout_s, row_cap=self.row_cap
+                self.engine,
+                raw_sql(query),
+                timeout_s=self.timeout_s,
+                row_cap=self.row_cap,
+                untrusted=True,  # the driver, not just single_select, allows one statement
             ).rows
             error = None
         except UnsafeSqlError as exc:
