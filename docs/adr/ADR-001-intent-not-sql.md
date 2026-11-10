@@ -10,11 +10,12 @@ a double count) with nothing to catch it. Ledgerline's claim is governance: ever
 comes from a query the system can explain and audit.
 
 ## Decision
-The model returns a structured intent (entity, metrics, filters, group-by, date range,
-order, limit, or `unanswerable`). Plain Python validates every field against the
-registry, code resolves relative dates against `LEDGERLINE_NOW`, and a SQLAlchemy Core
-builder writes parameterized SQL that runs on a read-only connection. Anything the
-grammar or validator cannot express becomes a refusal with a reason, never a guess.
+The model returns a structured intent (`ledgerline/core/intent.py`): an entity, selected
+fields, metrics, filters, having, group-by, a date range, order and limit, or
+`unanswerable` with a reason. Plain Python validates every field against the registry
+and returns typed errors. Code resolves relative dates against `LEDGERLINE_NOW`. A
+SQLAlchemy Core builder writes parameterized SQL that runs on a read-only connection.
+Anything the grammar or validator cannot express is refused with a reason, never guessed.
 
 ## Trade-off accepted
 Coverage. Questions outside the grammar are refused even when a free-form SQL writer

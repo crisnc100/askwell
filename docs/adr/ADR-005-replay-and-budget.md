@@ -19,6 +19,10 @@ total, and an eval that loops over hundreds of questions can overspend quickly.
   models-endpoint pricing. Results are checkpointed per item, so a stopped run resumes,
   carries its spend forward, and still yields a partial report. 429s back off
   exponentially. The OpenRouter key also has a credit limit as a backstop.
+- **Known limit:** counting characters bounds tokens only for plain ASCII text. Text
+  with many non-ASCII characters can take more tokens than characters, so the pre-check
+  can come in low there. Each call's actual cost is still charged before the next
+  pre-check, and the key's credit limit still applies.
 
 ## Prediction (pre-registered)
 1. The replay eval reproduces the committed replay report byte for byte in CI, with zero
