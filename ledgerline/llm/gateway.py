@@ -110,7 +110,10 @@ class Gateway:
         messages: list[ChatMessage],
         schema: type[T],
         context: dict[str, Any] | None = None,
+        guard: BudgetGuard | None = None,
     ) -> LLMResult[T]:
+        """One structured call. `guard` overrides the gateway's own budget guard, so
+        concurrent callers (one per API request) never share or replace each other's."""
         json_schema = schema.model_json_schema()
         key = replay_key(model, prompt_version, messages, json_schema)
 
@@ -145,7 +148,8 @@ class Gateway:
             )
 
         assert self.transport is not None
-        assert self.guard is not None
+        budget = guard or self.guard
+        assert budget is not None
         transport = self.transport
         price = self.price_lookup(model)
         if price is None:
@@ -155,7 +159,7 @@ class Gateway:
         prompt_bytes = len(
             canonical_json([m.model_dump() for m in messages]).encode("utf-8")
         ) + len(canonical_json(json_schema).encode("utf-8"))
-        self.guard.precheck(worst_case_cost(price, prompt_bytes, self.max_tokens))
+        budget.precheck(worst_case_cost(price, prompt_bytes, self.max_tokens))
 
         def call() -> RawResponse:
             return transport(
@@ -171,7 +175,7 @@ class Gateway:
         else:
             raw = with_backoff(call, sleep=self._backoff_sleep)
         cost, source = cost_from_usage(raw.usage, price)
-        self.guard.charge(cost)
+        budget.charge(cost)
         if self.mode == "record":
             assert self.store is not None
             # Stored before parsing, so a replay reproduces a ParseError too.

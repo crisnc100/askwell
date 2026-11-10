@@ -223,13 +223,20 @@ class AskService:
         view = registry_view(registry, self.settings.now, self.settings.prompt_budget_chars)
         for step in view.truncation:
             log.info("prompt truncation for %s: %s", schema_id, step)
-        if self.gateway.mode in ("live", "record") and self.reset_budget_per_ask:
-            self.gateway.guard = BudgetGuard(self.settings.ask_budget_usd)
+        # A fresh guard per ask, held here rather than on the shared gateway, so
+        # concurrent requests never reset or charge each other's budget. (The eval turns
+        # this off and shares one run-wide guard through gateway.guard.)
+        ask_guard = (
+            BudgetGuard(self.settings.ask_budget_usd)
+            if self.gateway.mode in ("live", "record") and self.reset_budget_per_ask
+            else None
+        )
         prompt_version = PROMPT_VERSION if trial == 1 else f"{PROMPT_VERSION}+trial{trial}"
         request_context = {"schema_id": schema_id, "question": question, **(context or {})}
 
         def interpret(messages: list[ChatMessage]) -> LLMResult[Intent]:
             return self.gateway.complete(
+                guard=ask_guard,
                 model=self.model,
                 prompt_version=prompt_version,
                 messages=messages,
