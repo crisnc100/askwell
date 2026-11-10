@@ -59,6 +59,7 @@ ErrorCode = Literal[
     "invalid_date_range",
     "grain_type",
     "having_without_group_by",
+    "having_type",
     "unknown_metric",
     "invalid_alias",
     "duplicate_alias",
@@ -745,6 +746,19 @@ class _Validator:
             loc = f"having[{index}]"
             if having.metric not in labels:
                 self.fail("unknown_metric", loc, f"no metric labelled {having.metric!r}")
+                continue
+            metric = next(m for m in metrics if m.label == having.metric)
+            if (
+                metric.field is not None
+                and metric.agg in ("min", "max")
+                and (metric.field.type in TEMPORAL_TYPES)
+            ):
+                # HAVING thresholds are numbers; a date's min or max cannot be compared to one.
+                self.fail(
+                    "having_type",
+                    loc,
+                    f"{having.metric} is a {metric.field.type}; having takes numeric metrics",
+                )
                 continue
             if having.op == "between":
                 if having.values is None or len(having.values) != 2 or having.value is not None:
