@@ -246,12 +246,13 @@ def _fields(plan: QueryPlan) -> list[ResolvedField]:
 def _required_aliases(plan: QueryPlan) -> set[str]:
     """Table aliases a row must have a match in. A join used only inside `any_of`
     groups is optional: an inner join there would drop rows that satisfy another branch
-    of the OR (an urgent work order with no technician). Every other use (select,
-    metrics, group_by, order_by, AND filters) keeps inner-join semantics."""
+    of the OR (an urgent work order with no technician). Select, metrics, group_by and
+    AND filters keep inner-join semantics; ORDER BY alone never makes a join required."""
     used: list[ResolvedField] = list(plan.select)
     used += [m.field for m in plan.metrics if m.field is not None]
     used += [g.field for g in plan.group_by]
-    used += [o.field for o in plan.order_by if o.field is not None]
+    # ORDER BY is not listed: sorting by a field from an optional join must not turn it
+    # into an inner join and drop the rows the OR kept (they sort with NULLs).
     for item in plan.where:
         if isinstance(item, PredicateGroup) and item.mode == "any_of":
             continue
