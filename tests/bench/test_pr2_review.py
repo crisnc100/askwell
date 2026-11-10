@@ -274,3 +274,71 @@ def test_configured_spider_schema_is_regenerated_and_checked(
     schemas, hashes = run_module._schemas(get_settings(), ["spider_car_1"])
     assert schemas["spider_car_1"].registry_path != stale
     assert "spider_car_1" in hashes
+
+
+# --- x1 (HIGH): the driver itself refuses a batch, even if single_select were bypassed ---
+
+
+def test_postgres_driver_refuses_a_batch_without_single_select(
+    pg_seeded: Engine, pg_owner: Engine
+) -> None:
+    from ledgerline.core.executor import ExecutionError, run
+
+    before = content_hash(pg_owner)
+    # The server refuses it before anything runs: as a cursor it is not one valid query.
+    with pytest.raises(ExecutionError, match=r"multiple commands|syntax error"):
+        run(pg_seeded, text(ESCAPE), untrusted=True)
+    with pytest.raises(ExecutionError, match="multiple commands"):
+        run(pg_seeded, text("SELECT 1; SELECT 2"), untrusted=True)
+    assert content_hash(pg_owner) == before
+    fresh = create_engine(get_settings().database_ro_url)
+    try:
+        with fresh.connect() as conn:
+            assert conn.execute(text("SELECT 1")).scalar_one() == 1
+    finally:
+        fresh.dispose()
+
+
+def test_sqlite_driver_refuses_a_batch(sqlite_fieldservice: Engine) -> None:
+    from ledgerline.core.executor import ExecutionError, run
+
+    engine = readonly_engine(str(sqlite_fieldservice.url))
+    try:
+        with pytest.raises(ExecutionError, match="one statement"):
+            run(engine, text("SELECT 1; SELECT 2"), untrusted=True)
+    finally:
+        engine.dispose()
+
+
+# --- x3: a trailing comment after the final semicolon is fine ---
+
+
+def test_a_trailing_comment_after_the_semicolon_is_allowed(
+    pg_seeded: Engine, tmp_path: Path
+) -> None:
+    from ledgerline.bench.systems import single_select
+
+    assert single_select("SELECT 1; -- done") == "SELECT 1"
+    assert single_select("SELECT ';' ; /* end */ ") == "SELECT ';'"
+    answer = _oneshot(pg_seeded, "SELECT count(*) FROM parts; -- all parts", tmp_path).answer(
+        ITEM, 1, None
+    )
+    assert answer.error is None, answer.error
+    assert answer.rows == [(120,)]
+
+
+# --- x2: the checkpoint key covers the whole scored item ---
+
+
+def test_checkpoint_key_covers_category_and_ordering() -> None:
+    from ledgerline.bench.run import Task
+
+    base = Task("fieldservice", "m", 1, "oneshot", ITEM, "p", "r")
+    keys = {
+        base.key,
+        replace(base, item=replace(ITEM, category="should_refuse")).key,
+        replace(base, item=replace(ITEM, ordered=True)).key,
+        replace(base, item=replace(ITEM, question="q2")).key,
+        replace(base, item=replace(ITEM, gold_sql="SELECT 2")).key,
+    }
+    assert len(keys) == 5
