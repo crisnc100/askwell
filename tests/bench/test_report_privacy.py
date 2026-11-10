@@ -99,6 +99,7 @@ ALLOWED_PHRASES: dict[str, tuple[str, ...]] = {
         "one hard budget",
     ),
     "builds/v01/testchange-prompt.md": ("suppress_health_check",),
+    "builds/v01/context-brief.json": ("a hard budget guard",),
     # tests/: "hard" is Spider's hardness level and a budget word; Hypothesis's API name
     # contains "health check".
     "tests/test_gold.py": ('difficulty["hard"]',),
