@@ -94,7 +94,10 @@ def _schemas(
     out: dict[str, SchemaConfig] = {}
     hashes: dict[str, str] = {}
     for schema_id in schema_ids:
-        if schema_id in configured:
+        # A Spider schema is always regenerated and checked against its committed hash,
+        # even if config/schemas.yaml also lists it: a hand-edited registry must never
+        # reach the benchmark.
+        if schema_id in configured and not schema_id.startswith("spider_"):
             out[schema_id] = configured[schema_id]
             continue
         if not schema_id.startswith("spider_"):
