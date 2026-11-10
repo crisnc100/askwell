@@ -4,7 +4,8 @@
   transaction that starts `SET TRANSACTION READ ONLY` and `SET LOCAL statement_timeout`.
 - SQLite: the file opens with `mode=ro` (plus `PRAGMA query_only`), and a progress
   handler interrupts a query that passes its deadline.
-- Rows past the cap are not fetched; the result says it was truncated.
+- Rows past the cap are never fetched (Postgres streams through a server-side cursor);
+  the result says it was truncated.
 - With an audit log, every execution is recorded (trace id, question, intent,
   validation, SQL, params hash, row count, cost, model). Data rows are never logged.
 """
@@ -23,7 +24,7 @@ from sqlalchemy import Engine, create_engine, event
 from sqlalchemy.engine import make_url
 from sqlalchemy.exc import DBAPIError
 from sqlalchemy.pool import NullPool
-from sqlalchemy.sql import Executable
+from sqlalchemy.sql import Executable, Select, TextClause
 
 from ledgerline.core.audit import AuditEntry, AuditLog, params_hash
 from ledgerline.core.sqlbuild import build, compile_sql
@@ -116,7 +117,13 @@ def run(
             elif dialect == "sqlite":
                 deadline = time.monotonic() + timeout_s
                 raw.set_progress_handler(lambda: int(time.monotonic() > deadline), 1000)
-            result = conn.execute(stmt)
+            # A server-side cursor on Postgres: rows arrive in batches as they are fetched,
+            # so at most row_cap + 1 rows ever reach this process. (SQLite's cursor is
+            # already incremental.)
+            options = (
+                {"stream_results": True, "max_row_buffer": row_cap + 1} if _is_query(stmt) else {}
+            )
+            result = conn.execute(stmt, execution_options=options)
             columns = list(result.keys())
             rows = [tuple(row) for row in result.fetchmany(row_cap + 1)]
         except DBAPIError as exc:
@@ -128,6 +135,17 @@ def run(
                 raw.set_progress_handler(None, 0)
             conn.rollback()
     return QueryResult(columns, rows[:row_cap], len(rows) > row_cap)
+
+
+def _is_query(stmt: Executable) -> bool:
+    """Only a SELECT can run through a server-side cursor (Postgres wraps it in DECLARE
+    CURSOR). Anything else runs plainly, so the read-only transaction is what refuses
+    a write, with its own error."""
+    if isinstance(stmt, Select):
+        return True
+    if isinstance(stmt, TextClause):
+        return stmt.text.lstrip().lower().startswith(("select", "with"))
+    return False
 
 
 def _is_timeout(exc: DBAPIError) -> bool:
