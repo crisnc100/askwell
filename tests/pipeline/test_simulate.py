@@ -151,3 +151,27 @@ def test_an_answer_that_breaks_the_response_schema_is_rejected_and_kept(tmp_path
     assert key not in store
     assert (tmp_path / "pending" / f"{key}.json").exists()
     assert answer_path(tmp_path / "pending", key).exists()
+
+
+class Limited(BaseModel):
+    limit: int
+    label: str
+
+
+def test_import_validates_strictly_without_coercion(tmp_path: Path) -> None:
+    """A string "5" for an integer field would be coerced by default validation; the
+    stored answer must match the exported schema exactly, so it is rejected."""
+    from ledgerline.llm.simulate import import_answers_report
+
+    gw = _gateway("export", tmp_path)
+    with pytest.raises(PendingRequestError) as info:
+        gw.complete(model="target/model", prompt_version="p1", messages=MESSAGES, schema=Limited)
+    key = info.value.key
+    _answer(tmp_path, key, simulated_by="claude-test", response={"limit": "5", "label": "x"})
+    report = import_answers_report(tmp_path / "pending", ReplayStore(tmp_path / "store.jsonl"))
+    assert report.imported == []
+    assert [r.key for r in report.rejected] == [key]
+    assert "limit" in report.rejected[0].reason
+    _answer(tmp_path, key, simulated_by="claude-test", response={"limit": 5, "label": "x"})
+    report = import_answers_report(tmp_path / "pending", ReplayStore(tmp_path / "store.jsonl"))
+    assert [i.key for i in report.imported] == [key]
