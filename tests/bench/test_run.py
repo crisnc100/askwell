@@ -4,6 +4,7 @@ score, report. The answers here are fixtures for the mechanism, never committed.
 from __future__ import annotations
 
 import json
+from dataclasses import replace
 from pathlib import Path
 
 import pytest
@@ -147,3 +148,49 @@ def test_triage_tags_are_checked(isolated: Path) -> None:
     (isolated / "triage" / "fieldservice.yaml").write_text("fs-001: {tag: vibes}\n")
     with pytest.raises(ValueError, match="vibes"):
         report_module.load_triage("fieldservice")
+
+
+def test_changing_the_prompt_or_registry_never_resumes_old_results(
+    isolated: Path, pg_seeded: Engine, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A checkpoint record is only reused for the same prompt version and registry; any
+    change makes those tasks run again (here: exported again)."""
+    from ledgerline.pipeline import service as service_module
+
+    _run("export")
+    _answer_all(
+        isolated / "pending" / "fieldservice" / "ledgerline",
+        {"intent_type": "unanswerable", "unanswerable_reason": "fixture"},
+        {},
+    )
+    _answer_all(
+        isolated / "pending" / "fieldservice" / "oneshot",
+        {},
+        {"sql": "SELECT 1", "refusal_reason": None},
+    )
+    for system in ("ledgerline", "oneshot"):
+        store = ReplayStore(isolated / "recordings" / "fieldservice" / f"{system}.jsonl")
+        import_answers(isolated / "pending" / "fieldservice" / system, store)
+    assert len(_run("export").records) == 134
+
+    monkeypatch.setattr(service_module, "PROMPT_VERSION", "interpret-v999")
+    changed_prompt = _run("export")
+    assert changed_prompt.deferred == {"fieldservice/ledgerline": 67}
+    assert {r["system"] for r in changed_prompt.records} == {"oneshot"}
+
+    monkeypatch.undo()
+    edited = isolated / "fieldservice.yaml"
+    from tests.core.conftest import FIELDSERVICE_REGISTRY
+
+    edited.write_text(FIELDSERVICE_REGISTRY.read_text().replace("Parts catalogue.", "Parts list."))
+    real = run_module._schemas
+
+    def with_edited_registry(settings, schema_ids):
+        schemas, hashes = real(settings, schema_ids)
+        schemas["fieldservice"] = replace(schemas["fieldservice"], registry_path=edited)
+        return schemas, hashes
+
+    monkeypatch.setattr(run_module, "_schemas", with_edited_registry)
+    changed_registry = _run("export")
+    assert changed_registry.records == []
+    assert sum(changed_registry.deferred.values()) == 134
