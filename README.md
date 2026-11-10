@@ -17,7 +17,8 @@ yet. Today you write an intent by hand and compile it to SQL (see below).
 
 ## Quick start
 
-You need [uv](https://docs.astral.sh/uv/) and Docker.
+You need [uv](https://docs.astral.sh/uv/), Docker and `psql` (the PostgreSQL client).
+The tests run `infra/postgres/roles.sql` with `psql`, and fail without it.
 
 ```sh
 uv sync
@@ -105,9 +106,12 @@ The executor (`ledgerline/core/executor.py`) runs the query in a read-only trans
 with a timeout (5 seconds by default) and a row cap (1000 by default); the result says
 when rows were cut off. SQLite files are opened read-only. Given an audit log, it writes
 one row to `ask_log` for every run, including one that could not connect. The row holds
-the question, the intent, the SQL with placeholders and a hash of the parameter values,
-but never the parameter values or the result rows. `ask_log` lives in a separate app
-database that the read-only role cannot connect to.
+the question and the intent as given, the validation outcome, the SQL with placeholders,
+a SHA-256 of the bound parameters, the row count, the cost, the model and the outcome.
+The question and intent can contain the values a person typed, such as a customer name
+in a filter, so those values do reach the log. The row never holds the result rows or
+the separate list of bound parameters. `ask_log` lives in a separate app database that
+the read-only role cannot connect to.
 
 Try it with an intent file, for example `revenue.json`:
 
