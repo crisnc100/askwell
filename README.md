@@ -34,7 +34,9 @@ defaults in `ledgerline/config.py` match them. To change them, copy `.env.exampl
 
 No API key is needed. Model calls default to replay mode, which answers only from
 recorded responses. A model is called live only with `--mode record` or `--mode live`,
-or by `ledgerline spike`, and each of those needs `OPENROUTER_API_KEY`.
+with `LEDGERLINE_LLM_MODE=record` or `live` in the environment (it sets the mode for
+`ledgerline ask` and the API when no `--mode` is given), or by `ledgerline spike`. Each
+of those needs `OPENROUTER_API_KEY`.
 
 ## Asking a question
 

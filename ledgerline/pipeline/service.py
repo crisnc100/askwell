@@ -22,10 +22,11 @@ from ledgerline.core.intent import Intent
 from ledgerline.core.registry import Registry, load_registry
 from ledgerline.core.validate import QueryPlan, ValidationResult, validate
 from ledgerline.llm.budget import BudgetGuard
+from ledgerline.llm.errors import ParseError, ReplayMissError
 from ledgerline.llm.gateway import Gateway, OpenRouterTransport
 from ledgerline.llm.pricing import PriceBook
 from ledgerline.llm.replay import ReplayStore
-from ledgerline.llm.simulate import register_response_model
+from ledgerline.llm.simulate import PendingRequestError, register_response_model
 from ledgerline.llm.types import ChatMessage, LLMResult
 from ledgerline.pipeline.graph import AskState, build_graph
 from ledgerline.pipeline.prompt import PROMPT_VERSION, first_messages, registry_view
@@ -234,15 +235,23 @@ class AskService:
         prompt_version = PROMPT_VERSION if trial == 1 else f"{PROMPT_VERSION}+trial{trial}"
         request_context = {"schema_id": schema_id, "question": question, **(context or {})}
 
+        spent = [0.0]  # what this ask has paid, for the audit row if the gateway fails
+
         def interpret(messages: list[ChatMessage]) -> LLMResult[Intent]:
-            return self.gateway.complete(
-                guard=ask_guard,
-                model=self.model,
-                prompt_version=prompt_version,
-                messages=messages,
-                schema=Intent,
-                context=request_context,
-            )
+            try:
+                result = self.gateway.complete(
+                    guard=ask_guard,
+                    model=self.model,
+                    prompt_version=prompt_version,
+                    messages=messages,
+                    schema=Intent,
+                    context=request_context,
+                )
+            except ParseError as exc:
+                spent[0] += exc.cost_usd
+                raise
+            spent[0] += result.cost_usd
+            return result
 
         def check(intent: Intent) -> ValidationResult:
             return validate(
@@ -273,10 +282,38 @@ class AskService:
             )
 
         graph = build_graph(interpret, check, execute, refuse_on_budget=self.reset_budget_per_ask)
-        state: AskState = graph.invoke(
-            {"question": question, "messages": first_messages(view, question), "attempts": []}
-        )
+        try:
+            state: AskState = graph.invoke(
+                {"question": question, "messages": first_messages(view, question), "attempts": []}
+            )
+        except Exception as exc:
+            # A gateway failure (replay miss, export, provider error) leaves the graph
+            # before any audit write. Record it once, then let the caller map it to its
+            # status or exit code as before.
+            self._audit_failure(schema_id, question, trace_id, _failure_reason(exc), spent[0])
+            raise
         return self._result(schema_id, question, trace_id, state, view.truncation)
+
+    def _audit_failure(
+        self, schema_id: str, question: str, trace_id: str, reason: str, cost_usd: float
+    ) -> None:
+        if self.audit is None:
+            return
+        self.audit.record(
+            AuditEntry(
+                trace_id=trace_id,
+                schema_id=schema_id,
+                question=question,
+                intent="null",
+                validation=json.dumps({"ok": False, "error": reason}),
+                sql=None,
+                params_hash=None,
+                row_count=None,
+                cost_usd=cost_usd,
+                model=self.model,
+                outcome="error",
+            )
+        )
 
     def _result(
         self,
@@ -327,6 +364,16 @@ class AskService:
             provenance=state.get("provenance"),
             prompt_truncation=truncation,
         )
+
+
+def _failure_reason(exc: Exception) -> str:
+    """A short reason for the audit row. Provider error text is left out: it can carry
+    request details; the exception type is enough to find the failure in the logs."""
+    if isinstance(exc, PendingRequestError):
+        return "no recording; the model request was exported for a simulated answer"
+    if isinstance(exc, ReplayMissError):
+        return "no recorded model answer (replay mode)"
+    return f"model call failed: {type(exc).__name__}"
 
 
 def _intent_json(state: AskState) -> str:

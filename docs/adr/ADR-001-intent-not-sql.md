@@ -53,10 +53,11 @@ Measured on eval run `sim-1` (`evals/reports/sim-1.md`). The model's answers wer
 the real model. One trial, fieldservice gold revision 2.
 
 Two things changed between the prediction and the run:
-- The grammar grew before the run: joins of up to 3 tables (was 2) and filters that compare
-  two columns. That made 4 of the 12 "beyond the grammar" items expressible: fs-029 (compare
-  two dates), fs-033, fs-038 and fs-040 (three-table joins). fs-041 now has a join path but
-  still needs a conditional count, so it stays out of reach.
+- The grammar grew before the run: a field can now be up to three relationship hops from
+  the base table (was two), and filters can compare two columns. That made 4 of the 12
+  "beyond the grammar" items expressible: fs-029 (compare two dates), fs-033 and fs-038
+  (four tables, three hops) and fs-040 (five tables, three hops on its longest path).
+  fs-041 now has a join path but still needs a conditional count, so it stays out of reach.
 - Gold revision 2 fixed fs-032, which contradicted the gold README (`evals/gold/CHANGELOG.md`).
 
 | Metric (fieldservice) | Ledgerline | oneshot |
