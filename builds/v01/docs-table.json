@@ -355,6 +355,15 @@
      ]
     }
    ]
+  },
+  {
+   "behavior": "Replay recordings of simulated model answers for the fieldservice eval and the ask examples",
+   "files": [
+    "evals/recordings/eval/fieldservice/ledgerline.jsonl",
+    "evals/recordings/eval/fieldservice/oneshot.jsonl",
+    "evals/recordings/interpret.jsonl"
+   ],
+   "none": "Generated data written by the gateway's import step; docs/rerecord.md already describes how they are made."
   }
  ]
 }
