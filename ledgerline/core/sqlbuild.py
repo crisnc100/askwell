@@ -196,7 +196,10 @@ def _sqlite_canonical_datetime(x: str) -> str:
     fraction = (
         f"CASE WHEN instr({x}, '.') > 0 THEN substr({digits} || '000000', 1, 6) ELSE '000000' END"
     )
-    return f"(strftime('%Y-%m-%d %H:%M:%S', {x}) || '.' || {fraction})"
+    canonical = f"(strftime('%Y-%m-%d %H:%M:%S', {x}) || '.' || {fraction})"
+    # strftime gives NULL for text it cannot read; keep the stored text instead, so an
+    # odd value still counts, groups and compares as itself rather than vanishing.
+    return f"COALESCE({canonical}, {x})"
 
 
 @compiles(AsDatetime, "sqlite")
@@ -209,7 +212,7 @@ class SqliteDatetimeText(FunctionElement[Any]):
     text, so '10:30:00' and '10:30:00.000000' differ; this puts both sides in one format.
     Elsewhere it is the operand unchanged (Postgres compares real timestamps)."""
 
-    type = DateTime()
+    type = LenientDateTime()  # an unreadable stored value comes back as stored
     name = "sqlite_datetime_text"
     inherit_cache = True
 
