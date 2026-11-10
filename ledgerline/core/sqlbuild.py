@@ -11,12 +11,12 @@ from __future__ import annotations
 from typing import Any
 
 from sqlalchemy import (
+    BigInteger,
     Boolean,
     ColumnElement,
     Date,
     DateTime,
     FromClause,
-    Integer,
     Numeric,
     Select,
     String,
@@ -46,7 +46,9 @@ from ledgerline.core.validate import (
 )
 
 _TYPES: dict[str, TypeEngine[Any]] = {
-    "integer": Integer(),
+    # BIGINT for every integer field: binding a 64-bit id as INTEGER would narrow it to
+    # 32 bits on Postgres. Comparing an INTEGER column with a BIGINT value is exact.
+    "integer": BigInteger(),
     "number": Numeric(asdecimal=False),
     "text": String(),
     "boolean": Boolean(),
