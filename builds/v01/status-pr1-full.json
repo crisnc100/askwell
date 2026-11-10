@@ -1,0 +1,11 @@
+{"f1":{"status":"rejected","reason":"Out of scope for PR1: export/import is P3/P4 work on the stacked PR2 branch; REFUTED by a cross-vendor dispute.","evidence":"builds/v01/plan.md:6-7 (PR scopes), plan.md decision section; dispute verdict on this review","response":"intentional"},
+ "f2":{"status":"fixed","response":"real"},
+ "f3":{"status":"fixed","response":"real"},
+ "f4":{"status":"fixed","response":"real"},
+ "f5":{"status":"fixed","response":"real"},
+ "f6":{"status":"fixed","response":"real"},
+ "f7":{"status":"fixed","response":"real"},
+ "f8":{"status":"fixed","response":"real"},
+ "x1":{"status":"rejected","reason":"Re-raise of f1, already REFUTED as out of scope for PR1.","evidence":"builds/v01/plan.md:6-7","refutedBy":{"review":"2026-11-10-02-47-50-2910c4","finding":"f1"},"response":"intentional"},
+ "x2":{"status":"deferred","reason":"Fix-check: ORDER BY on a field reached only through an OR group re-forces an inner join, so the f2 repair is incomplete for that combination.","fix":"Keep the join LEFT when it is first introduced by an any_of predicate, and order NULLs last; first task when v01 is merged into pipeline."},
+ "x3":{"status":"deferred","reason":"Fix-check: SQLite datetime normalization pads timezone suffixes into the fraction ('.0Z' -> '.0Z0000').","fix":"Strip or convert a trailing Z/offset before padding the fraction, with tests for Z and +00:00 forms; first task in pipeline."}}

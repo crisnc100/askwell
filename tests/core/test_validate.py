@@ -917,3 +917,84 @@ def test_default_metric_labels_step_around_group_labels() -> None:
     )
     assert [g.label for g in plan.group_by] == ["count"]
     assert [m.label for m in plan.metrics] == ["count_2"]
+
+
+def test_rule_ambiguous_value() -> None:
+    """Two allowed values differ only by case: an exact match wins, anything else is
+    ambiguous rather than silently picking one (PR1 review f6)."""
+    from ledgerline.core.registry import EntityDef, FieldDef
+
+    reg = Registry(
+        schema_version=1,
+        draft=False,
+        entities={
+            "t": EntityDef(
+                table="t",
+                fields={
+                    "id": FieldDef(column="id", type="integer"),
+                    "grade": FieldDef(
+                        column="grade",
+                        type="text",
+                        categorical=True,
+                        allowed_values=["A", "a", "B"],
+                    ),
+                },
+            )
+        },
+    )
+    exact = plan_of(
+        reg,
+        intent_type="summary",
+        entity="t",
+        metrics=COUNT,
+        filters=[{"field": "grade", "op": "eq", "value": "a"}],
+    )
+    first = exact.where[0]
+    assert isinstance(first, Predicate)
+    assert first.values == ("a",)
+    upper = plan_of(
+        reg,
+        intent_type="summary",
+        entity="t",
+        metrics=COUNT,
+        filters=[{"field": "grade", "op": "eq", "value": "A"}],
+    )
+    assert isinstance(upper.where[0], Predicate)
+    assert upper.where[0].values == ("A",)
+    folded = plan_of(
+        reg,
+        intent_type="summary",
+        entity="t",
+        metrics=COUNT,
+        filters=[{"field": "grade", "op": "eq", "value": "b"}],
+    )
+    assert isinstance(folded.where[0], Predicate)
+    assert folded.where[0].values == ("B",)
+    reg2 = with_field(reg, "t", "grade", allowed_values=["Ab", "aB"])
+    assert codes(
+        reg2,
+        intent_type="summary",
+        entity="t",
+        metrics=COUNT,
+        filters=[{"field": "grade", "op": "eq", "value": "ab"}],
+    ) == ["ambiguous_value"]
+
+
+def test_rule_having_type(registry: Registry) -> None:
+    """HAVING thresholds are numbers; a min/max over a date cannot take one (f8)."""
+    assert codes(
+        registry,
+        intent_type="grouped_summary",
+        entity="invoices",
+        metrics=[{"agg": "min", "field": "issued_at", "alias": "first_issued"}],
+        group_by=[{"field": "status"}],
+        having=[{"metric": "first_issued", "op": "gt", "value": 5}],
+    ) == ["having_type"]
+    assert check(
+        registry,
+        intent_type="grouped_summary",
+        entity="invoices",
+        metrics=[{"agg": "max", "field": "amount", "alias": "top"}],
+        group_by=[{"field": "status"}],
+        having=[{"metric": "top", "op": "gt", "value": 5}],
+    ).ok

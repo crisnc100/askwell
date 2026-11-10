@@ -12,7 +12,9 @@ plausible, and it is wrong: the worst failure for a governed analyst.
 ## Decision
 The builder joins only along many-to-one edges from the base entity. The validator
 rejects (`fan_out`) any intent that would aggregate after a join along a one-to-many
-edge, and rejects ambiguous paths (more than one shortest path) rather than picking one.
+edge. A row list that reaches the many side is rejected too (`one_to_many_join`). The
+validator also rejects ambiguous paths (more than one shortest path,
+`ambiguous_path`) rather than picking one.
 The model can re-base the question on the many side (for example, aggregate invoices and
 join up to work orders), which is always safe.
 

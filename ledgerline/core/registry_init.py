@@ -117,34 +117,62 @@ def _read_tables(engine: Engine) -> list[_Table]:
     return tables
 
 
+def _find(names: list[str], wanted: str, case_insensitive: bool) -> str | None:
+    """The identifier `wanted` among `names`: exact match first. Only where identifiers
+    are case-insensitive (SQLite) may a unique case-insensitive match stand in."""
+    if wanted in names:
+        return wanted
+    if case_insensitive:
+        folded = [n for n in names if n.lower() == wanted.lower()]
+        if len(folded) == 1:
+            return folded[0]
+    return None
+
+
 def _relationships(
     tables: list[_Table],
     entity_slug: dict[str, str],
     field_slugs: dict[str, dict[str, str]],
     warnings: list[str],
+    *,
+    default_schema: str | None = None,
+    case_insensitive: bool = True,
 ) -> list[Relationship]:
     by_lower = {t.name.lower(): t for t in tables}
+    by_name = {t.name: t for t in tables}
     single_pk = {t.name: t.pk[0] for t in tables if len(t.pk) == 1}
     rels: dict[tuple[str, str], Relationship] = {}
+    skipped: set[tuple[str, str]] = set()  # (table, lowercased column) of skipped keys
 
     for t in tables:
         for fk in t.fks:
             src_cols = list(fk.get("constrained_columns") or [])
             dst_cols = list(fk.get("referred_columns") or [])
-            target = by_lower.get(str(fk.get("referred_table") or "").lower())
+            ref_schema = fk.get("referred_schema")
+            if ref_schema is not None and ref_schema != default_schema:
+                # Only the default schema is introspected; a same-named table here is a
+                # different table, so the key is skipped, never redirected.
+                warnings.append(
+                    f"skipped foreign key {t.name}.{', '.join(src_cols)}: target "
+                    f"{ref_schema}.{fk.get('referred_table')} is outside the introspected schema"
+                )
+                skipped.update((t.name, c.lower()) for c in src_cols)
+                continue
+            target_name = _find(
+                list(by_name), str(fk.get("referred_table") or ""), case_insensitive
+            )
+            target = by_name.get(target_name) if target_name else None
             if len(src_cols) != 1 or len(dst_cols) != 1 or target is None:
                 warnings.append(f"skipped foreign key on {t.name}: not single-column or unknown")
+                skipped.update((t.name, c.lower()) for c in src_cols)
                 continue
-            dst_col = next(
-                (c for c in field_slugs[target.name] if c.lower() == dst_cols[0].lower()), None
-            )
-            src_col = next(
-                (c for c in field_slugs[t.name] if c.lower() == src_cols[0].lower()), None
-            )
+            dst_col = _find(list(field_slugs[target.name]), dst_cols[0], case_insensitive)
+            src_col = _find(list(field_slugs[t.name]), src_cols[0], case_insensitive)
             if dst_col is None or src_col is None or single_pk.get(target.name) != dst_col:
                 warnings.append(
                     f"skipped foreign key {t.name}.{src_cols[0]}: target is not a primary key"
                 )
+                skipped.add((t.name, src_cols[0].lower()))
                 continue
             key = (t.name, src_col)
             rels.setdefault(
@@ -166,7 +194,11 @@ def _relationships(
     for t in tables:
         for col in t.columns:
             col_name = str(col["name"])
-            if (t.name, col_name) in rels or (t.pk == [col_name]):
+            # A declared key that was skipped says where the column points; guessing a
+            # different target from its name would invent a wrong join.
+            if (t.name, col_name) in rels or t.pk == [col_name]:
+                continue
+            if (t.name, col_name.lower()) in skipped:
                 continue
             candidates: list[str] = []
             match = _ID_SUFFIX.match(col_name)
@@ -252,7 +284,14 @@ def init_registry(
     warnings: list[str] = []
     entity_slug = _unique_slugs([t.name for t in tables])
     field_slugs = {t.name: _unique_slugs([str(c["name"]) for c in t.columns]) for t in tables}
-    relationships = _relationships(tables, entity_slug, field_slugs, warnings)
+    relationships = _relationships(
+        tables,
+        entity_slug,
+        field_slugs,
+        warnings,
+        default_schema=inspect(engine).default_schema_name,
+        case_insensitive=engine.dialect.name == "sqlite",
+    )
     key_columns = {(r.from_entity, r.from_field) for r in relationships}
 
     entities: dict[str, EntityDef] = {}

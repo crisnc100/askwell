@@ -1,8 +1,8 @@
 # Architecture decision records
 
 Each ADR states its prediction **before** the code or the measurement exists, and is
-committed in P1 (before `ledgerline/intent.py` first appears; `git log` shows the order).
-The **Result** section is filled in after the live eval (P5) with the measured numbers,
+committed in P1 (before `ledgerline/core/intent.py` first appears; `git log` shows the order).
+The **Result** section is filled in after the live eval (P4) with the measured numbers,
 whether or not they agree. A prediction is never edited after the fact; a wrong one stays
 wrong, with the result next to it.
 

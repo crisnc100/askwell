@@ -25,8 +25,8 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
-    # The single reference time for the seeder, the prompt's reference date and
-    # relative-date resolution. Gold results are computed against it.
+    # The single reference time for the seeder and for relative-date resolution.
+    # Gold results are computed against it.
     now: datetime = DEFAULT_NOW
 
     # Owner role: creates and seeds the fieldservice schema.
