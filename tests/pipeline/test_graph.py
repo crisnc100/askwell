@@ -132,3 +132,26 @@ def test_rows_are_never_sent_to_the_model(
     sent = " ".join(m.content for call in gateway.calls for m in call)
     for (name,) in result.rows:
         assert name not in sent
+
+
+def test_each_attempt_keeps_its_own_provenance(
+    settings: Settings, fieldservice_config: dict[str, SchemaConfig], audit_engine: Engine
+) -> None:
+    from ledgerline.core.intent import Intent
+    from ledgerline.llm.types import LLMResult, RawResponse
+
+    bad = {**UNPAID, "filters": [{"field": "status", "op": "eq", "value": "outstanding"}]}
+    service, gateway = scripted_service(settings, fieldservice_config, [bad, UNPAID], audit_engine)
+    marks = iter([{"simulated_by": "sim-A", "standing_in_for": "t"}, None])
+    original = gateway.complete
+
+    def with_provenance(**kw: Any) -> LLMResult[Intent]:
+        result = original(**kw)
+        return result.model_copy(update={"provenance": next(marks)})
+
+    gateway.complete = with_provenance  # type: ignore[method-assign]
+    _ = RawResponse
+    result = service.ask("fieldservice", "q")
+    attempts = result.validation["attempts"]
+    assert attempts[0]["provenance"] == {"simulated_by": "sim-A", "standing_in_for": "t"}
+    assert attempts[1]["provenance"] is None

@@ -180,8 +180,8 @@ def test_changing_the_prompt_or_registry_never_resumes_old_results(
         changed_prompt = _run("export")
     assert changed_prompt.deferred == {"fieldservice/ledgerline": 67}
     assert {r["system"] for r in changed_prompt.records} == {"oneshot"}
-    assert run_module.RUNS_DIR == isolated / "runs"
-    assert run_module.EVAL_PENDING == isolated / "pending"
+    assert isolated / "runs" == run_module.RUNS_DIR
+    assert isolated / "pending" == run_module.EVAL_PENDING
 
     edited = isolated / "fieldservice.yaml"
     from tests.core.conftest import FIELDSERVICE_REGISTRY
