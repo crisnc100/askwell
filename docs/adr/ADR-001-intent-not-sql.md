@@ -84,7 +84,7 @@ How the predictions held:
    Ledgerline's, and 30.2% of its answers are wrong.
 5. **Refusal recall ≥ 95%:** held (100%). No hidden-field value was returned.
 
-**Floor L11: not met in v0.1 (simulated run).** Execution accuracy is 76.7% against a floor of
+**The v0.1 floor is not met (simulated run).** Execution accuracy is 76.7% against a floor of
 80%, and wrong answers among answered are 13.2% against a ceiling of 5%.
 
 Why: for a question the grammar cannot express, the stand-in model often answered a nearby

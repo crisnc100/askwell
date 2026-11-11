@@ -3,7 +3,7 @@
 - **Status:** Spike PENDING. The spike command exists (`ledgerline spike`); it has not run
   because no `OPENROUTER_API_KEY` was available when P1 was built. No model is chosen yet,
   and no result below is filled in.
-- **Result:** PENDING.
+- **Result:** not measured (see Result).
 
 ## Interim target (2026-11-09)
 There is no OpenRouter key yet, so no real model runs. Until there is, a Claude model
@@ -45,5 +45,13 @@ support varies by model and by upstream provider.
 3. The whole spike spends under $0.05.
 
 ## Result
-PENDING. Fill in: candidates run, honoured/exact per model, spend, the chosen default and
-second model, and which predictions held.
+Not measured, as of 2026-11-11. The spike needs a live model and there is no OpenRouter key
+yet, so no candidate has run and no model is chosen.
+
+1. **At least two candidates honour json_schema on 5/5 probes:** not measured.
+2. **At least one advertising candidate fails a probe:** not measured.
+3. **The spike spends under $0.05:** not measured.
+
+Every result in this repo uses the interim target, `openai/gpt-oss-120b`, with simulated
+answers. The spike runs once a key exists, and the recordings are made again if it picks a
+different default.

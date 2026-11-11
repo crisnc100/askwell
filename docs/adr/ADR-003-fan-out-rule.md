@@ -1,7 +1,7 @@
 # ADR-003: Refuse aggregates across a one-to-many join
 
 - **Status:** Proposed. Prediction committed 2026-11-09 (P1).
-- **Result:** PENDING.
+- **Result:** recorded 2026-11-11 from the simulated run `sim-1` (see Result).
 
 ## Context
 `work_orders` is one-to-many to both `invoices` and `work_order_parts` (about 8% of
@@ -27,4 +27,13 @@ join up to work orders), which is always safe.
    is traced in the miss triage to a one-to-many join that inflated a count or sum.
 
 ## Result
-PENDING.
+Measured on the eval run `sim-1` ([evals/reports/sim-1.md](../../evals/reports/sim-1.md)). Its model answers were **simulated**: claude-haiku-5-5 answered every request as a stand-in for `openai/gpt-oss-120b`, because there is no OpenRouter key yet. A simulated run tests the pipeline and the scoring; it does not measure the target model. One trial.
+
+1. **Zero Ledgerline wrong answers on fieldservice from fan-out:** held. Ledgerline gave 5
+   wrong answers on fieldservice. The triage tags 2 as `gold_issue` (questions that can be
+   read with either of two dates) and 3 as `grammar_gap` (questions it should have
+   refused). None came from a one-to-many join.
+2. **At most 2 `validator_false_reject` misses on fieldservice:** held. There were none,
+   and the `fan_out` check did not fire on any fieldservice question.
+3. **At least one baseline wrong answer traced to an inflated join:** not measured. The
+   triage covers Ledgerline's misses only, and the sql_agent baseline is not built yet.

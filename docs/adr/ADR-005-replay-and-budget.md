@@ -1,7 +1,7 @@
 # ADR-005: Replay recordings and a hard per-run budget
 
 - **Status:** Accepted for P1 (gateway built and tested). Prediction committed 2026-11-09.
-- **Result:** PENDING (measured after the P4 live run).
+- **Result:** recorded 2026-11-11 (see Result). There has been no live run yet.
 
 ## Context
 The repo is public and CI never calls a live model. Reviewers and cloners must be able
@@ -36,4 +36,19 @@ total, and an eval that loops over hundreds of questions can overspend quickly.
 4. The sql_agent baseline costs 3× to 8× the Ledgerline pipeline per question.
 
 ## Result
-PENDING.
+Recorded 2026-11-11. Every model answer so far is simulated, so nothing here was spent or
+measured against a real model.
+
+1. **The replay eval reproduces the committed report byte for byte, with zero misses:**
+   held for the Markdown report. `./verify.sh` replays the fieldservice recordings and
+   compares the result with `evals/reports/replay-fieldservice.md`. It passed locally and
+   in CI on every merged PR. A replay miss raises, so a pass means there were none. The
+   JSON report is not compared, because it holds replay latencies, which vary run to run.
+2. **Live spend under $5, and no run over its budget:** not measured. There has been no
+   live run; total spend is $0.
+3. **The worst-case pre-check overestimates a call's cost by 3× to 10×:** not measured. No
+   live call has been made. One change since the prediction: the pre-check now counts the
+   prompt in UTF-8 bytes, not characters, because one character can be up to 4 bytes and a
+   token is never shorter than a byte.
+4. **sql_agent costs 3× to 8× the Ledgerline pipeline per question:** not measured. The
+   sql_agent baseline is not built yet.

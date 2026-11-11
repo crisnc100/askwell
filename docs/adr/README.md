@@ -1,16 +1,20 @@
 # Architecture decision records
 
-Each ADR states its prediction **before** the code or the measurement exists, and is
-committed in P1 (before `ledgerline/core/intent.py` first appears; `git log` shows the order).
-The **Result** section is filled in after the live eval (P4) with the measured numbers,
-whether or not they agree. A prediction is never edited after the fact; a wrong one stays
-wrong, with the result next to it.
+An ADR (architecture decision record) explains one design choice: the problem, the
+decision, what it costs, and a **prediction** of how it will measure. Each prediction was
+committed before the code it describes existed (`git log` shows the order), and is never
+edited afterwards. The **Result** section records what was measured, whether or not it
+agrees, and says "not measured" where nothing could be measured yet.
 
-| ADR | Decision | Status |
+So far every model answer has been simulated: a stand-in model answered for the target
+model, because there is no OpenRouter key yet. Results come from that simulated run,
+`sim-1`, and say so.
+
+| ADR | Decision | Result |
 |---|---|---|
-| [001](ADR-001-intent-not-sql.md) | The LLM fills a typed intent; it never writes SQL | Result recorded (simulated run); floor not met |
-| [002](ADR-002-langgraph-boundary.md) | LangGraph orchestrates one linear graph; nothing more | Prediction committed |
-| [003](ADR-003-fan-out-rule.md) | Refuse aggregates across a one-to-many join | Prediction committed |
-| [004](ADR-004-model-choice.md) | Default and second model, chosen by a live spike | Spike PENDING |
-| [005](ADR-005-replay-and-budget.md) | Replay recordings and a hard per-run budget | Prediction committed |
-| [006](ADR-006-benchmark-methodology.md) | Pre-registered eval on fieldservice + 5 Spider DBs vs two baselines | Prediction committed |
+| [001](ADR-001-intent-not-sql.md) | The model fills a typed intent; it never writes SQL | Recorded (simulated); the v0.1 floor is not met |
+| [002](ADR-002-langgraph-boundary.md) | LangGraph runs one fixed graph, nothing more | Recorded (simulated); the 150-line prediction was wrong (171) |
+| [003](ADR-003-fan-out-rule.md) | Refuse totals across a one-to-many join | Recorded (simulated); two predictions held, one not measured |
+| [004](ADR-004-model-choice.md) | Default and second model, chosen by a live test | Not measured: needs a model key |
+| [005](ADR-005-replay-and-budget.md) | Replay recordings and a hard per-run budget | Replay held; spend and cost not measured |
+| [006](ADR-006-benchmark-methodology.md) | Questions fixed in advance, on fieldservice and 5 Spider databases | Recorded (simulated); sql_agent not measured |
