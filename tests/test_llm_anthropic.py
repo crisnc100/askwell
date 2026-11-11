@@ -17,7 +17,7 @@ import pytest
 from pydantic import BaseModel, SecretStr
 
 from ledgerline.config import Settings
-from ledgerline.llm.anthropic_transport import AnthropicTransport
+from ledgerline.llm.anthropic_transport import JSON_ONLY, AnthropicTransport
 from ledgerline.llm.budget import BudgetGuard
 from ledgerline.llm.daily import DailySpend
 from ledgerline.llm.errors import ParseError, ProviderUnavailableError
@@ -140,7 +140,7 @@ def test_anthropic_models_are_priced_from_config() -> None:
 # --- the request ---
 
 
-def test_the_request_uses_structured_output_low_effort_and_no_sampling_settings() -> None:
+def test_the_request_asks_for_json_text_at_low_effort_with_no_sampling_settings() -> None:
     server = Server([ok()])
     raw = _transport(server)(
         model="claude-haiku-5-5",
@@ -152,11 +152,9 @@ def test_the_request_uses_structured_output_low_effort_and_no_sampling_settings(
     body = server.bodies[0]
     assert body["model"] == "claude-haiku-5-5"
     assert body["max_tokens"] == 1024
-    assert body["system"] == "Fill in the form."
+    assert body["system"] == f"Fill in the form.\n\n{JSON_ONLY}"
     assert body["messages"] == [{"role": "user", "content": "label it"}]
-    assert body["output_config"]["effort"] == "low"
-    assert body["output_config"]["format"]["type"] == "json_schema"
-    assert body["output_config"]["format"]["schema"]["properties"].keys() == {"label", "score"}
+    assert body["output_config"] == {"effort": "low"}
     assert body["thinking"] == {"type": "adaptive"}
     for absent in ("temperature", "top_p", "top_k", "output_format"):
         assert absent not in body, absent
@@ -172,6 +170,19 @@ def test_the_router_sends_the_bare_model_id(tmp_path: Path) -> None:
 
 
 # --- answers ---
+
+
+def test_a_fenced_json_reply_still_parses(tmp_path: Path) -> None:
+    fenced = '```json\n{"label": "a", "score": 2}\n```'
+    result = _complete(_gateway(Server([ok(text=fenced)]), tmp=tmp_path))
+    assert result.value == Answer(label="a", score=2)
+
+
+def test_prose_instead_of_json_is_a_charged_parse_error(tmp_path: Path) -> None:
+    gw = _gateway(Server([ok(text="Here is the form you asked for.")]), tmp=tmp_path)
+    with pytest.raises(ParseError) as info:
+        _complete(gw)
+    assert info.value.cost_usd == pytest.approx(COST)
 
 
 def test_thinking_blocks_are_skipped_when_reading_the_answer(tmp_path: Path) -> None:
