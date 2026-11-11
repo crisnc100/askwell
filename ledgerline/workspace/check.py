@@ -226,6 +226,13 @@ def check_files(files: list[UploadedFile], limits: Limits | None = None) -> Chec
         if result is not None:
             parsed.append(result)
     _check_table_names(reports, limits)
+    # Files that become the same table were reported above; they take no further part,
+    # since every later step looks tables up by name.
+    counts: dict[str, int] = {}
+    for report in reports:
+        if report.table is not None:
+            counts[report.table] = counts.get(report.table, 0) + 1
+    parsed = [p for p in parsed if counts.get(p.slug, 0) == 1]
     # ID and link checks need every table; a file that could not be read at all would
     # make them report problems that are not there. Without them, each column is still
     # typed and its damaged values reported.

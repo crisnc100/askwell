@@ -31,6 +31,9 @@ let step: Step = "prepare";
 let edits: Edits = { fields: {} };
 // Messages to show at the top of the next page drawn (an upload batch with a refusal).
 let notices: string[] = [];
+// Counts page draws. A page that loads data checks it is still the current draw before
+// using the answer, so a slow, older load never overwrites a newer page or its edits.
+let drawn = 0;
 
 // The workspace link is "/#ws=<id>". A fragment never reaches the server, so the id is
 // not in any access log, and Referrer-Policy keeps it from leaking to other sites.
@@ -64,6 +67,7 @@ function go(target: Step): void {
 }
 
 function render(): void {
+  drawn += 1;
   clear(app);
   append(app, header(), nav());
   const main = h("main", { attrs: { "data-step": step } });
@@ -224,7 +228,9 @@ async function preparePage(main: HTMLElement): Promise<void> {
       showError(main, err);
     }
   });
+  const draw = drawn;
   const zones = await api.timeZones();
+  if (draw !== drawn) return;
   for (const zone of zones) {
     const option = h("option", { attrs: { value: zone } }, zone);
     option.selected = zone === DEFAULT_TIME_ZONE;
@@ -388,7 +394,9 @@ function checkPage(main: HTMLElement): void {
 // Confirm ------------------------------------------------------------------------------
 
 async function confirmPage(main: HTMLElement): Promise<void> {
+  const draw = drawn;
   const data = await api.fields();
+  if (draw !== drawn) return;
   // The edits are the one source of truth: they start as the fields' current state, the
   // boxes are drawn from them, and the preview and Confirm send exactly them.
   edits = { fields: {} };

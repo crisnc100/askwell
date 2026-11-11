@@ -16,6 +16,9 @@ Values that look like a damaged number or date (`1,234`, `$5`, `45%`, `1.2E+11`,
 `3/4/25`) are not silently read as text when the rest of the column is numbers or
 dates: Check reports each one with its fix.
 
+Every pattern reads ASCII digits only (re.ASCII), so digits from other scripts, such as
+full-width digits, make a column text and keep their exact text.
+
 Every pattern here runs in time proportional to the cell's length: no two quantifiers
 can match the same characters, so a long cell that almost matches cannot make the
 matcher try exponentially many ways. Digit strings longer than any 64-bit number are
@@ -52,23 +55,25 @@ _MAX_INT_DIGITS = 19
 # A decimal longer than this cannot be stored exactly in a float anyway.
 _MAX_NUM_CHARS = 40
 
-_INT = re.compile(r"[-+]?\d+")
-_NUM = re.compile(r"[-+]?(?:\d+\.\d*|\.\d+)")
-_LEADING_ZERO = re.compile(r"[-+]?0\d")
-_DATE = re.compile(r"\d{4}-\d{2}-\d{2}")
-_DATETIME = re.compile(r"\d{4}-\d{2}-\d{2} \d{2}:\d{2}(?::\d{2})?")
+_INT = re.compile(r"[-+]?\d+", re.ASCII)
+_NUM = re.compile(r"[-+]?(?:\d+\.\d*|\.\d+)", re.ASCII)
+_LEADING_ZERO = re.compile(r"[-+]?0\d", re.ASCII)
+_DATE = re.compile(r"\d{4}-\d{2}-\d{2}", re.ASCII)
+_DATETIME = re.compile(r"\d{4}-\d{2}-\d{2} \d{2}:\d{2}(?::\d{2})?", re.ASCII)
 
-_THOUSANDS = re.compile(r"[-+]?\d{1,3}(?:,\d{3})+(?:\.\d+)?")
+_THOUSANDS = re.compile(r"[-+]?\d{1,3}(?:,\d{3})+(?:\.\d+)?", re.ASCII)
 # A number written loosely: digits and commas, then an optional fraction (or only a
 # fraction). The comma run and the fraction cannot overlap, so matching is linear.
 _LOOSE = r"(?:\d[\d,]*(?:\.\d+)?|\.\d+)"
-_CURRENCY = re.compile(rf"[-+]?[$€£¥]\s?{_LOOSE}|[-+]?{_LOOSE}\s?[$€£¥]")
-_PERCENT = re.compile(rf"[-+]?{_LOOSE}\s?%")
-_EXPONENT = re.compile(r"[-+]?\d+(?:\.\d+)?[eE][-+]?\d+")
-_SLASH_DATE = re.compile(r"(\d{1,2})[/.-](\d{1,2})[/.-](\d{2}|\d{4})(?:[ T].*)?")
-_YMD_SLASH = re.compile(r"(\d{4})/(\d{1,2})/(\d{1,2})")
+_CURRENCY = re.compile(rf"[-+]?[$€£¥]\s?{_LOOSE}|[-+]?{_LOOSE}\s?[$€£¥]", re.ASCII)
+_PERCENT = re.compile(rf"[-+]?{_LOOSE}\s?%", re.ASCII)
+_EXPONENT = re.compile(r"[-+]?\d+(?:\.\d+)?[eE][-+]?\d+", re.ASCII)
+_SLASH_DATE = re.compile(r"(\d{1,2})[/.-](\d{1,2})[/.-](\d{2}|\d{4})(?:[ T](.*))?", re.ASCII)
+_CLOCK = re.compile(r"(\d{1,2}):(\d{2})(?::(\d{2}))?", re.ASCII)
+_YMD_SLASH = re.compile(r"(\d{4})/(\d{1,2})/(\d{1,2})", re.ASCII)
 _ISO_ZONED = re.compile(
-    r"(\d{4}-\d{2}-\d{2})[T ](\d{2}:\d{2}(?::\d{2})?)(?:\.\d+)?(?:Z|[+-]\d{2}:?\d{2})?"
+    r"(\d{4}-\d{2}-\d{2})[T ](\d{2}:\d{2}(?::\d{2})?)(?:\.\d+)?(?:Z|[+-]\d{2}:?\d{2})?",
+    re.ASCII,
 )
 
 NUMBER_KINDS: frozenset[str] = frozenset({"int", "num"})
@@ -200,7 +205,7 @@ def number_fix(cell: str) -> str:
             "a spreadsheet shortened this number; format the column as a whole number "
             "(or as text) and export again"
         )
-    plain = re.sub(r"[\s,$€£¥%]", "", cell)
+    plain = re.sub(r"[\s,$€£¥%]", "", cell, flags=re.ASCII)
     if _PERCENT.fullmatch(cell):
         try:
             fraction = format(Decimal(plain) / 100, "f")
@@ -231,7 +236,7 @@ def date_fix(cell: str) -> str:
         return f"use dashes: {_iso(year, month, day) or 'YYYY-MM-DD'}"
     slash = _SLASH_DATE.fullmatch(cell)
     assert slash is not None
-    first, second, year_text = slash.groups()
+    first, second, year_text, time_text = slash.groups()
     year = int(year_text) + (2000 if len(year_text) == 2 else 0)
     a, b = int(first), int(second)
     # Month first unless the first number cannot be a month.
@@ -239,8 +244,21 @@ def date_fix(cell: str) -> str:
     suggestion = _iso(year, month, day)
     if suggestion is None:
         return "use the form YYYY-MM-DD"
+    if time_text is not None:
+        suggestion = f"{suggestion} {_clock(time_text)}"
     spoken = f"{date(year, month, day):%B} {day}, {year}"
     return f"use {suggestion} (if it means {spoken})"
+
+
+def _clock(text: str) -> str:
+    """A time of day in the accepted HH:MM[:SS] form, or a placeholder if it is not
+    one (like 2pm)."""
+    found = _CLOCK.fullmatch(text.strip())
+    if found is None:
+        return "HH:MM"
+    hour, minute, second = found.groups()
+    out = f"{int(hour):02d}:{minute}"
+    return out + (f":{second}" if second else "")
 
 
 def _iso(year: int, month: int, day: int) -> str | None:
