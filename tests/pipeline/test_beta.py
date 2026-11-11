@@ -122,7 +122,7 @@ def test_every_page_and_api_route_needs_a_code(gated: TestClient) -> None:
             assert response.json() == {"detail": invite.NEEDS_CODE}
 
 
-def test_the_health_check_answers_without_a_code(gated: TestClient) -> None:
+def test_healthz_answers_without_a_code(gated: TestClient) -> None:
     with gated as client:
         response = client.get("/healthz")
     assert response.status_code == 200

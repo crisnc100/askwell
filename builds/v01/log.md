@@ -180,3 +180,13 @@ Each item has a test in `tests/workspace/test_hardening.py`.
 - **Permissions:** folders 0700, files 0600. The audit SQLite file is created by hand with 0600 first; SQLite gives its journals the same mode.
 - **Slow uploads:** an upload must finish in 120 seconds (408 otherwise), and one address may run at most 2 at once. Both release the reservation.
 - **File names:** sent in `X-File-Name` (percent-encoded UTF-8). The query parameter is refused. The tests moved in their own commit (`14cd35a`) while the server briefly accepted both, so every commit stays green.
+
+### Phase 4: the beta itself (L26)
+- **Invite gate** (`ledgerline/invite.py`): on when `LEDGERLINE_INVITE_CODES` is set. Every page and API route except `/invite` and `/healthz` answers 401 without a code: the gate page for a browser, `{"detail": ...}` for anything else. The code lives in an HttpOnly, Secure, SameSite=Lax cookie, or the `X-Invite-Code` header. `hmac.compare_digest` runs against every code with no early exit. 10 tries an hour per address.
+- **Daily cap** (`ledgerline/llm/daily.py`): on when `LEDGERLINE_DAILY_SPEND_CAP_USD` is set. The gateway reserves each live call's worst case in `spend.sqlite` (`BEGIN IMMEDIATE`, so concurrent requests and processes cannot overspend), then settles to the real cost, or to 0 when the call raised. A UTC day.
+- **Kill switch:** `LEDGERLINE_LIVE_ANSWERS_OFF=1`. The gateway refuses every live call before it is sent. `/ask` and workspace asks answer 503 with a plain sentence for both the switch and the cap.
+- **Health:** `/healthz` keeps its body and now also opens every demo database (`SELECT 1`), answering 503 when one fails.
+- **Image and compose:** `Dockerfile` (pages built in a Node stage; fieldservice seeded at build into a read-only SQLite file; non-root user; `/data` volume; `umask 077`; uvicorn's own proxy-header handling off, since Ledgerline reads `X-Forwarded-For` itself). `compose.prod.yaml`: `app` on `127.0.0.1:8000` with a health check, and `sweep` hourly. `.env.beta.example` lists the four settings.
+- **Local container check** (built here, not deployed): replay mode with a code: `/healthz` 200, `/` and `/schemas` 401 without the code, a recorded demo question answers with it, and every file under `/data` is 0600 and every folder 0700. Live mode with the real key and the kill switch on: it starts, `/healthz` reports `live`, and `/ask` returns the plain 503 with no model call.
+- **Tests:** `tests/pipeline/test_beta.py` (gate, cap, kill switch) and `tests/workspace/test_beta_workspace.py` (the plain message on workspace asks).
+- The deploy section of the README covers the settings, the volume and Caddy. Nothing was deployed.

@@ -328,6 +328,57 @@ The Results page (`/results/`) draws every report in `evals/reports/` from its J
 --write`), and a test checks every committed report against it. The page links each
 schema's triage file, `evals/triage/<schema>.yaml`, which gives every miss its cause.
 
+## Deploy the hosted beta
+
+The hosted beta is one container on one host, behind [Caddy](https://caddyserver.com),
+a web server that handles HTTPS. It answers live questions with a beta-only OpenRouter
+key. Three controls keep it small and cheap:
+
+- **Invite gate.** Every page and API route needs an invite code, except `/healthz`.
+  A visitor enters the code once; the browser keeps it in a cookie scripts cannot read.
+  Scripts can send it in the `X-Invite-Code` header instead.
+- **Daily cap.** All live answers together may spend at most a set amount per UTC day.
+  Each model call reserves its worst-case cost before it is sent, so the cap holds even
+  when requests overlap. The day's total is kept on disk, so a restart does not reset it.
+- **Kill switch.** One setting turns live answers off. Asks then get "Live answers are
+  turned off right now." instead of an answer.
+
+The image (`Dockerfile`) builds the pages, installs the app and builds the fieldservice
+demo as a read-only SQLite file, so the beta needs no Postgres. It runs as an
+unprivileged user, and everything it writes lives in one volume, `/data`: uploaded
+workspaces, the audit log (`app.sqlite`) and the day's spend (`spend.sqlite`).
+
+On the host:
+
+1. Copy `.env.beta.example` to `.env.beta` and fill it in:
+
+   | Setting | What it does |
+   |---|---|
+   | `OPENROUTER_API_KEY` | The beta's own key. Give it a credit limit on OpenRouter too. |
+   | `LEDGERLINE_INVITE_CODES` | The invite codes, comma-separated. With none set there is no gate, so never leave it empty on a public host. |
+   | `LEDGERLINE_DAILY_SPEND_CAP_USD` | The most live answers may cost per UTC day, for example `1.00`. |
+   | `LEDGERLINE_LIVE_ANSWERS_OFF` | `1` turns live answers off. Restart the app after changing it. |
+
+   `compose.prod.yaml` also sets `LEDGERLINE_TRUST_PROXY=1`, because Caddy is the only
+   client and it writes `X-Forwarded-For`. The image sets the database and data paths.
+2. Start it: `docker compose -f compose.prod.yaml up -d --build`. It starts two
+   services: `app`, on `127.0.0.1:8000` so only the host can reach it, and `sweep`,
+   which deletes expired workspaces once an hour.
+3. Point Caddy at it. Caddy gets the HTTPS certificate on its own:
+
+   ```
+   ledgerline.example.com {
+       reverse_proxy 127.0.0.1:8000
+   }
+   ```
+
+4. Check it: `curl https://ledgerline.example.com/healthz` returns
+   `{"status": "ok", "mode": "live"}`. It answers 503 if the demo database cannot be read.
+
+To turn live answers off in a hurry, set `LEDGERLINE_LIVE_ANSWERS_OFF=1` in `.env.beta`
+and run `docker compose -f compose.prod.yaml up -d`. To back up or move the beta, copy
+the `ledgerline-data` volume.
+
 ## Checks
 
 `./verify.sh` is the one gate, locally and in CI. It runs a locked `uv sync`, ruff
