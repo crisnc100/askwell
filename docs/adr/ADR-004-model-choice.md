@@ -217,4 +217,4 @@ next to the four from Amendment 2.
 - If it fails a gate, nothing changes: the default stays mistral-small, and the numbers
   go back to Cristian.
 - gemma-4-26b-a4b-it stays the second model, from a different vendor.
-- Hard budget for this amendment's live runs: $1.
+- Budget for this amendment's live runs: at most $1, enforced by the budget guard.
