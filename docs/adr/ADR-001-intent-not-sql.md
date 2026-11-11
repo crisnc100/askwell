@@ -14,7 +14,9 @@ comes from a query the system can explain and audit.
 The model returns a structured intent (`ledgerline/core/intent.py`): an entity, selected
 fields, metrics, filters, having, group-by, a date range, order and limit, or
 `unanswerable` with a reason. Plain Python validates every field against the registry
-and returns typed errors. Code resolves relative dates against `LEDGERLINE_NOW`. A
+and returns typed errors. Code resolves relative dates: against `LEDGERLINE_NOW` for a
+configured schema, so evals reproduce, and against the wall clock in the workspace's time
+zone for uploaded data ([Your data](../../README.md#your-data)). A
 SQLAlchemy Core builder writes parameterized SQL that runs on a read-only connection.
 Anything the grammar or validator cannot express is refused with a reason, never guessed.
 

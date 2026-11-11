@@ -242,3 +242,81 @@ Decided by Cristian, 2026-11-09. v0.1 must be a usable product: a stranger prepa
 - **L19** Hidden fields and hidden category values never appear in the model prompt (test on the exported request).
 - **L20** The Results page renders all schemas from the committed JSON, including the 3 new domains, with the simulated banner and metric definitions.
 - **L21** Docs follow Cristian's rule: plain, deliberate, terms defined on first use. The README walks a stranger through the flow in under 2 minutes of reading.
+
+## P5 rev 4 (replaces rev 3) — 2026-11-11
+Decided by Cristian, 2026-11-11:
+- **Hosted beta answers live questions** with a beta-only OpenRouter key, a global daily spending cap and a kill switch, behind an invite code.
+- **The 3 extra synthetic domains are dropped.** Fieldservice is the demo; the 5 Spider databases and upload-your-own-data carry the "works on other schemas" claim.
+
+Rev 4 also resolves the rev-3 Bounce (`bounce-p5.md`). It overrides `context.md`'s v0.1 out-of-scope line: CSV upload, an invite-code gate and deployment are now in scope.
+
+### Three PRs, not one
+Each merges alone and leaves `main` working. They are split because the upload surface is the most security-relevant code in the project and must be reviewed on its own.
+- **PR3 — Your data (P5a):** workspaces, upload, check, confirm and ask on SQLite, run locally. No hosting.
+- **PR4 — Results and docs (P5b):** the results page from report JSON, plus the docs.
+- **PR5 — Hosted beta (P5c):** invite gate, live key with a daily cap and a kill switch, deploy to a cristianortega.dev subdomain. It needs two things from Cristian before it starts: the host and the key.
+
+### P5a — Your data (PR3)
+**States.** A workspace is `new → checked → confirmed`.
+- Upload is allowed in `new` and `checked`. A same-name file replaces the old one, and any upload moves the workspace back to `new`.
+- Check runs on the whole set. Passing loads it all-or-nothing and moves to `checked`.
+- Confirm saves the registry edits and moves to `confirmed`. Uploading after Confirm is refused: start a new workspace.
+- Ask works only in `confirmed`. Before that, the API answers "Confirm your fields first" (409), never a developer error.
+- Expiry is 7 days from the last activity. The page shows the expiry date and the workspace link to bookmark.
+
+**Prepare-your-data rules** (shown on the page, enforced by Check):
+- One table per CSV, with a header row. UTF-8, with or without a BOM. CRLF or LF. Comma delimiter; a file using `;` gets a clear error naming it.
+- Table name is the file name, slugged: lowercase, spaces and punctuation become `_`, `.csv` in any case. Two files with the same slug are an error. Two headers with the same slug are an error.
+- Each table has an ID column named `id` or `<table>_id`. A table with no ID column but two or more `<x>_id` columns is a link table and is allowed.
+- A column named `<x>_id` links to table `<x>` or its plural form `<x>s`. The orphan check (values with no match) is a warning, not an error, and compares with the same type the loader uses.
+- Null values: blank, `NULL`, `NA`, `N/A` and `-`, in any case.
+- Dates are `YYYY-MM-DD`; datetimes are `YYYY-MM-DD HH:MM[:SS]`, with no time zone. A column mixing both is a datetime column.
+- Numbers: a plain number. Thousands separators, currency symbols and `%` are errors with the fix spelled out. A column where any value has a leading zero (like `00123`) is text, so IDs and zip codes keep their zeros. A foreign-key column takes the type of the ID it points to.
+- Limits, enforced on the server while the file streams in: 10 MB per file, 10 files, 200 columns, 1,000,000 rows, 10,000 characters per cell.
+- Messages name the file, row, column, what's wrong and the exact fix. At most 20 messages per file, then "and N more like this".
+
+**Check and load must agree.** A property test generates valid and messy-but-valid files (BOM, CRLF, quoted commas and newlines, blanks, leading zeros) and proves everything that passes Check loads, with every value round-tripped exactly.
+
+**Confirm.** It shows the drafted registry: tables, fields, types, detected links and auto-hidden fields. The user can hide or unhide a field and add a description. Aliases and renames wait.
+- **Category values are opt-in.** A column's distinct values are sent to the model only when the user ticks "Share these values with the model". The page warns that shared values go to a third-party model.
+- A hidden value stays allowed in the validator. The model just never sees it, and a user who types it still gets an answer.
+- The preview uses the same renderer and truncation as the interpret prompt (one function), so it shows exactly what the model will see.
+
+**Ask.**
+- It uses the same pipeline with a second, dynamic schema source: per-workspace registry, per-workspace read-only SQLite executor and per-workspace audit.
+- Relative dates use the wall clock in the workspace's time zone (picked at upload, default America/New_York). Evals keep the pinned reference time.
+- Refusal codes (`fan_out`, `ambiguous_path` and so on) are shown as plain English with a suggestion.
+- **No key (local default):** questions on a workspace answer "Live answers need a model key; see the README." No 500. The demo schema still answers its recorded examples.
+
+**Privacy and abuse.**
+- Workspace ids come from `secrets` (128 bits) and travel in a header, never the URL path. The bookmark link carries it in the `#fragment`. `Referrer-Policy: no-referrer`.
+- An id with path characters is rejected before any file access (test).
+- Delete my data removes the SQLite file and its `-wal`/`-journal` files, the raw uploads, the registry and the workspace's ask_log rows.
+- A sweep command, `ledgerline sweep`, runs from cron (no in-process scheduler). It tolerates a file that is open, and a removal that fails is retried on the next run.
+- Limits: a global disk cap of 2 GB for all workspaces; at most 3 live workspaces per IP; per-IP rate limits of 30 asks and 20 uploads per hour, trusting `X-Forwarded-For` only when `LEDGERLINE_TRUST_PROXY=1`.
+- Every user-supplied string the page shows (file names, headers, messages, cells) is inserted as text, never HTML (test with a `<script>` payload).
+- One line on the upload page: "Don't upload personal data. Uploads are deleted after 7 days. Shared field values go to a third-party model."
+
+**Pages:** Prepare, Upload (a file input; drag-and-drop optional), Check, Confirm, Ask. Vite + TypeScript, served by FastAPI.
+
+**Acceptance**
+- **L16** Each check rule has a named test with a minimal bad file, and messages name the file, row, column and fix, capped per file.
+- **L17** One Playwright smoke test runs Prepare → Upload the sample → Check → Confirm (hide one field, add one description) → Ask, with a fake model. The exported prompt shows the edit took effect.
+- **L18** Isolation: workspace B's header can't read A's data; crafted ids with path characters are refused. Delete removes the file, sidecars, raw uploads, registry and ask_log rows. The sweep removes a workspace idle for 7 days (fake clock).
+- **L19** Hidden fields and unshared category values never appear in the model prompt (test on the exported request).
+- **L20** The property test: everything that passes Check loads and round-trips exactly.
+- **L21** Server-side limits (size while streaming, columns, rows, cell length, disk cap, per-IP workspaces and rate limits) each have a test.
+- **L22** The XSS test passes: user strings render as text.
+- **L23** Relative dates on a workspace use the wall clock in its time zone (test with a fake clock); the eval reproduces unchanged.
+- **L24** Per-module coverage floors cover the new check, load and workspace modules.
+
+### P5b — Results and docs (PR4)
+- **Results page** from the committed report JSON. A JSON Schema for the report is committed, and the page's test validates every committed report against it. Per-schema metrics with intervals, plain-English metric definitions, the simulated banner and links to triage.
+- **Docs:** README walk-through of the product flow (at most 600 words above the fold), `docs/product-brief.md`, ADR results filled in, `docs/build-log.md`, `docs/failures/` with 3 or more triaged misses.
+- **L25** The results page test passes against every committed report; README and docs follow Cristian's docs rule.
+
+### P5c — Hosted beta (PR5, starts after Cristian names the host and adds the key)
+- Invite-code gate on every page and API route. Codes are listed in an env var.
+- A global daily model-spend cap, checked before each call, plus a kill switch env var that turns live answers off.
+- Dockerfile and deploy to a cristianortega.dev subdomain. One database engine in the deploy: the fieldservice demo moves to SQLite unless the host makes Postgres free.
+- **L26** The gate, the daily cap and the kill switch each have a test; the deployed health check passes.

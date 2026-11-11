@@ -1,18 +1,24 @@
-"""The HTTP API: POST /ask, GET /schemas, GET /schemas/{id}/examples, GET /healthz."""
+"""The HTTP API: POST /ask, GET /schemas, GET /schemas/{id}/examples, GET /healthz, and
+the workspace routes under /api (ledgerline/workspace/api.py)."""
 
 from __future__ import annotations
 
-from collections.abc import AsyncIterator
+from collections.abc import AsyncIterator, Awaitable, Callable
 from contextlib import asynccontextmanager
+from pathlib import Path
 from typing import Any
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request, Response
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
 from ledgerline.config import get_settings
 from ledgerline.llm.errors import ReplayMissError
 from ledgerline.llm.simulate import PendingRequestError
 from ledgerline.pipeline.service import AskService, UnknownSchemaError
+from ledgerline.workspace import api as workspace_api
+from ledgerline.workspace.api import WorkspaceApp
+from ledgerline.workspace.store import WorkspaceStore
 
 
 class AskRequest(BaseModel):
@@ -20,7 +26,17 @@ class AskRequest(BaseModel):
     question: str = Field(min_length=1, max_length=2000)
 
 
-def create_app(service: AskService | None = None) -> FastAPI:
+WEB_DIST = Path(__file__).resolve().parents[1] / "web" / "dist"
+
+
+def create_app(
+    service: AskService | None = None,
+    workspaces: WorkspaceApp | None = None,
+    web_dir: Path = WEB_DIST,
+) -> FastAPI:
+    """The API, plus the pages from `web_dir` at `/` when they have been built
+    (`npm run build` in web/)."""
+
     @asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         if service is None:
@@ -31,6 +47,27 @@ def create_app(service: AskService | None = None) -> FastAPI:
         app.state.service.close()
 
     app = FastAPI(title="Ledgerline", version="0.1.0", lifespan=lifespan)
+    if workspaces is None:
+        settings = get_settings()
+        workspaces = WorkspaceApp(
+            WorkspaceStore(Path(settings.workspace_dir)),
+            trust_proxy=settings.trust_proxy,
+            prompt_budget_chars=settings.prompt_budget_chars,
+        )
+    app.state.workspaces = workspaces
+
+    @app.middleware("http")
+    async def _headers(  # pyright: ignore[reportUnusedFunction]
+        request: Request, call_next: Callable[[Request], Awaitable[Response]]
+    ) -> Response:
+        response = await call_next(request)
+        # The workspace link is a secret: never send any URL of this site onward.
+        response.headers["Referrer-Policy"] = "no-referrer"
+        if request.url.path.startswith("/api/"):
+            response.headers["Cache-Control"] = "no-store"
+        return response
+
+    workspace_api.install(app, workspaces)
 
     def svc() -> AskService:
         return app.state.service  # type: ignore[no-any-return]
@@ -54,7 +91,8 @@ def create_app(service: AskService | None = None) -> FastAPI:
         return config.examples
 
     @app.post("/ask")
-    def ask(request: AskRequest) -> dict[str, Any]:
+    def ask(request: AskRequest, http: Request) -> dict[str, Any]:
+        workspaces.check_ask_rate(http)
         try:
             return svc().ask(request.schema_id, request.question).to_dict()
         except UnknownSchemaError as exc:
@@ -67,5 +105,9 @@ def create_app(service: AskService | None = None) -> FastAPI:
                 "no recorded model answer for this question; replay mode answers the "
                 "canned examples (GET /schemas/{id}/examples)",
             ) from exc
+
+    if web_dir.is_dir():
+        # Mounted last, so every API route above takes precedence over a file path.
+        app.mount("/", StaticFiles(directory=web_dir, html=True), name="web")
 
     return app

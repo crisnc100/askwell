@@ -1,3 +1,4 @@
 evals/gold/*.jsonl -text
 evals/gold/*.json -text
 evals/gold/*.py -text
+web/public/sample/*.csv -text

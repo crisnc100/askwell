@@ -1,283 +1,223 @@
 {
  "rows": [
   {
-   "behavior": "LangGraph ask pipeline: interpret, validate, one retry with the validator's errors, execute, deterministic present",
+   "behavior": "Workspaces: create, upload, check, confirm, ask, delete, sweep; the pages served at /",
    "files": [
-    "ledgerline/pipeline/__init__.py",
-    "ledgerline/pipeline/graph.py",
-    "ledgerline/pipeline/prompt.py",
-    "ledgerline/llm/types.py",
-    "ledgerline/llm/errors.py"
-   ],
-   "docs": [
-    {
-     "path": "README.md",
-     "claims": [
-      {
-       "claim": "one retry with the validator's errors; a second failure is a refusal",
-       "at": "ledgerline/pipeline/graph.py:22"
-      },
-      {
-       "claim": "retry message carries the validator's errors",
-       "at": "ledgerline/pipeline/prompt.py:151"
-      },
-      {
-       "claim": "the answer is built by code; present is deterministic",
-       "at": "ledgerline/pipeline/graph.py:142"
-      },
-      {
-       "claim": "result rows are never sent to the model (retry messages hold only the answer and issues)",
-       "at": "ledgerline/pipeline/prompt.py:153"
-      }
-     ]
-    }
-   ]
-  },
-  {
-   "behavior": "`ledgerline ask` and POST /ask, GET /schemas, GET /schemas/{id}/examples; per-ask budget; one ask_log row per ask",
-   "files": [
+    "ledgerline/workspace/__init__.py",
+    "ledgerline/workspace/store.py",
+    "ledgerline/workspace/api.py",
     "ledgerline/api.py",
     "ledgerline/cli.py",
-    "ledgerline/pipeline/service.py",
     "ledgerline/config.py",
-    "config/schemas.yaml",
-    "ledgerline/core/audit.py"
+    "web/index.html",
+    "web/src/main.ts",
+    "web/src/api.ts",
+    "web/src/dom.ts",
+    "web/src/style.css",
+    "web/vite.config.ts",
+    "web/tsconfig.json",
+    "web/package.json",
+    "web/.gitignore"
    ],
    "docs": [
     {
      "path": "README.md",
      "claims": [
       {
-       "claim": "ledgerline ask prints the trace as JSON",
-       "at": "ledgerline/cli.py:227"
+       "claim": "the pages are served at / once built with npm run build",
+       "at": "ledgerline/api.py:111"
       },
       {
-       "claim": "--schema picks a schema from config/schemas.yaml, default fieldservice",
-       "at": "ledgerline/cli.py:202"
+       "claim": "a workspace is a folder of its own under data/workspaces/",
+       "at": "ledgerline/config.py:72"
       },
       {
-       "claim": "uvicorn --factory works: create_app() with no service builds one from settings",
-       "at": "ledgerline/api.py:27"
+       "claim": "the time zone is picked and the workspace started on Prepare",
+       "at": "web/src/main.ts:209"
       },
       {
-       "claim": "GET /schemas lists schemas",
-       "at": "ledgerline/api.py:42"
+       "claim": "the page gives a link back to the workspace; anyone with it can see the data",
+       "at": "web/src/main.ts:152"
       },
       {
-       "claim": "GET /schemas/{id}/examples lists example questions",
-       "at": "ledgerline/api.py:49"
+       "claim": "a file with the same name replaces the old one",
+       "at": "ledgerline/workspace/store.py:513"
       },
       {
-       "claim": "a question with no recording gets a 409 in replay mode",
-       "at": "ledgerline/api.py:66"
+       "claim": "files are deleted after 7 days without use",
+       "at": "ledgerline/workspace/limits.py:31"
       },
       {
-       "claim": "the CLI exits with code 4 on a replay miss",
-       "at": "ledgerline/cli.py:224"
+       "claim": "idle time counts from the last use; opening counts as use",
+       "at": "ledgerline/workspace/store.py:320"
       },
       {
-       "claim": "refused asks get an audit row from the service; answered and failed ones from the executor",
-       "at": "ledgerline/pipeline/service.py:310"
+       "claim": "Delete my data deletes at once",
+       "at": "web/src/main.ts:147"
       },
       {
-       "claim": "each live/record ask has its own budget guard",
-       "at": "ledgerline/pipeline/service.py:229"
+       "claim": "ledgerline sweep removes expired workspaces",
+       "at": "ledgerline/cli.py:231"
       },
       {
-       "claim": "LEDGERLINE_ASK_BUDGET_USD default $0.05",
-       "at": "ledgerline/config.py:66"
-      },
-      {
-       "claim": "a budget stop on an ask is a refusal",
-       "at": "ledgerline/pipeline/graph.py:52"
-      },
-      {
-       "claim": "record/live need OPENROUTER_API_KEY",
-       "at": "ledgerline/llm/gateway.py:212"
-      },
-      {
-       "claim": "--mode option on ask: replay | export | record | live",
-       "at": "ledgerline/cli.py:205"
+       "claim": "the IP address is not stored; a keyed hash counts workspaces",
+       "at": "ledgerline/workspace/store.py:307"
       }
      ]
     },
     {
-     "path": "docs/adr/ADR-005-replay-and-budget.md",
+     "path": ".env.example",
      "claims": [
       {
-       "claim": "an API or CLI ask has its own limit, going over refuses that question",
-       "at": "ledgerline/pipeline/service.py:229"
+       "claim": "LEDGERLINE_WORKSPACE_DIR defaults to data/workspaces",
+       "at": "ledgerline/config.py:72"
       }
      ]
     }
    ]
   },
   {
-   "behavior": "Simulation: export mode, strict import with provenance, simulated labels on results and reports",
+   "behavior": "Workspace id stays out of request URLs: header plus #fragment, no Referer",
    "files": [
-    "ledgerline/llm/gateway.py",
-    "ledgerline/llm/simulate.py",
-    "ledgerline/llm/budget.py",
-    "evals/replay_cases.py",
-    ".gitignore",
-    "docs/rerecord.md",
-    "docs/adr/ADR-004-model-choice.md"
+    "web/src/api.ts",
+    "web/src/main.ts",
+    "ledgerline/api.py",
+    "ledgerline/workspace/store.py"
    ],
    "docs": [
     {
      "path": "README.md",
      "claims": [
       {
-       "claim": "four gateway modes including export",
-       "at": "ledgerline/config.py:17"
+       "claim": "the id is a random 128-bit code",
+       "at": "ledgerline/workspace/store.py:353"
       },
       {
-       "claim": "export writes every unrecorded request to evals/pending/",
-       "at": "ledgerline/llm/gateway.py:124"
+       "claim": "the id sits after the # in the link",
+       "at": "web/src/main.ts:46"
       },
       {
-       "claim": "pending dir default evals/pending",
-       "at": "ledgerline/config.py:64"
+       "claim": "the pages send the id in a request header",
+       "at": "web/src/api.ts:92"
       },
       {
-       "claim": "replay import loads answers",
-       "at": "ledgerline/cli.py:247"
-      },
-      {
-       "claim": "eval --mode import loads answers",
-       "at": "ledgerline/cli.py:291"
-      },
-      {
-       "claim": "JSON answers are validated strictly against the response schema",
-       "at": "ledgerline/llm/simulate.py:112"
-      },
-      {
-       "claim": "each recording is marked simulated_by / standing_in_for",
-       "at": "ledgerline/llm/simulate.py:182"
-      },
-      {
-       "claim": "ask and /ask return provenance",
-       "at": "ledgerline/pipeline/service.py:157"
-      },
-      {
-       "claim": "simulated reports say so on their first line",
-       "at": "ledgerline/bench/report.py:236"
-      },
-      {
-       "claim": "default model is the provisional target openai/gpt-oss-120b",
-       "at": "ledgerline/config.py:59"
+       "claim": "no URL of the site is sent onward as a referrer",
+       "at": "ledgerline/api.py:65"
       }
      ]
     },
     {
-     "path": "docs/adr/ADR-005-replay-and-budget.md",
+     "path": "web/src/api.ts",
      "claims": [
       {
-       "claim": "export mode: a request with no recording is written to the pending dir",
-       "at": "ledgerline/llm/gateway.py:124"
-      },
-      {
-       "claim": "worst case uses UTF-8 prompt bytes of messages and schema",
-       "at": "ledgerline/llm/gateway.py:161"
-      }
-     ]
-    },
-    {
-     "path": "docs/adr/ADR-004-model-choice.md",
-     "claims": [
-      {
-       "claim": "simulated answers loop is described in docs/rerecord.md",
-       "at": "docs/rerecord.md:22"
+       "claim": "the id goes only in the X-Workspace-Id header, never in a request URL",
+       "at": "web/src/api.ts:92"
       }
      ]
     }
    ]
   },
   {
-   "behavior": "Evaluation: systems, scoring, metrics, checkpoints, floors, reports, Spider registries and privacy check",
+   "behavior": "Prepare-your-data rules and Check messages",
    "files": [
-    "ledgerline/bench/__init__.py",
-    "ledgerline/bench/compare.py",
-    "ledgerline/bench/items.py",
-    "ledgerline/bench/metrics.py",
-    "ledgerline/bench/privacy.py",
-    "ledgerline/bench/report.py",
-    "ledgerline/bench/run.py",
-    "ledgerline/bench/spider.py",
-    "ledgerline/bench/systems.py",
-    "scripts/check_replay_report.py",
-    "scripts/spider_forbidden_values.py",
-    "verify.sh",
-    "evals/floors.yaml",
-    "evals/reports/sim-1.md",
-    "evals/reports/sim-1.json",
-    "evals/reports/replay-fieldservice.md",
-    "evals/reports/replay-fieldservice.json",
-    "evals/spider_registries.json",
-    "evals/spider_forbidden_values.json",
-    "evals/triage/fieldservice.yaml",
-    "evals/triage/spider_car_1.yaml",
-    "evals/triage/spider_dog_kennels.yaml",
-    "evals/triage/spider_flight_2.yaml",
-    "evals/triage/spider_network_1.yaml",
-    "evals/triage/spider_wta_1.yaml",
-    "docs/adr/ADR-006-benchmark-methodology.md",
-    "docs/adr/ADR-001-intent-not-sql.md",
-    "docs/adr/README.md",
-    "README.md"
+    "ledgerline/workspace/rules.py",
+    "ledgerline/workspace/check.py",
+    "ledgerline/workspace/load.py",
+    "web/src/main.ts"
    ],
    "docs": [
     {
      "path": "README.md",
      "claims": [
       {
-       "claim": "one-shot baseline writes SQL from the schema DDL and registry descriptions",
-       "at": "ledgerline/bench/systems.py:248"
+       "claim": "Prepare lists one table per file, header row, ID column, YYYY-MM-DD dates, plain numbers",
+       "at": "web/src/main.ts:171"
       },
       {
-       "claim": "baseline SQL must be one SELECT",
-       "at": "ledgerline/bench/systems.py:189"
+       "claim": "Prepare links a sample shop",
+       "at": "web/src/main.ts:196"
       },
       {
-       "claim": "the driver refuses a second statement (untrusted path)",
-       "at": "ledgerline/bench/systems.py:295"
+       "claim": "each problem names the file, the row, the column and the fix",
+       "at": "ledgerline/workspace/check.py:3"
       },
       {
-       "claim": "Spider registries are hash-checked; the eval stops on a mismatch",
-       "at": "ledgerline/bench/spider.py:61"
+       "claim": "up to 20 problems per file",
+       "at": "ledgerline/workspace/limits.py:25"
       },
       {
-       "claim": "sim-1 headline numbers and simulated banner",
-       "at": "evals/reports/sim-1.md:1"
-      },
-      {
-       "claim": "fieldservice floors: execution accuracy >= 80%, wrong answers <= 5%",
-       "at": "evals/floors.yaml:6"
-      },
-      {
-       "claim": "floor not met in v0.1",
-       "at": "evals/reports/sim-1.md:32"
-      },
-      {
-       "claim": "verify.sh checks the replay report reproduces",
-       "at": "verify.sh:33"
+       "claim": "nothing loads until every file passes",
+       "at": "ledgerline/workspace/store.py:553"
       }
      ]
-    },
+    }
+   ]
+  },
+  {
+   "behavior": "Confirm: hidden fields, descriptions, opt-in category values, shared prompt preview",
+   "files": [
+    "ledgerline/workspace/fields.py",
+    "ledgerline/pipeline/prompt.py",
+    "web/src/main.ts"
+   ],
+   "docs": [
     {
-     "path": "docs/adr/ADR-006-benchmark-methodology.md",
+     "path": "README.md",
      "claims": [
       {
-       "claim": "result comparison rules live in compare.py's docstring",
-       "at": "ledgerline/bench/compare.py:1"
+       "claim": "Confirm shows exactly what the model is sent (same renderer)",
+       "at": "ledgerline/workspace/ask.py:55"
       },
       {
-       "claim": "sql_agent is not built; it waits for a live model",
-       "at": "ledgerline/bench/run.py:176"
+       "claim": "the model sees names, types, links and descriptions; hidden fields are left out",
+       "at": "ledgerline/pipeline/prompt.py:107"
       },
       {
-       "claim": "sim-1 covers six schemas with ledgerline and oneshot, one trial",
-       "at": "evals/reports/sim-1.md:14"
+       "claim": "rows never go to the model: the prompt holds only the registry",
+       "at": "ledgerline/pipeline/prompt.py:95"
+      },
+      {
+       "claim": "fields with sensitive-looking names (email, phone) start hidden",
+       "at": "ledgerline/core/registry_init.py:50"
+      },
+      {
+       "claim": "a column's values are sent only when Share these values is ticked",
+       "at": "ledgerline/workspace/fields.py:163"
+      },
+      {
+       "claim": "the tick box is labelled Share these values with the model",
+       "at": "web/src/main.ts:514"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "behavior": "Ask on a workspace: wall-clock dates in the workspace time zone, plain refusals, no-key reply",
+   "files": [
+    "ledgerline/workspace/ask.py",
+    "ledgerline/pipeline/service.py",
+    "ledgerline/pipeline/prompt.py"
+   ],
+   "docs": [
+    {
+     "path": "README.md",
+     "claims": [
+      {
+       "claim": "the answer shows the SQL",
+       "at": "web/src/main.ts:586"
+      },
+      {
+       "claim": "answers need live mode",
+       "at": "ledgerline/workspace/ask.py:88"
+      },
+      {
+       "claim": "without it Ask replies 'Live answers need a model key; see the README.'",
+       "at": "ledgerline/workspace/ask.py:32"
+      },
+      {
+       "claim": "'last month' uses today's date in the workspace's time zone",
+       "at": "ledgerline/workspace/ask.py:47"
       }
      ]
     },
@@ -285,85 +225,125 @@
      "path": "docs/adr/ADR-001-intent-not-sql.md",
      "claims": [
       {
-       "claim": "the measuring command runs ledgerline and oneshot; sql_agent is refused",
-       "at": "ledgerline/bench/run.py:176"
+       "claim": "configured schemas resolve relative dates against LEDGERLINE_NOW",
+       "at": "ledgerline/pipeline/service.py:259"
+      },
+      {
+       "claim": "uploaded data resolves them against the wall clock in the workspace's time zone",
+       "at": "ledgerline/workspace/ask.py:71"
       }
      ]
     }
    ]
   },
   {
-   "behavior": "registry init types number-only SQLite DATE/DATETIME columns as numbers; lenient date reads; executor untrusted path",
+   "behavior": "Limits, proxy trust and privacy",
    "files": [
-    "ledgerline/core/registry_init.py",
-    "ledgerline/core/sqlbuild.py",
-    "ledgerline/core/executor.py",
-    "ledgerline/core/validate.py",
-    "ledgerline/fieldservice/seed.py"
+    "ledgerline/workspace/limits.py",
+    "ledgerline/workspace/api.py",
+    "ledgerline/api.py",
+    "ledgerline/config.py"
    ],
    "docs": [
     {
      "path": "README.md",
      "claims": [
       {
-       "claim": "on SQLite a temporal column holding only numbers is typed as a number",
-       "at": "ledgerline/core/registry_init.py:328"
+       "claim": "10 files, 10 MB, 200 columns, 1,000,000 rows, 10,000 characters per value",
+       "at": "ledgerline/workspace/limits.py:19"
       },
       {
-       "claim": "only integer/real storage types trigger the change",
-       "at": "ledgerline/core/registry_init.py:261"
+       "claim": "3 workspaces per address",
+       "at": "ledgerline/workspace/limits.py:28"
       },
       {
-       "claim": "the executor writes one ask_log row per query it runs",
-       "at": "ledgerline/core/executor.py:208"
+       "claim": "30 questions and 20 uploads an hour per address",
+       "at": "ledgerline/workspace/limits.py:29"
+      },
+      {
+       "claim": "questions to /ask count against the same limit",
+       "at": "ledgerline/api.py:95"
+      },
+      {
+       "claim": "counts live in the process and reset on restart",
+       "at": "ledgerline/workspace/limits.py:35"
+      },
+      {
+       "claim": "2 GB of disk for all workspaces",
+       "at": "ledgerline/workspace/limits.py:27"
+      },
+      {
+       "claim": "LEDGERLINE_TRUST_PROXY=1 reads the address from X-Forwarded-For",
+       "at": "ledgerline/workspace/api.py:76"
+      }
+     ]
+    },
+    {
+     "path": ".env.example",
+     "claims": [
+      {
+       "claim": "LEDGERLINE_TRUST_PROXY: set only behind a proxy that writes X-Forwarded-For",
+       "at": "ledgerline/config.py:75"
       }
      ]
     }
    ]
   },
   {
-   "behavior": "Gold revision 2 (fs-032 corrected)",
+   "behavior": "verify.sh and CI build the pages and run the browser tests; pyright strict on workspace; coverage floors",
    "files": [
-    "evals/gold/fieldservice.jsonl",
-    "evals/gold/MANIFEST.json",
-    "evals/gold/CHANGELOG.md"
-   ],
-   "none": "Recorded in evals/gold/CHANGELOG.md and ADR-001's Result; the gold README's conventions already match the corrected item."
-  },
-  {
-   "behavior": "Secrets baseline and its update script",
-   "files": [
-    ".secrets.baseline",
-    "scripts/update_secrets_baseline.sh"
-   ],
-   "none": "Tooling only; README's Checks section already names detect-secrets against .secrets.baseline."
-  },
-  {
-   "behavior": "Cost bound counts UTF-8 bytes, not characters",
-   "files": [
-    "ledgerline/llm/pricing.py",
-    "docs/adr/ADR-005-replay-and-budget.md"
+    "verify.sh",
+    ".github/workflows/verify.yml",
+    "web/playwright.config.ts",
+    "pyproject.toml",
+    "scripts/check_coverage.py",
+    "web/e2e/helpers.ts"
    ],
    "docs": [
     {
-     "path": "docs/adr/ADR-005-replay-and-budget.md",
+     "path": "README.md",
      "claims": [
       {
-       "claim": "worst case is prompt bytes x prompt price + max_tokens x completion price",
-       "at": "ledgerline/llm/pricing.py:64"
+       "claim": "verify.sh type checks and builds the pages and runs Playwright",
+       "at": "verify.sh:37"
+      },
+      {
+       "claim": "the browser tests run against a fake model",
+       "at": "web/playwright.config.ts:8"
+      },
+      {
+       "claim": "pyright is strict on ledgerline/core and ledgerline/workspace",
+       "at": "pyproject.toml:65"
+      },
+      {
+       "claim": "CI uses Node 22",
+       "at": ".github/workflows/verify.yml:50"
+      },
+      {
+       "claim": "Chromium is installed once with npx playwright install chromium",
+       "at": "verify.sh:36"
       }
      ]
     }
    ]
   },
   {
-   "behavior": "Replay recordings of simulated model answers for the fieldservice eval and the ask examples",
+   "behavior": "Sample shop CSV files and their line-ending rule",
    "files": [
-    "evals/recordings/eval/fieldservice/ledgerline.jsonl",
-    "evals/recordings/eval/fieldservice/oneshot.jsonl",
-    "evals/recordings/interpret.jsonl"
+    "web/public/sample/customers.csv",
+    "web/public/sample/order_items.csv",
+    "web/public/sample/orders.csv",
+    "web/public/sample/products.csv",
+    ".gitattributes"
    ],
-   "none": "Generated data written by the gateway's import step; docs/rerecord.md already describes how they are made."
+   "none": "Data files the Prepare page links to; README mentions the sample shop through the Prepare row. .gitattributes only keeps their bytes exact."
+  },
+  {
+   "behavior": "Locked npm dependencies for web/",
+   "files": [
+    "web/package-lock.json"
+   ],
+   "none": "Generated lock file; no behavior to describe."
   }
  ]
 }

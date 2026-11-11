@@ -18,8 +18,10 @@ labelled that way, and the accuracy floor for fieldservice is not met in v0.1.
 
 ## Quick start
 
-You need [uv](https://docs.astral.sh/uv/), Docker and `psql` (the PostgreSQL client).
-The tests run `infra/postgres/roles.sql` with `psql`, and fail without it.
+You need [uv](https://docs.astral.sh/uv/), Docker, `psql` (the PostgreSQL client) and
+Node with npm (CI uses Node 22). The tests run `infra/postgres/roles.sql` with `psql`,
+and fail without it. The browser tests need Chromium, installed once from the
+repository root with `(cd web && npm ci && npx playwright install chromium)`.
 
 ```sh
 uv sync
@@ -71,6 +73,57 @@ Every `ask` and `/ask` writes one row to the audit log (`ask_log`, below), wheth
 was answered, refused or failed. In live or record mode each ask also has its own
 spending limit (`LEDGERLINE_ASK_BUDGET_USD`, default $0.05). A question that would go
 over it is refused, and that refusal is audited too.
+
+## Your data
+
+You can also ask questions about your own CSV files. This runs on your machine for now.
+Build the pages once, then start the server:
+
+```sh
+(cd web && npm ci && npm run build)
+uv run uvicorn ledgerline.api:create_app --factory
+```
+
+Open `http://localhost:8000/` and follow the five steps:
+
+1. **Prepare.** Read the rules a file must follow: one table per file, a header row, an
+   ID column, `YYYY-MM-DD` dates and plain numbers. A small sample shop is there to try.
+   Pick your time zone and start a *workspace*: a private folder of its own under
+   `data/workspaces/`. The page gives you a link back to it. Bookmark it; anyone with the
+   link can see your data.
+2. **Upload** your files. A file with the same name replaces the old one.
+3. **Check** reads every file. Each problem names the file, the row and column where there
+   is one, and the fix, up to 20 per file. Nothing loads until every file passes.
+4. **Confirm** shows exactly what the model will be sent: table and column names, types,
+   links and your descriptions. You can hide any field. Fields with names that look
+   sensitive (email, phone and similar) start hidden.
+5. **Ask** a question in plain English. The answer shows the rows and the SQL behind them.
+
+What stays private:
+
+- **Your rows.** They never go to the model. A column's values (an order's statuses, for
+  example) go only if you tick "Share these values with the model" on Confirm, because
+  shared values leave your machine.
+- **The workspace link.** Its id is a random 128-bit code after the `#`, a part of the
+  link browsers never send to a server. The pages send it in a request header instead,
+  so it never appears in a URL the server sees or logs.
+- **Your address.** It is not stored. A keyed hash of it counts your workspaces.
+- **Your files.** They expire after 7 days without use and are deleted the next time
+  `uv run ledgerline sweep` runs (run it from cron, for example once an hour) or the
+  workspace is opened. "Delete my data" removes them at once.
+
+Limits: at most 10 files per workspace, and per file 10 MB, 200 columns, 1,000,000 rows
+and 10,000 characters per value. Each address gets 3 workspaces at a time, 20 uploads and
+30 questions an hour (questions to `/ask` count too). The hourly counts live in the
+server process and start again when it restarts; the workspace count does not. All workspaces together share 2 GB of disk.
+Behind a proxy that sets `X-Forwarded-For`, set `LEDGERLINE_TRUST_PROXY=1` so the limits
+see the real address. Leave it off otherwise, or any client could claim any address.
+
+Answers on your own data need a live model, because no answers are recorded for your
+files. Set `OPENROUTER_API_KEY` and `LEDGERLINE_LLM_MODE=live` (see
+[.env.example](.env.example)). Without them, Ask replies "Live answers need a model key;
+see the README." Questions like "last month" use today's date in your workspace's time
+zone.
 
 ## The demo database
 
@@ -235,10 +288,12 @@ they reproduce `evals/reports/replay-fieldservice.md`.
 ## Checks
 
 `./verify.sh` is the one gate, locally and in CI. It runs a locked `uv sync`, ruff
-(lint and format), pyright (strict on `ledgerline/core`), detect-secrets against
-`.secrets.baseline`, pytest with branch coverage, per-module coverage floors
-(`scripts/check_coverage.py`) and the replay check above. A skipped test fails the run,
-so a missing database shows up as a failure, not a pass.
+(lint and format), pyright (strict on `ledgerline/core` and `ledgerline/workspace`),
+detect-secrets against `.secrets.baseline`, pytest with branch coverage, per-module
+coverage floors (`scripts/check_coverage.py`) and the replay check above. It then type
+checks and builds the pages in `web/` and runs the browser tests (Playwright, against a
+fake model). A skipped test fails the run, so a missing database shows up as a failure,
+not a pass.
 
 ## Decisions
 

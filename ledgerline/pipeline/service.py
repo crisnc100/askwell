@@ -6,6 +6,7 @@ import json
 import logging
 import os
 import uuid
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import date, datetime
 from decimal import Decimal
@@ -41,6 +42,25 @@ RECORDINGS_FILE = "interpret.jsonl"
 
 class UnknownSchemaError(KeyError):
     pass
+
+
+@dataclass(frozen=True)
+class AskTarget:
+    """Everything one ask runs against. A configured schema and an uploaded workspace
+    both become one of these, so they share the whole pipeline.
+
+    `now` is the reference time relative dates resolve against: the pinned
+    `LEDGERLINE_NOW` for configured schemas (so evals reproduce), or the wall clock in
+    the workspace's time zone, as a naive local time, for a workspace. `time_zone` is
+    the label the prompt gives that time."""
+
+    schema_id: str
+    registry: Registry
+    engine: Engine
+    allow_draft: bool
+    now: datetime
+    time_zone: str
+    audit: AuditLog | None
 
 
 @dataclass(frozen=True)
@@ -224,8 +244,47 @@ class AskService:
         failure that leaves before one was written (a missing registry or database, a
         gateway or recording error) gets an error row here, then is re-raised so the
         API status and CLI exit code stay the same."""
+        return self._audited(
+            schema_id, self.audit, lambda: self.target(schema_id), question, trial, context
+        )
+
+    def target(self, schema_id: str) -> AskTarget:
+        """The ask target for a schema in `config/schemas.yaml`."""
+        registry = self.registry(schema_id)
+        return AskTarget(
+            schema_id=schema_id,
+            registry=registry,
+            engine=self.engine(schema_id),
+            allow_draft=self.schemas[schema_id].allow_draft,
+            now=self.settings.now,
+            time_zone="UTC",
+            audit=self.audit,
+        )
+
+    def ask_target(
+        self,
+        target: AskTarget,
+        question: str,
+        *,
+        trial: int = 1,
+        context: dict[str, Any] | None = None,
+    ) -> AskResult:
+        """`ask`, for a target the caller built (an uploaded workspace)."""
+        return self._audited(
+            target.schema_id, target.audit, lambda: target, question, trial, context
+        )
+
+    def _audited(
+        self,
+        schema_id: str,
+        audit_log: AuditLog | None,
+        build: Callable[[], AskTarget],
+        question: str,
+        trial: int,
+        context: dict[str, Any] | None,
+    ) -> AskResult:
         trace_id = str(uuid.uuid4())
-        audit = _OneRow(self.audit)
+        audit = _OneRow(audit_log)
         # A fresh guard per ask, held here rather than on the shared gateway, so
         # concurrent requests never reset or charge each other's budget. (The eval turns
         # this off and shares one run-wide guard through gateway.guard.) The guard is
@@ -237,7 +296,7 @@ class AskService:
             else None
         )
         try:
-            return self._ask(schema_id, question, trace_id, audit, ask_guard, trial, context)
+            return self._ask(build(), question, trace_id, audit, ask_guard, trial, context)
         except Exception as exc:
             if not audit.written:
                 spent = ask_guard.spent_usd if ask_guard is not None else 0.0
@@ -250,7 +309,7 @@ class AskService:
 
     def _ask(
         self,
-        schema_id: str,
+        target: AskTarget,
         question: str,
         trace_id: str,
         audit: _OneRow,
@@ -258,9 +317,11 @@ class AskService:
         trial: int,
         context: dict[str, Any] | None,
     ) -> AskResult:
-        registry = self.registry(schema_id)
-        config = self.schemas[schema_id]
-        view = registry_view(registry, self.settings.now, self.settings.prompt_budget_chars)
+        schema_id = target.schema_id
+        registry = target.registry
+        view = registry_view(
+            registry, target.now, self.settings.prompt_budget_chars, target.time_zone
+        )
         for step in view.truncation:
             log.info("prompt truncation for %s: %s", schema_id, step)
         prompt_version = PROMPT_VERSION if trial == 1 else f"{PROMPT_VERSION}+trial{trial}"
@@ -280,13 +341,13 @@ class AskService:
             return validate(
                 intent,
                 registry,
-                now=self.settings.now,
-                allow_draft=config.allow_draft,
+                now=target.now,
+                allow_draft=target.allow_draft,
                 row_cap=self.settings.row_cap,
             )
 
         executor = Executor(
-            self.engine(schema_id),
+            target.engine,
             audit=audit if audit.enabled else None,
             timeout_s=self.settings.query_timeout_s,
             row_cap=self.settings.row_cap,
