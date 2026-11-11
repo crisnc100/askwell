@@ -52,7 +52,7 @@ test("the results page renders every schema of every committed report", async ({
       const rows = data.table.filter((r: { schema: string }) => r.schema === schema);
       await expect(section.locator("table.metrics tbody tr")).toHaveCount(rows.length);
       for (const row of rows) {
-        const cells = section.locator(`tr[data-system="${row.system}"] td`);
+        const cells = section.locator(`tr[data-system="${row.system}"][data-model="${row.model}"] td`);
         await expect(cells).toHaveCount(LABELS.length);
         const accuracy = row.execution_accuracy;
         await expect(cells.first()).toContainText(`${accuracy.n} of ${accuracy.of}`);
