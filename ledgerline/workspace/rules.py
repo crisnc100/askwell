@@ -195,7 +195,8 @@ def convert(cell: str, ctype: ColumnType) -> Stored:
     if found not in DATE_KINDS:
         raise ValueError(f"{cell!r} is not a date or date and time")
     # One stored form, so equal moments are equal text in SQLite.
-    return datetime.fromisoformat(cell).strftime("%Y-%m-%d %H:%M:%S")
+    # isoformat pads the year to four digits; strftime("%Y") does not on glibc.
+    return datetime.fromisoformat(cell).isoformat(sep=" ", timespec="seconds")
 
 
 def number_fix(cell: str) -> str:
