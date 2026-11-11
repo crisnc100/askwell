@@ -32,8 +32,12 @@ TEXT = st.text(
 INTEGER = st.integers(-(2**63), 2**63 - 1).map(str) | st.integers(0, 99).map(lambda n: f"+{n}")
 NUMBER = st.decimals(min_value=-(10**9), max_value=10**9, places=4, allow_nan=False).map(str)
 DATE = st.dates().map(lambda d: d.isoformat())
+# Formatted field by field: strftime's %Y does not zero-pad years before 1000 on glibc.
 DATETIME = st.datetimes().map(
-    lambda d: d.strftime("%Y-%m-%d %H:%M") if d.second == 0 else d.strftime("%Y-%m-%d %H:%M:%S")
+    lambda d: (
+        f"{d.year:04d}-{d.month:02d}-{d.day:02d} {d.hour:02d}:{d.minute:02d}"
+        + ("" if d.second == 0 else f":{d.second:02d}")
+    )
 )
 ZERO_PADDED = st.integers(0, 99999).map(lambda n: f"0{n}")
 KINDS: dict[str, st.SearchStrategy[str]] = {
