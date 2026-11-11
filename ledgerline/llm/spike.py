@@ -94,6 +94,9 @@ class ProbeResult:
     cost_usd: float
     latency_ms: int
     detail: str = ""
+    # What the model returned: the parsed fields, or the raw text when it did not
+    # parse. It lets a reader see which field differed from the expected answer.
+    answer: dict[str, Any] | str | None = None
 
 
 @dataclass
@@ -181,7 +184,16 @@ def run_spike(
                 return reports, stopped
             except ParseError as exc:
                 report.probes.append(
-                    _failed(index, "parse_error", gateway, spent_before, started, clock, exc.reason)
+                    _failed(
+                        index,
+                        "parse_error",
+                        gateway,
+                        spent_before,
+                        started,
+                        clock,
+                        exc.reason,
+                        answer=exc.raw[:2000],
+                    )
                 )
                 continue
             except LLMError as exc:
@@ -196,6 +208,7 @@ def run_spike(
                     exact=_matches(result.value, want),
                     cost_usd=result.cost_usd,
                     latency_ms=int((clock() - started) * 1000),
+                    answer=result.value.model_dump(mode="json"),
                 )
             )
     return reports, stopped
@@ -209,6 +222,7 @@ def _failed(
     started: float,
     clock: Any,
     detail: str,
+    answer: str | None = None,
 ) -> ProbeResult:
     spent = (gateway.guard.spent_usd if gateway.guard else 0.0) - spent_before
     return ProbeResult(
@@ -218,6 +232,7 @@ def _failed(
         cost_usd=spent,
         latency_ms=int((clock() - started) * 1000),
         detail=detail[:300],
+        answer=answer,
     )
 
 

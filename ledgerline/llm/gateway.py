@@ -18,6 +18,8 @@ from pathlib import Path
 from typing import Any, Protocol
 
 import httpx
+import openai
+from openai.types.chat import ChatCompletion
 from pydantic import BaseModel, ValidationError
 
 from ledgerline.config import LLMMode, Settings
@@ -48,6 +50,8 @@ _FENCE = re.compile(r"^\s*```(?:json)?\s*(.*?)\s*```\s*$", re.DOTALL)
 
 def parse_output[T: BaseModel](raw: RawResponse, schema: type[T]) -> T:
     """Validate the provider's parse, or fall back to parsing the text with Pydantic."""
+    if raw.finish_reason == "length":
+        raise ParseError("the answer was cut off at the max_tokens limit", raw.content)
     if raw.parsed is not None:
         try:
             return schema.model_validate(raw.parsed)
@@ -253,7 +257,13 @@ class OpenRouterTransport:
             include_raw=True,
             strict=self._strict,
         )
-        out: Any = structured.invoke([(m.role, m.content) for m in messages])
+        try:
+            out: Any = structured.invoke([(m.role, m.content) for m in messages])
+        except openai.LengthFinishReasonError as exc:
+            # The SDK raises this when the answer stops at max_tokens. The call was
+            # still billed, so its usage goes back to the gateway to be charged; the
+            # gateway's parse then turns it into a ParseError.
+            return _cut_off_response(exc.completion, model)
         message = out["raw"]
         content = (
             message.content if isinstance(message.content, str) else json.dumps(message.content)
@@ -267,3 +277,16 @@ class OpenRouterTransport:
             usage=usage,
             model=str(metadata.get("model_name") or model),
         )
+
+
+def _cut_off_response(completion: ChatCompletion, model: str) -> RawResponse:
+    choice = completion.choices[0] if completion.choices else None
+    content = (choice.message.content if choice else None) or ""
+    usage: dict[str, Any] = completion.usage.model_dump() if completion.usage else {}
+    return RawResponse(
+        content=content,
+        parsed=None,
+        usage=usage,
+        model=completion.model or model,
+        finish_reason="length",
+    )

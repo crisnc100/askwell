@@ -161,3 +161,12 @@ Each fix's test was committed first, in a test-only commit, and failed before th
 - **Triage** (`evals/triage/*.yaml`): every Ledgerline miss is tagged, none left "untriaged". Fieldservice (11 misses): grammar_gap 8, gold_issue 3. Spider (106): grammar_gap 77, validator_false_reject 12, gold_issue 10, misread 6, builder_bug 1. Notes cite Spider items by ID and name schema columns, but never quote question text or data values. A "registry gap" note means registry init could not infer a link, e.g. a foreign key to a non-key column, or a column not named like its target's key.
 - **Gold issues are not edited.** fs-032 contradicts `evals/gold/README.md`: the gold excludes void invoices, but the question does not say to. fs-022 and fs-024 are ambiguous about which date to use. Changing any of them needs a CHANGELOG reason, which is the orchestrator's call.
 - **Committed replay report:** `evals/reports/replay-fieldservice.md` with the fieldservice recordings (`evals/recordings/eval/fieldservice/`). `scripts/check_replay_report.py`, now a verify.sh step, re-runs the fieldservice eval from the recordings in a temp directory and diffs the Markdown. The JSON is not compared, because replay latency varies.
+
+## P5c — Hosted beta (PR5)
+
+### Phase 1: length-limited answers
+- **The bug:** when an answer stops at `max_tokens`, the OpenAI SDK raises `LengthFinishReasonError`. It is not an `LLMError`, so it escaped the gateway, aborted evals and had no API handler. It was raised before the gateway charged the call, so a billed call counted as $0.
+- **The fix:** the transport catches it and returns the cut-off answer with its usage and `finish_reason: "length"`. The gateway charges it like any call (and records it in record mode). `parse_output` then raises `ParseError`, which the pipeline already treats as one failed attempt. A cut-off answer never parses, even when its text happens to be valid JSON.
+- **Spike report:** each probe now stores the model's answer (the parsed fields, or the raw text when it did not parse), so a reader can see which field differed.
+- **Tests:** `tests/test_llm_length_limit.py` (real transport on a mocked server: charged, recorded and replayed as the same error, and the spend reaches a checkpointed run's budget); a new spike test for stored answers.
+- `ContentFilterFinishReasonError` can escape the same way. It is out of this PR's scope and is noted for later.
