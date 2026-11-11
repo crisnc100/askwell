@@ -170,3 +170,13 @@ Each fix's test was committed first, in a test-only commit, and failed before th
 - **Spike report:** each probe now stores the model's answer (the parsed fields, or the raw text when it did not parse), so a reader can see which field differed.
 - **Tests:** `tests/test_llm_length_limit.py` (real transport on a mocked server: charged, recorded and replayed as the same error, and the spend reaches a checkpointed run's budget); a new spike test for stored answers.
 - `ContentFilterFinishReasonError` can escape the same way. It is out of this PR's scope and is noted for later.
+
+### Phase 3: hardening deferred from PR3
+Each item has a test in `tests/workspace/test_hardening.py`.
+- **Concurrent Checks:** a Check now grows its reservation to the built size in one locked step (`Capacity.resize`) before it swaps files in. Two Checks that both finished building cannot both claim space that fits one.
+- **Uncounted files:** the Check report, `meta.json`, and Confirm's `registry.yaml` and `edits.json` go through `WorkspaceStore.write_counted`, which reserves any growth first. Only growth is reserved, so a visit that rewrites `meta.json` at the same size never fails on a full disk. Counting the metadata changed one test's free-space margin (own commit, `faddd3f`).
+- **Crashed temp files:** temporary upload files and staging folders carry a per-process token. Only this process's own are left out of the disk usage; anyone else's are counted. Ones older than an hour (`STALE_TEMP_S`) are removed when a store starts and on every sweep. The age gate keeps a cron `ledgerline sweep` from deleting a live server's files.
+- **Check rate limit:** 20 an hour per address.
+- **Permissions:** folders 0700, files 0600. The audit SQLite file is created by hand with 0600 first; SQLite gives its journals the same mode.
+- **Slow uploads:** an upload must finish in 120 seconds (408 otherwise), and one address may run at most 2 at once. Both release the reservation.
+- **File names:** sent in `X-File-Name` (percent-encoded UTF-8). The query parameter is refused. The tests moved in their own commit (`14cd35a`) while the server briefly accepted both, so every commit stays green.
