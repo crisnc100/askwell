@@ -257,7 +257,11 @@ def render_markdown(report: dict[str, Any]) -> str:
         )
     for floor in report.get("floors", []):
         verdict = "met" if floor["met"] else "not met"
-        lines += ["", f"## Floor check: {floor['schema']}, {floor['model']} (plan.md L11)", ""]
+        lines += [
+            "",
+            f"## Floor check: {floor['schema']}, {floor['model']} (v0.1 acceptance floor)",
+            "",
+        ]
         for check in floor["checks"]:
             mark = "met" if check["met"] else "NOT met"
             label = METRIC_LABELS.get(check["metric"], check["metric"])

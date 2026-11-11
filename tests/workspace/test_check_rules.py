@@ -67,6 +67,14 @@ def test_header_names_collide_after_slugging() -> None:
     assert "'Order Date'" in problem.message
 
 
+def test_blank_header_does_not_hide_a_name_collision() -> None:
+    result = check(csv_file("items.csv", "id,,Order Date,order_date\n1,2,2025-01-01,2025-01-02\n"))
+    assert_names(only_problem(result, "blank_header"), "items.csv", 1, None)
+    problem = only_problem(result, "duplicate_header")
+    assert_names(problem, "items.csv", 1, "order_date")
+    assert not result.ok
+
+
 def test_semicolon_delimiter_is_named() -> None:
     problem = only_problem(check(csv_file("items.csv", "id;label\n1;a\n")), "wrong_delimiter")
     assert_names(problem, "items.csv", 1, None)

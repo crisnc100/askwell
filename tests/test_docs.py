@@ -18,3 +18,9 @@ def test_rerecord_guide_covers_the_whole_loop() -> None:
         "ledgerline replay import",
     ):
         assert command in text, command
+
+
+def test_verify_sh_gives_the_same_chromium_install_command_as_the_readme() -> None:
+    command = "(cd web && npm ci && npx playwright install chromium)"
+    assert command in (ROOT / "README.md").read_text()
+    assert command in (ROOT / "verify.sh").read_text()

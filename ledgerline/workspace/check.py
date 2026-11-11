@@ -426,8 +426,10 @@ _QUOTE_FIX = (
 
 def _check_header(headers: list[str], out: _Reporter, limits: Limits) -> list[str] | None:
     """The column names (slugged headers), or None after reporting a header problem.
-    A header over the cell limit is reported and never classified."""
+    A header over the cell limit is reported and never classified. Name collisions are
+    reported in the same Check as any other header problem, so one upload shows them all."""
     ok = True
+    named: list[int] = []
     for index, header in enumerate(headers):
         if not header:
             out.add(
@@ -448,18 +450,18 @@ def _check_header(headers: list[str], out: _Reporter, limits: Limits) -> list[st
                 row=1,
             )
             ok = False
-        elif len(slugify(header)) > MAX_COLUMN_NAME:
-            out.add(
-                "error",
-                "column_name_too_long",
-                f"the name of column {index + 1} is too long",
-                f"shorten it to at most {MAX_COLUMN_NAME} letters, digits and underscores",
-                row=1,
-            )
-            ok = False
-    if not ok:
-        return None
-    if all(kind(h) != "text" for h in headers):
+        else:
+            named.append(index)
+            if len(slugify(header)) > MAX_COLUMN_NAME:
+                out.add(
+                    "error",
+                    "column_name_too_long",
+                    f"the name of column {index + 1} is too long",
+                    f"shorten it to at most {MAX_COLUMN_NAME} letters, digits and underscores",
+                    row=1,
+                )
+                ok = False
+    if ok and all(kind(h) != "text" for h in headers):
         out.add(
             "error",
             "no_header",
@@ -468,11 +470,10 @@ def _check_header(headers: list[str], out: _Reporter, limits: Limits) -> list[st
             row=1,
         )
         return None
-    names = [slugify(h) for h in headers]
     first: dict[str, str] = {}
-    for header, name in zip(headers, names, strict=True):
-        if not header:
-            continue
+    for index in named:
+        header = headers[index]
+        name = slugify(header)
         if name in first:
             out.add(
                 "error",
@@ -485,7 +486,7 @@ def _check_header(headers: list[str], out: _Reporter, limits: Limits) -> list[st
             ok = False
         else:
             first[name] = header
-    return names if ok else None
+    return [slugify(h) for h in headers] if ok else None
 
 
 def _column(
