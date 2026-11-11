@@ -16,9 +16,12 @@ An answer that stopped at `max_tokens` (or at the context window) or that the mo
 refused comes back with its usage and a `finish_reason`, so the gateway charges it and
 then raises ParseError, as it does for OpenRouter.
 
-Rate limits (429), server errors (5xx, including 529 overloaded) and connection errors
-are retried here with exponential backoff; any other error, a 400 above all, is raised
-at once. The SDK's own retries are off, so nothing is retried twice.
+Rate limits (429), server errors (5xx, including 529 overloaded) and connections that
+were refused before the request was sent are retried here with exponential backoff.
+A timeout or dropped connection after sending is raised at once: the API may already
+have billed that call, and the gateway charges it at its worst case. Any other error,
+a 400 above all, is raised at once. The SDK's own retries are off, so nothing is
+retried twice.
 """
 
 from __future__ import annotations
@@ -34,6 +37,7 @@ from anthropic.types import Message, MessageParam
 
 from ledgerline.config import Settings
 from ledgerline.llm.errors import ProviderUnavailableError
+from ledgerline.llm.gateway import may_have_been_billed
 from ledgerline.llm.types import ChatMessage, RawResponse
 
 JSON_ONLY = "Reply with the intent as one JSON object and nothing else."
@@ -101,6 +105,8 @@ class AnthropicTransport:
                 anthropic.InternalServerError,
                 anthropic.APIConnectionError,
             ) as exc:
+                if may_have_been_billed(exc):
+                    raise
                 if attempt == self.RETRIES:
                     raise ProviderUnavailableError(
                         f"the Anthropic API still failed after {self.RETRIES} retries: "
@@ -117,7 +123,8 @@ def _raw(message: Message, model: str) -> RawResponse:
     if finish is None:
         try:
             value = json.loads(text)
-        except ValueError:
+        except (ValueError, RecursionError):
+            # Left to the gateway, which charges the call before it fails to parse.
             value = None
         parsed = value if isinstance(value, dict) else None
     usage = message.usage

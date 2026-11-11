@@ -17,7 +17,9 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import Any, Protocol
 
+import anthropic
 import httpx
+import httpx2
 import openai
 from openai.types.chat import ChatCompletion
 from pydantic import BaseModel, ValidationError
@@ -49,6 +51,18 @@ PriceLookup = Callable[[str], ModelPrice | None]
 _FENCE = re.compile(r"^\s*```(?:json)?\s*(.*?)\s*```\s*$", re.DOTALL)
 
 
+_NOT_SENT = (httpx.ConnectError, httpx.ConnectTimeout, httpx2.ConnectError, httpx2.ConnectTimeout)
+
+
+def may_have_been_billed(exc: BaseException) -> bool:
+    """Whether a failed call may still have been billed: the request could have reached
+    the provider before the connection failed or timed out. A refused or timed-out
+    connect never sent it; an HTTP error status is an answer, and is not billed."""
+    if not isinstance(exc, anthropic.APIConnectionError | openai.APIConnectionError):
+        return False
+    return not isinstance(exc.__cause__, _NOT_SENT)
+
+
 def parse_output[T: BaseModel](raw: RawResponse, schema: type[T]) -> T:
     """Validate the provider's parse, or fall back to parsing the text with Pydantic."""
     if raw.finish_reason == "length":
@@ -70,6 +84,8 @@ def parse_output[T: BaseModel](raw: RawResponse, schema: type[T]) -> T:
         return schema.model_validate_json(text)
     except ValidationError as exc:
         raise ParseError(f"text did not validate: {exc.errors()[0]['msg']}", raw.content) from exc
+    except RecursionError as exc:
+        raise ParseError("the answer is nested too deeply to read", raw.content[:2000]) from exc
 
 
 def _parse_charged[T: BaseModel](
@@ -198,9 +214,17 @@ class Gateway:
                 raw = with_backoff(call, sleep=self._backoff_sleep)
             cost, source = cost_from_usage(raw.usage, price)
             billed = cost
+        except BaseException as exc:
+            if may_have_been_billed(exc):
+                # The request was sent but its answer was lost, so the provider may
+                # have billed it. Charge the worst case: a lost answer must never get
+                # past the budget or the daily cap.
+                billed = worst
+                budget.charge(worst)
+            raise
         finally:
             if self.daily is not None and day is not None:
-                # A call that raised was not billed, so its reservation is given back.
+                # A call known not to be billed gives its reservation back.
                 self.daily.settle(day, worst, billed)
         budget.charge(cost)
         if self.mode == "record":

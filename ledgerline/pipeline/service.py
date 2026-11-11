@@ -101,6 +101,13 @@ def load_schemas(settings: Settings, path: Path = SCHEMAS_FILE) -> dict[str, Sch
     return out
 
 
+def daily_spend(settings: Settings) -> DailySpend | None:
+    """The global daily cap, when one is configured. Every live gateway shares it."""
+    if settings.daily_spend_cap_usd is None:
+        return None
+    return DailySpend(ROOT / settings.spend_db, settings.daily_spend_cap_usd)
+
+
 def build_gateway(
     settings: Settings,
     mode: str | None = None,
@@ -123,13 +130,9 @@ def build_gateway(
             max_tokens=settings.max_tokens,
             pending_dir=pending_dir or ROOT / settings.pending_dir,
         )
-    book = PriceBook.fetch(settings.openrouter_base_url)
-    daily = (
-        DailySpend(ROOT / settings.spend_db, settings.daily_spend_cap_usd)
-        if settings.daily_spend_cap_usd is not None
-        else None
+    router = ProviderRouter(
+        settings, load_openrouter_prices=lambda: PriceBook.fetch(settings.openrouter_base_url)
     )
-    router = ProviderRouter(settings, openrouter_prices=book)
     return Gateway(
         mode=chosen,  # type: ignore[arg-type]
         store=store,
@@ -137,7 +140,7 @@ def build_gateway(
         price_lookup=router.price,
         guard=BudgetGuard(budget_usd if budget_usd is not None else settings.ask_budget_usd),
         max_tokens=settings.max_tokens,
-        daily=daily,
+        daily=daily_spend(settings),
         live_answers_off=settings.live_answers_off,
     )
 

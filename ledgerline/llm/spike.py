@@ -20,6 +20,7 @@ import httpx
 from pydantic import BaseModel, ConfigDict
 
 from ledgerline.llm.budget import BudgetGuard
+from ledgerline.llm.daily import DailySpend
 from ledgerline.llm.errors import BudgetExceededError, LLMError, ParseError
 from ledgerline.llm.gateway import Gateway, Transport
 from ledgerline.llm.types import ChatMessage
@@ -258,8 +259,16 @@ def write_report(
 
 
 def make_live_gateway(
-    transport: Transport, price_lookup: Any, budget_usd: float, max_tokens: int
+    transport: Transport,
+    price_lookup: Any,
+    budget_usd: float,
+    max_tokens: int,
+    *,
+    daily: DailySpend | None = None,
+    live_answers_off: bool = False,
 ) -> Gateway:
+    """The spike's gateway. The CLI passes the beta's daily cap and kill switch, so a
+    spike can never spend what the beta is not allowed to."""
     return Gateway(
         mode="live",
         store=None,
@@ -267,4 +276,6 @@ def make_live_gateway(
         price_lookup=price_lookup,
         guard=BudgetGuard(budget_usd),
         max_tokens=max_tokens,
+        daily=daily,
+        live_answers_off=live_answers_off,
     )
