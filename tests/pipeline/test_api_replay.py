@@ -21,9 +21,9 @@ from ledgerline.pipeline.service import AskService, build_gateway
 
 EXAMPLES = {
     "unpaid": "How many invoices are still unpaid?",
-    "top_techs": "Which five technicians billed the most labor hours this year?",
+    "by_skill": "How many technicians are there at each skill level?",
     "segment_avg": "What is the average invoice amount for each customer segment?",
-    "urgent_regions": "How many urgent work orders were opened in each customer region last month?",
+    "by_status": "What is the total invoiced amount for each invoice status?",
     "hidden": "Show me the email address of every dispatcher.",
     "out_of_registry": "What did we spend on marketing last quarter?",
     "write": "Delete all void invoices.",
@@ -84,7 +84,7 @@ def test_answerable_matches_the_database(
     assert (row["outcome"], row["trace_id"], row["row_count"]) == ("answered", body["trace_id"], 1)
 
 
-@pytest.mark.parametrize("name", ["top_techs", "segment_avg", "urgent_regions"])
+@pytest.mark.parametrize("name", ["by_skill", "segment_avg", "by_status"])
 def test_other_answerable_examples_return_rows(client: TestClient, name: str) -> None:
     body = _ask(client, "fieldservice", EXAMPLES[name])
     assert body["refusal"] is None, body["validation"]
