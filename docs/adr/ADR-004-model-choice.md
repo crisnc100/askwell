@@ -188,8 +188,15 @@ included. "Unreadable" counts model calls whose answer did not parse.
   the prompt and the grammar, is the v0.2 question.
 
 Every recording these numbers come from is committed under
-`evals/recordings/eval/fieldservice/`, so `ledgerline eval --mode replay` with run id
-`select-2026-11-11` rebuilds the report without a key.
+`evals/recordings/eval/fieldservice/`, so this rebuilds the report without a key:
+
+```sh
+uv run ledgerline eval --schema fieldservice --systems ledgerline,oneshot --mode replay --models mistralai/mistral-small-24b-instruct-2501,google/gemma-4-26b-a4b-it,openai/gpt-oss-120b,openai/gpt-4o-mini --trials 1 --run-id select-2026-11-11
+```
+
+The model list must be given: without it the eval runs only the current default. The
+Markdown report comes out identical; the JSON differs only in latencies, which are
+replay timings rather than live ones.
 
 ## Amendment 3 (2026-11-11): Claude Haiku 5.5, measured under the same gates
 
@@ -271,3 +278,9 @@ Next to Amendment 2's four models (same benchmark, `ledgerline` system, one tria
   matches the gold on this data.
 - **One trial, as before.** Haiku's lead over the others is large enough that one trial
   settles the choice, but its exact rates have wide ranges.
+
+This rebuilds the report from the committed recordings, without a key:
+
+```sh
+uv run ledgerline eval --schema fieldservice --systems ledgerline,oneshot --mode replay --models anthropic:claude-haiku-5-5 --trials 1 --run-id select-haiku-2026-11-11
+```

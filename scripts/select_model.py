@@ -17,6 +17,7 @@ from typing import Any
 
 from ledgerline.bench import report as report_module
 from ledgerline.bench import run as run_module
+from ledgerline.llm.providers import ANTHROPIC_PREFIX
 
 MAX_UNREADABLE = 0.02
 MIN_REFUSAL_RECALL = 23
@@ -90,6 +91,10 @@ class Choice:
 
 
 def _vendor(model: str) -> str:
+    """The model's maker, whichever provider serves it: `anthropic:<id>` (the Anthropic
+    API) and `anthropic/<id>` (OpenRouter) are the same vendor."""
+    if model.startswith(ANTHROPIC_PREFIX):
+        return "anthropic"
     return model.split("/", 1)[0]
 
 
@@ -103,7 +108,9 @@ def choose(found: list[Candidate]) -> Choice:
         for c in pool
         if best.correct - c.correct < CLEARLY_WORSE and c.wrong - best.wrong < CLEARLY_WORSE
     ]
-    default = min(close, key=lambda c: c.cost_per_question)
+    # ADR-004 step 7: when nothing passes the gates, the best model ships, not the
+    # cheapest one near it.
+    default = min(close, key=lambda c: c.cost_per_question) if eligible else best
     ties = [c for c in close if c.cost_per_question == default.cost_per_question]
     note = "" if eligible else "No candidate passed every gate; this is the best one."
     if len(ties) > 1:
