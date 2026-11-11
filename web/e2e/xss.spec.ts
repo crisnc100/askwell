@@ -15,7 +15,11 @@ async function assertInert(page: Page): Promise<void> {
 }
 
 async function uploadText(page: Page, text: string): Promise<void> {
+  const stored = page.waitForResponse(
+    (r) => r.url().includes("/api/workspace/files") && r.request().method() === "PUT",
+  );
   await page.locator("#files").setInputFiles({ name: FILE, mimeType: "text/csv", buffer: Buffer.from(text) });
+  expect((await stored).status()).toBe(200);
   await expect(page.locator(".files li")).toHaveCount(1);
 }
 

@@ -24,6 +24,7 @@ from ledgerline.core.intent import Intent
 from ledgerline.core.registry import slugify
 from ledgerline.llm.types import ChatMessage, LLMResult
 from ledgerline.workspace.api import WorkspaceApp
+from ledgerline.workspace.limits import Limits
 from ledgerline.workspace.store import WorkspaceStore
 from tests.workspace.fake_model import FakeModel, fake_service
 
@@ -68,7 +69,10 @@ def main() -> None:
     args.export_dir.mkdir(parents=True)
     workspaces = Path(tempfile.mkdtemp(prefix="ledgerline-e2e-"))
     service = fake_service(get_settings(), ExportingModel(args.export_dir))
-    app = create_app(service=service, workspaces=WorkspaceApp(WorkspaceStore(workspaces)))
+    # Every browser test comes from one address; the per-address workspace cap has its
+    # own test (test_live_workspaces_per_ip), so it is lifted here.
+    store = WorkspaceStore(workspaces, Limits(workspaces_per_ip=1000))
+    app = create_app(service=service, workspaces=WorkspaceApp(store))
     try:
         uvicorn.run(app, host="127.0.0.1", port=args.port, log_level="warning")
     finally:
