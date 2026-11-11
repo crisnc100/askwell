@@ -28,8 +28,8 @@ def test_the_proxy_address_is_the_last_value_across_every_header_line(
         assert client.post("/api/workspaces", json={}, headers=two_lines).status_code == 201
         again = {"X-Forwarded-For": "1.1.1.1"}
         assert client.post("/api/workspaces", json={}, headers=again).status_code == 429
-        dodge = [("X-Forwarded-For", "1.1.1.1"), ("X-Forwarded-For", "8.8.8.8")]
-        assert client.post("/api/workspaces", json={}, headers=dodge).status_code == 201
+        appended = [("X-Forwarded-For", "1.1.1.1"), ("X-Forwarded-For", "8.8.8.8")]
+        assert client.post("/api/workspaces", json={}, headers=appended).status_code == 201
 
 
 def test_creating_a_workspace_needs_a_json_request(tmp_path: Path, clock: FakeClock) -> None:
