@@ -1,0 +1,505 @@
+{
+  "$defs": {
+    "BaselineWin": {
+      "additionalProperties": false,
+      "description": "An item a baseline got right and Ledgerline did not.",
+      "properties": {
+        "item_id": {
+          "title": "Item Id",
+          "type": "string"
+        },
+        "model": {
+          "title": "Model",
+          "type": "string"
+        },
+        "schema": {
+          "title": "Schema",
+          "type": "string"
+        },
+        "system": {
+          "title": "System",
+          "type": "string"
+        },
+        "trial": {
+          "minimum": 1,
+          "title": "Trial",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "schema",
+        "model",
+        "trial",
+        "item_id",
+        "system"
+      ],
+      "title": "BaselineWin",
+      "type": "object"
+    },
+    "Floor": {
+      "additionalProperties": false,
+      "description": "One schema's acceptance floor from `evals/floors.yaml`, checked on Ledgerline.",
+      "properties": {
+        "cause": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Cause"
+        },
+        "checks": {
+          "items": {
+            "$ref": "#/$defs/FloorCheck"
+          },
+          "title": "Checks",
+          "type": "array"
+        },
+        "met": {
+          "title": "Met",
+          "type": "boolean"
+        },
+        "model": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Model"
+        },
+        "next": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Next"
+        },
+        "schema": {
+          "title": "Schema",
+          "type": "string"
+        },
+        "status_note": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Status Note"
+        }
+      },
+      "required": [
+        "schema",
+        "model",
+        "met",
+        "checks",
+        "status_note",
+        "cause",
+        "next"
+      ],
+      "title": "Floor",
+      "type": "object"
+    },
+    "FloorCheck": {
+      "additionalProperties": false,
+      "properties": {
+        "met": {
+          "title": "Met",
+          "type": "boolean"
+        },
+        "metric": {
+          "title": "Metric",
+          "type": "string"
+        },
+        "rate": {
+          "$ref": "#/$defs/Rate"
+        },
+        "rule": {
+          "title": "Rule",
+          "type": "string"
+        }
+      },
+      "required": [
+        "metric",
+        "rule",
+        "rate",
+        "met"
+      ],
+      "title": "FloorCheck",
+      "type": "object"
+    },
+    "Miss": {
+      "additionalProperties": false,
+      "description": "A Ledgerline item that was not answered correctly, with its triage tag.",
+      "properties": {
+        "error": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Error"
+        },
+        "issue_codes": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Issue Codes",
+          "type": "array"
+        },
+        "item_id": {
+          "title": "Item Id",
+          "type": "string"
+        },
+        "model": {
+          "title": "Model",
+          "type": "string"
+        },
+        "note": {
+          "title": "Note",
+          "type": "string"
+        },
+        "outcome": {
+          "enum": [
+            "wrong",
+            "refused",
+            "error",
+            "pending"
+          ],
+          "title": "Outcome",
+          "type": "string"
+        },
+        "refusal": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Refusal"
+        },
+        "schema": {
+          "title": "Schema",
+          "type": "string"
+        },
+        "tag": {
+          "enum": [
+            "grammar_gap",
+            "misread",
+            "validator_false_reject",
+            "builder_bug",
+            "gold_issue",
+            "untriaged"
+          ],
+          "title": "Tag",
+          "type": "string"
+        },
+        "trial": {
+          "minimum": 1,
+          "title": "Trial",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "schema",
+        "item_id",
+        "trial",
+        "model",
+        "outcome",
+        "issue_codes",
+        "refusal",
+        "error",
+        "tag",
+        "note"
+      ],
+      "title": "Miss",
+      "type": "object"
+    },
+    "Rate": {
+      "additionalProperties": false,
+      "description": "`n` of `of`, as a share, with its Wilson 95% interval. Both are null when `of` is 0.",
+      "properties": {
+        "ci95": {
+          "anyOf": [
+            {
+              "maxItems": 2,
+              "minItems": 2,
+              "prefixItems": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                }
+              ],
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Ci95"
+        },
+        "n": {
+          "minimum": 0,
+          "title": "N",
+          "type": "integer"
+        },
+        "of": {
+          "minimum": 0,
+          "title": "Of",
+          "type": "integer"
+        },
+        "rate": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Rate"
+        }
+      },
+      "required": [
+        "n",
+        "of",
+        "rate",
+        "ci95"
+      ],
+      "title": "Rate",
+      "type": "object"
+    },
+    "Row": {
+      "additionalProperties": false,
+      "description": "Every metric for one schema, system and model, pooled over trials.",
+      "properties": {
+        "accuracy_given_attempted": {
+          "$ref": "#/$defs/Rate"
+        },
+        "coverage": {
+          "$ref": "#/$defs/Rate"
+        },
+        "execution_accuracy": {
+          "$ref": "#/$defs/Rate"
+        },
+        "execution_error_rate": {
+          "$ref": "#/$defs/Rate"
+        },
+        "false_refusal_rate": {
+          "$ref": "#/$defs/Rate"
+        },
+        "items": {
+          "minimum": 0,
+          "title": "Items",
+          "type": "integer"
+        },
+        "mean_cost_usd": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Mean Cost Usd"
+        },
+        "model": {
+          "title": "Model",
+          "type": "string"
+        },
+        "p50_latency_ms": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "P50 Latency Ms"
+        },
+        "pending": {
+          "minimum": 0,
+          "title": "Pending",
+          "type": "integer"
+        },
+        "refusal_recall": {
+          "$ref": "#/$defs/Rate"
+        },
+        "schema": {
+          "title": "Schema",
+          "type": "string"
+        },
+        "system": {
+          "title": "System",
+          "type": "string"
+        },
+        "trials": {
+          "minimum": 1,
+          "title": "Trials",
+          "type": "integer"
+        },
+        "wrong_answer_rate_given_answered": {
+          "$ref": "#/$defs/Rate"
+        }
+      },
+      "required": [
+        "schema",
+        "system",
+        "model",
+        "trials",
+        "items",
+        "pending",
+        "coverage",
+        "execution_accuracy",
+        "accuracy_given_attempted",
+        "false_refusal_rate",
+        "wrong_answer_rate_given_answered",
+        "refusal_recall",
+        "execution_error_rate",
+        "mean_cost_usd",
+        "p50_latency_ms"
+      ],
+      "title": "Row",
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "One eval run. `simulation` is set when any model answer was simulated, and says by\nwhich model and for which target.",
+  "properties": {
+    "abort_reason": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Abort Reason"
+    },
+    "baseline_wins": {
+      "items": {
+        "$ref": "#/$defs/BaselineWin"
+      },
+      "title": "Baseline Wins",
+      "type": "array"
+    },
+    "deferred": {
+      "additionalProperties": {
+        "type": "integer"
+      },
+      "title": "Deferred",
+      "type": "object"
+    },
+    "floors": {
+      "items": {
+        "$ref": "#/$defs/Floor"
+      },
+      "title": "Floors",
+      "type": "array"
+    },
+    "misses": {
+      "items": {
+        "$ref": "#/$defs/Miss"
+      },
+      "title": "Misses",
+      "type": "array"
+    },
+    "notes": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Notes",
+      "type": "array"
+    },
+    "registry_hashes": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "title": "Registry Hashes",
+      "type": "object"
+    },
+    "run_id": {
+      "title": "Run Id",
+      "type": "string"
+    },
+    "simulation": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Simulation"
+    },
+    "spent_usd": {
+      "minimum": 0,
+      "title": "Spent Usd",
+      "type": "number"
+    },
+    "status": {
+      "enum": [
+        "complete",
+        "partial",
+        "aborted at budget"
+      ],
+      "title": "Status",
+      "type": "string"
+    },
+    "table": {
+      "items": {
+        "$ref": "#/$defs/Row"
+      },
+      "title": "Table",
+      "type": "array"
+    },
+    "trials": {
+      "minimum": 1,
+      "title": "Trials",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "run_id",
+    "simulation",
+    "notes",
+    "trials",
+    "status",
+    "abort_reason",
+    "deferred",
+    "spent_usd",
+    "registry_hashes",
+    "table",
+    "floors",
+    "misses",
+    "baseline_wins"
+  ],
+  "title": "Report",
+  "type": "object"
+}
