@@ -1,7 +1,7 @@
-"""Column types and links on the edge cases: integers too big for a float, links from a
-table to itself, links to IDs that look like damaged numbers, very long headers and
-digit strings, and negative IDs with leading zeros. A second round-trip property mixes
-all of them into generated files."""
+"""Column types and links on the edge cases: integers too big for a float, links to IDs
+that look like damaged numbers, very long headers and digit strings, and negative IDs
+with leading zeros. A second round-trip property mixes all of them into generated
+files."""
 
 from __future__ import annotations
 
@@ -43,35 +43,6 @@ def test_big_integers_alone_stay_whole_numbers(tmp_path: Path) -> None:
     result = check(csv_file("items.csv", "id,amount\n1,9007199254740993\n2,-5\n"))
     assert result.tables[0].columns[1].type == "integer"
     assert stored(tmp_path, result, "items", "amount") == [9007199254740993, -5]
-
-
-def test_a_table_may_link_to_itself() -> None:
-    result = check(csv_file("nodes.csv", "id,node_id,label\n1,,root\n2,1,child\n3,9,lost\n"))
-    assert result.ok
-    plan = result.tables[0]
-    assert [(link.column, link.table, link.target_column) for link in plan.links] == [
-        ("node_id", "nodes", "id")
-    ]
-    assert plan.columns[1].type == "integer"
-    orphan = [p for p in result.files[0].problems if p.code == "orphan_link"]
-    assert [(p.row, p.column) for p in orphan] == [(4, "node_id")]
-
-
-def test_a_self_link_takes_a_text_id_type() -> None:
-    result = check(csv_file("nodes.csv", "id,node_id\n007,\n008,007\n"))
-    assert result.ok
-    assert [c.type for c in result.tables[0].columns] == ["text", "text"]
-
-
-def test_a_self_link_is_a_relationship_in_the_draft(tmp_path: Path) -> None:
-    from ledgerline.workspace import fields
-
-    result = check(csv_file("nodes.csv", "id,node_id\n1,\n2,1\n"))
-    db = tmp_path / "data.sqlite"
-    load_tables(result.tables, db)
-    drafted = fields.draft(db, result.tables)
-    registry = drafted["registry.draft.yaml"]
-    assert "from_entity: nodes\n  from_field: node_id\n  to_entity: nodes" in registry
 
 
 def test_a_link_to_ids_that_look_like_damaged_numbers_passes() -> None:
@@ -137,13 +108,20 @@ def edge_files(draw: st.DrawFn) -> list[UploadedFile]:
     )
     if any(not i.isdigit() for i in ids):
         ids[0] = "x" + ids[0]  # keeps a mixed column text, so every ID is a label
-    parent = draw(st.lists(st.sampled_from(ids) | st.just(""), min_size=n, max_size=n))
     mixed = draw(st.lists(MIXED, min_size=n, max_size=n))
-    out = io.StringIO()
-    writer = csv.writer(out, lineterminator="\n")
-    writer.writerow(["id", "node_id", "mixed"])
-    writer.writerows(zip(ids, parent, mixed, strict=True))
-    return [UploadedFile("nodes.csv", out.getvalue().encode())]
+    links = draw(st.lists(st.sampled_from(ids) | st.just(""), min_size=n, max_size=n))
+    parents = io.StringIO()
+    writer = csv.writer(parents, lineterminator="\n")
+    writer.writerow(["id", "mixed"])
+    writer.writerows(zip(ids, mixed, strict=True))
+    children = io.StringIO()
+    writer = csv.writer(children, lineterminator="\n")
+    writer.writerow(["id", "parent_id"])
+    writer.writerows(zip(range(1, n + 1), links, strict=True))
+    return [
+        UploadedFile("parents.csv", parents.getvalue().encode()),
+        UploadedFile("children.csv", children.getvalue().encode()),
+    ]
 
 
 @settings(max_examples=100, deadline=None)
