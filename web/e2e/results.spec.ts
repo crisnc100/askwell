@@ -38,8 +38,11 @@ test("the results page renders every schema of every committed report", async ({
     if (data.simulation) {
       await expect(banner).toContainText("Simulated.");
       await expect(banner).toContainText(data.simulation);
-    } else {
+    } else if (data.status === "complete") {
       await expect(banner).toHaveText("Measured with a real model.");
+    } else {
+      await expect(banner).toContainText("Not measured");
+      await expect(banner).toContainText(data.status);
     }
 
     const definitions = page.locator("#definitions");
