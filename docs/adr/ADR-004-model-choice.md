@@ -1,9 +1,10 @@
 # ADR-004: Default and second model, chosen by a live spike
 
-- **Status:** Spike PENDING. The spike command exists (`ledgerline spike`); it has not run
-  because no `OPENROUTER_API_KEY` was available when P1 was built. No model is chosen yet,
-  and no result below is filled in.
-- **Result:** not measured (see Result).
+- **Status:** Decided, 2026-11-11. The spike ran but could not choose (Amendment 1); the
+  fieldservice benchmark chose under a new rule (Amendment 2). The sections before the
+  amendments are the original record and are kept as written.
+- **Result:** default `mistralai/mistral-small-24b-instruct-2501`, second
+  `google/gemma-4-26b-a4b-it` (Amendment 2).
 
 ## Interim target (2026-11-09)
 There is no OpenRouter key yet, so no real model runs. Until there is, a Claude model
@@ -134,3 +135,57 @@ score above 35/43 (81.4%). L11 stays as the product floor and is reported as it 
 8. **Budget:** $3 in total for every live run in PR5, enforced by the budget guard.
 
 The result is added to this ADR as Amendment 2.
+
+## Amendment 2 (2026-11-11): the selection result
+
+The live pass ran once, as Amendment 1 set out: fieldservice, one trial, the `ledgerline`
+and `oneshot` systems, record mode, run id `select-2026-11-11`. It spent $0.100 of its $2
+budget. The full report is
+[evals/reports/select-2026-11-11.md](../../evals/reports/select-2026-11-11.md), and the
+rule applied to it is
+[evals/reports/model-selection-select-2026-11-11.md](../../evals/reports/model-selection-select-2026-11-11.md)
+(`scripts/select_model.py`).
+
+The scores are for the `ledgerline` system. Cost per question is measured, retries
+included. "Unreadable" counts model calls whose answer did not parse.
+
+| Model | Cost per question | Correct (of 43) | Wrong | Refusal recall | Unreadable | p50 latency | Gates |
+|---|---|---|---|---|---|---|---|
+| mistralai/mistral-small-24b-instruct-2501 | $0.000145 | 21 | 6 | 24/24 | 0/91 (0%) | 1.29 s | pass |
+| google/gemma-4-26b-a4b-it | $0.000219 | 23 | 7 | 23/24 | 0/93 (0%) | 1.31 s | pass |
+| openai/gpt-oss-120b | $0.000277 | 25 | 4 | 24/24 | 7/84 (8.3%) | 2.48 s | fails unreadable |
+| openai/gpt-4o-mini | $0.000319 | 19 | 5 | 24/24 | 4/79 (5.1%) | 1.28 s | fails unreadable |
+
+### The choice
+- **Best eligible:** gemma-4-26b-a4b-it, with 23 correct.
+- **Default: `mistralai/mistral-small-24b-instruct-2501`.** It is the cheapest eligible
+  model. It is 2 correct answers behind the best and has 1 fewer wrong answer, so it is
+  not clearly worse (that needs 4 or more).
+- **Second: `google/gemma-4-26b-a4b-it`,** the best eligible model from another vendor.
+- No tie on cost, so the Spider tie-break was not needed.
+
+### What the numbers say
+- **gpt-oss-120b's unreadable answers were all cut off.** Each of the 7 stopped at the
+  1,024-token limit (`LEDGERLINE_MAX_TOKENS`), because the model reasons before it
+  answers and spent the limit doing so. The rule fixes the production settings, so this
+  counts against it. The choice is sensitive to that limit: had gpt-oss-120b passed
+  the gate, it would be the best (25), mistral would be exactly 4 behind, and the
+  default would be gemma. The rule was applied as approved and not rerun.
+- **One trial.** Each model answered each question once, so a difference of a few
+  questions between models is within noise. The 95% ranges in the report are wide.
+- **The top of the ladder bought nothing.** gpt-4o-mini cost the most per question and
+  scored the fewest correct answers. Its 4 unreadable answers parsed as JSON but did
+  not match the intent schema.
+- **No model reaches the L11 floor** (at least 80% correct, at most 5% wrong among
+  answered). The default scores 48.8% correct (21/43) and 22.2% wrong among answered
+  (6/27). Eight questions need things the intent grammar cannot express, so 81.4% was
+  the ceiling for any model. The floor stays as the product target, reported as not met.
+- **Live is well below simulated.** The simulated stand-in scored 33/43 on the same
+  questions; the live default scores 21/43. Most of the gap is intents that fail
+  validation twice: a placeholder value in `unanswerable_reason` on a normal question,
+  a missing `group_by`, or a sort on a field that does not exist. Closing that gap, in
+  the prompt and the grammar, is the v0.2 question.
+
+Every recording these numbers come from is committed under
+`evals/recordings/eval/fieldservice/`, so `ledgerline eval --mode replay` with run id
+`select-2026-11-11` rebuilds the report without a key.

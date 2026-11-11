@@ -54,10 +54,11 @@ class Settings(BaseSettings):
     )
     openrouter_base_url: str = "https://openrouter.ai/api/v1"
 
-    # Model ids come from config only. The real spike (ADR-004) is deferred until a key
-    # exists; this provisional target is what simulated answers stand in for.
-    default_model: str | None = "openai/gpt-oss-120b"
-    second_model: str | None = None
+    # Model ids come from config only. Chosen by ADR-004's rule (Amendment 2): the
+    # cheapest model not clearly worse than the best on the fieldservice benchmark,
+    # and the best eligible model from another vendor.
+    default_model: str | None = "mistralai/mistral-small-24b-instruct-2501"
+    second_model: str | None = "google/gemma-4-26b-a4b-it"
 
     llm_mode: LLMMode = "replay"
     replay_dir: str = "evals/recordings"

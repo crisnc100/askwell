@@ -11,10 +11,11 @@ reason. A question the intent cannot express can still get a wrong answer, when 
 fills in a valid intent for a nearby question instead of refusing. [docs/product-brief.md](docs/product-brief.md) explains
 who it is for and what it leaves out on purpose.
 
-**Status.** v0.1 runs on your machine. There is no model key yet, so every model answer in
-this repo was written by a stand-in model and is labelled *simulated* (see
-[Simulated answers](#simulated-answers)). On that run Ledgerline does not reach its own
-accuracy target; the results below say so.
+**Status.** v0.1 runs on your machine, and an invite-only beta answers live questions
+(see [Deploy the hosted beta](#deploy-the-hosted-beta)). The default model,
+`mistralai/mistral-small-24b-instruct-2501`, was chosen by a measured rule
+([ADR-004](docs/adr/ADR-004-model-choice.md)). Ledgerline does not reach its own accuracy
+target with it; the results below say so.
 
 ## Try it
 
@@ -47,22 +48,23 @@ To see an answer with no key, ask the demo database one of its recorded question
 uv run ledgerline ask "How many invoices are still unpaid?"
 ```
 
-It prints the intent, the check, the SQL and the rows.
+It prints the intent, the check, the SQL and the rows. Recorded questions are ones the
+model answers; [Results](#results) has its measured accuracy.
 
 ## Results
 
 `http://localhost:8000/results/` shows the benchmark: how often Ledgerline answers, how
 often it is right, and how often it refuses, next to a baseline where the same model writes
 SQL directly. Each number has a plain definition and a 95% range. On fieldservice, the
-made-up business in the demo database:
+made-up business in the demo database, with the default model, live:
 
-| Simulated, fieldservice | Ledgerline | one-shot |
+| Live, fieldservice | Ledgerline | one-shot |
 |---|---|---|
-| Rows match the expected answer | 76.7% (33/43) | 69.8% (30/43) |
-| Wrong answers among answered | 13.2% (5/38) | 30.2% (13/43) |
+| Rows match the expected answer | 48.8% (21/43) | 46.5% (20/43) |
+| Wrong answers among answered | 22.2% (6/27) | 52.4% (22/42) |
 
-Ledgerline gives fewer wrong answers, but it misses its v0.1 target (at least 80% right,
-at most 5% wrong). [docs/failures/](docs/failures/README.md) walks through four misses.
+Ledgerline gives far fewer wrong answers, mostly by refusing what it cannot check, but it
+misses its v0.1 target (at least 80% right, at most 5% wrong). [docs/failures/](docs/failures/README.md) walks through four misses.
 
 ## Read more
 
@@ -71,7 +73,9 @@ at most 5% wrong). [docs/failures/](docs/failures/README.md) walks through four 
 - [docs/adr/](docs/adr/README.md): each design decision, with a prediction made before
   the code and the measured result.
 - [docs/build-log.md](docs/build-log.md): how v0.1 was built, and what reviews caught.
-- [evals/reports/sim-1.md](evals/reports/sim-1.md): the full simulated report.
+- [evals/reports/select-2026-11-11.md](evals/reports/select-2026-11-11.md): the live
+  report for the four models compared, and [sim-1.md](evals/reports/sim-1.md), the
+  earlier run with simulated answers.
 - The sections below: each part of the system in detail.
 
 ## Setup details
@@ -146,7 +150,8 @@ curl -s localhost:8000/ask -H 'content-type: application/json' \
 ```
 
 `GET /schemas` lists the schemas, and `GET /schemas/{id}/examples` lists the example
-questions. In replay mode only those examples have recorded answers; any other question
+questions. They are examples the current model answers; `/results/` has its measured
+accuracy. In replay mode only those examples have recorded answers; any other question
 gets a 409 (the CLI exits with code 4).
 
 Each question goes through the same steps. The model makes one call and returns an
@@ -271,9 +276,16 @@ budget, and stops when it would go over. A long eval run saves each finished ite
 stopped run can resume and its spend still counts.
 [ADR-005](docs/adr/ADR-005-replay-and-budget.md) has the details.
 
-`ledgerline spike` checks which candidate models return valid structured output. It
-has not run yet. Until it does, the default model is a provisional target,
-`openai/gpt-oss-120b`; see [ADR-004](docs/adr/ADR-004-model-choice.md).
+An answer cut off at the token limit (`LEDGERLINE_MAX_TOKENS`) is still paid for, so it is
+charged and counted as unreadable, like any answer that does not parse.
+
+The default and second models (`LEDGERLINE_DEFAULT_MODEL`, `LEDGERLINE_SECOND_MODEL`) were
+chosen on the fieldservice benchmark: the cheapest model, by measured cost per question,
+that is not clearly worse than the best one and passes three gates (few unreadable
+answers, near-perfect refusals, a median answer within 3 seconds).
+[ADR-004](docs/adr/ADR-004-model-choice.md) has the rule and the numbers.
+`ledgerline spike` is the earlier, smaller check of structured output; its report is in
+`evals/spike/`.
 
 ## Simulated answers
 
@@ -304,10 +316,13 @@ single SELECT, and the database driver refuses a second statement, so it cannot 
 the read-only transaction. Spider registries come from `registry init` with no edits,
 and the eval stops if one no longer matches its committed hash.
 
-Results of the simulated run `sim-1` are in
-[evals/reports/sim-1.md](evals/reports/sim-1.md). Every answer in it was written by
-claude-haiku-5-5 standing in for `openai/gpt-oss-120b`, so these are simulated numbers,
-not a measurement of that model. On fieldservice:
+The live run `select-2026-11-11` compared four models on fieldservice; its report is
+[evals/reports/select-2026-11-11.md](evals/reports/select-2026-11-11.md), and the default
+model's numbers are in [Results](#results). Before a key existed, the simulated run
+`sim-1` ([evals/reports/sim-1.md](evals/reports/sim-1.md)) checked the pipeline and the
+scoring. Every answer in it was written by claude-haiku-5-5 standing in for
+`openai/gpt-oss-120b`, so those are simulated numbers, not a measurement of that model.
+On fieldservice:
 
 | Simulated, fieldservice | Ledgerline | one-shot |
 |---|---|---|
@@ -316,7 +331,7 @@ not a measurement of that model. On fieldservice:
 | Refusal recall (refused what it should) | 100% (24/24) | 100% (24/24) |
 
 The floor for fieldservice, the minimum v0.1 set out to reach (execution accuracy at
-least 80%, wrong answers at most 5%), is **not met in v0.1**. The report lists every
+least 80%, wrong answers at most 5%), is **not met in v0.1**, simulated or live. The report lists every
 Ledgerline miss with a tag for its cause;
 [ADR-001](docs/adr/ADR-001-intent-not-sql.md) explains the result against its
 prediction. `./verify.sh` replays the committed fieldservice recordings and checks that

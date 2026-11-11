@@ -1,7 +1,11 @@
 """The questions whose model answers are recorded for the replay tests and the demo.
 
-`uv run python -m evals.replay_cases export` runs each one through the pipeline in
-export mode, writing every unrecorded model request to evals/pending/. After the answers
+`uv run python -m evals.replay_cases record` asks each one of the default model, live,
+and appends its answers to the replay store. It needs `OPENROUTER_API_KEY`; each ask
+has its own budget (`LEDGERLINE_ASK_BUDGET_USD`).
+
+`uv run python -m evals.replay_cases export` is the way without a key: it writes every
+unrecorded model request to evals/pending/ for a simulated answer. After the answers
 are imported (`ledgerline replay import`), run it again: a question whose first answer
 failed validation then exports its retry request.
 """
@@ -55,10 +59,10 @@ def cases(
     return schemas, questions
 
 
-def export(work_dir: Path) -> list[Path]:
+def export(work_dir: Path, mode: str = "export") -> list[Path]:
     settings = get_settings()
     schemas, questions = cases(settings, work_dir)
-    service = AskService(settings, schemas, build_gateway(settings, "export"), audit=None)
+    service = AskService(settings, schemas, build_gateway(settings, mode), audit=None)
     exported: list[Path] = []
     try:
         for schema_id, question in questions:
@@ -75,13 +79,13 @@ def export(work_dir: Path) -> list[Path]:
 
 
 def main(argv: list[str]) -> int:
-    if argv[:1] != ["export"]:
-        print("usage: python -m evals.replay_cases export")
+    if argv[:1] not in (["export"], ["record"]):
+        print("usage: python -m evals.replay_cases export|record")
         return 2
     import tempfile
 
     with tempfile.TemporaryDirectory() as tmp:
-        exported = export(Path(tmp))
+        exported = export(Path(tmp), argv[0])
     print(f"{len(exported)} request(s) pending")
     return 0
 

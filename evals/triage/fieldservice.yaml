@@ -1,33 +1,82 @@
-# Triage of every Ledgerline miss in eval run sim-1 (simulated answers).
+# Triage of every miss by the default model (mistralai/mistral-small-24b-instruct-2501)
+# in the live run select-2026-11-11. Notes describe that model's answer; other models in
+# the same report missed some of the same questions in other ways. The triage of the
+# simulated run sim-1 is kept in evals/reports/sim-1.md.
 # Tags: grammar_gap | misread | validator_false_reject | builder_bug | gold_issue.
+#
+# "Placeholder reason" below means the model put "", "none" or "None" in
+# unanswerable_reason on an intent that is not a refusal. The validator rejects any
+# value there, as the grammar says, so such an intent fails even when the rest is right.
+fs-009:
+  note: 'The first intent was right except for a placeholder reason. On the retry the model said the
+    registry has no technician names, which is wrong (full_name is visible).'
+  tag: misread
+fs-011:
+  note: 'Asked for the most expensive part and its price, the model returned the highest price and a
+    count, not the part. A row list sorted by price with a limit of 1 would answer it.'
+  tag: misread
+fs-018:
+  note: 'Both intents had a placeholder reason, no group_by, and a sort on an issued_at_month field that
+    does not exist. A monthly group on issued_at would answer it.'
+  tag: misread
+fs-020:
+  note: 'The model added a year-to-date filter on completion date that the question does not ask for. The
+    gold averages every completed job.'
+  tag: misread
+fs-021:
+  note: 'The first intent counted from technicians, a fan-out the validator rightly refused. The retry
+    re-based on work orders but asked for a day grain on a text field.'
+  tag: misread
 fs-022:
-  note: 'Ambiguous date: the answer filtered on completion date (when parts are used), the gold on opening
-    date. Both readings are defensible.'
-  tag: gold_issue
+  note: 'Both intents had a placeholder reason and no group_by; the first also counted from parts, a
+    fan-out. Grouping work_order_parts by part would answer it.'
+  tag: misread
+fs-023:
+  note: 'Both intents were right except for a placeholder reason ("None"), and neither kept the "at least
+    25" condition.'
+  tag: misread
 fs-024:
-  note: 'Ambiguous date: ''did work for last month'' was read as completed last month; the gold uses opened
-    last month.'
+  note: 'Ambiguous date: "did work for last month" was read as completed last month; the gold uses opened
+    last month. Both readings are defensible.'
   tag: gold_issue
 fs-025:
-  note: Needs the difference between two dates (opened to completed). Refused correctly.
+  note: Needs the difference between two dates (opened to completed). Refused, by failing validation twice.
   tag: grammar_gap
 fs-028:
-  note: 'Needs a ratio of two counts. The model returned counts per status instead of refusing: a wrong
-    answer, not a refusal.'
+  note: 'Needs a ratio of two counts. The model returned two counts of cancelled orders instead of
+    refusing: a wrong answer, not a refusal.'
   tag: grammar_gap
 fs-030:
-  note: Needs a computed value (quantity times unit price). Refused correctly.
+  note: Needs a computed value (quantity times unit price). Refused, by failing validation twice.
   tag: grammar_gap
+fs-032:
+  note: 'Both intents had a placeholder reason and no group_by, and summed invoices from technicians or
+    work orders, a fan-out. Grouping invoices by technician would answer it.'
+  tag: misread
+fs-033:
+  note: 'Both intents had a placeholder reason and no group_by; the first sorted on fields that do not
+    exist. Grouping invoices by customer region and quarter would answer it.'
+  tag: misread
+fs-034:
+  note: 'The first intent was a row list from customers with filters on work orders; the retry grouped
+    by customer with a year grain on an ID and filtered the same date twice.'
+  tag: misread
 fs-035:
-  note: 'Needs two date fields in one monthly series. The model counted completions among the orders opened
-    each month instead of refusing: a wrong answer.'
+  note: Needs two date fields in one monthly series. Refused, by failing validation twice.
   tag: grammar_gap
+fs-036:
+  note: 'Both intents had a placeholder reason and no group_by, and sorted on a field that does not
+    exist; the "at least 100 invoices" condition was dropped.'
+  tag: misread
 fs-037:
-  note: 'Needs a distinct count of months in HAVING. The model returned per-technician monthly counts
-    instead of refusing: a wrong answer.'
+  note: Needs a distinct count of months in HAVING. Refused correctly.
   tag: grammar_gap
+fs-038:
+  note: 'The model left out the "paid" filter and grouped by site and customer ID instead of by
+    customer, with no "more than $20,000" condition.'
+  tag: misread
 fs-039:
-  note: Needs date arithmetic and a ratio. Refused correctly.
+  note: Needs date arithmetic and a ratio. Refused, by failing validation twice.
   tag: grammar_gap
 fs-041:
   note: Needs a conditional count beside a sum. Refused correctly.
@@ -35,3 +84,19 @@ fs-041:
 fs-042:
   note: Needs an anti-join (sites with no work orders). Refused correctly.
   tag: grammar_gap
+fs-043:
+  note: 'The model dropped the "at least 20 completed jobs" condition and sorted by job count instead
+    of average hours.'
+  tag: misread
+# The two demo questions the default model missed when the demo was re-recorded. They are
+# not benchmark items; they were dropped from config/schemas.yaml (see builds/v01/log.md).
+demo-top-technicians:
+  note: '"Which five technicians billed the most labor hours this year?" The first intent counted from
+    technicians as a row list with metrics (intent_shape, unknown_field, fan_out). The retry refused,
+    saying the join would double count. Summing work order hours grouped by technician answers it.'
+  tag: misread
+demo-urgent-by-region:
+  note: '"How many urgent work orders were opened in each customer region last month?" Both intents had a
+    placeholder reason ("None"), no group_by, and a sort on customer__region (intent_shape,
+    invalid_order_by). Grouping work orders by the customer region answers it.'
+  tag: misread

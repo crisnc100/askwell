@@ -190,3 +190,15 @@ Each item has a test in `tests/workspace/test_hardening.py`.
 - **Local container check** (built here, not deployed): replay mode with a code: `/healthz` 200, `/` and `/schemas` 401 without the code, a recorded demo question answers with it, and every file under `/data` is 0600 and every folder 0700. Live mode with the real key and the kill switch on: it starts, `/healthz` reports `live`, and `/ask` returns the plain 503 with no model call.
 - **Tests:** `tests/pipeline/test_beta.py` (gate, cap, kill switch) and `tests/workspace/test_beta_workspace.py` (the plain message on workspace asks).
 - The deploy section of the README covers the settings, the volume and Caddy. Nothing was deployed.
+
+### Phase 2: model selection
+- **Order, provable in git:** ADR-004 Amendment 1 (rule) `29a20a6` and the selection script `dbb75ea` were committed before the live pass.
+- **Live pass** `select-2026-11-11`: fieldservice, 1 trial, `ledgerline` and `oneshot`, record mode, 4 models, budget $2. Spent $0.1002. Result in ADR-004 Amendment 2 and `evals/reports/model-selection-select-2026-11-11.md`: default mistral-small-24b-2501, second gemma-4-26b-a4b-it. gpt-oss-120b and gpt-4o-mini failed the unreadable gate (7/84 cut off at 1,024 tokens; 4/79 off-schema). Had gpt-oss passed, the default would be gemma; recorded, not rerun (agreed with the orchestrator).
+- **L11 not met:** 48.8% (21/43) correct, 22.2% (6/27) wrong among answered. The simulated stand-in scored 33/43 on the same questions; the gap is the v0.2 question.
+- **Why live misses:** 12 of the 16 refusals are intents that failed validation twice. The common faults are a placeholder `unanswerable_reason` ("", "none", "None") on a normal question, a missing `group_by`, and a sort on a field that does not exist. The validator is right to reject them; the prompt and grammar are the v0.2 lever. Every miss is triaged in `evals/triage/fieldservice.yaml` (replacing sim-1's triage, which stays baked into `sim-1.md`).
+- **Floor text** (`evals/floors.yaml`) rewritten from the live numbers.
+- **Demo re-recorded** live with the new default (`python -m evals.replay_cases record`, $0.0011). Two canned questions failed:
+  - "Which five technicians billed the most labor hours this year?": the first intent was a row list with metrics that counted from technicians (`intent_shape`, `unknown_field`, `fan_out`); the retry refused, saying the join would double count.
+  - "How many urgent work orders were opened in each customer region last month?": both intents had `unanswerable_reason: "None"`, no `group_by`, and a sort on `customer__region` (`intent_shape`, `invalid_order_by`).
+  Both were replaced (option A, approved). Four candidates were written before recording and recorded in a fixed order ($0.0004); the first two, "How many technicians are there at each skill level?" and "What is the total invoiced amount for each invoice status?", both answer and replace them. The README says where the examples appear that they are examples the model answers, with a link to the measured accuracy.
+- **Total live spend in PR5:** $0.1017 of the $3 budget.

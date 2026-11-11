@@ -5,12 +5,13 @@ fieldservice:
   floors:
     execution_accuracy: {min: 0.80}
     wrong_answer_rate_given_answered: {max: 0.05}
-  status_note: in v0.1 (simulated run)
+  status_note: in v0.1 (live, default model)
   cause: >-
-    For questions the intent grammar cannot express, the stand-in model often answers a
-    nearby question instead of refusing. Example: asked for a percentage, it returned a
-    count per status. Each such answer is a wrong answer, not a refusal.
+    Most misses are refusals. 16 of the 43 answerable questions end in one: 12 because
+    the model's intent failed validation twice (most often a malformed intent shape, or a
+    sort on a field that is neither a metric nor a group), and 4 because the model judged
+    the question unanswerable. Eight questions need things the intent grammar cannot
+    express, so no model can score above 81.4%. Of the 27 answers given, 6 are wrong.
   next: >-
-    v0.2 changes the prompt to refuse first when a question needs something the grammar
-    lacks, then measures it on a fresh run. The v0.1 prompt is not changed after seeing
-    these results.
+    v0.2 changes the prompt and the grammar, then measures them on a fresh run. The v0.1
+    prompt is not changed after seeing these results.
