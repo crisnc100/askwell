@@ -21,8 +21,8 @@ class RawResponse(BaseModel):
     parsed: dict[str, Any] | None = None
     usage: dict[str, Any] = {}
     model: str
-    # "length" (cut off at `max_tokens`) or "content_filter" (blocked by the provider):
-    # either way there is no usable answer, but the call is still billed.
+    # "length" (cut off at `max_tokens`), "content_filter" (blocked by the provider) or
+    # "refusal" (the model declined): there is no usable answer, but the call is billed.
     finish_reason: str | None = None
 
 

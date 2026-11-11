@@ -25,8 +25,9 @@ from ledgerline.core.validate import QueryPlan, ValidationResult, validate
 from ledgerline.llm.budget import BudgetGuard
 from ledgerline.llm.daily import DailySpend
 from ledgerline.llm.errors import ReplayMissError
-from ledgerline.llm.gateway import Gateway, OpenRouterTransport
+from ledgerline.llm.gateway import Gateway
 from ledgerline.llm.pricing import PriceBook
+from ledgerline.llm.providers import ProviderRouter
 from ledgerline.llm.replay import ReplayStore
 from ledgerline.llm.simulate import PendingRequestError, register_response_model
 from ledgerline.llm.types import ChatMessage, LLMResult
@@ -128,11 +129,12 @@ def build_gateway(
         if settings.daily_spend_cap_usd is not None
         else None
     )
+    router = ProviderRouter(settings, openrouter_prices=book)
     return Gateway(
         mode=chosen,  # type: ignore[arg-type]
         store=store,
-        transport=OpenRouterTransport(settings),
-        price_lookup=book.get,
+        transport=router,
+        price_lookup=router.price,
         guard=BudgetGuard(budget_usd if budget_usd is not None else settings.ask_budget_usd),
         max_tokens=settings.max_tokens,
         daily=daily,

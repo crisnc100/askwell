@@ -55,6 +55,8 @@ def parse_output[T: BaseModel](raw: RawResponse, schema: type[T]) -> T:
         raise ParseError("the answer was cut off at the max_tokens limit", raw.content)
     if raw.finish_reason == "content_filter":
         raise ParseError("the provider's content filter blocked the answer", raw.content)
+    if raw.finish_reason == "refusal":
+        raise ParseError("the model refused to answer", raw.content)
     if raw.parsed is not None:
         try:
             return schema.model_validate(raw.parsed)

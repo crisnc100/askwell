@@ -13,7 +13,7 @@ DEFAULT_NOW = datetime(2026, 6, 30, tzinfo=UTC)
 
 # replay: recordings only. export: recordings, and every unrecorded request is written
 # to the pending directory for a simulated answer (no API key needed; see
-# docs/rerecord.md). record / live: OpenRouter, budget-guarded.
+# docs/rerecord.md). record / live: a live provider (OpenRouter or Anthropic), budget-guarded.
 LLMMode = Literal["record", "replay", "live", "export"]
 
 
@@ -59,6 +59,30 @@ class Settings(BaseSettings):
     # and the best eligible model from another vendor.
     default_model: str | None = "mistralai/mistral-small-24b-instruct-2501"
     second_model: str | None = "google/gemma-4-26b-a4b-it"
+
+    # The direct Anthropic API, for models configured as `anthropic:<model id>`
+    # (ledgerline/llm/providers.py). Every other model goes through OpenRouter.
+    anthropic_api_key: SecretStr | None = Field(
+        default=None,
+        validation_alias=AliasChoices("ANTHROPIC_API_KEY", "LEDGERLINE_ANTHROPIC_API_KEY"),
+    )
+    anthropic_base_url: str | None = None
+    # How much the model thinks before answering. A short structured form needs little.
+    anthropic_effort: Literal["low", "medium", "high"] = "low"
+    # USD per million tokens. Haiku 5.5's price for prompts up to 100,000 tokens; ours are
+    # far smaller. The daily cap and per-ask budgets charge at these prices.
+    anthropic_input_usd_per_mtok: float = Field(
+        default=0.10,
+        validation_alias=AliasChoices(
+            "ANTHROPIC_INPUT_USD_PER_MTOK", "LEDGERLINE_ANTHROPIC_INPUT_USD_PER_MTOK"
+        ),
+    )
+    anthropic_output_usd_per_mtok: float = Field(
+        default=0.50,
+        validation_alias=AliasChoices(
+            "ANTHROPIC_OUTPUT_USD_PER_MTOK", "LEDGERLINE_ANTHROPIC_OUTPUT_USD_PER_MTOK"
+        ),
+    )
 
     llm_mode: LLMMode = "replay"
     replay_dir: str = "evals/recordings"

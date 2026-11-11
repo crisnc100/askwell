@@ -55,3 +55,8 @@ class LiveAnswersOffError(LLMError):
 
     def __init__(self) -> None:
         super().__init__(LIVE_ANSWERS_OFF)
+
+
+class ProviderUnavailableError(LLMError):
+    """The provider still failed (rate limit, server error or no connection) after every
+    retry. It carries no HTTP status, so the gateway does not retry it again."""
