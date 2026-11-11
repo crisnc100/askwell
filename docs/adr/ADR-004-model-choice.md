@@ -189,3 +189,32 @@ included. "Unreadable" counts model calls whose answer did not parse.
 Every recording these numbers come from is committed under
 `evals/recordings/eval/fieldservice/`, so `ledgerline eval --mode replay` with run id
 `select-2026-11-11` rebuilds the report without a key.
+
+## Amendment 3 (2026-11-11): Claude Haiku 5.5, measured under the same gates
+
+This amendment was committed before Haiku 5.5's live run, so `git log` shows the rule
+came first.
+
+**The choice.** Cristian chose Claude Haiku 5.5 (`claude-haiku-5-5`) as the beta's model.
+His Claude plan includes monthly Anthropic API credits, which apply only to calls made
+directly to the Anthropic API, not through OpenRouter. Within the beta's daily cap, the
+model is in effect free. Its list price is $0.10 per million input tokens and $0.50 per
+million output tokens (for prompts up to 100,000 tokens), and spend is still measured
+and capped at that price.
+
+**How it is measured.** The same way as Amendment 1's candidates: one live pass on the
+fieldservice benchmark, record mode, one trial, the `ledgerline` and `oneshot` systems,
+and the production settings (`LEDGERLINE_MAX_TOKENS` 1,024). It is called directly
+through the Anthropic API, with structured output (`output_config.format`, a JSON
+schema), adaptive thinking at effort `low`, and no sampling settings. Its row is reported
+next to the four from Amendment 2.
+
+**The rule for this choice.**
+- Haiku 5.5 must pass the same three gates: unreadable answers at most 2% of calls,
+  refusal recall at least 23 of 24, median latency at most 3 seconds.
+- If it passes, it becomes the default, because it is Cristian's explicit choice. The
+  "not clearly worse" comparison is reported, but it does not overrule that choice.
+- If it fails a gate, nothing changes: the default stays mistral-small, and the numbers
+  go back to Cristian.
+- gemma-4-26b-a4b-it stays the second model, from a different vendor.
+- Hard budget for this amendment's live runs: $1.
