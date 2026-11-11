@@ -69,9 +69,10 @@ def main() -> None:
     args.export_dir.mkdir(parents=True)
     workspaces = Path(tempfile.mkdtemp(prefix="ledgerline-e2e-"))
     service = fake_service(get_settings(), ExportingModel(args.export_dir))
-    # Every browser test comes from one address; the per-address workspace cap has its
-    # own test (test_live_workspaces_per_ip), so it is lifted here.
-    store = WorkspaceStore(workspaces, Limits(workspaces_per_ip=1000))
+    # Every browser test comes from one address. The per-address limits have their own
+    # tests (test_limits.py), so they are lifted here.
+    lifted = Limits(workspaces_per_ip=1000, uploads_per_hour=1000, asks_per_hour=1000)
+    store = WorkspaceStore(workspaces, lifted)
     app = create_app(service=service, workspaces=WorkspaceApp(store))
     try:
         uvicorn.run(app, host="127.0.0.1", port=args.port, log_level="warning")
