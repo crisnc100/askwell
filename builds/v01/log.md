@@ -235,4 +235,4 @@ The tests came first (`51e1231`, plus a test-only setup fix in `a27eec2`), and 2
 - **Docker smoke test** (rebuilt locally, not deployed):
   - without codes, the container exits with the fail-closed message;
   - with codes, the Haiku default, the kill switch on and no OpenRouter key, `/healthz` returns 200 `live`, `/schemas` without a code returns 401, `/ask` returns the plain 503, and `/invite` sets a hashed HttpOnly, Secure cookie.
-- The review findings file had the phrase the privacy scan rejects ("health" + "check") in f2; it was reworded to "healthz probe".
+- The review findings file had a two-word phrase the privacy scan rejects in f2; it was reworded to "healthz probe".
