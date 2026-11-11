@@ -41,7 +41,9 @@ def create_app(
     if workspaces is None:
         settings = get_settings()
         workspaces = WorkspaceApp(
-            WorkspaceStore(Path(settings.workspace_dir)), trust_proxy=settings.trust_proxy
+            WorkspaceStore(Path(settings.workspace_dir)),
+            trust_proxy=settings.trust_proxy,
+            prompt_budget_chars=settings.prompt_budget_chars,
         )
     app.state.workspaces = workspaces
 
@@ -80,7 +82,8 @@ def create_app(
         return config.examples
 
     @app.post("/ask")
-    def ask(request: AskRequest) -> dict[str, Any]:
+    def ask(request: AskRequest, http: Request) -> dict[str, Any]:
+        workspaces.check_ask_rate(http)
         try:
             return svc().ask(request.schema_id, request.question).to_dict()
         except UnknownSchemaError as exc:

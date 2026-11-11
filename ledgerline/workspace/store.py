@@ -36,7 +36,7 @@ from pathlib import Path
 from typing import Literal
 from zoneinfo import available_timezones
 
-from ledgerline.workspace.check import CheckResult, UploadedFile, check_files
+from ledgerline.workspace.check import CheckResult, TablePlan, UploadedFile, check_files
 from ledgerline.workspace.limits import MB, Limits
 from ledgerline.workspace.load import load_tables
 
@@ -169,8 +169,16 @@ class Workspace:
         return self.dir / "registry.yaml"
 
     @property
-    def values_path(self) -> Path:
-        return self.dir / "values.json"
+    def draft_path(self) -> Path:
+        return self.dir / "registry.draft.yaml"
+
+    @property
+    def fields_path(self) -> Path:
+        return self.dir / "fields.json"
+
+    @property
+    def edits_path(self) -> Path:
+        return self.dir / "edits.json"
 
     @property
     def audit_path(self) -> Path:
@@ -187,7 +195,13 @@ class Workspace:
 
     def clear_loaded(self) -> None:
         """Remove everything built from the uploads (back to `new`)."""
-        for path in (self.registry_path, self.values_path, self.check_path):
+        for path in (
+            self.registry_path,
+            self.draft_path,
+            self.fields_path,
+            self.edits_path,
+            self.check_path,
+        ):
             path.unlink(missing_ok=True)
         for suffix in ("", "-wal", "-journal", "-shm"):
             self.db_path.with_name(self.db_path.name + suffix).unlink(missing_ok=True)
@@ -421,9 +435,14 @@ class WorkspaceStore:
             workspace.clear_loaded()
             workspace.save()
 
-    def check(self, workspace: Workspace) -> CheckResult:
-        """Check every file; if the whole set passes, load it all and move to
-        `checked`. A failing set loads nothing and stays (or goes back to) `new`."""
+    def check(
+        self,
+        workspace: Workspace,
+        after_load: Callable[[Workspace, list[TablePlan]], object] | None = None,
+    ) -> CheckResult:
+        """Check every file; if the whole set passes, load it all, run `after_load`
+        (which drafts the registry) and move to `checked`. A failing set loads nothing
+        and stays (or goes back to) `new`."""
         meta = workspace.meta
         if meta.state == "confirmed":
             raise WrongStateError("This workspace is already confirmed.")
@@ -440,6 +459,8 @@ class WorkspaceStore:
                         "The service is out of space for loading data right now. Try again later."
                     )
                 load_tables(result.tables, workspace.db_path)
+                if after_load is not None:
+                    after_load(workspace, result.tables)
                 meta.state = "checked"
             else:
                 meta.state = "new"

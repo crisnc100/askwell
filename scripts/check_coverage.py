@@ -23,6 +23,8 @@ FLOORS: dict[str, float] = {
     "ledgerline/workspace/store.py": 95.0,
     "ledgerline/workspace/limits.py": 95.0,
     "ledgerline/workspace/api.py": 90.0,
+    "ledgerline/workspace/fields.py": 90.0,
+    "ledgerline/workspace/ask.py": 90.0,
 }
 
 

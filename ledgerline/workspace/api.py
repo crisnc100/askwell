@@ -13,8 +13,11 @@ from typing import Any
 
 from fastapi import APIRouter, FastAPI, Request
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
+from ledgerline.workspace import fields
+from ledgerline.workspace.ask import ask_workspace, prompt_preview
+from ledgerline.workspace.fields import Edits
 from ledgerline.workspace.limits import Limits, RateLimiter
 from ledgerline.workspace.store import (
     DEFAULT_TIME_ZONE,
@@ -39,6 +42,9 @@ class WorkspaceApp:
     store: WorkspaceStore
     # Trust X-Forwarded-For (set LEDGERLINE_TRUST_PROXY=1 only behind a proxy that sets it).
     trust_proxy: bool = False
+    # The interpret prompt's size budget (Settings.prompt_budget_chars); the Confirm
+    # preview truncates exactly as the prompt does.
+    prompt_budget_chars: int = 16000
     uploads: RateLimiter = field(init=False)
     asks: RateLimiter = field(init=False)
 
@@ -50,6 +56,13 @@ class WorkspaceApp:
     @property
     def limits(self) -> Limits:
         return self.store.limits
+
+    def check_ask_rate(self, request: Request) -> None:
+        if not self.asks.allow(self.client_ip(request)):
+            raise TooManyRequestsError(
+                f"Too many questions from your address (the limit is "
+                f"{self.limits.asks_per_hour} an hour). Try again later."
+            )
 
     def client_ip(self, request: Request) -> str:
         """The caller's address. Behind a trusted proxy it is the last X-Forwarded-For
@@ -65,6 +78,10 @@ class WorkspaceApp:
 
 class CreateRequest(BaseModel):
     time_zone: str = DEFAULT_TIME_ZONE
+
+
+class AskRequest(BaseModel):
+    question: str = Field(min_length=1, max_length=2000)
 
 
 def status(app: WorkspaceApp, workspace: Workspace) -> dict[str, Any]:
@@ -146,8 +163,36 @@ def install(fastapi_app: FastAPI, app: WorkspaceApp) -> APIRouter:
     @router.post("/workspace/check")
     def check(request: Request) -> dict[str, Any]:
         workspace = opened(request)
-        app.store.check(workspace)
+        app.store.check(workspace, after_load=fields.draft)
         return status(app, workspace)
+
+    @router.get("/workspace/fields")
+    def list_fields(request: Request) -> dict[str, Any]:
+        workspace = opened(request)
+        registry, info = fields.load_draft(workspace)
+        edits = fields.saved_edits(workspace)
+        return {"tables": fields.field_rows(registry, info, edits), "edits": edits.model_dump()}
+
+    @router.post("/workspace/preview")
+    def preview(request: Request, edits: Edits) -> dict[str, Any]:
+        workspace = opened(request)
+        registry, info = fields.load_draft(workspace)
+        applied = fields.apply(registry, info, edits)
+        return prompt_preview(
+            applied, workspace.meta.time_zone, app.store.clock, app.prompt_budget_chars
+        )
+
+    @router.post("/workspace/confirm")
+    def confirm(request: Request, edits: Edits) -> dict[str, Any]:
+        workspace = opened(request)
+        fields.confirm(app.store, workspace, edits)
+        return status(app, workspace)
+
+    @router.post("/workspace/ask")
+    def ask(request: Request, body: AskRequest) -> dict[str, Any]:
+        workspace = opened(request)
+        app.check_ask_rate(request)
+        return ask_workspace(request.app.state.service, workspace, body.question, app.store.clock)
 
     @router.delete("/workspace")
     def delete(request: Request) -> dict[str, bool]:

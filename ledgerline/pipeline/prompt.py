@@ -85,8 +85,14 @@ def _field_line(name: str, fdef: FieldDef, max_values: int | None, desc_len: int
     return "".join(parts)
 
 
-def _render(registry: Registry, now: datetime, max_values: int | None, desc_len: int | None) -> str:
-    lines = [f"Reference date: {now.date().isoformat()} (UTC).", "", "Entities:"]
+def _render(
+    registry: Registry,
+    now: datetime,
+    max_values: int | None,
+    desc_len: int | None,
+    time_zone: str,
+) -> str:
+    lines = [f"Reference date: {now.date().isoformat()} ({time_zone}).", "", "Entities:"]
     for slug, entity in registry.entities.items():
         header = f"## {slug}"
         if entity.aliases:
@@ -116,7 +122,11 @@ def _render(registry: Registry, now: datetime, max_values: int | None, desc_len:
     return "\n".join(lines) + "\n"
 
 
-def registry_view(registry: Registry, now: datetime, budget_chars: int) -> PromptView:
+def registry_view(
+    registry: Registry, now: datetime, budget_chars: int, time_zone: str = "UTC"
+) -> PromptView:
+    """The registry part of the interpret prompt. The Confirm page's preview calls this
+    same function, so it shows exactly what the model is sent."""
     steps: list[tuple[str, int | None, int | None]] = [
         ("full", None, None),
         (f"allowed values cut to {MAX_VALUES} per field", MAX_VALUES, None),
@@ -126,7 +136,7 @@ def registry_view(registry: Registry, now: datetime, budget_chars: int) -> Promp
     truncation: list[str] = []
     text = ""
     for label, max_values, desc_len in steps:
-        text = _render(registry, now, max_values, desc_len)
+        text = _render(registry, now, max_values, desc_len, time_zone)
         if label != "full":
             truncation.append(label)
         if len(text) <= budget_chars:
@@ -135,9 +145,13 @@ def registry_view(registry: Registry, now: datetime, budget_chars: int) -> Promp
     return PromptView(text, truncation)
 
 
+def system_message(view: PromptView) -> str:
+    return f"{SYSTEM_PROMPT}\n{view.text}"
+
+
 def first_messages(view: PromptView, question: str) -> list[ChatMessage]:
     return [
-        ChatMessage(role="system", content=f"{SYSTEM_PROMPT}\n{view.text}"),
+        ChatMessage(role="system", content=system_message(view)),
         ChatMessage(role="user", content=question),
     ]
 
