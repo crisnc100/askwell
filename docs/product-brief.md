@@ -43,8 +43,8 @@ which fields the model may see.
   question right. That costs coverage, and the benchmark counts the cost. It is not a
   guarantee against wrong answers: when a question needs something an intent cannot
   express, the model can still fill in a valid intent for a nearby question, and that
-  answer is wrong. In the simulated run this happened on 3 of 43 fieldservice questions
-  ([docs/failures/](failures/README.md)).
+  answer is wrong. In the simulated run this happened on 3 of the 43 fieldservice
+  questions that have an answer ([docs/failures/](failures/README.md)).
 - **It does not let the model write SQL**, call tools, or see result rows.
 - **It does not change data.** Every query is read-only, enforced by the database
   connection, not only by the code.
