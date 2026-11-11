@@ -14,7 +14,7 @@ uv run ruff check .
 step "ruff format --check"
 uv run ruff format --check .
 
-step "pyright (strict on ledgerline/core)"
+step "pyright (strict on ledgerline/core and ledgerline/workspace)"
 uv run pyright
 
 step "detect-secrets (against .secrets.baseline)"

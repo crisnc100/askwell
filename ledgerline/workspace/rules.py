@@ -50,7 +50,7 @@ Kind = Literal[
 NULL_SPELLINGS: frozenset[str] = frozenset({"", "null", "na", "n/a", "-"})
 INT64_MIN, INT64_MAX = -(2**63), 2**63 - 1
 FLOAT_EXACT = 2**53
-# More digits than any 64-bit number has; longer digit strings are never parsed.
+# The most digits a 64-bit number has; longer digit strings are never parsed.
 _MAX_INT_DIGITS = 19
 # A decimal longer than this cannot be stored exactly in a float anyway.
 _MAX_NUM_CHARS = 40

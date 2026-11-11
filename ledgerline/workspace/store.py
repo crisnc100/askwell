@@ -9,8 +9,8 @@ A workspace moves `new -> checked -> confirmed`:
   changed data set starts a new workspace.
 
 Everything a workspace holds lives in its folder: the raw uploads, the SQLite file and
-its `-wal`/`-journal` sidecars, the registry, the shared category values and its own
-`ask_log`. Deleting the folder deletes all of it.
+its `-wal`/`-journal` sidecars, the registry, the category values held back for Confirm
+and its own `ask_log`. Deleting the folder deletes all of it.
 
 The workspace id is a bearer secret: 128 random bits from `secrets`, as 32 hex
 characters. Anything else is refused before a path is built from it. It expires

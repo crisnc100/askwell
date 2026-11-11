@@ -1,8 +1,9 @@
 """The workspace HTTP routes, under `/api`.
 
-The workspace id travels only in the `X-Workspace-Id` header, never in a URL, so it
-stays out of access logs, browser history and Referer headers. Every refusal comes back
-as `{"detail": <a plain sentence>}` with a status the page can show as is.
+The workspace id travels only in the `X-Workspace-Id` header, never in a request URL, so
+it stays out of access logs and Referer headers. The page keeps it after the link's `#`,
+which browsers never send. Every refusal comes back as `{"detail": <a plain sentence>}`
+with a status the page can show as is.
 """
 
 from __future__ import annotations
