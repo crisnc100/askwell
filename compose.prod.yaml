@@ -6,6 +6,8 @@ services:
     build: .
     image: ledgerline:beta
     restart: unless-stopped
+    # A runaway request cannot take the whole host with it.
+    mem_limit: 1g
     env_file: .env.beta
     environment:
       # Caddy on the same host is the only client, and it writes X-Forwarded-For.

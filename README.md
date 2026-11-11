@@ -359,8 +359,10 @@ a web server that handles HTTPS. It answers live questions with Claude Haiku 5.5
 beta-only Anthropic API key. Three controls keep it small and cheap:
 
 - **Invite gate.** Every page and API route needs an invite code, except `/healthz`.
-  A visitor enters the code once; the browser keeps it in a cookie scripts cannot read.
-  Scripts can send it in the `X-Invite-Code` header instead.
+  A visitor enters the code once; the browser keeps a hash of it in a cookie scripts
+  cannot read. Scripts can send the code in the `X-Invite-Code` header instead. Ten
+  wrong codes an hour from one address, by any route, lock that address out for the
+  hour. The image sets `LEDGERLINE_ENV=beta`, which refuses to start without codes.
 - **Daily cap.** All live answers together may spend at most a set amount per UTC day.
   Each model call reserves its worst-case cost before it is sent, so the cap holds even
   when requests overlap. The day's total is kept on disk, so a restart does not reset it.
@@ -380,7 +382,7 @@ On the host:
    |---|---|
    | `ANTHROPIC_API_KEY` | The key for the default model, `anthropic:claude-haiku-5-5`. Set a spend limit on it in the Anthropic console too. |
    | `OPENROUTER_API_KEY` | Only if `LEDGERLINE_DEFAULT_MODEL` names an OpenRouter model. Give that key a credit limit on OpenRouter too. |
-   | `LEDGERLINE_INVITE_CODES` | The invite codes, comma-separated. With none set there is no gate, so never leave it empty on a public host. |
+   | `LEDGERLINE_INVITE_CODES` | The invite codes, comma-separated. Make each one long and random, for example from `python -c "import secrets; print(secrets.token_urlsafe(16))"`. The app will not start without them. |
    | `LEDGERLINE_DAILY_SPEND_CAP_USD` | The most live answers may cost per UTC day, for example `1.00`. |
    | `LEDGERLINE_LIVE_ANSWERS_OFF` | `1` turns live answers off. Restart the app after changing it. |
 
@@ -393,9 +395,15 @@ On the host:
 
    ```
    ledgerline.example.com {
+       request_body {
+           max_size 12MB
+       }
        reverse_proxy 127.0.0.1:8000
    }
    ```
+
+   `max_size` stops an oversized request at Caddy; the largest real request is one
+   10 MB CSV.
 
 4. Check it: `curl https://ledgerline.example.com/healthz` returns
    `{"status": "ok", "mode": "live"}`. It answers 503 if the demo database cannot be read.

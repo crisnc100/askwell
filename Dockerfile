@@ -1,14 +1,15 @@
 # The hosted beta's image: the API, the built pages, and the fieldservice demo on SQLite.
 # Build: docker build -t ledgerline .   Run: docker compose -f compose.prod.yaml up -d
 
-FROM node:22.21.1-bookworm-slim AS web
+FROM node:22.21.1-bookworm-slim@sha256:25b3eb23a00590b7499f2a2ce939322727fcce1b15fdd69754fcd09536a3ae2c AS web
 WORKDIR /web
 COPY web/package.json web/package-lock.json ./
 RUN npm ci --silent
 COPY web/ ./
 RUN npm run build --silent
 
-FROM ghcr.io/astral-sh/uv:0.9.11-python3.12-bookworm-slim
+# Both base images are pinned by digest, so a rebuild gets exactly the same layers.
+FROM ghcr.io/astral-sh/uv:0.9.11-python3.12-bookworm-slim@sha256:ef305979f94d4729707a0fc98444ebf1bc0e63a2d2919a62d28fcc3e42957508
 ENV UV_LINK_MODE=copy \
     UV_COMPILE_BYTECODE=1 \
     UV_PROJECT_ENVIRONMENT=/venv \
@@ -36,7 +37,8 @@ RUN useradd --system --uid 10001 --home-dir /nonexistent ledgerline \
 USER ledgerline
 VOLUME ["/data"]
 
-ENV LEDGERLINE_LLM_MODE=live \
+ENV LEDGERLINE_ENV=beta \
+    LEDGERLINE_LLM_MODE=live \
     LEDGERLINE_DATABASE_RO_URL=sqlite:////app/demo/fieldservice.sqlite \
     LEDGERLINE_APP_DATABASE_URL=sqlite:////data/app.sqlite \
     LEDGERLINE_WORKSPACE_DIR=/data/workspaces \
