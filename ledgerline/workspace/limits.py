@@ -28,6 +28,12 @@ class Limits:
     workspaces_per_ip: int = 3
     asks_per_hour: int = 30
     uploads_per_hour: int = 20
+    # Check is the most expensive route: it reads every upload and rebuilds the database.
+    checks_per_hour: int = 20
+    # An upload holds a share of the disk cap until it ends, so it may not run forever,
+    # and one address may not run many at once.
+    upload_seconds: float = 120.0
+    uploads_in_flight_per_ip: int = 2
     idle_days: int = 7
 
 

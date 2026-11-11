@@ -19,9 +19,14 @@ characters. Anything else is refused before a path is built from it. It expires
 Requests can overlap. Every change to a workspace runs inside `locked`, which holds that
 workspace's lock, reads its metadata fresh from disk and saves it before letting go, so
 no request acts on a stale copy. Disk space is reserved before it is written
-(`Capacity`), so two requests can never both spend the same free space. Files still
-being written (an upload streaming in, a load being built) are covered by their
-reservation, not counted twice.
+(`Capacity`), so two requests can never both spend the same free space. Files this
+process is still writing (an upload streaming in, a load being built) are covered by
+their reservation, not counted twice. Temporary files carry the writing process's
+token, so another process's leftovers (one that crashed, say) are still counted, and
+`sweep` removes them once they are old.
+
+Only the owner of the server process may read a workspace: folders are 0700 and files
+0600. The folder names are bearer ids, so a listing alone would leak them.
 """
 
 from __future__ import annotations
@@ -55,6 +60,9 @@ WORKSPACE_ID = re.compile(r"[0-9a-f]{32}")
 _TRASH = ".trash"
 _INCOMING = ".incoming-"
 _STAGING = ".staging-"
+# A temporary file older than this belongs to no live request: uploads end after
+# `Limits.upload_seconds` and a load takes seconds.
+STALE_TEMP_S = 3600.0
 DRAFT_FILE = "registry.draft.yaml"
 FIELDS_FILE = "fields.json"
 # A load reserves this much before building, then checks the real size before swapping
@@ -103,12 +111,34 @@ class DiskFullError(WorkspaceError):
     status = 507
 
 
+class UploadTooSlowError(WorkspaceError):
+    status = 408
+
+
 NOT_FOUND = "No workspace has that link. It may have expired or been deleted."
 CONFIRMED = (
     "This workspace is confirmed, so its files are fixed. Start a new workspace to use "
     "different files."
 )
 DISK_FULL = "The service is out of space right now. Try again later."
+PRIVATE_DIR = 0o700
+PRIVATE_FILE = 0o600
+
+
+def make_private_dir(path: Path) -> None:
+    """Create `path` if needed, readable by this account only."""
+    path.mkdir(mode=PRIVATE_DIR, exist_ok=True)
+    os.chmod(path, PRIVATE_DIR)
+
+
+def write_private(path: Path, data: bytes) -> None:
+    """Write `data` to `path` atomically, readable by this account only."""
+    tmp = path.with_name(path.name + ".tmp")
+    fd = os.open(tmp, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, PRIVATE_FILE)
+    with os.fdopen(fd, "wb") as fh:
+        os.fchmod(fh.fileno(), PRIVATE_FILE)
+        fh.write(data)
+    os.replace(tmp, path)
 
 
 @dataclass
@@ -213,10 +243,14 @@ class Workspace:
     def check_path(self) -> Path:
         return self.dir / "check.json"
 
+    @property
+    def meta_path(self) -> Path:
+        return self.dir / "meta.json"
+
     def save(self) -> None:
-        tmp = self.dir / "meta.json.tmp"
-        tmp.write_text(self.meta.to_json(), encoding="utf-8")
-        os.replace(tmp, self.dir / "meta.json")
+        """Write the metadata without touching the disk cap. The store saves through
+        `WorkspaceStore.save`, which counts the write."""
+        write_private(self.meta_path, self.meta.to_json().encode("utf-8"))
 
     def clear_loaded(self) -> None:
         """Remove everything built from the uploads (back to `new`)."""
@@ -257,11 +291,14 @@ class Capacity:
         with self._lock:
             self.reserved -= size
 
-    def fits(self, size: int, held: int) -> bool:
-        """Whether `size` more bytes fit, for a caller already holding `held` of the
-        reserved total."""
+    def resize(self, held: int, size: int) -> int:
+        """Change a reservation from `held` to `size` bytes, in one step under the lock,
+        so two callers can never both grow into the same free space. Returns `size`."""
         with self._lock:
-            return self.usage() + self.reserved - held + size <= self.cap
+            if size > held and self.usage() + self.reserved - held + size > self.cap:
+                raise DiskFullError(DISK_FULL)
+            self.reserved += size - held
+            return size
 
 
 @dataclass
@@ -283,7 +320,11 @@ class WorkspaceStore:
         self._locks: dict[str, threading.RLock] = {}
         self._locks_guard = threading.Lock()
         self.capacity = Capacity(self.limits.disk_cap_bytes, self.disk_usage)
-        root.mkdir(parents=True, exist_ok=True)
+        # Marks this process's temporary files (see the module docstring).
+        self._token = secrets.token_hex(4)
+        root.parent.mkdir(parents=True, exist_ok=True)
+        make_private_dir(root)
+        self.remove_stale_temp()
 
     def lock(self, workspace_id: str) -> threading.RLock:
         with self._locks_guard:
@@ -299,7 +340,26 @@ class WorkspaceStore:
                 raise WorkspaceNotFoundError(NOT_FOUND)
             workspace = Workspace(self.root, meta)
             yield workspace
-            workspace.save()
+            self.save(workspace)
+
+    def save(self, workspace: Workspace) -> None:
+        self.write_counted(workspace.meta_path, workspace.meta.to_json().encode("utf-8"))
+
+    def write_counted(self, path: Path, data: bytes) -> None:
+        """Write a small file privately, reserving any growth first so it counts toward
+        the disk cap like every other write. Only growth is reserved, so rewriting a
+        file at the same size (a visit updating `last_activity`) never fails on a full
+        disk."""
+        try:
+            old = path.stat().st_size
+        except FileNotFoundError:
+            old = 0
+        growth = max(0, len(data) - old)
+        self.capacity.reserve(growth)
+        try:
+            write_private(path, data)
+        finally:
+            self.capacity.release(growth)
 
     def _now(self) -> datetime:
         return self.clock().astimezone(UTC)
@@ -354,9 +414,10 @@ class WorkspaceStore:
             now = self._now().isoformat()
             meta = Meta(workspace_id, "new", now, now, time_zone, owner)
             workspace = Workspace(self.root, meta)
-            workspace.dir.mkdir()
-            workspace.uploads.mkdir()
-            workspace.save()
+            workspace.dir.mkdir(mode=PRIVATE_DIR)
+            make_private_dir(workspace.uploads)
+            os.chmod(workspace.dir, PRIVATE_DIR)
+            self.save(workspace)
         return workspace
 
     def open(self, raw_id: str | None, *, touch: bool = True) -> Workspace:
@@ -382,7 +443,7 @@ class WorkspaceStore:
         workspace_id = parse_workspace_id(workspace_id)
         source = self.root / workspace_id
         trash = self.root / _TRASH
-        trash.mkdir(exist_ok=True)
+        make_private_dir(trash)
         target = trash / f"{workspace_id}-{secrets.token_hex(4)}"
         with self.lock(workspace_id):
             try:
@@ -420,16 +481,52 @@ class WorkspaceStore:
                     shutil.rmtree(entry)
                 except OSError:
                     result.failed.append(entry.name)
+        result.failed.extend(self.remove_stale_temp())
         return result
 
+    def _own_temp(self, name: str) -> bool:
+        return name.startswith((f"{_INCOMING}{self._token}-", f"{_STAGING}{self._token}-"))
+
+    def _temp_paths(self) -> list[Path]:
+        """Every temporary upload file and staging folder under the root."""
+        found: list[Path] = []
+        for dirpath, dirs, files in os.walk(self.root):
+            here = Path(dirpath)
+            found.extend(here / d for d in dirs if d.startswith(_STAGING))
+            dirs[:] = [d for d in dirs if not d.startswith(_STAGING)]
+            found.extend(here / f for f in files if f.startswith(_INCOMING))
+        return found
+
+    def remove_stale_temp(self) -> list[str]:
+        """Remove temporary files that no live request can own: another process's,
+        older than `STALE_TEMP_S`. Runs when a store starts and on every sweep.
+        Returns the names it could not remove."""
+        failed: list[str] = []
+        cutoff = self._now().timestamp() - STALE_TEMP_S
+        for path in self._temp_paths():
+            if self._own_temp(path.name):
+                continue
+            try:
+                if path.lstat().st_mtime > cutoff:
+                    continue
+                if path.is_dir():
+                    shutil.rmtree(path)
+                else:
+                    path.unlink()
+            except FileNotFoundError:
+                continue
+            except OSError:
+                failed.append(path.name)
+        return failed
+
     def disk_usage(self) -> int:
-        """Bytes on disk under the root, leaving out files still being written: their
-        reservations already count them."""
+        """Bytes on disk under the root, leaving out files this process is still
+        writing: their reservations already count them."""
         total = 0
         for dirpath, dirs, files in os.walk(self.root):
-            dirs[:] = [d for d in dirs if not d.startswith(_STAGING)]
+            dirs[:] = [d for d in dirs if not self._own_temp(d)]
             for name in files:
-                if name.startswith(_INCOMING):
+                if self._own_temp(name):
                     continue
                 with contextlib.suppress(OSError):
                     total += (Path(dirpath) / name).stat().st_size
@@ -450,25 +547,41 @@ class WorkspaceStore:
         limit = self.limits.max_file_bytes
         if content_length is not None and content_length > limit:
             raise FileTooLargeError(_too_large(limit))
-        incoming = workspace.uploads / f"{_INCOMING}{secrets.token_hex(8)}"
+        incoming = workspace.uploads / f"{_INCOMING}{self._token}-{secrets.token_hex(8)}"
         received = 0
         reserved = 0
         try:
             if content_length:
                 await asyncio.to_thread(self.capacity.reserve, content_length)
                 reserved = content_length
-            with incoming.open("wb") as fh:
-                async for chunk in chunks:
-                    received += len(chunk)
-                    if received > limit:
-                        raise FileTooLargeError(_too_large(limit))
-                    if received > reserved:
-                        reserved += await asyncio.to_thread(
-                            self._reserve_more, received - reserved, limit - reserved
-                        )
-                    fh.write(chunk)
+            fd = os.open(incoming, os.O_WRONLY | os.O_CREAT | os.O_EXCL, PRIVATE_FILE)
+            with os.fdopen(fd, "wb") as fh:
+                try:
+                    async with asyncio.timeout(self.limits.upload_seconds):
+                        async for chunk in chunks:
+                            received += len(chunk)
+                            if received > limit:
+                                raise FileTooLargeError(_too_large(limit))
+                            if received > reserved:
+                                reserved += await asyncio.to_thread(
+                                    self._reserve_more, received - reserved, limit - reserved
+                                )
+                            fh.write(chunk)
+                except TimeoutError:
+                    raise UploadTooSlowError(
+                        f"The upload took longer than {self.limits.upload_seconds:g} seconds. "
+                        "Try again on a faster connection, or split the file."
+                    ) from None
+
+            def hand_over() -> None:
+                # Once the file is in place the disk usage counts it, so its
+                # reservation is given back before the metadata is saved.
+                nonlocal reserved
+                self.capacity.release(reserved)
+                reserved = 0
+
             return await asyncio.to_thread(
-                self._commit_upload, workspace.id, name, incoming, received
+                self._commit_upload, workspace.id, name, incoming, received, hand_over
             )
         finally:
             incoming.unlink(missing_ok=True)
@@ -502,20 +615,34 @@ class WorkspaceStore:
         return replacing
 
     def _commit_upload(
-        self, workspace_id: str, name: str, incoming: Path, received: int
+        self,
+        workspace_id: str,
+        name: str,
+        incoming: Path,
+        received: int,
+        hand_over: Callable[[], None],
     ) -> FileEntry:
         with self.locked(workspace_id) as workspace:
             meta = workspace.meta
             replacing = self._check_room_for(meta, name)
             stored = f"f{meta.next_file}.csv"
+            target = workspace.uploads / stored
+            os.replace(incoming, target)
+            hand_over()
             meta.next_file += 1
-            os.replace(incoming, workspace.uploads / stored)
             if replacing is not None:
-                (workspace.uploads / replacing.stored).unlink(missing_ok=True)
                 meta.files.remove(replacing)
             entry = FileEntry(name, stored, received, self._now().isoformat())
             meta.files.append(entry)
             meta.state = "new"
+            try:
+                self.save(workspace)
+            except BaseException:
+                # The metadata on disk never listed the file, so it must not stay.
+                target.unlink(missing_ok=True)
+                raise
+            if replacing is not None:
+                (workspace.uploads / replacing.stored).unlink(missing_ok=True)
             workspace.clear_loaded()
         return entry
 
@@ -550,33 +677,40 @@ class WorkspaceStore:
                 raise WrongStateError("Upload at least one CSV file first.")
             files = fresh.read_files()
             result = check_files(files, self.limits)
+            report = json.dumps(result.to_dict()).encode("utf-8")
             if not result.ok:
                 fresh.clear_loaded()
                 meta.state = "new"
-                fresh.check_path.write_text(json.dumps(result.to_dict()), encoding="utf-8")
+                self.write_counted(fresh.check_path, report)
                 return result
             estimate = max(LOAD_MIN_BYTES, LOAD_FACTOR * sum(len(f.data) for f in files))
-            self.capacity.reserve(estimate)
-            staging = fresh.dir / f"{_STAGING}{secrets.token_hex(4)}"
+            # The report is written while the reservation is held, so it is part of it.
+            # The metadata saved on the way out reserves its own growth.
+            extra_bytes = len(report)
+            held = 0
+            staging = fresh.dir / f"{_STAGING}{self._token}-{secrets.token_hex(4)}"
             try:
-                staging.mkdir()
+                held = self.capacity.resize(held, estimate + extra_bytes)
+                staging.mkdir(mode=PRIVATE_DIR)
                 load_tables(result.tables, staging / fresh.db_path.name)
                 extra = (
                     after_load(staging / fresh.db_path.name, result.tables) if after_load else {}
                 )
                 for file_name, text in extra.items():
-                    (staging / file_name).write_text(text, encoding="utf-8")
+                    write_private(staging / file_name, text.encode("utf-8"))
+                os.chmod(staging / fresh.db_path.name, PRIVATE_FILE)
                 built = sum(p.stat().st_size for p in staging.iterdir())
-                if not self.capacity.fits(built, held=estimate):
-                    raise DiskFullError(DISK_FULL)
+                # Grow the reservation to the real size before anything is swapped in,
+                # so a concurrent Check cannot count the same free space.
+                held = self.capacity.resize(held, built + extra_bytes)
                 fresh.clear_loaded()
                 for path in staging.iterdir():
                     os.replace(path, fresh.dir / path.name)
                 meta.state = "checked"
-                fresh.check_path.write_text(json.dumps(result.to_dict()), encoding="utf-8")
+                write_private(fresh.check_path, report)
             finally:
                 shutil.rmtree(staging, ignore_errors=True)
-                self.capacity.release(estimate)
+                self.capacity.release(held)
         return result
 
 
