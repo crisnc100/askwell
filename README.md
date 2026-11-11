@@ -110,15 +110,16 @@ What stays private:
   shared values leave your machine.
 - **The workspace link.** Its id is a random 128-bit code after the `#`, a part of the
   link browsers never send to a server. The pages send it in a request header instead,
-  so it never appears in a URL the server sees or logs.
+  so it never appears in a URL the server sees or logs. File names travel the same way.
 - **Your address.** It is not stored. A keyed hash of it counts your workspaces.
 - **Your files.** They expire after 7 days without use and are deleted the next time
   `uv run ledgerline sweep` runs (run it from cron, for example once an hour) or the
   workspace is opened. "Delete my data" removes them at once.
 
 Limits: at most 10 files per workspace, and per file 10 MB, 200 columns, 1,000,000 rows
-and 10,000 characters per value. Each address gets 3 workspaces at a time, 20 uploads and
-30 questions an hour (questions to `/ask` count too). The hourly counts live in the
+and 10,000 characters per value. Each address gets 3 workspaces at a time, 20 uploads, 20 checks and
+30 questions an hour (questions to `/ask` count too), and at most 2 uploads running at
+once. An upload must finish within 2 minutes. The hourly counts live in the
 server process and start again when it restarts; the workspace count does not. All
 workspaces together share 2 GB of disk. Behind a proxy that sets `X-Forwarded-For`, set `LEDGERLINE_TRUST_PROXY=1` so the limits
 see the real address. Leave it off otherwise, or any client could claim any address.

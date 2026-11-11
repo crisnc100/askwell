@@ -280,3 +280,12 @@ def test_a_file_name_that_is_not_utf8_is_a_plain_refusal(client: TestClient) -> 
     )
     assert put.status_code == 400
     assert "percent-encoded" in put.json()["detail"]
+
+
+def test_a_file_name_in_the_url_is_refused(client: TestClient) -> None:
+    headers = new_workspace(client)
+    put = client.put(
+        "/api/workspace/files", params={"name": "a.csv"}, content=b"id\n1\n", headers=headers
+    )
+    assert put.status_code == 400
+    assert FILE_HEADER in put.json()["detail"]

@@ -146,16 +146,14 @@ def install(fastapi_app: FastAPI, app: WorkspaceApp) -> APIRouter:
     def opened(request: Request) -> Workspace:
         return app.store.open(request.headers.get(HEADER))
 
-    def file_name(request: Request, name: str | None) -> str:
+    def file_name(request: Request) -> str:
         raw = request.headers.get(FILE_HEADER)
-        if raw is not None:
-            try:
-                return unquote(raw, errors="strict")
-            except UnicodeDecodeError as exc:
-                raise WorkspaceError("Send the file name percent-encoded as UTF-8.") from exc
-        if name is not None:
-            return name
-        raise WorkspaceError(f"Send the file name in the {FILE_HEADER} header.")
+        if raw is None:
+            raise WorkspaceError(f"Send the file name in the {FILE_HEADER} header.")
+        try:
+            return unquote(raw, errors="strict")
+        except UnicodeDecodeError as exc:
+            raise WorkspaceError("Send the file name percent-encoded as UTF-8.") from exc
 
     @router.get("/time-zones")
     def list_time_zones() -> list[str]:
@@ -195,7 +193,7 @@ def install(fastapi_app: FastAPI, app: WorkspaceApp) -> APIRouter:
         return status(app, opened(request))
 
     @router.put("/workspace/files")
-    async def upload(request: Request, name: str | None = None) -> dict[str, Any]:
+    async def upload(request: Request) -> dict[str, Any]:
         # Opening takes the workspace lock, so it runs off the event loop.
         workspace = await asyncio.to_thread(opened, request)
         ip = app.client_ip(request)
@@ -208,7 +206,7 @@ def install(fastapi_app: FastAPI, app: WorkspaceApp) -> APIRouter:
         with app.upload_slot(ip):
             await app.store.upload(
                 workspace,
-                file_name(request, name),
+                file_name(request),
                 request.stream(),
                 int(length) if length and length.isdigit() else None,
             )
@@ -216,9 +214,9 @@ def install(fastapi_app: FastAPI, app: WorkspaceApp) -> APIRouter:
         return status(app, fresh)
 
     @router.delete("/workspace/files")
-    def remove_file(request: Request, name: str | None = None) -> dict[str, Any]:
+    def remove_file(request: Request) -> dict[str, Any]:
         workspace = opened(request)
-        app.store.remove_file(workspace, file_name(request, name))
+        app.store.remove_file(workspace, file_name(request))
         return status(app, app.store.open(workspace.id, touch=False))
 
     @router.post("/workspace/check")
