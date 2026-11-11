@@ -282,6 +282,9 @@ class Capacity:
         self._lock = threading.Lock()
 
     def reserve(self, size: int) -> None:
+        if size <= 0:
+            # Adding no bytes never needs room, even when usage is already over the cap.
+            return
         with self._lock:
             if self.usage() + self.reserved + size > self.cap:
                 raise DiskFullError(DISK_FULL)
@@ -361,6 +364,36 @@ class WorkspaceStore:
         finally:
             self.capacity.release(growth)
 
+    def write_counted_together(self, files: list[tuple[Path, bytes]]) -> None:
+        """Write several small files as one change: the growth of all of them is
+        reserved before any is written, and if a write still fails, every file already
+        written is put back as it was."""
+        old: list[tuple[Path, bytes | None]] = []
+        for path, _ in files:
+            try:
+                old.append((path, path.read_bytes()))
+            except FileNotFoundError:
+                old.append((path, None))
+        growth = sum(
+            max(0, len(data) - (len(before) if before is not None else 0))
+            for (_, data), (_, before) in zip(files, old, strict=True)
+        )
+        self.capacity.reserve(growth)
+        written: list[tuple[Path, bytes | None]] = []
+        try:
+            for (path, data), previous in zip(files, old, strict=True):
+                write_private(path, data)
+                written.append(previous)
+        except BaseException:
+            for path, before in written:
+                if before is None:
+                    path.unlink(missing_ok=True)
+                else:
+                    write_private(path, before)
+            raise
+        finally:
+            self.capacity.release(growth)
+
     def _now(self) -> datetime:
         return self.clock().astimezone(UTC)
 
@@ -415,9 +448,15 @@ class WorkspaceStore:
             meta = Meta(workspace_id, "new", now, now, time_zone, owner)
             workspace = Workspace(self.root, meta)
             workspace.dir.mkdir(mode=PRIVATE_DIR)
-            make_private_dir(workspace.uploads)
-            os.chmod(workspace.dir, PRIVATE_DIR)
-            self.save(workspace)
+            try:
+                make_private_dir(workspace.uploads)
+                os.chmod(workspace.dir, PRIVATE_DIR)
+                self.save(workspace)
+            except BaseException:
+                # Without its metadata the folder would count against nothing and only
+                # an idle sweep would find it.
+                shutil.rmtree(workspace.dir, ignore_errors=True)
+                raise
         return workspace
 
     def open(self, raw_id: str | None, *, touch: bool = True) -> Workspace:
@@ -550,6 +589,9 @@ class WorkspaceStore:
         incoming = workspace.uploads / f"{_INCOMING}{self._token}-{secrets.token_hex(8)}"
         received = 0
         reserved = 0
+        # A reservation running in a worker thread. A timeout cancels the wait for it,
+        # not the thread, so cleanup waits for it and releases what it reserved.
+        pending: asyncio.Future[int] | None = None
         try:
             if content_length:
                 await asyncio.to_thread(self.capacity.reserve, content_length)
@@ -563,9 +605,15 @@ class WorkspaceStore:
                             if received > limit:
                                 raise FileTooLargeError(_too_large(limit))
                             if received > reserved:
-                                reserved += await asyncio.to_thread(
-                                    self._reserve_more, received - reserved, limit - reserved
+                                pending = asyncio.ensure_future(
+                                    asyncio.to_thread(
+                                        self._reserve_more,
+                                        received - reserved,
+                                        limit - reserved,
+                                    )
                                 )
+                                reserved += await asyncio.shield(pending)
+                                pending = None
                             fh.write(chunk)
                 except TimeoutError:
                     raise UploadTooSlowError(
@@ -584,6 +632,10 @@ class WorkspaceStore:
                 self._commit_upload, workspace.id, name, incoming, received, hand_over
             )
         finally:
+            if pending is not None:
+                # A reservation the disk cap refused holds nothing.
+                with contextlib.suppress(Exception):
+                    reserved += await pending
             incoming.unlink(missing_ok=True)
             self.capacity.release(reserved)
 
