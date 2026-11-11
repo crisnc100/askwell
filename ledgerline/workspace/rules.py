@@ -74,6 +74,8 @@ _ISO_ZONED = re.compile(
 NUMBER_KINDS: frozenset[str] = frozenset({"int", "num"})
 INTEGER_KINDS: frozenset[str] = frozenset({"int", "wide_int"})
 DATE_KINDS: frozenset[str] = frozenset({"date", "datetime"})
+# Values that read cleanly as a number or a date.
+CLEAN_KINDS: frozenset[str] = NUMBER_KINDS | INTEGER_KINDS | DATE_KINDS
 
 
 def is_null(cell: str) -> bool:

@@ -170,6 +170,7 @@ async function preparePage(main: HTMLElement): Promise<void> {
       h("li", {}, "UTF-8 text, separated by commas (not semicolons). A value with a comma or a line break goes in quotes."),
       h("li", {}, "Each table has an ID column named id or <table>_id, with one unique value per row. A table that only links two others needs no ID."),
       h("li", {}, "A column named <table>_id links to that table (customer_id links to customers)."),
+      h("li", {}, "A column named after its own table (customer_id in customers.csv) is one of its ID names, never a link."),
       h("li", {}, "Dates are YYYY-MM-DD (2025-03-04); times are YYYY-MM-DD HH:MM, with no time zone."),
       h("li", {}, "Numbers are plain: 1234.50, not 1,234.50, $1234.50 or 45%."),
       h("li", {}, "Blank, NULL, NA, N/A and - all mean no value."),

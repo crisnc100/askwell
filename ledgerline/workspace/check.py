@@ -22,6 +22,7 @@ from typing import Literal
 from ledgerline.core.registry import slugify
 from ledgerline.workspace.limits import Limits
 from ledgerline.workspace.rules import (
+    CLEAN_KINDS,
     DATE_KINDS,
     ColumnType,
     column_type,
@@ -231,8 +232,9 @@ def check_files(files: list[UploadedFile], limits: Limits | None = None) -> Chec
     if len(parsed) == len(files):
         plans = _cross_file(parsed)
     else:
-        for p in parsed:
-            _type_columns(p, skip=set())
+        tables = {r.table for r in reports if r.table is not None}
+        id_index, links = _roles(parsed, tables, complete=False)
+        _type_by_role(parsed, id_index, links)
         plans = []
     result = CheckResult(reports, plans)
     if not result.ok:
@@ -519,9 +521,15 @@ def _column(
     return column_type(kinds)
 
 
-def _cross_file(parsed: list[_Parsed]) -> list[TablePlan]:
-    """ID columns, links and link types across the whole set, then the plans."""
-    by_slug = {p.slug: p for p in parsed}
+def _roles(
+    parsed: list[_Parsed], tables: set[str], *, complete: bool
+) -> tuple[dict[str, int], dict[str, list[tuple[int, str]]]]:
+    """Each table's ID column, and its link columns with their target tables.
+
+    A column named `<x>_id` links to table `<x>` or `<x>s`, but never to its own table:
+    `<table>_id` and `<singular>_id` are that table's own ID names. With the whole set
+    read (`complete`), a link needs a target with an ID column; otherwise any uploaded
+    table counts, so a link to an unreadable file is still treated as a link."""
     id_index: dict[str, int] = {}
     for p in parsed:
         for candidate in id_column_candidates(p.slug):
@@ -530,32 +538,65 @@ def _cross_file(parsed: list[_Parsed]) -> list[TablePlan]:
                 break
     links: dict[str, list[tuple[int, str]]] = {}
     for p in parsed:
-        own = id_index.get(p.slug)
+        own_names = set(id_column_candidates(p.slug))
         for index, name in enumerate(p.names):
             match = _LINK.match(name)
-            if match is None or index == own:
+            if match is None or name in own_names:
                 continue
             stem = match.group(1)
-            # A table may link to itself (nodes.node_id -> nodes.id).
-            target = next((t for t in (stem, f"{stem}s") if t in by_slug and t in id_index), None)
+            target = next(
+                (
+                    t
+                    for t in (stem, f"{stem}s")
+                    if t in tables and t != p.slug and (t in id_index or not complete)
+                ),
+                None,
+            )
             if target is not None:
                 links.setdefault(p.slug, []).append((index, target))
+    return id_index, links
 
-    # Types, in dependency order. An ID is a label, so its type comes from its values
-    # with no damaged-value checks ('$5' is a fine ID). A link takes its target ID's
-    # type before any of its values are judged. Every other column is typed by its own
-    # values, with damaged ones reported.
+
+def _type_by_role(
+    parsed: list[_Parsed], id_index: dict[str, int], links: dict[str, list[tuple[int, str]]]
+) -> None:
+    """Types, in dependency order. ID columns first: checked for damaged values like any
+    column when the rest of the column is clean numbers or dates, and otherwise labels
+    ('$5' is a fine ID). Then links: each takes its target ID's type before any of its
+    values are judged (a link to an unreadable file is typed by its values, unjudged).
+    Then every other column, by its own values."""
+    by_slug = {p.slug: p for p in parsed}
     for p in parsed:
         index = id_index.get(p.slug)
         if index is not None:
-            p.types[index] = column_type({kind(v) for r in p.rows if (v := r[index]) is not None})
+            values = [r[index] for r in p.rows]
+            if _has_clean_values(values):
+                p.types[index] = _column(p.headers[index], values, p.row_numbers, p.out)
+            else:
+                p.types[index] = column_type({kind(v) for v in values if v is not None})
     for p in parsed:
         for index, target in links.get(p.slug, []):
-            p.types[index] = by_slug[target].types[id_index[target]]
             p.link_columns.add(index)
+            if target in by_slug and target in id_index:
+                p.types[index] = by_slug[target].types[id_index[target]]
+            else:
+                p.types[index] = column_type(
+                    {kind(v) for r in p.rows if (v := r[index]) is not None}
+                )
     for p in parsed:
         own = id_index.get(p.slug)
         _type_columns(p, skip=p.link_columns | ({own} if own is not None else set()))
+
+
+def _has_clean_values(values: list[str | None]) -> bool:
+    return any(v is not None and kind(v) in CLEAN_KINDS for v in values)
+
+
+def _cross_file(parsed: list[_Parsed]) -> list[TablePlan]:
+    """ID columns, links and link types across the whole set, then the plans."""
+    by_slug = {p.slug: p for p in parsed}
+    id_index, links = _roles(parsed, set(by_slug), complete=True)
+    _type_by_role(parsed, id_index, links)
 
     id_values: dict[str, set[int | float | str]] = {}
     for p in parsed:
