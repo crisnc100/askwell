@@ -111,6 +111,28 @@ async def test_an_upload_finishing_after_delete_does_not_bring_it_back(
 async def test_two_uploads_cannot_spend_the_same_free_space(
     tmp_path: Path, clock: FakeClock
 ) -> None:
+    """With a declared size (a browser always sends one for a file), the first upload
+    reserves its whole size, so exactly one of two fits."""
+    store = WorkspaceStore(tmp_path / "ws", Limits(disk_cap_bytes=50_000), clock)
+    workspace_id = store.create("1.1.1.1").id
+    _fill_to(store, 1500)
+    results = await asyncio.gather(
+        store.upload(store.open(workspace_id), "a.csv", body(b"x" * 1000), 1000),
+        store.upload(store.open(workspace_id), "b.csv", body(b"y" * 1000), 1000),
+        return_exceptions=True,
+    )
+    assert sum(isinstance(r, DiskFullError) for r in results) == 1
+    assert store.disk_usage() <= store.limits.disk_cap_bytes
+    # The refused upload gave its reservation back: what is left can still be used.
+    _fill_to(store, 400)
+    await store.upload(store.open(workspace_id), "c.csv", body(b"z" * 300))
+
+
+async def test_uploads_without_a_declared_size_never_overspend(
+    tmp_path: Path, clock: FakeClock
+) -> None:
+    """Without a declared size, room is reserved as bytes arrive: two uploads racing for
+    the same space may both be refused, but never both stored."""
     store = WorkspaceStore(tmp_path / "ws", Limits(disk_cap_bytes=50_000), clock)
     workspace_id = store.create("1.1.1.1").id
     _fill_to(store, 1500)
@@ -119,11 +141,9 @@ async def test_two_uploads_cannot_spend_the_same_free_space(
         store.upload(store.open(workspace_id), "b.csv", body(b"y" * 1000)),
         return_exceptions=True,
     )
-    assert sum(isinstance(r, DiskFullError) for r in results) == 1
+    assert sum(isinstance(r, DiskFullError) for r in results) >= 1
     assert store.disk_usage() <= store.limits.disk_cap_bytes
-    # The refused upload gave its reservation back: what is left can still be used.
-    _fill_to(store, 400)
-    await store.upload(store.open(workspace_id), "c.csv", body(b"z" * 300))
+    assert store.capacity.reserved == 0
 
 
 async def test_a_refused_recheck_keeps_the_loaded_workspace(

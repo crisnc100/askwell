@@ -95,6 +95,7 @@ def test_disk_cap_before_loading(small: WorkspaceStore) -> None:
     from ledgerline.workspace.store import FileEntry
 
     workspace.meta.files.append(FileEntry("a.csv", "f1.csv", 5, workspace.meta.created_at))
+    workspace.save()
     (small.root / "filler").write_bytes(b"x" * 4990)
     with pytest.raises(DiskFullError):
         small.check(workspace)
