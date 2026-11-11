@@ -1,0 +1,314 @@
+{
+  "prompt_version": "spike-v1",
+  "budget_usd": 0.5,
+  "spent_usd": 0.001014,
+  "stopped_by_budget": null,
+  "candidates": [
+    {
+      "model": "openai/gpt-oss-120b",
+      "advertised_structured_outputs": true,
+      "probes_run": 5,
+      "honoured": 5,
+      "exact": 1,
+      "cost_usd": 0.000205,
+      "p50_latency_ms": 4677,
+      "probes": [
+        {
+          "probe": 0,
+          "outcome": "honoured",
+          "exact": false,
+          "cost_usd": 4.866e-05,
+          "latency_ms": 8186,
+          "detail": ""
+        },
+        {
+          "probe": 1,
+          "outcome": "honoured",
+          "exact": false,
+          "cost_usd": 3.5427e-05,
+          "latency_ms": 3557,
+          "detail": ""
+        },
+        {
+          "probe": 2,
+          "outcome": "honoured",
+          "exact": false,
+          "cost_usd": 4.338e-05,
+          "latency_ms": 4677,
+          "detail": ""
+        },
+        {
+          "probe": 3,
+          "outcome": "honoured",
+          "exact": true,
+          "cost_usd": 3.4118e-05,
+          "latency_ms": 2192,
+          "detail": ""
+        },
+        {
+          "probe": 4,
+          "outcome": "honoured",
+          "exact": false,
+          "cost_usd": 4.3491e-05,
+          "latency_ms": 4685,
+          "detail": ""
+        }
+      ]
+    },
+    {
+      "model": "openai/gpt-oss-20b",
+      "advertised_structured_outputs": true,
+      "probes_run": 5,
+      "honoured": 5,
+      "exact": 1,
+      "cost_usd": 0.000379,
+      "p50_latency_ms": 3490,
+      "probes": [
+        {
+          "probe": 0,
+          "outcome": "honoured",
+          "exact": false,
+          "cost_usd": 6.543e-05,
+          "latency_ms": 3752,
+          "detail": ""
+        },
+        {
+          "probe": 1,
+          "outcome": "honoured",
+          "exact": true,
+          "cost_usd": 6.998e-05,
+          "latency_ms": 3490,
+          "detail": ""
+        },
+        {
+          "probe": 2,
+          "outcome": "honoured",
+          "exact": false,
+          "cost_usd": 6.81e-05,
+          "latency_ms": 370,
+          "detail": ""
+        },
+        {
+          "probe": 3,
+          "outcome": "honoured",
+          "exact": false,
+          "cost_usd": 7.8e-05,
+          "latency_ms": 694,
+          "detail": ""
+        },
+        {
+          "probe": 4,
+          "outcome": "honoured",
+          "exact": false,
+          "cost_usd": 9.763e-05,
+          "latency_ms": 5463,
+          "detail": ""
+        }
+      ]
+    },
+    {
+      "model": "z-ai/glm-5.3-flash",
+      "advertised_structured_outputs": true,
+      "probes_run": 5,
+      "honoured": 4,
+      "exact": 2,
+      "cost_usd": 0.000216,
+      "p50_latency_ms": 1815,
+      "probes": [
+        {
+          "probe": 0,
+          "outcome": "honoured",
+          "exact": false,
+          "cost_usd": 3.965e-05,
+          "latency_ms": 1706,
+          "detail": ""
+        },
+        {
+          "probe": 1,
+          "outcome": "honoured",
+          "exact": true,
+          "cost_usd": 1.836e-05,
+          "latency_ms": 1851,
+          "detail": ""
+        },
+        {
+          "probe": 2,
+          "outcome": "honoured",
+          "exact": true,
+          "cost_usd": 0.000106085,
+          "latency_ms": 3706,
+          "detail": ""
+        },
+        {
+          "probe": 3,
+          "outcome": "parse_error",
+          "exact": false,
+          "cost_usd": 2.725000000000004e-05,
+          "latency_ms": 1815,
+          "detail": "structured output failed validation: 7 validation errors for Triage\ncategory\n  Field required [type=missing, input_value={'customer_name': None, 'dollar_amounts': []}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.14/v/missing\nurgency\n  Field required [type=missing"
+        },
+        {
+          "probe": 4,
+          "outcome": "honoured",
+          "exact": false,
+          "cost_usd": 2.467e-05,
+          "latency_ms": 1533,
+          "detail": ""
+        }
+      ]
+    },
+    {
+      "model": "mistralai/mistral-small-24b-instruct-2501",
+      "advertised_structured_outputs": true,
+      "probes_run": 5,
+      "honoured": 5,
+      "exact": 2,
+      "cost_usd": 3.2e-05,
+      "p50_latency_ms": 858,
+      "probes": [
+        {
+          "probe": 0,
+          "outcome": "honoured",
+          "exact": false,
+          "cost_usd": 7.36e-06,
+          "latency_ms": 844,
+          "detail": ""
+        },
+        {
+          "probe": 1,
+          "outcome": "honoured",
+          "exact": false,
+          "cost_usd": 5.95e-06,
+          "latency_ms": 1149,
+          "detail": ""
+        },
+        {
+          "probe": 2,
+          "outcome": "honoured",
+          "exact": true,
+          "cost_usd": 5.9e-06,
+          "latency_ms": 850,
+          "detail": ""
+        },
+        {
+          "probe": 3,
+          "outcome": "honoured",
+          "exact": true,
+          "cost_usd": 5.66e-06,
+          "latency_ms": 858,
+          "detail": ""
+        },
+        {
+          "probe": 4,
+          "outcome": "honoured",
+          "exact": false,
+          "cost_usd": 7.46e-06,
+          "latency_ms": 1192,
+          "detail": ""
+        }
+      ]
+    },
+    {
+      "model": "google/gemma-4-26b-a4b-it",
+      "advertised_structured_outputs": true,
+      "probes_run": 5,
+      "honoured": 5,
+      "exact": 2,
+      "cost_usd": 4.9e-05,
+      "p50_latency_ms": 581,
+      "probes": [
+        {
+          "probe": 0,
+          "outcome": "honoured",
+          "exact": false,
+          "cost_usd": 1.14e-05,
+          "latency_ms": 528,
+          "detail": ""
+        },
+        {
+          "probe": 1,
+          "outcome": "honoured",
+          "exact": true,
+          "cost_usd": 8.9e-06,
+          "latency_ms": 581,
+          "detail": ""
+        },
+        {
+          "probe": 2,
+          "outcome": "honoured",
+          "exact": true,
+          "cost_usd": 8.7e-06,
+          "latency_ms": 616,
+          "detail": ""
+        },
+        {
+          "probe": 3,
+          "outcome": "honoured",
+          "exact": false,
+          "cost_usd": 8.8e-06,
+          "latency_ms": 565,
+          "detail": ""
+        },
+        {
+          "probe": 4,
+          "outcome": "honoured",
+          "exact": false,
+          "cost_usd": 1.096e-05,
+          "latency_ms": 725,
+          "detail": ""
+        }
+      ]
+    },
+    {
+      "model": "meta-llama/llama-3.1-8b-instruct",
+      "advertised_structured_outputs": true,
+      "probes_run": 5,
+      "honoured": 5,
+      "exact": 1,
+      "cost_usd": 0.000132,
+      "p50_latency_ms": 495,
+      "probes": [
+        {
+          "probe": 0,
+          "outcome": "honoured",
+          "exact": false,
+          "cost_usd": 2.97e-05,
+          "latency_ms": 495,
+          "detail": ""
+        },
+        {
+          "probe": 1,
+          "outcome": "honoured",
+          "exact": false,
+          "cost_usd": 2.398e-05,
+          "latency_ms": 508,
+          "detail": ""
+        },
+        {
+          "probe": 2,
+          "outcome": "honoured",
+          "exact": false,
+          "cost_usd": 2.706e-05,
+          "latency_ms": 762,
+          "detail": ""
+        },
+        {
+          "probe": 3,
+          "outcome": "honoured",
+          "exact": true,
+          "cost_usd": 2.398e-05,
+          "latency_ms": 446,
+          "detail": ""
+        },
+        {
+          "probe": 4,
+          "outcome": "honoured",
+          "exact": false,
+          "cost_usd": 2.75e-05,
+          "latency_ms": 438,
+          "detail": ""
+        }
+      ]
+    }
+  ]
+}
