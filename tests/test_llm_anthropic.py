@@ -14,15 +14,15 @@ from typing import Any
 
 import httpx2
 import pytest
-from ledgerline.llm.anthropic_transport import AnthropicTransport
-from ledgerline.llm.providers import ProviderRouter, split_model
 from pydantic import BaseModel, SecretStr
 
 from ledgerline.config import Settings
+from ledgerline.llm.anthropic_transport import AnthropicTransport
 from ledgerline.llm.budget import BudgetGuard
 from ledgerline.llm.daily import DailySpend
 from ledgerline.llm.errors import ParseError, ProviderUnavailableError
 from ledgerline.llm.gateway import Gateway
+from ledgerline.llm.providers import ProviderRouter, split_model
 from ledgerline.llm.replay import ReplayStore
 from ledgerline.llm.types import ChatMessage
 
@@ -87,9 +87,8 @@ def error(status: int) -> httpx2.Response:
 
 
 def _settings(**overrides: Any) -> Settings:
-    return Settings(  # type: ignore[call-arg]
-        ANTHROPIC_API_KEY=SecretStr("sk-ant-test"), OPENROUTER_API_KEY=None, **overrides
-    )
+    keys = {"ANTHROPIC_API_KEY": SecretStr("sk-ant-test"), "OPENROUTER_API_KEY": None}
+    return Settings(**keys, **overrides)
 
 
 def _transport(server: Server, sleeps: list[float] | None = None) -> AnthropicTransport:
