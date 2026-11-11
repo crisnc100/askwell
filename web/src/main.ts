@@ -156,8 +156,6 @@ function workspaceBox(): HTMLElement | null {
   );
 }
 
-// Prepare ------------------------------------------------------------------------------
-
 async function preparePage(main: HTMLElement): Promise<void> {
   append(
     main,
@@ -247,8 +245,6 @@ function exampleTable(columns: string[], rows: string[][]): HTMLElement {
   );
 }
 
-// Upload -------------------------------------------------------------------------------
-
 function uploadPage(main: HTMLElement): void {
   const current = status as Status;
   const input = h("input", { attrs: { type: "file", id: "files", accept: ".csv,text/csv", multiple: "" } });
@@ -324,8 +320,6 @@ function formatBytes(bytes: number): string {
   return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
 }
 
-// Check --------------------------------------------------------------------------------
-
 function checkPage(main: HTMLElement): void {
   const current = status as Status;
   append(main, h("h1", {}, "Check"));
@@ -390,8 +384,6 @@ function checkPage(main: HTMLElement): void {
   }
   append(main, workspaceBox());
 }
-
-// Confirm ------------------------------------------------------------------------------
 
 async function confirmPage(main: HTMLElement): Promise<void> {
   const draw = drawn;
@@ -525,8 +517,6 @@ function fieldRow(
   );
 }
 
-// Ask ----------------------------------------------------------------------------------
-
 function askPage(main: HTMLElement): void {
   const input = h("input", { attrs: { type: "text", id: "question", maxlength: "2000", placeholder: "How many orders were paid last month?" } });
   const button = h("button", { attrs: { type: "submit" } }, "Ask");
@@ -599,8 +589,6 @@ function showAnswer(where: HTMLElement, answer: Answer): void {
     ),
   );
 }
-
-// Start --------------------------------------------------------------------------------
 
 async function start(): Promise<void> {
   const id = idFromHash();

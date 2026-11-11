@@ -1,5 +1,5 @@
 // Calls to the Ledgerline API. The workspace id goes in the X-Workspace-Id header only,
-// never in a URL, so it stays out of server logs and browser history.
+// never in a request URL, so it stays out of server logs.
 
 export type State = "new" | "checked" | "confirmed";
 
