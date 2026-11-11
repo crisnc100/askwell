@@ -2,57 +2,43 @@
   "abort_reason": null,
   "baseline_wins": [
     {
-      "item_id": "fs-009",
-      "model": "mistralai/mistral-small-24b-instruct-2501",
-      "schema": "fieldservice",
-      "system": "oneshot",
-      "trial": 1
-    },
-    {
-      "item_id": "fs-011",
-      "model": "mistralai/mistral-small-24b-instruct-2501",
-      "schema": "fieldservice",
-      "system": "oneshot",
-      "trial": 1
-    },
-    {
-      "item_id": "fs-020",
-      "model": "mistralai/mistral-small-24b-instruct-2501",
-      "schema": "fieldservice",
-      "system": "oneshot",
-      "trial": 1
-    },
-    {
-      "item_id": "fs-023",
-      "model": "mistralai/mistral-small-24b-instruct-2501",
-      "schema": "fieldservice",
-      "system": "oneshot",
-      "trial": 1
-    },
-    {
       "item_id": "fs-025",
-      "model": "mistralai/mistral-small-24b-instruct-2501",
+      "model": "anthropic:claude-haiku-5-5",
       "schema": "fieldservice",
       "system": "oneshot",
       "trial": 1
     },
     {
       "item_id": "fs-030",
-      "model": "mistralai/mistral-small-24b-instruct-2501",
+      "model": "anthropic:claude-haiku-5-5",
       "schema": "fieldservice",
       "system": "oneshot",
       "trial": 1
     },
     {
-      "item_id": "fs-032",
-      "model": "mistralai/mistral-small-24b-instruct-2501",
+      "item_id": "fs-035",
+      "model": "anthropic:claude-haiku-5-5",
       "schema": "fieldservice",
       "system": "oneshot",
       "trial": 1
     },
     {
-      "item_id": "fs-043",
-      "model": "mistralai/mistral-small-24b-instruct-2501",
+      "item_id": "fs-037",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "fieldservice",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "item_id": "fs-038",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "fieldservice",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "item_id": "fs-042",
+      "model": "anthropic:claude-haiku-5-5",
       "schema": "fieldservice",
       "system": "oneshot",
       "trial": 1
@@ -61,19 +47,19 @@
   "deferred": {},
   "floors": [
     {
-      "cause": "Most misses are refusals. 16 of the 43 answerable questions end in one: 12 because the model's intent failed validation twice (most often a malformed intent shape, or a sort on a field that is neither a metric nor a group), and 4 because the model judged the question unanswerable. Eight questions need things the intent grammar cannot express, so no model can score above 81.4%. Of the 27 answers given, 6 are wrong.",
+      "cause": "Accuracy is met (35 of 43); wrong answers miss by one (2 of 37 answered, 5.4%). Both wrong answers are questions the intent grammar cannot express (a ratio, two date fields in one series), where the model answered a nearby question instead of refusing. Of its 6 refusals, 5 are correct refusals of such questions; 1 (fs-038) is a misread after one intent failed validation.",
       "checks": [
         {
-          "met": false,
+          "met": true,
           "metric": "execution_accuracy",
           "rate": {
             "ci95": [
-              0.3461744754671859,
-              0.632476915305507
+              0.6738299634272562,
+              0.9025824857100377
             ],
-            "n": 21,
+            "n": 35,
             "of": 43,
-            "rate": 0.4883720930232558
+            "rate": 0.813953488372093
           },
           "rule": ">= 80%"
         },
@@ -82,18 +68,18 @@
           "metric": "wrong_answer_rate_given_answered",
           "rate": {
             "ci95": [
-              0.10607239452360037,
-              0.4075692886663257
+              0.014950976833157673,
+              0.17704654350813104
             ],
-            "n": 6,
-            "of": 27,
-            "rate": 0.2222222222222222
+            "n": 2,
+            "of": 37,
+            "rate": 0.05405405405405406
           },
           "rule": "<= 5%"
         }
       ],
       "met": false,
-      "model": "mistralai/mistral-small-24b-instruct-2501",
+      "model": "anthropic:claude-haiku-5-5",
       "next": "v0.2 changes the prompt and the grammar, then measures them on a fresh run. The v0.1 prompt is not changed after seeing these results.",
       "schema": "fieldservice",
       "status_note": "in v0.1 (live, default model)"
@@ -102,139 +88,22 @@
   "misses": [
     {
       "error": null,
-      "issue_codes": [
-        "intent_shape"
-      ],
-      "item_id": "fs-009",
-      "model": "mistralai/mistral-small-24b-instruct-2501",
-      "note": "The first intent was right except for a placeholder reason. On the retry the model said the registry has no technician names, which is wrong (full_name is visible).",
-      "outcome": "refused",
-      "refusal": "The question asks for a list of technicians, but the registry does not include a field for technician names.",
-      "schema": "fieldservice",
-      "tag": "misread",
-      "trial": 1
-    },
-    {
-      "error": null,
       "issue_codes": [],
-      "item_id": "fs-011",
-      "model": "mistralai/mistral-small-24b-instruct-2501",
-      "note": "Asked for the most expensive part and its price, the model returned the highest price and a count, not the part. A row list sorted by price with a limit of 1 would answer it.",
-      "outcome": "wrong",
-      "refusal": null,
-      "schema": "fieldservice",
-      "tag": "misread",
-      "trial": 1
-    },
-    {
-      "error": null,
-      "issue_codes": [
-        "intent_shape",
-        "invalid_order_by"
-      ],
-      "item_id": "fs-018",
-      "model": "mistralai/mistral-small-24b-instruct-2501",
-      "note": "Both intents had a placeholder reason, no group_by, and a sort on an issued_at_month field that does not exist. A monthly group on issued_at would answer it.",
-      "outcome": "refused",
-      "refusal": "no valid query after 2 attempts (intent_shape, invalid_order_by)",
-      "schema": "fieldservice",
-      "tag": "misread",
-      "trial": 1
-    },
-    {
-      "error": null,
-      "issue_codes": [],
-      "item_id": "fs-020",
-      "model": "mistralai/mistral-small-24b-instruct-2501",
-      "note": "The model added a year-to-date filter on completion date that the question does not ask for. The gold averages every completed job.",
-      "outcome": "wrong",
-      "refusal": null,
-      "schema": "fieldservice",
-      "tag": "misread",
-      "trial": 1
-    },
-    {
-      "error": null,
-      "issue_codes": [
-        "fan_out",
-        "grain_type"
-      ],
-      "item_id": "fs-021",
-      "model": "mistralai/mistral-small-24b-instruct-2501",
-      "note": "The first intent counted from technicians, a fan-out the validator rightly refused. The retry re-based on work orders but asked for a day grain on a text field.",
-      "outcome": "refused",
-      "refusal": "no valid query after 2 attempts (grain_type)",
-      "schema": "fieldservice",
-      "tag": "misread",
-      "trial": 1
-    },
-    {
-      "error": null,
-      "issue_codes": [
-        "fan_out",
-        "intent_shape",
-        "invalid_order_by"
-      ],
-      "item_id": "fs-022",
-      "model": "mistralai/mistral-small-24b-instruct-2501",
-      "note": "Both intents had a placeholder reason and no group_by; the first also counted from parts, a fan-out. Grouping work_order_parts by part would answer it.",
-      "outcome": "refused",
-      "refusal": "no valid query after 2 attempts (intent_shape)",
-      "schema": "fieldservice",
-      "tag": "misread",
-      "trial": 1
-    },
-    {
-      "error": null,
-      "issue_codes": [
-        "intent_shape"
-      ],
-      "item_id": "fs-023",
-      "model": "mistralai/mistral-small-24b-instruct-2501",
-      "note": "Both intents were right except for a placeholder reason (\"None\"), and neither kept the \"at least 25\" condition.",
-      "outcome": "refused",
-      "refusal": "no valid query after 2 attempts (intent_shape)",
-      "schema": "fieldservice",
-      "tag": "misread",
-      "trial": 1
-    },
-    {
-      "error": null,
-      "issue_codes": [
-        "unknown_field"
-      ],
-      "item_id": "fs-024",
-      "model": "mistralai/mistral-small-24b-instruct-2501",
-      "note": "Ambiguous date: \"did work for last month\" was read as completed last month; the gold uses opened last month. Both readings are defensible.",
-      "outcome": "wrong",
-      "refusal": null,
-      "schema": "fieldservice",
-      "tag": "gold_issue",
-      "trial": 1
-    },
-    {
-      "error": null,
-      "issue_codes": [
-        "aggregate_type",
-        "date_range_duplicate"
-      ],
       "item_id": "fs-025",
-      "model": "mistralai/mistral-small-24b-instruct-2501",
-      "note": "Needs the difference between two dates (opened to completed). Refused, by failing validation twice.",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "Haiku 5.5 (select-haiku-2026-11-11): Needs the difference between two dates (opened to completed). Refused correctly, naming the missing duration. mistral-small (select-2026-11-11): Needs the difference between two dates (opened to completed). Refused, by failing validation twice.",
       "outcome": "refused",
-      "refusal": "no valid query after 2 attempts (date_range_duplicate)",
+      "refusal": "The registry cannot compute elapsed days between opened_at and completed_at. Metrics aggregate a single field, and no duration field exists. Average labour hours for urgent work orders is available instead, if that helps.",
       "schema": "fieldservice",
       "tag": "grammar_gap",
       "trial": 1
     },
     {
       "error": null,
-      "issue_codes": [
-        "date_range_duplicate"
-      ],
+      "issue_codes": [],
       "item_id": "fs-028",
-      "model": "mistralai/mistral-small-24b-instruct-2501",
-      "note": "Needs a ratio of two counts. The model returned two counts of cancelled orders instead of refusing: a wrong answer, not a refusal.",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "Haiku 5.5 (select-haiku-2026-11-11): Needs a ratio of two counts. The model returned work order counts per status instead of refusing: a wrong answer, not a refusal. mistral-small (select-2026-11-11): Needs a ratio of two counts. The model returned two counts of cancelled orders instead of refusing: a wrong answer, not a refusal.",
       "outcome": "wrong",
       "refusal": null,
       "schema": "fieldservice",
@@ -243,113 +112,36 @@
     },
     {
       "error": null,
-      "issue_codes": [
-        "fan_out",
-        "intent_shape",
-        "invalid_order_by",
-        "unknown_field"
-      ],
+      "issue_codes": [],
       "item_id": "fs-030",
-      "model": "mistralai/mistral-small-24b-instruct-2501",
-      "note": "Needs a computed value (quantity times unit price). Refused, by failing validation twice.",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "Haiku 5.5 (select-haiku-2026-11-11): Needs a computed value (quantity times unit price). Refused correctly. mistral-small (select-2026-11-11): Needs a computed value (quantity times unit price). Refused, by failing validation twice.",
       "outcome": "refused",
-      "refusal": "no valid query after 2 attempts (invalid_order_by, unknown_field)",
+      "refusal": "Parts revenue requires multiplying quantity by unit_price per line, and the registry metrics only aggregate a single field. No product or computed revenue measure is available.",
       "schema": "fieldservice",
       "tag": "grammar_gap",
       "trial": 1
     },
     {
       "error": null,
-      "issue_codes": [
-        "fan_out",
-        "intent_shape",
-        "invalid_order_by"
-      ],
-      "item_id": "fs-032",
-      "model": "mistralai/mistral-small-24b-instruct-2501",
-      "note": "Both intents had a placeholder reason and no group_by, and summed invoices from technicians or work orders, a fan-out. Grouping invoices by technician would answer it.",
-      "outcome": "refused",
-      "refusal": "no valid query after 2 attempts (fan_out, intent_shape, invalid_order_by)",
-      "schema": "fieldservice",
-      "tag": "misread",
-      "trial": 1
-    },
-    {
-      "error": null,
-      "issue_codes": [
-        "intent_shape",
-        "invalid_order_by"
-      ],
-      "item_id": "fs-033",
-      "model": "mistralai/mistral-small-24b-instruct-2501",
-      "note": "Both intents had a placeholder reason and no group_by; the first sorted on fields that do not exist. Grouping invoices by customer region and quarter would answer it.",
-      "outcome": "refused",
-      "refusal": "no valid query after 2 attempts (intent_shape)",
-      "schema": "fieldservice",
-      "tag": "misread",
-      "trial": 1
-    },
-    {
-      "error": null,
-      "issue_codes": [
-        "date_range_duplicate",
-        "grain_type",
-        "intent_shape",
-        "one_to_many_join"
-      ],
-      "item_id": "fs-034",
-      "model": "mistralai/mistral-small-24b-instruct-2501",
-      "note": "The first intent was a row list from customers with filters on work orders; the retry grouped by customer with a year grain on an ID and filtered the same date twice.",
-      "outcome": "refused",
-      "refusal": "no valid query after 2 attempts (date_range_duplicate, grain_type)",
-      "schema": "fieldservice",
-      "tag": "misread",
-      "trial": 1
-    },
-    {
-      "error": null,
-      "issue_codes": [
-        "intent_shape",
-        "invalid_order_by"
-      ],
+      "issue_codes": [],
       "item_id": "fs-035",
-      "model": "mistralai/mistral-small-24b-instruct-2501",
-      "note": "Needs two date fields in one monthly series. Refused, by failing validation twice.",
-      "outcome": "refused",
-      "refusal": "no valid query after 2 attempts (intent_shape, invalid_order_by)",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "Haiku 5.5 (select-haiku-2026-11-11): Needs two date fields in one monthly series. The model counted completions among the orders opened each month instead of refusing: a wrong answer. mistral-small (select-2026-11-11): Needs two date fields in one monthly series. Refused, by failing validation twice.",
+      "outcome": "wrong",
+      "refusal": null,
       "schema": "fieldservice",
       "tag": "grammar_gap",
       "trial": 1
     },
     {
       "error": null,
-      "issue_codes": [
-        "date_range_duplicate",
-        "fan_out",
-        "intent_shape",
-        "invalid_order_by"
-      ],
-      "item_id": "fs-036",
-      "model": "mistralai/mistral-small-24b-instruct-2501",
-      "note": "Both intents had a placeholder reason and no group_by, and sorted on a field that does not exist; the \"at least 100 invoices\" condition was dropped.",
-      "outcome": "refused",
-      "refusal": "no valid query after 2 attempts (intent_shape, invalid_order_by)",
-      "schema": "fieldservice",
-      "tag": "misread",
-      "trial": 1
-    },
-    {
-      "error": null,
-      "issue_codes": [
-        "fan_out",
-        "intent_shape",
-        "invalid_order_by"
-      ],
+      "issue_codes": [],
       "item_id": "fs-037",
-      "model": "mistralai/mistral-small-24b-instruct-2501",
-      "note": "Needs a distinct count of months in HAVING. Refused correctly.",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "Haiku 5.5 (select-haiku-2026-11-11): Needs a distinct count of months in HAVING. Refused correctly. mistral-small (select-2026-11-11): Needs a distinct count of months in HAVING. Refused correctly.",
       "outcome": "refused",
-      "refusal": "The question requires a join that would double count rows, which is not allowed.",
+      "refusal": "The registry can't express a per-technician check that every month in the quarter has at least one completion. A grouped query can't require all months to be present, and count_distinct on completed_at counts distinct timestamps, not distinct months.",
       "schema": "fieldservice",
       "tag": "grammar_gap",
       "trial": 1
@@ -357,79 +149,39 @@
     {
       "error": null,
       "issue_codes": [
-        "fan_out",
-        "invalid_order_by"
+        "unknown_field"
       ],
       "item_id": "fs-038",
-      "model": "mistralai/mistral-small-24b-instruct-2501",
-      "note": "The model left out the \"paid\" filter and grouped by site and customer ID instead of by customer, with no \"more than $20,000\" condition.",
-      "outcome": "wrong",
-      "refusal": null,
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "Haiku 5.5 (select-haiku-2026-11-11): The first intent named a field that does not exist; on the retry the model said invoices cannot be grouped by customer. They can: the registry links invoices to customers through work orders and sites. mistral-small (select-2026-11-11): The model left out the \"paid\" filter and grouped by site and customer ID instead of by customer, with no \"more than $20,000\" condition.",
+      "outcome": "refused",
+      "refusal": "The registry has no direct link from invoices to customers. Invoices join only to work_orders, and customers are reachable only through work_orders and sites, a multi-step path that the registry cannot group by. Customer totals cannot be computed from the listed fields.",
       "schema": "fieldservice",
       "tag": "misread",
       "trial": 1
     },
     {
       "error": null,
-      "issue_codes": [
-        "date_range_duplicate",
-        "grain_type"
-      ],
+      "issue_codes": [],
       "item_id": "fs-039",
-      "model": "mistralai/mistral-small-24b-instruct-2501",
-      "note": "Needs date arithmetic and a ratio. Refused, by failing validation twice.",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "Haiku 5.5 (select-haiku-2026-11-11): Needs date arithmetic and a ratio. Refused correctly. mistral-small (select-2026-11-11): Needs date arithmetic and a ratio. Refused, by failing validation twice.",
       "outcome": "refused",
-      "refusal": "no valid query after 2 attempts (date_range_duplicate, grain_type)",
+      "refusal": "The registry has no way to express an elapsed-time comparison (completed_at within 2 days of opened_at) or a share computed from two counts. Filters can only compare a field to a fixed value or another field directly, not to a date plus an interval.",
       "schema": "fieldservice",
       "tag": "grammar_gap",
       "trial": 1
     },
     {
       "error": null,
-      "issue_codes": [
-        "fan_out",
-        "intent_shape",
-        "unknown_field",
-        "value_shape"
-      ],
-      "item_id": "fs-041",
-      "model": "mistralai/mistral-small-24b-instruct-2501",
-      "note": "Needs a conditional count beside a sum. Refused correctly.",
-      "outcome": "refused",
-      "refusal": "The question requires aggregating invoices, which are in a one-to-many relationship with customers, and ordering by the aggregated value. This is not supported.",
-      "schema": "fieldservice",
-      "tag": "grammar_gap",
-      "trial": 1
-    },
-    {
-      "error": null,
-      "issue_codes": [
-        "intent_shape",
-        "one_to_many_join"
-      ],
+      "issue_codes": [],
       "item_id": "fs-042",
-      "model": "mistralai/mistral-small-24b-instruct-2501",
-      "note": "Needs an anti-join (sites with no work orders). Refused correctly.",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "Haiku 5.5 (select-haiku-2026-11-11): Needs an anti-join (sites with no work orders). Refused correctly. mistral-small (select-2026-11-11): Needs an anti-join (sites with no work orders). Refused correctly.",
       "outcome": "refused",
-      "refusal": "The question asks for sites with no work orders, but the registry does not have a field for the last work order date on a site.",
+      "refusal": "The registry cannot express 'sites with no work orders in a period'. That needs an anti-join from sites to work_orders, and the only listed relationship runs from work_orders to sites, so it cannot be filtered by the absence of related work orders.",
       "schema": "fieldservice",
       "tag": "grammar_gap",
-      "trial": 1
-    },
-    {
-      "error": null,
-      "issue_codes": [
-        "fan_out",
-        "intent_shape",
-        "invalid_order_by"
-      ],
-      "item_id": "fs-043",
-      "model": "mistralai/mistral-small-24b-instruct-2501",
-      "note": "The model dropped the \"at least 20 completed jobs\" condition and sorted by job count instead of average hours.",
-      "outcome": "wrong",
-      "refusal": null,
-      "schema": "fieldservice",
-      "tag": "misread",
       "trial": 1
     }
   ],
@@ -439,36 +191,36 @@
   "registry_hashes": {},
   "run_id": "replay-fieldservice",
   "simulation": null,
-  "spent_usd": 0.01587406,
+  "spent_usd": 0.05474179999999999,
   "status": "complete",
   "table": [
     {
       "accuracy_given_attempted": {
         "ci95": [
-          0.5924307113336742,
-          0.8939276054763996
+          0.822953456491869,
+          0.9850490231668423
         ],
-        "n": 21,
-        "of": 27,
-        "rate": 0.7777777777777778
+        "n": 35,
+        "of": 37,
+        "rate": 0.9459459459459459
       },
       "coverage": {
         "ci95": [
-          0.47859809159688477,
-          0.7562366099034943
+          0.7273641203261714,
+          0.9344427657203511
         ],
-        "n": 27,
+        "n": 37,
         "of": 43,
-        "rate": 0.627906976744186
+        "rate": 0.8604651162790697
       },
       "execution_accuracy": {
         "ci95": [
-          0.3461744754671859,
-          0.632476915305507
+          0.6738299634272562,
+          0.9025824857100377
         ],
-        "n": 21,
+        "n": 35,
         "of": 43,
-        "rate": 0.4883720930232558
+        "rate": 0.813953488372093
       },
       "execution_error_rate": {
         "ci95": [
@@ -481,17 +233,17 @@
       },
       "false_refusal_rate": {
         "ci95": [
-          0.24376339009650572,
-          0.5214019084031153
+          0.06555723427964878,
+          0.2726358796738286
         ],
-        "n": 16,
+        "n": 6,
         "of": 43,
-        "rate": 0.37209302325581395
+        "rate": 0.13953488372093023
       },
       "items": 67,
-      "mean_cost_usd": 0.00014535298507462686,
-      "model": "mistralai/mistral-small-24b-instruct-2501",
-      "p50_latency_ms": 5.259917001239955,
+      "mean_cost_usd": 0.0004146164179104478,
+      "model": "anthropic:claude-haiku-5-5",
+      "p50_latency_ms": 6.187083083204925,
       "pending": 0,
       "refusal_recall": {
         "ci95": [
@@ -507,23 +259,23 @@
       "trials": 1,
       "wrong_answer_rate_given_answered": {
         "ci95": [
-          0.10607239452360037,
-          0.4075692886663257
+          0.014950976833157673,
+          0.17704654350813104
         ],
-        "n": 6,
-        "of": 27,
-        "rate": 0.2222222222222222
+        "n": 2,
+        "of": 37,
+        "rate": 0.05405405405405406
       }
     },
     {
       "accuracy_given_attempted": {
         "ci95": [
-          0.32511057704121815,
-          0.6108435952768602
+          0.6479435728926356,
+          0.885771657790044
         ],
-        "n": 20,
+        "n": 34,
         "of": 43,
-        "rate": 0.46511627906976744
+        "rate": 0.7906976744186046
       },
       "coverage": {
         "ci95": [
@@ -536,21 +288,21 @@
       },
       "execution_accuracy": {
         "ci95": [
-          0.32511057704121815,
-          0.6108435952768602
+          0.6479435728926356,
+          0.885771657790044
         ],
-        "n": 20,
+        "n": 34,
         "of": 43,
-        "rate": 0.46511627906976744
+        "rate": 0.7906976744186046
       },
       "execution_error_rate": {
         "ci95": [
-          0.008224694838897963,
-          0.10246555563352011
+          0.0,
+          0.05422613939130178
         ],
-        "n": 2,
+        "n": 0,
         "of": 67,
-        "rate": 0.029850746268656716
+        "rate": 0.0
       },
       "false_refusal_rate": {
         "ci95": [
@@ -562,30 +314,30 @@
         "rate": 0.0
       },
       "items": 67,
-      "mean_cost_usd": 9.157328358208956e-05,
-      "model": "mistralai/mistral-small-24b-instruct-2501",
-      "p50_latency_ms": 2.3841660004109144,
+      "mean_cost_usd": 0.0004024253731343284,
+      "model": "anthropic:claude-haiku-5-5",
+      "p50_latency_ms": 2.5450839893892407,
       "pending": 0,
       "refusal_recall": {
         "ci95": [
-          0.7975819352134406,
-          0.9926065438344942
+          0.8620237953250198,
+          1.0
         ],
-        "n": 23,
+        "n": 24,
         "of": 24,
-        "rate": 0.9583333333333334
+        "rate": 1.0
       },
       "schema": "fieldservice",
       "system": "oneshot",
       "trials": 1,
       "wrong_answer_rate_given_answered": {
         "ci95": [
-          0.3772246413134498,
-          0.6664039876929454
+          0.11422834220995602,
+          0.3520564271073644
         ],
-        "n": 22,
-        "of": 42,
-        "rate": 0.5238095238095238
+        "n": 9,
+        "of": 43,
+        "rate": 0.20930232558139536
       }
     }
   ],

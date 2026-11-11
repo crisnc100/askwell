@@ -12,10 +12,10 @@ fills in a valid intent for a nearby question instead of refusing. [docs/product
 who it is for and what it leaves out on purpose.
 
 **Status.** v0.1 runs on your machine, and an invite-only beta answers live questions
-(see [Deploy the hosted beta](#deploy-the-hosted-beta)). The default model,
-`mistralai/mistral-small-24b-instruct-2501`, was chosen by a measured rule
-([ADR-004](docs/adr/ADR-004-model-choice.md)). Ledgerline does not reach its own accuracy
-target with it; the results below say so.
+(see [Deploy the hosted beta](#deploy-the-hosted-beta)). The default model is Claude
+Haiku 5.5, measured against the same gates as the others
+([ADR-004](docs/adr/ADR-004-model-choice.md)). It reaches the accuracy target but gives one
+wrong answer too many.
 
 ## Try it
 
@@ -60,11 +60,11 @@ made-up business in the demo database, with the default model, live:
 
 | Live, fieldservice | Ledgerline | one-shot |
 |---|---|---|
-| Rows match the expected answer | 48.8% (21/43) | 46.5% (20/43) |
-| Wrong answers among answered | 22.2% (6/27) | 52.4% (22/42) |
+| Rows match the expected answer | 81.4% (35/43) | 79.1% (34/43) |
+| Wrong answers among answered | 5.4% (2/37) | 20.9% (9/43) |
 
-Ledgerline gives far fewer wrong answers, mostly by refusing what it cannot check, but it
-misses its v0.1 target (at least 80% right, at most 5% wrong). [docs/failures/](docs/failures/README.md) walks through four misses.
+Ledgerline gives a quarter of the baseline's wrong answers, but it misses its v0.1
+target (at least 80% right, at most 5% wrong) by one wrong answer. [docs/failures/](docs/failures/README.md) walks through four misses.
 
 ## Read more
 
@@ -73,9 +73,8 @@ misses its v0.1 target (at least 80% right, at most 5% wrong). [docs/failures/](
 - [docs/adr/](docs/adr/README.md): each design decision, with a prediction made before
   the code and the measured result.
 - [docs/build-log.md](docs/build-log.md): how v0.1 was built, and what reviews caught.
-- [evals/reports/select-2026-11-11.md](evals/reports/select-2026-11-11.md): the live
-  report for the four models compared, and [sim-1.md](evals/reports/sim-1.md), the
-  earlier run with simulated answers.
+- [evals/reports/](evals/reports/): the live runs (`select-haiku-2026-11-11` for the
+  default) and `sim-1`, run earlier on simulated answers.
 - The sections below: each part of the system in detail.
 
 ## Setup details
@@ -93,7 +92,9 @@ defaults in `ledgerline/config.py` match them. To change them, copy `.env.exampl
 Model calls default to replay mode, which answers only from recorded responses. A model is
 called live only with `--mode record` or `--mode live`, with `LEDGERLINE_LLM_MODE=record`
 or `live` in the environment (it sets the mode for `ledgerline ask` and the API when no
-`--mode` is given), or by `ledgerline spike`. Each of those needs `OPENROUTER_API_KEY`.
+`--mode` is given), or by `ledgerline spike`. Each of those needs the key for the model's
+provider: `ANTHROPIC_API_KEY` for a model named `anthropic:<id>`, `OPENROUTER_API_KEY` for
+any other (the spike always uses OpenRouter).
 
 ## Your data
 
@@ -129,7 +130,7 @@ workspaces together share 2 GB of disk. Behind a proxy that sets `X-Forwarded-Fo
 see the real address. Leave it off otherwise, or any client could claim any address.
 
 Answers on your own data need a live model, because no answers are recorded for your
-files. Set `OPENROUTER_API_KEY` and `LEDGERLINE_LLM_MODE=live` (see
+files. Set `ANTHROPIC_API_KEY` (for the default model) and `LEDGERLINE_LLM_MODE=live` (see
 [.env.example](.env.example)). Without them, Ask replies "Live answers need a model key;
 see the README." Questions like "last month" use today's date in your workspace's time
 zone.
@@ -268,22 +269,29 @@ instead, because a work order can have more than one invoice.
 
 ## Model gateway
 
-`ledgerline/llm/` makes one structured-output call to a model on OpenRouter, through
-LangChain. It has four modes: `record`, `replay`, `live` and `export`. In replay mode a
+`ledgerline/llm/` makes one call to a model and parses its answer into the requested
+form. The model's configured name picks the provider: `anthropic:<model id>` (for example
+`anthropic:claude-haiku-5-5`) calls the Anthropic API directly with the official SDK;
+any other name is an OpenRouter model, called through LangChain with structured output.
+The Anthropic API refuses the intent schema as structured output (it is too large for
+its grammar), so that transport asks for the JSON as text; the same parser and
+validator check it. Anthropic prices come from config (`ANTHROPIC_INPUT_USD_PER_MTOK`,
+`ANTHROPIC_OUTPUT_USD_PER_MTOK`); OpenRouter reports its own. The gateway has four modes: `record`, `replay`, `live` and `export`. In replay mode a
 missing recording is an error; it never falls back to a live call. Before each live
 call, a budget guard checks the call's worst-case cost against what is left of the
 budget, and stops when it would go over. A long eval run saves each finished item, so a
 stopped run can resume and its spend still counts.
 [ADR-005](docs/adr/ADR-005-replay-and-budget.md) has the details.
 
-An answer cut off at the token limit (`LEDGERLINE_MAX_TOKENS`) is still paid for, so it is
-charged and counted as unreadable, like any answer that does not parse.
+An answer cut off at the token limit (`LEDGERLINE_MAX_TOKENS`), blocked by a content
+filter or refused by the model is still paid for, so it is charged and counted as
+unreadable, like any answer that does not parse.
 
 The default and second models (`LEDGERLINE_DEFAULT_MODEL`, `LEDGERLINE_SECOND_MODEL`) were
-chosen on the fieldservice benchmark: the cheapest model, by measured cost per question,
-that is not clearly worse than the best one and passes three gates (few unreadable
-answers, near-perfect refusals, a median answer within 3 seconds).
-[ADR-004](docs/adr/ADR-004-model-choice.md) has the rule and the numbers.
+measured on the fieldservice benchmark against three gates (few unreadable answers,
+near-perfect refusals, a median answer within 3 seconds). The default, Claude Haiku 5.5,
+was Cristian's choice and passed them; the second is the best eligible model from
+another vendor. [ADR-004](docs/adr/ADR-004-model-choice.md) has the rule and the numbers.
 `ledgerline spike` is the earlier, smaller check of structured output; its report is in
 `evals/spike/`.
 
@@ -316,9 +324,10 @@ single SELECT, and the database driver refuses a second statement, so it cannot 
 the read-only transaction. Spider registries come from `registry init` with no edits,
 and the eval stops if one no longer matches its committed hash.
 
-The live run `select-2026-11-11` compared four models on fieldservice; its report is
-[evals/reports/select-2026-11-11.md](evals/reports/select-2026-11-11.md), and the default
-model's numbers are in [Results](#results). Before a key existed, the simulated run
+The live run `select-2026-11-11` compared four OpenRouter models on fieldservice
+([report](evals/reports/select-2026-11-11.md)), and `select-haiku-2026-11-11` measured
+Claude Haiku 5.5, the default ([report](evals/reports/select-haiku-2026-11-11.md)); its
+numbers are in [Results](#results). Before a key existed, the simulated run
 `sim-1` ([evals/reports/sim-1.md](evals/reports/sim-1.md)) checked the pipeline and the
 scoring. Every answer in it was written by claude-haiku-5-5 standing in for
 `openai/gpt-oss-120b`, so those are simulated numbers, not a measurement of that model.
@@ -346,8 +355,8 @@ schema's triage file, `evals/triage/<schema>.yaml`, which gives every miss its c
 ## Deploy the hosted beta
 
 The hosted beta is one container on one host, behind [Caddy](https://caddyserver.com),
-a web server that handles HTTPS. It answers live questions with a beta-only OpenRouter
-key. Three controls keep it small and cheap:
+a web server that handles HTTPS. It answers live questions with Claude Haiku 5.5, through a
+beta-only Anthropic API key. Three controls keep it small and cheap:
 
 - **Invite gate.** Every page and API route needs an invite code, except `/healthz`.
   A visitor enters the code once; the browser keeps it in a cookie scripts cannot read.
@@ -369,7 +378,8 @@ On the host:
 
    | Setting | What it does |
    |---|---|
-   | `OPENROUTER_API_KEY` | The beta's own key. Give it a credit limit on OpenRouter too. |
+   | `ANTHROPIC_API_KEY` | The key for the default model, `anthropic:claude-haiku-5-5`. Set a spend limit on it in the Anthropic console too. |
+   | `OPENROUTER_API_KEY` | Only if `LEDGERLINE_DEFAULT_MODEL` names an OpenRouter model. Give that key a credit limit on OpenRouter too. |
    | `LEDGERLINE_INVITE_CODES` | The invite codes, comma-separated. With none set there is no gate, so never leave it empty on a public host. |
    | `LEDGERLINE_DAILY_SPEND_CAP_USD` | The most live answers may cost per UTC day, for example `1.00`. |
    | `LEDGERLINE_LIVE_ANSWERS_OFF` | `1` turns live answers off. Restart the app after changing it. |

@@ -7,11 +7,11 @@ fieldservice:
     wrong_answer_rate_given_answered: {max: 0.05}
   status_note: in v0.1 (live, default model)
   cause: >-
-    Most misses are refusals. 16 of the 43 answerable questions end in one: 12 because
-    the model's intent failed validation twice (most often a malformed intent shape, or a
-    sort on a field that is neither a metric nor a group), and 4 because the model judged
-    the question unanswerable. Eight questions need things the intent grammar cannot
-    express, so no model can score above 81.4%. Of the 27 answers given, 6 are wrong.
+    Accuracy is met (35 of 43); wrong answers miss by one (2 of 37 answered, 5.4%). Both
+    wrong answers are questions the intent grammar cannot express (a ratio, two date
+    fields in one series), where the model answered a nearby question instead of
+    refusing. Of its 6 refusals, 5 are correct refusals of such questions; 1 (fs-038) is
+    a misread after one intent failed validation.
   next: >-
     v0.2 changes the prompt and the grammar, then measures them on a fresh run. The v0.1
     prompt is not changed after seeing these results.

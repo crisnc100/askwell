@@ -1,10 +1,11 @@
 # ADR-004: Default and second model, chosen by a live spike
 
 - **Status:** Decided, 2026-11-11. The spike ran but could not choose (Amendment 1); the
-  fieldservice benchmark chose under a new rule (Amendment 2). The sections before the
+  fieldservice benchmark chose under a new rule (Amendment 2); Cristian then chose Claude
+  Haiku 5.5, which passed the same gates (Amendment 3). The sections before the
   amendments are the original record and are kept as written.
-- **Result:** default `mistralai/mistral-small-24b-instruct-2501`, second
-  `google/gemma-4-26b-a4b-it` (Amendment 2).
+- **Result:** default `anthropic:claude-haiku-5-5` (Amendment 3; mistral-small was the
+  default under Amendment 2), second `google/gemma-4-26b-a4b-it`.
 
 ## Interim target (2026-11-09)
 There is no OpenRouter key yet, so no real model runs. Until there is, a Claude model
@@ -240,3 +241,33 @@ The gateway parses the text and validates it, and the validator checks it, as fo
 other model. The unreadable-answers gate decides whether this works. If Haiku fails
 only that gate, it is tried once more with the schema as a non-strict tool, within the
 same $1 budget, and both rows are reported.
+
+### Result
+Haiku 5.5's live pass ran as set out above: run id `select-haiku-2026-11-11`, $0.055
+spent (the whole amendment, including one test call and the demo re-record, spent $0.058
+of its $1). The report is
+[evals/reports/select-haiku-2026-11-11.md](../../evals/reports/select-haiku-2026-11-11.md).
+Next to Amendment 2's four models (same benchmark, `ledgerline` system, one trial):
+
+| Model | Cost per question | Correct (of 43) | Wrong | Refusal recall | Unreadable | p50 latency | Gates |
+|---|---|---|---|---|---|---|---|
+| anthropic:claude-haiku-5-5 | $0.000415 | 35 | 2 | 24/24 | 0/72 (0%) | 0.92 s | pass |
+| mistralai/mistral-small-24b-instruct-2501 | $0.000145 | 21 | 6 | 24/24 | 0/91 (0%) | 1.29 s | pass |
+| google/gemma-4-26b-a4b-it | $0.000219 | 23 | 7 | 23/24 | 0/93 (0%) | 1.31 s | pass |
+| openai/gpt-oss-120b | $0.000277 | 25 | 4 | 24/24 | 7/84 (8.3%) | 2.48 s | fails unreadable |
+| openai/gpt-4o-mini | $0.000319 | 19 | 5 | 24/24 | 4/79 (5.1%) | 1.28 s | fails unreadable |
+
+- **Haiku 5.5 passes every gate, so it is the default** (`anthropic:claude-haiku-5-5`).
+  It is also the best model measured, by 10 correct answers, so Amendment 2's
+  comparison agrees. JSON text without structured output gave no unreadable answers.
+- **gemma-4-26b-a4b-it stays the second model.**
+- **L11:** execution accuracy is met, 81.4% (35/43). Wrong answers among answered miss
+  by one, 5.4% (2/37) against at most 5%, so the floor as a whole is not met. Both
+  wrong answers are questions the grammar cannot express, answered as a nearby question
+  instead of refused.
+- **The 81.4% "ceiling" was not a firm limit.** Haiku missed 7 of the 8 questions the
+  grammar cannot express and one it could (fs-038). It scored fs-041, a "conditional
+  count beside a sum", correct with an intent that counts only the owed invoices; that
+  matches the gold on this data.
+- **One trial, as before.** Haiku's lead over the others is large enough that one trial
+  settles the choice, but its exact rates have wide ranges.

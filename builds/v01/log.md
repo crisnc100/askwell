@@ -202,3 +202,18 @@ Each item has a test in `tests/workspace/test_hardening.py`.
   - "How many urgent work orders were opened in each customer region last month?": both intents had `unanswerable_reason: "None"`, no `group_by`, and a sort on `customer__region` (`intent_shape`, `invalid_order_by`).
   Both were replaced (option A, approved). Four candidates were written before recording and recorded in a fixed order ($0.0004); the first two, "How many technicians are there at each skill level?" and "What is the total invoiced amount for each invoice status?", both answer and replace them. The README says where the examples appear that they are examples the model answers, with a link to the measured accuracy.
 - **Total live spend in PR5:** $0.1017 of the $3 budget.
+
+### Phase 5: Claude Haiku 5.5 through the Anthropic API
+- **Provider choice:** a model's configured name picks its provider. `anthropic:<id>` goes to the Anthropic API directly; anything else is an OpenRouter id (`ledgerline/llm/providers.py`). Chosen over a single `LEDGERLINE_DEFAULT_PROVIDER` because one eval run can mix providers, and the name is already part of each replay key, so recordings never collide. OpenRouter's own `vendor/model:variant` names keep working.
+- **Transport** (`ledgerline/llm/anthropic_transport.py`, `anthropic` SDK 2.8.0). Each rule was checked against the installed SDK:
+  - model id `claude-haiku-5-5`;
+  - `output_config.effort` low, with adaptive thinking;
+  - no sampling settings (the `create()` signature has none);
+  - `stop_reason` `max_tokens`, `model_context_window_exceeded` and `refusal` are charged, then parse-fail;
+  - prices from config;
+  - SDK retries off, with typed retries on 429, 5xx (529 included) and connection errors, never on a 400.
+- **No structured output:** the API refused the Intent schema with a 400 ("compiled grammar is too large"). Six reduced versions were refused the same way, and the refusals were not billed. Option A was approved: JSON text, checked by the existing parser, Pydantic and the validator. Recorded in ADR-004 Amendment 3. The fallback (C, a non-strict tool) was not needed.
+- **Live pass** `select-haiku-2026-11-11`: $0.0547. Haiku scored 35/43 correct, 2 wrong, 24/24 refusal recall, 0/72 unreadable and a 0.92 s median, so it passes every gate and is the default. gemma stays second.
+- **L11:** accuracy met (81.4%). Wrong answers among answered are 5.4% (2/37), so it misses by one. Floor text and triage are updated; the triage notes name the model they describe.
+- **Demo re-recorded** with Haiku ($0.0029). Every canned example answers, so no question changed.
+- **Phase 5 live spend:** $0.0580 of $1, including one $0.0003 test call. PR5 total: $0.160.

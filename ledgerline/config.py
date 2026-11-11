@@ -54,10 +54,11 @@ class Settings(BaseSettings):
     )
     openrouter_base_url: str = "https://openrouter.ai/api/v1"
 
-    # Model ids come from config only. Chosen by ADR-004's rule (Amendment 2): the
-    # cheapest model not clearly worse than the best on the fieldservice benchmark,
-    # and the best eligible model from another vendor.
-    default_model: str | None = "mistralai/mistral-small-24b-instruct-2501"
+    # Model names come from config only; `anthropic:<id>` goes to the Anthropic API,
+    # anything else to OpenRouter (ledgerline/llm/providers.py). The default is
+    # Cristian's choice, measured under ADR-004's gates (Amendment 3); the second is the
+    # best eligible model from another vendor (Amendment 2).
+    default_model: str | None = "anthropic:claude-haiku-5-5"
     second_model: str | None = "google/gemma-4-26b-a4b-it"
 
     # The direct Anthropic API, for models configured as `anthropic:<model id>`
