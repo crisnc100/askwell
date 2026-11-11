@@ -218,3 +218,25 @@ next to the four from Amendment 2.
   go back to Cristian.
 - gemma-4-26b-a4b-it stays the second model, from a different vendor.
 - Budget for this amendment's live runs: at most $1, enforced by the budget guard.
+
+### Change before the run: JSON text, not structured output
+The API refused the intent schema as structured output. Every request with
+`output_config.format` set to it returned a 400: "The compiled grammar is too large,
+which would cause performance issues." These versions of the schema were all refused
+the same way:
+- the schema as generated;
+- the schema after the SDK's `transform_schema`;
+- with descriptions, defaults and titles removed;
+- with every property required;
+- without the nested filter groups;
+- with nullable unions written as type lists.
+
+A version with loosely typed nested objects was refused for another reason: every
+object must set `additionalProperties: false`. Refused requests are not billed.
+
+So this transport sends no `output_config.format`. The system prompt already describes
+every intent field, and the transport adds one line asking for the JSON object alone.
+The gateway parses the text and validates it, and the validator checks it, as for every
+other model. The unreadable-answers gate decides whether this works. If Haiku fails
+only that gate, it is tried once more with the schema as a non-strict tool, within the
+same $1 budget, and both rows are reported.

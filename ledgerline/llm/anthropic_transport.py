@@ -1,9 +1,12 @@
-"""The Anthropic API, called directly with the official SDK, using structured output.
+"""The Anthropic API, called directly with the official SDK. The answer comes back as
+JSON text.
 
 What each request sends, and why:
-- `output_config.format`: the JSON schema the answer must follow (the SDK's
-  `transform_schema` moves the keywords the API does not take into descriptions; the
-  gateway still validates the answer with Pydantic).
+- No `output_config.format`. The API refuses the intent schema as structured output
+  (400, "compiled grammar is too large"; ADR-004 Amendment 3). The system prompt already
+  describes every field, and a line added here asks for the JSON object alone. The
+  gateway parses the text (a code fence is allowed) and validates it with Pydantic, and
+  the validator checks it, as for any other model.
 - `output_config.effort` (`LEDGERLINE_ANTHROPIC_EFFORT`, default `low`) with adaptive
   thinking: the model decides how much to think, and a short form needs little.
 - No `temperature`, `top_p` or `top_k`: the API refuses non-default values for this
@@ -27,12 +30,13 @@ from typing import Any, cast
 
 import anthropic
 import httpx2
-from anthropic import transform_schema
 from anthropic.types import Message, MessageParam
 
 from ledgerline.config import Settings
 from ledgerline.llm.errors import ProviderUnavailableError
 from ledgerline.llm.types import ChatMessage, RawResponse
+
+JSON_ONLY = "Reply with the intent as one JSON object and nothing else."
 
 _FINISH = {
     "max_tokens": "length",
@@ -81,15 +85,11 @@ class AnthropicTransport:
         request: dict[str, Any] = {
             "model": model,
             "max_tokens": max_tokens,
+            "system": f"{system}\n\n{JSON_ONLY}" if system else JSON_ONLY,
             "messages": turns,
-            "output_config": {
-                "effort": self._effort,
-                "format": {"type": "json_schema", "schema": transform_schema(schema)},
-            },
+            "output_config": {"effort": self._effort},
             "thinking": {"type": "adaptive"},
         }
-        if system:
-            request["system"] = system
         return _raw(self._with_retries(request), model)
 
     def _with_retries(self, request: dict[str, Any]) -> Message:
