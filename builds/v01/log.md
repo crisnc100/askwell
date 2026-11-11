@@ -217,3 +217,22 @@ Each item has a test in `tests/workspace/test_hardening.py`.
 - **L11:** accuracy met (81.4%). Wrong answers among answered are 5.4% (2/37), so it misses by one. Floor text and triage are updated; the triage notes name the model they describe.
 - **Demo re-recorded** with Haiku ($0.0029). Every canned example answers, so no question changed.
 - **Phase 5 live spend:** $0.0580 of $1, including one $0.0003 test call. PR5 total: $0.160.
+
+### PR5 fix round (review: Sol for code, Fable for security; findings in `pr5-review-findings.md`)
+The tests came first (`51e1231`, plus a test-only setup fix in `a27eec2`), and 21 of them failed on the code before the fixes. Then came the fixes, one commit per area:
+- **gateway f1** (`0ef185e`): a call whose request may have reached the provider (read timeout, dropped connection) is charged at its worst case to the guard and the daily cap, and is not retried. A refused connect was never sent, so it is still retried and free.
+- **service f2** (`0ef185e`): OpenRouter's price list is fetched on first use, so an Anthropic-only beta starts while OpenRouter is down.
+- **spike f3** (`0ef185e`): the spike uses the configured daily cap and kill switch.
+- **invite f1/s1, f2, s2** (`b8390e8`): wrong header or cookie codes count against the per-address limit, and a wrong cookie is cleared. The cookie holds the code's SHA-256 hash, so codes outside Latin-1 work. The login body is capped at 4 KB, and the try is counted before the body is read.
+- **fields f1, store f2, s1, s2** (`be27aba`):
+  - re-confirm writes both files as one change, restoring both on failure;
+  - a timed-out reservation is waited for and released;
+  - a zero-byte reservation never refuses;
+  - a refused create removes its folder.
+- **select f1/f2, ADR f1** (`4f19c29`): when nothing passes the gates, the best model ships, and `anthropic:` and `anthropic/` are one vendor. ADR-004 now gives the full replay commands; both were run from fresh run folders and reproduced the Markdown reports exactly.
+- **LOWs:** RecursionError becomes a charged ParseError (`0ef185e`). `LEDGERLINE_ENV=beta|prod` refuses to start without codes, and the image sets `beta` (`b8390e8`, `0224375`). Both base images are pinned by digest (`0224375`).
+- **Defense in depth** (`0224375`): `mem_limit: 1g` on the app, a Caddy `request_body` limit in the README, and advice on making strong codes.
+- **Docker smoke test** (rebuilt locally, not deployed):
+  - without codes, the container exits with the fail-closed message;
+  - with codes, the Haiku default, the kill switch on and no OpenRouter key, `/healthz` returns 200 `live`, `/schemas` without a code returns 401, `/ask` returns the plain 503, and `/invite` sets a hashed HttpOnly, Secure cookie.
+- The review findings file had the phrase the privacy scan rejects ("health" + "check") in f2; it was reworded to "healthz probe".
