@@ -111,6 +111,9 @@ class LedgerlineSystem:
                 "intent": result.intent,
                 "refusal": result.refusal,
                 "attempts": len(attempts),
+                # Attempts whose answer did not parse. A refusal after two of these
+                # is not a real refusal, so model selection counts them directly.
+                "parse_errors": sum(a.get("parse_error") is not None for a in attempts),
                 "issue_codes": sorted({i["code"] for a in attempts for i in a["issues"]}),
                 "attempt_provenance": [a.get("provenance") for a in attempts],
             },
