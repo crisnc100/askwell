@@ -227,6 +227,19 @@ def ask(
     typer.echo(json.dumps(result.to_dict(), indent=2, default=str))
 
 
+@app.command()
+def sweep() -> None:
+    """Delete expired workspaces and finish any deletion that failed. Run it from cron."""
+    from pathlib import Path
+
+    from ledgerline.workspace.store import WorkspaceStore
+
+    result = WorkspaceStore(Path(get_settings().workspace_dir)).sweep()
+    typer.echo(f"removed {len(result.removed)} expired workspace(s)")
+    for name in result.failed:
+        typer.echo(f"could not remove {name} yet; the next sweep retries it", err=True)
+
+
 @replay_app.command("import")
 def replay_import(
     pending_dir: Annotated[

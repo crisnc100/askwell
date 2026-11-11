@@ -68,6 +68,12 @@ class Settings(BaseSettings):
     prompt_budget_chars: int = 16000
     max_tokens: int = 1024
 
+    # Uploaded workspaces, one folder each (see ledgerline/workspace/store.py).
+    workspace_dir: str = "data/workspaces"
+    # Read the client address from X-Forwarded-For. Set it only behind a proxy that
+    # writes that header; otherwise any client could claim any address.
+    trust_proxy: bool = False
+
     @field_validator("now")
     @classmethod
     def _require_utc(cls, value: datetime) -> datetime:

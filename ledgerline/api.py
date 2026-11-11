@@ -1,18 +1,23 @@
-"""The HTTP API: POST /ask, GET /schemas, GET /schemas/{id}/examples, GET /healthz."""
+"""The HTTP API: POST /ask, GET /schemas, GET /schemas/{id}/examples, GET /healthz, and
+the workspace routes under /api (ledgerline/workspace/api.py)."""
 
 from __future__ import annotations
 
-from collections.abc import AsyncIterator
+from collections.abc import AsyncIterator, Awaitable, Callable
 from contextlib import asynccontextmanager
+from pathlib import Path
 from typing import Any
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request, Response
 from pydantic import BaseModel, Field
 
 from ledgerline.config import get_settings
 from ledgerline.llm.errors import ReplayMissError
 from ledgerline.llm.simulate import PendingRequestError
 from ledgerline.pipeline.service import AskService, UnknownSchemaError
+from ledgerline.workspace import api as workspace_api
+from ledgerline.workspace.api import WorkspaceApp
+from ledgerline.workspace.store import WorkspaceStore
 
 
 class AskRequest(BaseModel):
@@ -20,7 +25,9 @@ class AskRequest(BaseModel):
     question: str = Field(min_length=1, max_length=2000)
 
 
-def create_app(service: AskService | None = None) -> FastAPI:
+def create_app(
+    service: AskService | None = None, workspaces: WorkspaceApp | None = None
+) -> FastAPI:
     @asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         if service is None:
@@ -31,6 +38,25 @@ def create_app(service: AskService | None = None) -> FastAPI:
         app.state.service.close()
 
     app = FastAPI(title="Ledgerline", version="0.1.0", lifespan=lifespan)
+    if workspaces is None:
+        settings = get_settings()
+        workspaces = WorkspaceApp(
+            WorkspaceStore(Path(settings.workspace_dir)), trust_proxy=settings.trust_proxy
+        )
+    app.state.workspaces = workspaces
+
+    @app.middleware("http")
+    async def _headers(  # pyright: ignore[reportUnusedFunction]
+        request: Request, call_next: Callable[[Request], Awaitable[Response]]
+    ) -> Response:
+        response = await call_next(request)
+        # The workspace link is a secret: never send any URL of this site onward.
+        response.headers["Referrer-Policy"] = "no-referrer"
+        if request.url.path.startswith("/api/"):
+            response.headers["Cache-Control"] = "no-store"
+        return response
+
+    workspace_api.install(app, workspaces)
 
     def svc() -> AskService:
         return app.state.service  # type: ignore[no-any-return]

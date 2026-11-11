@@ -62,7 +62,7 @@ include = ["ledgerline", "tests", "scripts", "evals"]
 exclude = ["data", ".venv"]
 pythonVersion = "3.12"
 typeCheckingMode = "standard"
-strict = ["ledgerline/core"]
+strict = ["ledgerline/core", "ledgerline/workspace"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

@@ -1,0 +1,13 @@
+id,name,city,segment,contact_email,signup_date
+1,Harbor Cafe,Hillcrest,retail,orders1@shop1.example,2025-07-22
+2,Juniper Books,Riverton,retail,orders2@shop2.example,2025-10-02
+3,Copper Kettle,Riverton,wholesale,orders3@shop3.example,2025-10-26
+4,Bluebird Florist,Riverton,online,orders4@shop4.example,2025-04-20
+5,Maple Hardware,Riverton,retail,orders5@shop5.example,2025-08-11
+6,Lantern Bakery,Port Ellis,retail,orders6@shop6.example,2025-05-04
+7,Northwind Bikes,Riverton,online,orders7@shop7.example,2025-08-06
+8,Fern & Stone,Riverton,online,orders8@shop8.example,2025-03-05
+9,Pebble Toys,Lakeside,online,orders9@shop9.example,2025-10-26
+10,Orchard Market,Riverton,online,orders10@shop10.example,2025-10-27
+11,Tidewater Supply,Port Ellis,retail,orders11@shop11.example,2025-04-24
+12,Quill Stationers,Riverton,online,orders12@shop12.example,2025-03-10

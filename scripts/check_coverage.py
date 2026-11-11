@@ -17,6 +17,12 @@ FLOORS: dict[str, float] = {
     "ledgerline/core/sqlbuild.py": 95.0,
     "ledgerline/core/executor.py": 85.0,
     "ledgerline/core/registry_init.py": 85.0,
+    "ledgerline/workspace/rules.py": 90.0,
+    "ledgerline/workspace/check.py": 95.0,
+    "ledgerline/workspace/load.py": 85.0,
+    "ledgerline/workspace/store.py": 95.0,
+    "ledgerline/workspace/limits.py": 95.0,
+    "ledgerline/workspace/api.py": 90.0,
 }
 
 
