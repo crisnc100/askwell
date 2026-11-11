@@ -244,7 +244,7 @@ function schemaSection(report: Report, schema: string): HTMLElement {
       ...rows.map((row) =>
         h(
           "tr",
-          { attrs: { "data-system": row.system } },
+          { attrs: { "data-system": row.system, "data-model": row.model } },
           h("th", { attrs: { scope: "row" } }, SYSTEMS[row.system] ?? row.system, h("div", { class: "muted" }, row.model)),
           ...METRICS.map((m) => rateCell(row[m.key])),
         ),
@@ -279,6 +279,23 @@ function picker(reports: Summary[], current: string): HTMLElement | null {
   return h("p", {}, h("label", { attrs: { for: "report" } }, "Report"), select);
 }
 
+// An export run that has no answers yet carries no simulation mark either, so a missing
+// mark means a real model only when the run finished.
+function banner(report: Report): HTMLElement {
+  if (report.simulation) {
+    return h("div", { class: "notice info banner", attrs: { role: "note", id: "simulated" } }, h("strong", {}, "Simulated. "), report.simulation);
+  }
+  if (report.status === "complete") {
+    return h("div", { class: "notice ok banner", attrs: { role: "note" } }, "Measured with a real model.");
+  }
+  return h(
+    "div",
+    { class: "notice error banner", attrs: { role: "note" } },
+    h("strong", {}, "Not measured. "),
+    `This run is ${report.status}, so its numbers cover only the questions answered so far.`,
+  );
+}
+
 async function getJson<T>(path: string): Promise<T> {
   const response = await fetch(path);
   if (!response.ok) throw new Error(response.status === 404 ? "No report has that name." : "The report could not be loaded.");
@@ -301,10 +318,9 @@ async function start(): Promise<void> {
     const report = await getJson<Report>(`/api/reports/${encodeURIComponent(id)}`);
     append(
       main,
-      report.simulation
-        ? h("div", { class: "notice info banner", attrs: { role: "note", id: "simulated" } }, h("strong", {}, "Simulated. "), report.simulation)
-        : h("div", { class: "notice ok banner", attrs: { role: "note" } }, "Measured with a real model."),
+      banner(report),
       h("h1", {}, `Benchmark results: ${report.run_id}`),
+      h("p", { attrs: { id: "status" } }, `Status: ${report.status}.`),
       picker(reports, report.run_id),
       h(
         "p",
