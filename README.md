@@ -20,8 +20,8 @@ labelled that way, and the accuracy floor for fieldservice is not met in v0.1.
 
 You need [uv](https://docs.astral.sh/uv/), Docker, `psql` (the PostgreSQL client) and
 Node with npm (CI uses Node 22). The tests run `infra/postgres/roles.sql` with `psql`,
-and fail without it. The browser tests need Chromium, installed once with
-`cd web && npx playwright install chromium`.
+and fail without it. The browser tests need Chromium, installed once from the
+repository root with `(cd web && npm ci && npx playwright install chromium)`.
 
 ```sh
 uv sync
@@ -92,8 +92,8 @@ Open `http://localhost:8000/` and follow the five steps:
    `data/workspaces/`. The page gives you a link back to it. Bookmark it; anyone with the
    link can see your data.
 2. **Upload** your files. A file with the same name replaces the old one.
-3. **Check** reads every file. Each problem names the file, the row, the column and the
-   fix, up to 20 per file. Nothing loads until every file passes.
+3. **Check** reads every file. Each problem names the file, the row and column where there
+   is one, and the fix, up to 20 per file. Nothing loads until every file passes.
 4. **Confirm** shows exactly what the model will be sent: table and column names, types,
    links and your descriptions. You can hide any field. Fields with names that look
    sensitive (email, phone and similar) start hidden.
@@ -108,14 +108,14 @@ What stays private:
   link browsers never send to a server. The pages send it in a request header instead,
   so it never appears in a URL the server sees or logs.
 - **Your address.** It is not stored. A keyed hash of it counts your workspaces.
-- **Your files.** They are deleted after 7 days without use, or at once with "Delete my
-  data". `uv run ledgerline sweep` removes expired workspaces; run it from cron, for
-  example once an hour.
+- **Your files.** They expire after 7 days without use and are deleted the next time
+  `uv run ledgerline sweep` runs (run it from cron, for example once an hour) or the
+  workspace is opened. "Delete my data" removes them at once.
 
 Limits: at most 10 files per workspace, and per file 10 MB, 200 columns, 1,000,000 rows
 and 10,000 characters per value. Each address gets 3 workspaces at a time, 20 uploads and
-30 questions an hour (questions to `/ask` count too). These counts live in the server
-process and start again when it restarts. All workspaces together share 2 GB of disk.
+30 questions an hour (questions to `/ask` count too). The hourly counts live in the
+server process and start again when it restarts; the workspace count does not. All workspaces together share 2 GB of disk.
 Behind a proxy that sets `X-Forwarded-For`, set `LEDGERLINE_TRUST_PROXY=1` so the limits
 see the real address. Leave it off otherwise, or any client could claim any address.
 

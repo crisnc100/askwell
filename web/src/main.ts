@@ -23,7 +23,7 @@ const STEPS: { id: Step; label: string }[] = [
 
 const DEFAULT_TIME_ZONE = "America/New_York";
 const PRIVACY =
-  "Don't upload personal data. Uploads are deleted after 7 days without use. Shared field values go to a third-party model.";
+  "Don't upload personal data. Uploads expire after 7 days without use. Shared field values go to a third-party model.";
 
 const app = document.getElementById("app") as HTMLElement;
 let status: Status | null = null;
@@ -170,12 +170,12 @@ async function preparePage(main: HTMLElement): Promise<void> {
       { class: "rules" },
       h("li", {}, "One table per CSV file, with a header row of column names. The file name becomes the table name."),
       h("li", {}, "UTF-8 text, separated by commas (not semicolons). A value with a comma or a line break goes in quotes."),
-      h("li", {}, "Each table has an ID column named id, <table>_id or the singular (customer_id in customers.csv), with one unique value per row. A table that only links two others needs no ID."),
+      h("li", {}, "Each table has an ID column named id, <table>_id or <table>_id without a final s (customer_id in customers.csv), with one unique value per row. A table that only links two others needs no ID."),
       h("li", {}, "A column named <name>_id links to the table <name> or <name>s (customer_id links to customers)."),
       h("li", {}, "A column named after its own table (customer_id in customers.csv) is one of its ID names, never a link."),
-      h("li", {}, "Dates are YYYY-MM-DD (2025-03-04); times are YYYY-MM-DD HH:MM or HH:MM:SS, with no time zone."),
+      h("li", {}, "Dates are YYYY-MM-DD (2025-03-04); times are YYYY-MM-DD HH:MM or YYYY-MM-DD HH:MM:SS, with no time zone."),
       h("li", {}, "Numbers are plain: 1234.50, not 1,234.50, $1234.50 or 45%."),
-      h("li", {}, "A number with a leading zero, like 00123, stays text, so codes keep their zeros."),
+      h("li", {}, "A number with a leading zero, like 00123, stays text, so codes keep their zeros. A link column takes the type of the ID it points to."),
       h("li", {}, "Blank, NULL, NA, N/A and - all mean no value."),
       h("li", {}, "At most 10 files of 10 MB each, 200 columns and 1,000,000 rows per file, and 10,000 characters per value."),
     ),
