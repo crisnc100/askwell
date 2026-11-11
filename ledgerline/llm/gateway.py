@@ -53,6 +53,8 @@ def parse_output[T: BaseModel](raw: RawResponse, schema: type[T]) -> T:
     """Validate the provider's parse, or fall back to parsing the text with Pydantic."""
     if raw.finish_reason == "length":
         raise ParseError("the answer was cut off at the max_tokens limit", raw.content)
+    if raw.finish_reason == "content_filter":
+        raise ParseError("the provider's content filter blocked the answer", raw.content)
     if raw.parsed is not None:
         try:
             return schema.model_validate(raw.parsed)
@@ -280,7 +282,11 @@ class OpenRouterTransport:
             # The SDK raises this when the answer stops at max_tokens. The call was
             # still billed, so its usage goes back to the gateway to be charged; the
             # gateway's parse then turns it into a ParseError.
-            return _cut_off_response(exc.completion, model)
+            return _unfinished_response(exc.completion, model, "length")
+        except openai.ContentFilterFinishReasonError as exc:
+            # Billed too, for the same reason. The SDK sends the completion on every
+            # non-streaming call; without one the usage is unknown and nothing is charged.
+            return _unfinished_response(exc.completion, model, "content_filter")
         message = out["raw"]
         content = (
             message.content if isinstance(message.content, str) else json.dumps(message.content)
@@ -296,7 +302,11 @@ class OpenRouterTransport:
         )
 
 
-def _cut_off_response(completion: ChatCompletion, model: str) -> RawResponse:
+def _unfinished_response(
+    completion: ChatCompletion | None, model: str, finish_reason: str
+) -> RawResponse:
+    if completion is None:
+        return RawResponse(content="", model=model, finish_reason=finish_reason)
     choice = completion.choices[0] if completion.choices else None
     content = (choice.message.content if choice else None) or ""
     usage: dict[str, Any] = completion.usage.model_dump() if completion.usage else {}
@@ -305,5 +315,5 @@ def _cut_off_response(completion: ChatCompletion, model: str) -> RawResponse:
         parsed=None,
         usage=usage,
         model=completion.model or model,
-        finish_reason="length",
+        finish_reason=finish_reason,
     )

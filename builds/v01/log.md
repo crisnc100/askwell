@@ -169,7 +169,7 @@ Each fix's test was committed first, in a test-only commit, and failed before th
 - **The fix:** the transport catches it and returns the cut-off answer with its usage and `finish_reason: "length"`. The gateway charges it like any call (and records it in record mode). `parse_output` then raises `ParseError`, which the pipeline already treats as one failed attempt. A cut-off answer never parses, even when its text happens to be valid JSON.
 - **Spike report:** each probe now stores the model's answer (the parsed fields, or the raw text when it did not parse), so a reader can see which field differed.
 - **Tests:** `tests/test_llm_length_limit.py` (real transport on a mocked server: charged, recorded and replayed as the same error, and the spend reaches a checkpointed run's budget); a new spike test for stored answers.
-- `ContentFilterFinishReasonError` can escape the same way. It is out of this PR's scope and is noted for later.
+- `ContentFilterFinishReasonError` (an answer the provider's content filter blocked) escaped the same way; it now takes the same path, with `finish_reason: "content_filter"`. Tests: `tests/test_llm_content_filter.py`, including the daily cap.
 
 ### Phase 3: hardening deferred from PR3
 Each item has a test in `tests/workspace/test_hardening.py`.
