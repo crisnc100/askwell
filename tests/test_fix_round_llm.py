@@ -199,7 +199,8 @@ def test_the_spike_gateway_takes_the_daily_cap(tmp_path: Path) -> None:
 
     daily = DailySpend(tmp_path / "spend.sqlite", cap_usd=0.0)
     options: dict[str, Any] = {"daily": daily, "live_answers_off": True}
-    gateway = make_live_gateway(cast(Any, None), lambda _m: None, 1.0, 100, **options)
+    never = cast(Any, lambda **_k: None)
+    gateway = make_live_gateway(never, lambda _m: None, 1.0, 100, **options)
     assert gateway.daily is daily
     assert gateway.live_answers_off is True
 
