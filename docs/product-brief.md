@@ -38,9 +38,13 @@ which fields the model may see.
 
 ## What it deliberately does not do
 
-- **It does not guess.** A question the intent cannot express is refused with a reason,
-  even when a SQL-writing model would have got it right. That costs coverage, and the
-  benchmark counts the cost.
+- **It does not run an intent the check rejects.** A rejected intent gets one retry and
+  is then refused with a reason, even when a SQL-writing model would have got the
+  question right. That costs coverage, and the benchmark counts the cost. It is not a
+  guarantee against wrong answers: when a question needs something an intent cannot
+  express, the model can still fill in a valid intent for a nearby question, and that
+  answer is wrong. In the simulated run this happened on 3 of 43 fieldservice questions
+  ([docs/failures/](failures/README.md)).
 - **It does not let the model write SQL**, call tools, or see result rows.
 - **It does not change data.** Every query is read-only, enforced by the database
   connection, not only by the code.

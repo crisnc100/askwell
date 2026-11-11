@@ -6,8 +6,9 @@ every answer. It is built so that a wrong number is rare and easy to spot.
 A model never writes the SQL. It fills in an *intent*: a small, typed form that says which
 table, which numbers, which filters and which dates. Plain Python checks every part of the
 intent against a *registry*, a file that lists what the database may expose. Only a valid
-intent becomes SQL, and that SQL runs read-only. A question the intent cannot express is
-refused with a reason, not guessed. [docs/product-brief.md](docs/product-brief.md) explains
+intent becomes SQL, and that SQL runs read-only; a rejected intent is refused with a
+reason. A question the intent cannot express can still get a wrong answer, when the model
+fills in a valid intent for a nearby question instead of refusing. [docs/product-brief.md](docs/product-brief.md) explains
 who it is for and what it leaves out on purpose.
 
 **Status.** v0.1 runs on your machine. There is no model key yet, so every model answer in

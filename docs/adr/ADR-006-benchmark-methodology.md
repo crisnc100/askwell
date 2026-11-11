@@ -64,9 +64,8 @@ The Spider numbers below pool the 5 databases (250 questions). Square brackets a
    scored 80.0% against Ledgerline's 58.0%. Both were above their predicted ranges
    (one-shot 55–70%, Ledgerline 30–50%). sql_agent: not measured.
 4. **Ledgerline has the lowest wrong-answer rate:** held against one-shot on both Spider
-   (11.6% against 19.7%) and fieldservice (13.2% against 30.2%). On Spider the two
-   intervals overlap slightly, so that gap is less certain than fieldservice's. sql_agent:
-   not measured.
+   (11.6% [8-17] against 19.7% [15-25]) and fieldservice (13.2% [6-27] against 30.2%
+   [19-45]). On both, the two intervals overlap. sql_agent: not measured.
 5. **Most Spider misses are `grammar_gap`, and `builder_bug` is under 5%:** held. Of 105
    Spider misses, 76 (72%) are `grammar_gap`, 12 `validator_false_reject`, 11 `gold_issue`,
    6 `misread` and none `builder_bug`.

@@ -22,4 +22,6 @@ Each miss has a *category*, given when the run was reviewed (`evals/triage/field
 
 A wrong answer is worse than a refusal. A refusal tells the person to look elsewhere; a
 wrong table of numbers looks just like a right one. The first two are the kind of miss
-Ledgerline exists to prevent, and the reason the v0.1 floor is not met.
+Ledgerline exists to prevent: the model filled in a valid intent for a nearby question
+instead of refusing. They are 2 of the 5 wrong answers (5 of 38 answered) that put
+Ledgerline over its v0.1 limit of 5% wrong.

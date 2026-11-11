@@ -13,11 +13,13 @@ counted both the orders and the ones that have a completion date. So "completed"
 Every month's second number was off, by up to 31 (June: 182 instead of 213).
 
 **Why it was wrong.** The question needs two counts, each on its own date field, in one
-table. An intent groups by one date only. The numbers look reasonable, which is what makes
-this kind of answer dangerous.
+table. An intent can group by both dates, but all its metrics share one grouping and one
+set of rows, so it cannot count opened orders by one date and completed orders by the
+other. The numbers look reasonable, which is what makes this kind of answer dangerous.
 
 **Category.** `grammar_gap`, scored as a wrong answer.
 
 **What would fix it.**
 - Refuse first, as for [fs-028](fs-028-percentage.md).
-- Or let an intent hold two series, each with its own date field, joined on the month.
+- Or let an intent hold two series, each with its own grouping and date field, joined on
+  the month.

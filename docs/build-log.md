@@ -47,8 +47,9 @@ The plan was rewritten (rev 2) before any code:
   read the hidden columns (`users.email`, `users.password_hash`) at all. The registry also
   hides them, so they are blocked twice.
 - **The intent grammar grew by two things only:** joins up to 3 steps away, and filters
-  that compare two columns. Computed values, ratios and "rows with no match" stayed out,
-  and those questions are scored as refusals.
+  that compare two columns. Computed values, ratios and "rows with no match" stayed out.
+  Those questions stay in the answerable set: a refusal counts as a miss, and an answer to
+  a nearby question counts as wrong.
 
 ## 2026-11-09: no model key, so answers are simulated
 
@@ -100,7 +101,11 @@ What reviews caught:
   file.
 
 Merged 2026-11-10 with the fieldservice floor **not met** (76.7% right, 13.2% of answers
-wrong), stated as such and not tuned away.
+wrong), stated as such and not tuned away. Of the 10 misses, 5 were refusals of questions
+the intent cannot express. The other 5 were wrong answers: for 3 questions the intent
+cannot express (fs-028, fs-035, fs-037), the stand-in model filled in a valid intent for a
+nearby question instead of refusing, and 2 were questions that can be read with either of
+two dates.
 
 ## 2026-11-11: the plan for the product flow
 
