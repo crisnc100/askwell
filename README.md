@@ -72,6 +72,39 @@ was answered, refused or failed. In live or record mode each ask also has its ow
 spending limit (`LEDGERLINE_ASK_BUDGET_USD`, default $0.05). A question that would go
 over it is refused, and that refusal is audited too.
 
+## Your data
+
+You can also ask questions about your own CSV files. Build the pages once, then start
+the server:
+
+```sh
+(cd web && npm ci && npm run build)
+uv run uvicorn ledgerline.api:create_app --factory
+```
+
+Open `http://localhost:8000/` and follow the steps:
+
+1. **Prepare** lists the rules a file must follow (one table per file, an ID column,
+   `YYYY-MM-DD` dates, plain numbers) and links to a small sample shop to try.
+2. **Upload** puts your files in a private *workspace*: a folder of its own under
+   `data/workspaces/`, reached only through a random link. Bookmark the link. The
+   workspace is deleted after 7 days without use, or at once with "Delete my data".
+3. **Check** reads every file. Each problem names the file, the row, the column and the
+   fix. Nothing loads until every file passes.
+4. **Confirm** shows what the model will see: table and column names, types, links and
+   your descriptions, never your rows. You can hide a field. A column's category values
+   are sent only if you choose to share them.
+5. **Ask** runs the same pipeline as above on your data and shows the SQL.
+
+Answers on your own data need a live model, because nobody has recorded answers for your
+files. Set `OPENROUTER_API_KEY` and `LEDGERLINE_LLM_MODE=live` (see `.env.example`).
+Without them, Ask replies "Live answers need a model key; see the README." Questions
+like "last month" use today's date in the time zone you picked when you started.
+
+`uv run ledgerline sweep` deletes expired workspaces. Run it from cron, for example once
+an hour. Behind a proxy that sets `X-Forwarded-For`, set `LEDGERLINE_TRUST_PROXY=1` so
+the per-address limits see the real client.
+
 ## The demo database
 
 `ledgerline seed` drops and rebuilds *fieldservice*, a synthetic field-service business:

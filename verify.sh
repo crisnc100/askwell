@@ -32,4 +32,8 @@ uv run python -m scripts.check_coverage coverage.json
 step "replay eval reproduces the committed report"
 uv run python -m scripts.check_replay_report
 
+step "web: type check, build, browser tests (Playwright, fake model)"
+# Needs Node and Playwright's Chromium (once: cd web && npx playwright install chromium).
+(cd web && npm ci --silent && npm run build --silent && npx playwright test)
+
 printf '\nverify.sh: all checks passed\n'

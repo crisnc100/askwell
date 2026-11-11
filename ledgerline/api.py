@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Any
 
 from fastapi import FastAPI, HTTPException, Request, Response
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
 from ledgerline.config import get_settings
@@ -25,9 +26,17 @@ class AskRequest(BaseModel):
     question: str = Field(min_length=1, max_length=2000)
 
 
+WEB_DIST = Path(__file__).resolve().parents[1] / "web" / "dist"
+
+
 def create_app(
-    service: AskService | None = None, workspaces: WorkspaceApp | None = None
+    service: AskService | None = None,
+    workspaces: WorkspaceApp | None = None,
+    web_dir: Path = WEB_DIST,
 ) -> FastAPI:
+    """The API, plus the pages from `web_dir` at `/` when they have been built
+    (`npm run build` in web/)."""
+
     @asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         if service is None:
@@ -96,5 +105,9 @@ def create_app(
                 "no recorded model answer for this question; replay mode answers the "
                 "canned examples (GET /schemas/{id}/examples)",
             ) from exc
+
+    if web_dir.is_dir():
+        # Mounted last, so every API route above takes precedence over a file path.
+        app.mount("/", StaticFiles(directory=web_dir, html=True), name="web")
 
     return app

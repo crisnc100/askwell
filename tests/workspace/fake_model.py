@@ -5,7 +5,7 @@ because a workspace answers only with a live model."""
 from __future__ import annotations
 
 import json
-from collections.abc import Callable
+from collections.abc import Callable, Mapping
 from typing import Any
 
 from ledgerline.config import Settings
@@ -23,8 +23,10 @@ class FakeModel:
     mode = "live"
     guard = None
 
-    def __init__(self, answers: dict[str, Answer] | Callable[[str], Answer] | None = None) -> None:
-        self.answers: dict[str, Answer] | Callable[[str], Answer] = answers or {}
+    def __init__(
+        self, answers: Mapping[str, Answer] | Callable[[str], Answer] | None = None
+    ) -> None:
+        self.answers: Mapping[str, Answer] | Callable[[str], Answer] = answers or {}
         self.calls: list[list[ChatMessage]] = []
 
     def complete(self, *, messages: list[ChatMessage], **_: Any) -> LLMResult[Intent]:

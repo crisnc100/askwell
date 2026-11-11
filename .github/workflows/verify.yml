@@ -45,5 +45,20 @@ jobs:
         run: uv run python -m scripts.fetch_benchmarks
       - name: Seed (the one seed path)
         run: uv run ledgerline seed
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - name: Cache Playwright's browser (keyed by the locked Playwright version)
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ hashFiles('web/package-lock.json') }}
+      - name: Install the browser the web tests use
+        run: |
+          cd web
+          npm ci
+          npx playwright install --with-deps chromium
       - name: verify.sh
         run: ./verify.sh
