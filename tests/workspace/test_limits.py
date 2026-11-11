@@ -11,7 +11,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from ledgerline.api import create_app
-from ledgerline.workspace.api import HEADER, WorkspaceApp
+from ledgerline.workspace.api import FILE_HEADER, HEADER, WorkspaceApp
 from ledgerline.workspace.limits import Limits, RateLimiter
 from ledgerline.workspace.store import (
     DiskFullError,
@@ -164,7 +164,7 @@ def test_upload_after_confirm_is_refused_over_http(
     workspace.meta.state = "confirmed"
     workspace.save()
     response = small_client.put(
-        "/api/workspace/files", params={"name": "a.csv"}, content=b"id\n1\n", headers=headers
+        "/api/workspace/files", content=b"id\n1\n", headers={**headers, FILE_HEADER: "a.csv"}
     )
     assert response.status_code == 409
     assert "Start a new workspace" in response.json()["detail"]
