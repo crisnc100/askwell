@@ -50,6 +50,17 @@ class RateLimiter:
         self._events: dict[str, deque[float]] = {}
         self._lock = threading.Lock()
 
+    def full(self, key: str) -> bool:
+        """Whether `key` has used up the window, without counting an event."""
+        now = self.clock()
+        with self._lock:
+            events = self._events.get(key)
+            if not events:
+                return False
+            while events and events[0] <= now - self.window_s:
+                events.popleft()
+            return len(events) >= self.limit
+
     def allow(self, key: str) -> bool:
         """Count one event for `key`, or refuse it if the window is full."""
         now = self.clock()

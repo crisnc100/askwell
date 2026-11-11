@@ -94,6 +94,9 @@ class Settings(BaseSettings):
     prompt_budget_chars: int = 16000
     max_tokens: int = 1024
 
+    # Where this runs. In "beta" or "prod" the app refuses to start without invite codes,
+    # so a missing setting can never open the hosted beta to everyone.
+    env: Literal["dev", "beta", "prod"] = "dev"
     # The hosted beta. Invite codes, comma-separated; when unset, there is no gate.
     invite_codes: SecretStr | None = None
     # A cap on all live model spend per UTC day, kept in `spend_db` across restarts.

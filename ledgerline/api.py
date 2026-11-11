@@ -55,6 +55,15 @@ def create_app(
         yield
         app.state.service.close()
 
+    if invite_codes is None:
+        current = get_settings()
+        raw = current.invite_codes
+        invite_codes = invite.parse_codes(raw.get_secret_value() if raw else None)
+        if not invite_codes and current.env != "dev":
+            raise RuntimeError(
+                f"LEDGERLINE_ENV is {current.env!r} but LEDGERLINE_INVITE_CODES is empty: "
+                "refusing to start without the invite gate"
+            )
     app = FastAPI(title="Ledgerline", version="0.1.0", lifespan=lifespan)
     if workspaces is None:
         settings = get_settings()
@@ -64,9 +73,6 @@ def create_app(
             prompt_budget_chars=settings.prompt_budget_chars,
         )
     app.state.workspaces = workspaces
-    if invite_codes is None:
-        raw = get_settings().invite_codes
-        invite_codes = invite.parse_codes(raw.get_secret_value() if raw else None)
     # Installed before the header middleware, so its refusals get those headers too.
     invite.install(app, invite_codes, workspaces.client_ip)
 

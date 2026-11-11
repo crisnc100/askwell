@@ -1,18 +1,23 @@
 """The hosted beta's invite gate: every page and API route needs a valid invite code.
 
 Codes come from `LEDGERLINE_INVITE_CODES` (comma-separated). With no codes set there is
-no gate, which is the local default. A visitor enters a code once on the gate page; it
-is kept in an HttpOnly cookie, and scripts can send it in the `X-Invite-Code` header
-instead. Removing a code from the setting locks out everyone using it at their next
-request.
+no gate, which is the local default; `LEDGERLINE_ENV=beta` or `prod` refuses to start
+without codes (ledgerline/api.py). A visitor enters a code once on the gate page; the
+browser then keeps the code's SHA-256 hash, never the code itself, in an HttpOnly
+cookie. The hash is plain ASCII, so a code in any script works. Scripts can send the
+code in the `X-Invite-Code` header instead. Removing a code from the setting locks out
+everyone using it at their next request.
 
-Codes are compared in constant time, and every configured code is compared on every
-check, so the response time does not hint at how much of a code was right. Wrong codes
-are rate limited per address.
+Codes and hashes are compared in constant time, and every configured one is compared on
+every check, so the response time does not hint at how much was right. Every wrong code,
+from the form, the header or the cookie, counts against one limit per address; once it
+is used up, that address gets 429 until the hour has passed, right code or not.
+Requests that present no code do not count.
 """
 
 from __future__ import annotations
 
+import hashlib
 import hmac
 from collections.abc import Awaitable, Callable
 from html import escape
@@ -30,7 +35,10 @@ OPEN_PATHS = frozenset({"/invite", "/healthz"})
 COOKIE_DAYS = 30
 ATTEMPTS_PER_HOUR = 10
 MAX_CODE_CHARS = 200
+# The login form holds one code; anything longer is refused before it is read.
+MAX_FORM_BYTES = 4096
 NEEDS_CODE = "Enter your invite code first."
+TOO_MANY = "Too many wrong invite codes from your address. Wait an hour and try again."
 
 
 def parse_codes(raw: str | None) -> list[bytes]:
@@ -45,6 +53,20 @@ def is_valid(candidate: str | None, codes: list[bytes]) -> bool:
     for code in codes:
         # No early exit: every code is compared every time.
         matched |= hmac.compare_digest(given, code)
+    return matched
+
+
+def cookie_value(code: bytes) -> str:
+    return hashlib.sha256(code).hexdigest()
+
+
+def is_valid_cookie(candidate: str | None, codes: list[bytes]) -> bool:
+    if not candidate or len(candidate) != 64:
+        return False
+    given = candidate.encode("ascii", errors="replace")
+    matched = False
+    for code in codes:
+        matched |= hmac.compare_digest(given, cookie_value(code).encode("ascii"))
     return matched
 
 
@@ -80,18 +102,31 @@ def install(
         return
     attempts = RateLimiter(ATTEMPTS_PER_HOUR, 3600.0)
 
+    def too_many() -> HTMLResponse:
+        return HTMLResponse(_page("Too many tries. Wait an hour and try again."), 429)
+
     @app.middleware("http")
     async def _gate(  # pyright: ignore[reportUnusedFunction]
         request: Request, call_next: Callable[[Request], Awaitable[Response]]
     ) -> Response:
         if request.url.path in OPEN_PATHS:
             return await call_next(request)
-        given = request.cookies.get(COOKIE) or request.headers.get(HEADER)
-        if is_valid(given, codes):
+        cookie = request.cookies.get(COOKIE)
+        header = request.headers.get(HEADER)
+        if cookie is None and header is None:
+            return _refused(request)
+        ip = client_ip(request)
+        if attempts.full(ip):
+            return JSONResponse({"detail": TOO_MANY}, status_code=429)
+        if is_valid_cookie(cookie, codes) or is_valid(header, codes):
             return await call_next(request)
-        if _wants_page(request):
-            return HTMLResponse(_page(), status_code=401)
-        return JSONResponse({"detail": NEEDS_CODE}, status_code=401)
+        attempts.allow(ip)
+        response = _refused(request)
+        if cookie is not None:
+            # A stale cookie (its code was removed) would otherwise spend a try on
+            # every page and asset request.
+            response.delete_cookie(COOKIE)
+        return response
 
     @app.get("/invite", response_class=HTMLResponse)
     def invite_page() -> HTMLResponse:  # pyright: ignore[reportUnusedFunction]
@@ -99,21 +134,36 @@ def install(
 
     @app.post("/invite")
     async def invite(request: Request) -> Response:  # pyright: ignore[reportUnusedFunction]
-        form = parse_qs((await request.body()).decode("utf-8", errors="replace"))
-        code = (form.get("code") or [None])[0]
-        # Every try counts, right or wrong, so the limit is checked before the code.
+        # Every try counts, right or wrong, and the limit is checked before any of the
+        # body is read.
         if not attempts.allow(client_ip(request)):
-            return HTMLResponse(_page("Too many tries. Wait an hour and try again."), 429)
+            return too_many()
+        length = request.headers.get("content-length", "")
+        if length.isdigit() and int(length) > MAX_FORM_BYTES:
+            return HTMLResponse(_page("That is too long to be a code."), 413)
+        body = b""
+        async for chunk in request.stream():
+            body += chunk
+            if len(body) > MAX_FORM_BYTES:
+                return HTMLResponse(_page("That is too long to be a code."), 413)
+        form = parse_qs(body.decode("utf-8", errors="replace"))
+        code = (form.get("code") or [None])[0]
         if not is_valid(code, codes):
             return HTMLResponse(_page("That code is not valid."), status_code=401)
-        response = RedirectResponse("/", status_code=303)
         assert code is not None
+        response = RedirectResponse("/", status_code=303)
         response.set_cookie(
             COOKIE,
-            code,
+            cookie_value(code.encode("utf-8")),
             max_age=COOKIE_DAYS * 86400,
             httponly=True,
             secure=secure_cookie,
             samesite="lax",
         )
         return response
+
+
+def _refused(request: Request) -> Response:
+    if _wants_page(request):
+        return HTMLResponse(_page(), status_code=401)
+    return JSONResponse({"detail": NEEDS_CODE}, status_code=401)
