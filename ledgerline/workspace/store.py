@@ -15,10 +15,18 @@ its `-wal`/`-journal` sidecars, the registry, the shared category values and its
 The workspace id is a bearer secret: 128 random bits from `secrets`, as 32 hex
 characters. Anything else is refused before a path is built from it. It expires
 `Limits.idle_days` after its last use.
+
+Requests can overlap. Every change to a workspace runs inside `locked`, which holds that
+workspace's lock, reads its metadata fresh from disk and saves it before letting go, so
+no request acts on a stale copy. Disk space is reserved before it is written
+(`Capacity`), so two requests can never both spend the same free space. Files still
+being written (an upload streaming in, a load being built) are covered by their
+reservation, not counted twice.
 """
 
 from __future__ import annotations
 
+import asyncio
 import contextlib
 import hashlib
 import hmac
@@ -28,7 +36,8 @@ import re
 import secrets
 import shutil
 import threading
-from collections.abc import AsyncIterator, Callable
+from collections.abc import AsyncIterator, Callable, Generator
+from contextlib import contextmanager
 from dataclasses import asdict, dataclass, field
 from datetime import UTC, datetime, timedelta
 from functools import lru_cache
@@ -44,6 +53,17 @@ State = Literal["new", "checked", "confirmed"]
 DEFAULT_TIME_ZONE = "America/New_York"
 WORKSPACE_ID = re.compile(r"[0-9a-f]{32}")
 _TRASH = ".trash"
+_INCOMING = ".incoming-"
+_STAGING = ".staging-"
+DRAFT_FILE = "registry.draft.yaml"
+FIELDS_FILE = "fields.json"
+# A load reserves this much before building, then checks the real size before swapping
+# it in: a SQLite file is larger than its CSV (a 5-byte CSV makes an 8 KiB database).
+LOAD_MIN_BYTES = 8 * 1024
+LOAD_FACTOR = 3
+# Uploads without a declared size reserve room in steps of this size (exactly what is
+# needed when less than a step is left).
+RESERVE_STEP = 256 * 1024
 _OWNER_KEY_FILE = ".owner-key"
 MAX_NAME_CHARS = 100
 _CSV_NAME = re.compile(r".+\.csv", re.IGNORECASE)
@@ -84,6 +104,11 @@ class DiskFullError(WorkspaceError):
 
 
 NOT_FOUND = "No workspace has that link. It may have expired or been deleted."
+CONFIRMED = (
+    "This workspace is confirmed, so its files are fixed. Start a new workspace to use "
+    "different files."
+)
+DISK_FULL = "The service is out of space right now. Try again later."
 
 
 @dataclass
@@ -170,11 +195,11 @@ class Workspace:
 
     @property
     def draft_path(self) -> Path:
-        return self.dir / "registry.draft.yaml"
+        return self.dir / DRAFT_FILE
 
     @property
     def fields_path(self) -> Path:
-        return self.dir / "fields.json"
+        return self.dir / FIELDS_FILE
 
     @property
     def edits_path(self) -> Path:
@@ -212,6 +237,33 @@ class Workspace:
         ]
 
 
+class Capacity:
+    """The disk cap shared by all workspaces. Space is reserved under one lock before it
+    is written and released once the bytes are on disk (or abandoned)."""
+
+    def __init__(self, cap: int, usage: Callable[[], int]) -> None:
+        self.cap = cap
+        self.usage = usage
+        self.reserved = 0
+        self._lock = threading.Lock()
+
+    def reserve(self, size: int) -> None:
+        with self._lock:
+            if self.usage() + self.reserved + size > self.cap:
+                raise DiskFullError(DISK_FULL)
+            self.reserved += size
+
+    def release(self, size: int) -> None:
+        with self._lock:
+            self.reserved -= size
+
+    def fits(self, size: int, held: int) -> bool:
+        """Whether `size` more bytes fit, for a caller already holding `held` of the
+        reserved total."""
+        with self._lock:
+            return self.usage() + self.reserved - held + size <= self.cap
+
+
 @dataclass
 class SweepResult:
     removed: list[str] = field(default_factory=list[str])
@@ -230,11 +282,24 @@ class WorkspaceStore:
         self.clock = clock
         self._locks: dict[str, threading.RLock] = {}
         self._locks_guard = threading.Lock()
+        self.capacity = Capacity(self.limits.disk_cap_bytes, self.disk_usage)
         root.mkdir(parents=True, exist_ok=True)
 
     def lock(self, workspace_id: str) -> threading.RLock:
         with self._locks_guard:
             return self._locks.setdefault(workspace_id, threading.RLock())
+
+    @contextmanager
+    def locked(self, workspace_id: str) -> Generator[Workspace]:
+        """The workspace, read fresh under its lock; saved on a normal exit. An exception
+        leaves the metadata on disk as it was."""
+        with self.lock(workspace_id):
+            meta = self._read_meta(workspace_id)
+            if meta is None:
+                raise WorkspaceNotFoundError(NOT_FOUND)
+            workspace = Workspace(self.root, meta)
+            yield workspace
+            workspace.save()
 
     def _now(self) -> datetime:
         return self.clock().astimezone(UTC)
@@ -304,10 +369,10 @@ class WorkspaceStore:
         if self._expired(meta):
             self.delete(workspace_id)
             raise WorkspaceNotFoundError(NOT_FOUND)
-        workspace = Workspace(self.root, meta)
-        if touch:
-            meta.last_activity = self._now().isoformat()
-            workspace.save()
+        if not touch:
+            return Workspace(self.root, meta)
+        with self.locked(workspace_id) as workspace:
+            workspace.meta.last_activity = self._now().isoformat()
         return workspace
 
     def delete(self, workspace_id: str) -> bool:
@@ -319,10 +384,11 @@ class WorkspaceStore:
         trash = self.root / _TRASH
         trash.mkdir(exist_ok=True)
         target = trash / f"{workspace_id}-{secrets.token_hex(4)}"
-        try:
-            os.replace(source, target)
-        except FileNotFoundError:
-            return False
+        with self.lock(workspace_id):
+            try:
+                os.replace(source, target)
+            except FileNotFoundError:
+                return False
         with contextlib.suppress(OSError):
             shutil.rmtree(target)
         return True
@@ -357,9 +423,14 @@ class WorkspaceStore:
         return result
 
     def disk_usage(self) -> int:
+        """Bytes on disk under the root, leaving out files still being written: their
+        reservations already count them."""
         total = 0
-        for dirpath, _dirs, files in os.walk(self.root):
+        for dirpath, dirs, files in os.walk(self.root):
+            dirs[:] = [d for d in dirs if not d.startswith(_STAGING)]
             for name in files:
+                if name.startswith(_INCOMING):
+                    continue
                 with contextlib.suppress(OSError):
                     total += (Path(dirpath) / name).stat().st_size
         return total
@@ -372,100 +443,140 @@ class WorkspaceStore:
         content_length: int | None = None,
     ) -> FileEntry:
         """Store one uploaded file while it streams in, refusing it as soon as it passes
-        the per-file size limit or the disk cap."""
+        the per-file size limit or the disk cap. The locked steps run in a worker
+        thread, so a busy workspace never blocks the event loop."""
         name = check_file_name(name)
-        meta = workspace.meta
-        if meta.state == "confirmed":
-            raise WrongStateError(
-                "This workspace is confirmed, so its files are fixed. Start a new workspace "
-                "to use different files."
-            )
-        replacing = next((f for f in meta.files if f.name == name), None)
-        if replacing is None and len(meta.files) >= self.limits.max_files:
-            raise WrongStateError(
-                f"A workspace holds at most {self.limits.max_files} files. Remove one first."
-            )
+        await asyncio.to_thread(self._may_upload, workspace.id, name)
         limit = self.limits.max_file_bytes
         if content_length is not None and content_length > limit:
             raise FileTooLargeError(_too_large(limit))
-        room = self.limits.disk_cap_bytes - self.disk_usage()
-        incoming = workspace.uploads / f".incoming-{secrets.token_hex(8)}"
+        incoming = workspace.uploads / f"{_INCOMING}{secrets.token_hex(8)}"
         received = 0
+        reserved = 0
         try:
+            if content_length:
+                await asyncio.to_thread(self.capacity.reserve, content_length)
+                reserved = content_length
             with incoming.open("wb") as fh:
                 async for chunk in chunks:
                     received += len(chunk)
                     if received > limit:
                         raise FileTooLargeError(_too_large(limit))
-                    if received > room:
-                        raise DiskFullError(
-                            "The service is out of space for uploads right now. Try again later."
+                    if received > reserved:
+                        reserved += await asyncio.to_thread(
+                            self._reserve_more, received - reserved, limit - reserved
                         )
                     fh.write(chunk)
-            with self.lock(workspace.id):
-                stored = f"f{meta.next_file}.csv"
-                meta.next_file += 1
-                os.replace(incoming, workspace.uploads / stored)
-                if replacing is not None:
-                    (workspace.uploads / replacing.stored).unlink(missing_ok=True)
-                    meta.files.remove(replacing)
-                entry = FileEntry(name, stored, received, self._now().isoformat())
-                meta.files.append(entry)
-                meta.state = "new"
-                workspace.clear_loaded()
-                workspace.save()
+            return await asyncio.to_thread(
+                self._commit_upload, workspace.id, name, incoming, received
+            )
         finally:
             incoming.unlink(missing_ok=True)
+            self.capacity.release(reserved)
+
+    def _reserve_more(self, needed: int, most: int) -> int:
+        """Reserve a step ahead when there is room, or exactly what is needed."""
+        step = min(max(needed, RESERVE_STEP), most)
+        try:
+            self.capacity.reserve(step)
+        except DiskFullError:
+            if step == needed:
+                raise
+            self.capacity.reserve(needed)
+            return needed
+        return step
+
+    def _may_upload(self, workspace_id: str, name: str) -> None:
+        """Refuse early what the commit would refuse anyway."""
+        with self.locked(workspace_id) as workspace:
+            self._check_room_for(workspace.meta, name)
+
+    def _check_room_for(self, meta: Meta, name: str) -> FileEntry | None:
+        if meta.state == "confirmed":
+            raise WrongStateError(CONFIRMED)
+        replacing = next((f for f in meta.files if f.name == name), None)
+        if replacing is None and len(meta.files) >= self.limits.max_files:
+            raise WrongStateError(
+                f"A workspace holds at most {self.limits.max_files} files. Remove one first."
+            )
+        return replacing
+
+    def _commit_upload(
+        self, workspace_id: str, name: str, incoming: Path, received: int
+    ) -> FileEntry:
+        with self.locked(workspace_id) as workspace:
+            meta = workspace.meta
+            replacing = self._check_room_for(meta, name)
+            stored = f"f{meta.next_file}.csv"
+            meta.next_file += 1
+            os.replace(incoming, workspace.uploads / stored)
+            if replacing is not None:
+                (workspace.uploads / replacing.stored).unlink(missing_ok=True)
+                meta.files.remove(replacing)
+            entry = FileEntry(name, stored, received, self._now().isoformat())
+            meta.files.append(entry)
+            meta.state = "new"
+            workspace.clear_loaded()
         return entry
 
     def remove_file(self, workspace: Workspace, name: str) -> None:
-        meta = workspace.meta
-        if meta.state == "confirmed":
-            raise WrongStateError(
-                "This workspace is confirmed, so its files are fixed. Start a new workspace "
-                "to use different files."
-            )
-        with self.lock(workspace.id):
+        with self.locked(workspace.id) as fresh:
+            meta = fresh.meta
+            if meta.state == "confirmed":
+                raise WrongStateError(CONFIRMED)
             entry = next((f for f in meta.files if f.name == name), None)
             if entry is None:
                 raise WorkspaceNotFoundError(f"No file named {name!r} in this workspace.")
-            (workspace.uploads / entry.stored).unlink(missing_ok=True)
+            (fresh.uploads / entry.stored).unlink(missing_ok=True)
             meta.files.remove(entry)
             meta.state = "new"
-            workspace.clear_loaded()
-            workspace.save()
+            fresh.clear_loaded()
 
     def check(
         self,
         workspace: Workspace,
-        after_load: Callable[[Workspace, list[TablePlan]], object] | None = None,
+        after_load: Callable[[Path, list[TablePlan]], dict[str, str]] | None = None,
     ) -> CheckResult:
-        """Check every file; if the whole set passes, load it all, run `after_load`
-        (which drafts the registry) and move to `checked`. A failing set loads nothing
-        and stays (or goes back to) `new`."""
-        meta = workspace.meta
-        if meta.state == "confirmed":
-            raise WrongStateError("This workspace is already confirmed.")
-        if not meta.files:
-            raise WrongStateError("Upload at least one CSV file first.")
-        with self.lock(workspace.id):
-            files = workspace.read_files()
+        """Check every file. If the whole set passes, build the database (and the files
+        `after_load` returns for it, the drafted registry) in a staging folder, then swap
+        them in and move to `checked`. Until the swap nothing changes, so a load refused
+        for space leaves the workspace exactly as it was. A failing set loads nothing
+        and goes back to `new`."""
+        with self.locked(workspace.id) as fresh:
+            meta = fresh.meta
+            if meta.state == "confirmed":
+                raise WrongStateError("This workspace is already confirmed.")
+            if not meta.files:
+                raise WrongStateError("Upload at least one CSV file first.")
+            files = fresh.read_files()
             result = check_files(files, self.limits)
-            workspace.clear_loaded()
-            if result.ok:
-                needed = sum(len(f.data) for f in files)
-                if self.disk_usage() + needed > self.limits.disk_cap_bytes:
-                    raise DiskFullError(
-                        "The service is out of space for loading data right now. Try again later."
-                    )
-                load_tables(result.tables, workspace.db_path)
-                if after_load is not None:
-                    after_load(workspace, result.tables)
-                meta.state = "checked"
-            else:
+            if not result.ok:
+                fresh.clear_loaded()
                 meta.state = "new"
-            workspace.check_path.write_text(json.dumps(result.to_dict()), encoding="utf-8")
-            workspace.save()
+                fresh.check_path.write_text(json.dumps(result.to_dict()), encoding="utf-8")
+                return result
+            estimate = max(LOAD_MIN_BYTES, LOAD_FACTOR * sum(len(f.data) for f in files))
+            self.capacity.reserve(estimate)
+            staging = fresh.dir / f"{_STAGING}{secrets.token_hex(4)}"
+            try:
+                staging.mkdir()
+                load_tables(result.tables, staging / fresh.db_path.name)
+                extra = (
+                    after_load(staging / fresh.db_path.name, result.tables) if after_load else {}
+                )
+                for file_name, text in extra.items():
+                    (staging / file_name).write_text(text, encoding="utf-8")
+                built = sum(p.stat().st_size for p in staging.iterdir())
+                if not self.capacity.fits(built, held=estimate):
+                    raise DiskFullError(DISK_FULL)
+                fresh.clear_loaded()
+                for path in staging.iterdir():
+                    os.replace(path, fresh.dir / path.name)
+                meta.state = "checked"
+                fresh.check_path.write_text(json.dumps(result.to_dict()), encoding="utf-8")
+            finally:
+                shutil.rmtree(staging, ignore_errors=True)
+                self.capacity.release(estimate)
         return result
 
 

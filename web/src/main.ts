@@ -1,5 +1,14 @@
 import "./style.css";
-import { api, ApiError, type Answer, type Edits, type Field, type Status, useWorkspace } from "./api";
+import {
+  api,
+  ApiError,
+  type Answer,
+  type Edits,
+  type Field,
+  type FieldEdit,
+  type Status,
+  useWorkspace,
+} from "./api";
 import { append, clear, h, type Child } from "./dom";
 
 type Step = "prepare" | "upload" | "check" | "confirm" | "ask";
@@ -20,6 +29,8 @@ const app = document.getElementById("app") as HTMLElement;
 let status: Status | null = null;
 let step: Step = "prepare";
 let edits: Edits = { fields: {} };
+// Messages to show at the top of the next page drawn (an upload batch with a refusal).
+let notices: string[] = [];
 
 // The workspace link is "/#ws=<id>". A fragment never reaches the server, so the id is
 // not in any access log, and Referrer-Policy keeps it from leaking to other sites.
@@ -57,6 +68,8 @@ function render(): void {
   append(app, header(), nav());
   const main = h("main", { attrs: { "data-step": step } });
   app.appendChild(main);
+  for (const message of notices) main.appendChild(notice("error", message));
+  notices = [];
   const pages: Record<Step, () => Promise<void> | void> = {
     prepare: () => preparePage(main),
     upload: () => uploadPage(main),
@@ -114,7 +127,12 @@ function workspaceBox(): HTMLElement | null {
       on: {
         click: async () => {
           if (!confirm("Delete this workspace and every file in it? This cannot be undone.")) return;
-          await api.remove_workspace();
+          try {
+            await api.remove_workspace();
+          } catch (err) {
+            showError(app.querySelector("main") as HTMLElement, err);
+            return;
+          }
           status = null;
           useWorkspace(null);
           history.replaceState(null, "", "/");
@@ -231,13 +249,13 @@ function uploadPage(main: HTMLElement): void {
   input.addEventListener("change", async () => {
     const files = Array.from(input.files ?? []);
     clear(progress);
+    // Every file is tried; the accepted ones are listed and the refused ones explained.
     for (const file of files) {
       append(progress, h("p", { class: "muted" }, `Uploading ${file.name}…`));
       try {
         status = await api.upload(file);
       } catch (err) {
-        append(progress, notice("error", `${file.name}: ${err instanceof ApiError ? err.message : "upload failed"}`));
-        return;
+        notices.push(`${file.name}: ${err instanceof ApiError ? err.message : "upload failed"}`);
       }
     }
     render();
@@ -370,21 +388,35 @@ function checkPage(main: HTMLElement): void {
 
 async function confirmPage(main: HTMLElement): Promise<void> {
   const data = await api.fields();
-  edits = data.edits;
+  // The edits are the one source of truth: they start as the fields' current state, the
+  // boxes are drawn from them, and the preview and Confirm send exactly them.
+  edits = { fields: {} };
+  for (const table of data.tables) {
+    for (const field of table.fields) {
+      edits.fields[field.key] = {
+        hidden: field.hidden,
+        description: field.description,
+        share_values: field.share_values && !field.hidden,
+      };
+    }
+  }
   const preview = h("pre", { class: "prompt", attrs: { id: "prompt-preview", "aria-live": "polite" } });
   let timer: number | undefined;
+  let latest = 0;
   const refresh = (): void => {
     window.clearTimeout(timer);
     timer = window.setTimeout(async () => {
+      const request = ++latest;
       try {
         const result = await api.preview(edits);
-        preview.textContent = result.prompt;
+        // An older request that answers late never replaces a newer preview.
+        if (request === latest) preview.textContent = result.prompt;
       } catch (err) {
-        showError(main, err);
+        if (request === latest) showError(main, err);
       }
     }, 250);
   };
-  const edit = (key: string, change: Partial<Edits["fields"][string]>): void => {
+  const edit = (key: string, change: Partial<FieldEdit>): void => {
     edits.fields[key] = { ...(edits.fields[key] ?? {}), ...change };
     refresh();
   };
@@ -403,7 +435,7 @@ async function confirmPage(main: HTMLElement): Promise<void> {
   );
   for (const table of data.tables) {
     const body = h("tbody");
-    for (const field of table.fields) body.appendChild(fieldRow(field, edit));
+    for (const field of table.fields) body.appendChild(fieldRow(field, edits.fields[field.key], edit));
     append(
       main,
       h("h2", {}, table.name),
@@ -434,24 +466,30 @@ async function confirmPage(main: HTMLElement): Promise<void> {
   refresh();
 }
 
-function fieldRow(field: Field, edit: (key: string, change: Partial<Edits["fields"][string]>) => void): HTMLElement {
+function fieldRow(
+  field: Field,
+  state: FieldEdit,
+  edit: (key: string, change: Partial<FieldEdit>) => void,
+): HTMLElement {
   const hidden = h("input", { attrs: { type: "checkbox", "aria-label": `Hide ${field.key}`, "data-key": field.key, "data-role": "hide" } });
-  hidden.checked = field.hidden;
+  hidden.checked = Boolean(state.hidden);
   const description = h("input", {
     attrs: { type: "text", maxlength: "300", "aria-label": `Description of ${field.key}`, "data-key": field.key, "data-role": "description" },
   });
-  description.value = field.description;
+  description.value = state.description ?? "";
   description.addEventListener("input", () => edit(field.key, { description: description.value }));
   let share: HTMLInputElement | null = null;
   if (field.values.length) {
     share = h("input", { attrs: { type: "checkbox", "data-key": field.key, "data-role": "share" } });
-    share.checked = field.share_values;
-    share.disabled = field.hidden;
+    share.checked = Boolean(state.share_values);
+    share.disabled = Boolean(state.hidden);
     const box = share;
     share.addEventListener("change", () => edit(field.key, { share_values: box.checked }));
   }
   hidden.addEventListener("change", () => {
-    edit(field.key, { hidden: hidden.checked });
+    // A hidden field never shares its values, so hiding clears the box as well.
+    if (share && hidden.checked) share.checked = false;
+    edit(field.key, hidden.checked ? { hidden: true, share_values: false } : { hidden: false });
     if (share) share.disabled = hidden.checked;
   });
   const shown = field.values.slice(0, 8).join(", ") + (field.values.length > 8 ? ", …" : "");
@@ -572,5 +610,9 @@ async function start(): Promise<void> {
   }
   render();
 }
+
+// Opening a different workspace link in the same tab starts over with that workspace,
+// so nothing from the previous one (its id included) carries across.
+window.addEventListener("hashchange", () => location.reload());
 
 void start();

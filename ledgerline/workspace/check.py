@@ -43,6 +43,8 @@ _LINK = re.compile(r"^(.+)_id$")
 _MOSTLY_DATES = 0.9
 _MOSTLY_DATES_MIN = 10
 _SHOWN_VALUE = 40
+# The longest column name, after slugging, that Check accepts.
+MAX_COLUMN_NAME = 128
 
 
 @dataclass(frozen=True)
@@ -224,8 +226,14 @@ def check_files(files: list[UploadedFile], limits: Limits | None = None) -> Chec
             parsed.append(result)
     _check_table_names(reports, limits)
     # ID and link checks need every table; a file that could not be read at all would
-    # make them report problems that are not there.
-    plans = _cross_file(parsed) if len(parsed) == len(files) else []
+    # make them report problems that are not there. Without them, each column is still
+    # typed and its damaged values reported.
+    if len(parsed) == len(files):
+        plans = _cross_file(parsed)
+    else:
+        for p in parsed:
+            _type_columns(p, skip=set())
+        plans = []
     result = CheckResult(reports, plans)
     if not result.ok:
         result.tables = []
@@ -321,7 +329,7 @@ def _parse_file(
             row=1,
         )
         return None
-    names = _check_header(headers, out)
+    names = _check_header(headers, out, limits)
     if names is None:
         return None
     report.columns = len(headers)
@@ -366,6 +374,9 @@ def _parse_file(
                         row=row_number,
                         column=headers[index],
                     )
+                    # Reported once, and never classified: the file cannot load anyway.
+                    cells.append(None)
+                    continue
                 cells.append(None if is_null(cell) else cell)
             rows.append(cells)
             row_numbers.append(row_number)
@@ -392,11 +403,9 @@ def _parse_file(
     if not rows and report.ok:
         out.add("error", "no_rows", "the file has column names but no rows", "add the rows")
         return None
-    types: list[ColumnType] = [
-        _column(headers[i], [r[i] for r in rows], row_numbers, out) for i in range(width)
-    ]
     slug = report.table
     assert slug is not None
+    types: list[ColumnType] = ["text"] * width
     return _Parsed(report, out, slug, headers, names, rows, row_numbers, types)
 
 
@@ -406,8 +415,9 @@ _QUOTE_FIX = (
 )
 
 
-def _check_header(headers: list[str], out: _Reporter) -> list[str] | None:
-    """The column names (slugged headers), or None after reporting a header problem."""
+def _check_header(headers: list[str], out: _Reporter, limits: Limits) -> list[str] | None:
+    """The column names (slugged headers), or None after reporting a header problem.
+    A header over the cell limit is reported and never classified."""
     ok = True
     for index, header in enumerate(headers):
         if not header:
@@ -419,7 +429,28 @@ def _check_header(headers: list[str], out: _Reporter) -> list[str] | None:
                 row=1,
             )
             ok = False
-    if ok and all(kind(h) != "text" for h in headers):
+        elif len(header) > limits.max_cell_chars:
+            out.add(
+                "error",
+                "header_too_long",
+                f"the name of column {index + 1} is {len(header):,} characters; the limit is "
+                f"{limits.max_cell_chars:,}",
+                "give the column a short name",
+                row=1,
+            )
+            ok = False
+        elif len(slugify(header)) > MAX_COLUMN_NAME:
+            out.add(
+                "error",
+                "column_name_too_long",
+                f"the name of column {index + 1} is too long",
+                f"shorten it to at most {MAX_COLUMN_NAME} letters, digits and underscores",
+                row=1,
+            )
+            ok = False
+    if not ok:
+        return None
+    if all(kind(h) != "text" for h in headers):
         out.add(
             "error",
             "no_header",
@@ -505,12 +536,26 @@ def _cross_file(parsed: list[_Parsed]) -> list[TablePlan]:
             if match is None or index == own:
                 continue
             stem = match.group(1)
-            target = next(
-                (t for t in (stem, f"{stem}s") if t in by_slug and t != p.slug and t in id_index),
-                None,
-            )
+            # A table may link to itself (nodes.node_id -> nodes.id).
+            target = next((t for t in (stem, f"{stem}s") if t in by_slug and t in id_index), None)
             if target is not None:
                 links.setdefault(p.slug, []).append((index, target))
+
+    # Types, in dependency order. An ID is a label, so its type comes from its values
+    # with no damaged-value checks ('$5' is a fine ID). A link takes its target ID's
+    # type before any of its values are judged. Every other column is typed by its own
+    # values, with damaged ones reported.
+    for p in parsed:
+        index = id_index.get(p.slug)
+        if index is not None:
+            p.types[index] = column_type({kind(v) for r in p.rows if (v := r[index]) is not None})
+    for p in parsed:
+        for index, target in links.get(p.slug, []):
+            p.types[index] = by_slug[target].types[id_index[target]]
+            p.link_columns.add(index)
+    for p in parsed:
+        own = id_index.get(p.slug)
+        _type_columns(p, skip=p.link_columns | ({own} if own is not None else set()))
 
     id_values: dict[str, set[int | float | str]] = {}
     for p in parsed:
@@ -531,11 +576,7 @@ def _cross_file(parsed: list[_Parsed]) -> list[TablePlan]:
 
     for p in parsed:
         for index, target in links.get(p.slug, []):
-            target_parsed = by_slug[target]
-            target_type = target_parsed.types[id_index[target]]
-            p.types[index] = target_type
-            p.link_columns.add(index)
-            _check_link(p, index, target, target_type, id_values.get(target, set()))
+            _check_link(p, index, target, p.types[index], id_values.get(target, set()))
 
     for p in parsed:
         _check_conversion(p)
@@ -560,6 +601,13 @@ def _cross_file(parsed: list[_Parsed]) -> list[TablePlan]:
             )
         )
     return plans
+
+
+def _type_columns(p: _Parsed, skip: set[int]) -> None:
+    for index in range(len(p.names)):
+        if index not in skip:
+            values = [r[index] for r in p.rows]
+            p.types[index] = _column(p.headers[index], values, p.row_numbers, p.out)
 
 
 def _check_ids(p: _Parsed, index: int) -> set[int | float | str]:
@@ -644,7 +692,9 @@ def _type_words(ctype: ColumnType) -> str:
 
 def _link_fix(value: str, target_type: ColumnType) -> str:
     if target_type == "integer" and kind(value) == "zero_int":
-        return f"write it without leading zeros: {value.lstrip('+').lstrip('0') or '0'}"
+        sign = "-" if value.startswith("-") else ""
+        digits = value.lstrip("+-").lstrip("0") or "0"
+        return f"write it without leading zeros: {sign if digits != '0' else ''}{digits}"
     return "use the ID exactly as it is written in the other table"
 
 

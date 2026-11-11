@@ -7,13 +7,14 @@ as `{"detail": <a plain sentence>}` with a status the page can show as is.
 
 from __future__ import annotations
 
+import asyncio
 import json
 from dataclasses import dataclass, field
 from typing import Any
 
 from fastapi import APIRouter, FastAPI, Request
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ValidationError
 
 from ledgerline.workspace import fields
 from ledgerline.workspace.ask import ask_workspace, prompt_preview
@@ -33,6 +34,10 @@ HOUR_S = 3600.0
 
 class TooManyRequestsError(WorkspaceError):
     status = 429
+
+
+class NotJsonError(WorkspaceError):
+    status = 415
 
 
 @dataclass
@@ -69,7 +74,9 @@ class WorkspaceApp:
         entry, the one the proxy itself appended; earlier entries are whatever the
         client sent."""
         if self.trust_proxy:
-            forwarded = request.headers.get("x-forwarded-for", "")
+            # Every header line counts: a client can add its own line, but the proxy's
+            # value is always last.
+            forwarded = ",".join(request.headers.getlist("x-forwarded-for"))
             last = forwarded.split(",")[-1].strip()
             if last:
                 return last
@@ -128,9 +135,20 @@ def install(fastapi_app: FastAPI, app: WorkspaceApp) -> APIRouter:
         }
 
     @router.post("/workspaces", status_code=201)
-    def create(request: Request, body: CreateRequest | None = None) -> dict[str, Any]:
-        chosen = body.time_zone if body is not None else DEFAULT_TIME_ZONE
-        workspace = app.store.create(app.client_ip(request), chosen)
+    async def create(request: Request) -> dict[str, Any]:
+        # A cross-site page can send a form or an empty POST without the browser asking
+        # first, but not JSON, so requiring JSON keeps other sites from creating
+        # workspaces on a visitor's behalf. The type is checked before the body is read.
+        content_type = request.headers.get("content-type", "").split(";")[0].strip().lower()
+        if content_type != "application/json":
+            raise NotJsonError("Send the request as JSON.")
+        try:
+            body = CreateRequest.model_validate_json(await request.body() or b"{}")
+        except ValidationError as exc:
+            raise WorkspaceError("Send a JSON object, optionally with a time_zone.") from exc
+        workspace = await asyncio.to_thread(
+            app.store.create, app.client_ip(request), body.time_zone
+        )
         return status(app, workspace)
 
     @router.get("/workspace")
@@ -139,7 +157,8 @@ def install(fastapi_app: FastAPI, app: WorkspaceApp) -> APIRouter:
 
     @router.put("/workspace/files")
     async def upload(request: Request, name: str) -> dict[str, Any]:
-        workspace = opened(request)
+        # Opening takes the workspace lock, so it runs off the event loop.
+        workspace = await asyncio.to_thread(opened, request)
         if not app.uploads.allow(app.client_ip(request)):
             raise TooManyRequestsError(
                 f"Too many uploads from your address (the limit is "
@@ -152,19 +171,20 @@ def install(fastapi_app: FastAPI, app: WorkspaceApp) -> APIRouter:
             request.stream(),
             int(length) if length and length.isdigit() else None,
         )
-        return status(app, workspace)
+        fresh = await asyncio.to_thread(app.store.open, workspace.id, touch=False)
+        return status(app, fresh)
 
     @router.delete("/workspace/files")
     def remove_file(request: Request, name: str) -> dict[str, Any]:
         workspace = opened(request)
         app.store.remove_file(workspace, name)
-        return status(app, workspace)
+        return status(app, app.store.open(workspace.id, touch=False))
 
     @router.post("/workspace/check")
     def check(request: Request) -> dict[str, Any]:
         workspace = opened(request)
         app.store.check(workspace, after_load=fields.draft)
-        return status(app, workspace)
+        return status(app, app.store.open(workspace.id, touch=False))
 
     @router.get("/workspace/fields")
     def list_fields(request: Request) -> dict[str, Any]:
@@ -186,7 +206,7 @@ def install(fastapi_app: FastAPI, app: WorkspaceApp) -> APIRouter:
     def confirm(request: Request, edits: Edits) -> dict[str, Any]:
         workspace = opened(request)
         fields.confirm(app.store, workspace, edits)
-        return status(app, workspace)
+        return status(app, app.store.open(workspace.id, touch=False))
 
     @router.post("/workspace/ask")
     def ask(request: Request, body: AskRequest) -> dict[str, Any]:

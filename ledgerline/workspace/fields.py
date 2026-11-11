@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import json
 from dataclasses import asdict, dataclass, field
+from pathlib import Path
 from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -35,7 +36,14 @@ from ledgerline.core.registry import (
 )
 from ledgerline.core.registry_init import init_registry
 from ledgerline.workspace.check import TablePlan
-from ledgerline.workspace.store import Workspace, WorkspaceError, WorkspaceStore, WrongStateError
+from ledgerline.workspace.store import (
+    DRAFT_FILE,
+    FIELDS_FILE,
+    Workspace,
+    WorkspaceError,
+    WorkspaceStore,
+    WrongStateError,
+)
 
 MAX_DESCRIPTION = 300
 
@@ -73,9 +81,10 @@ class FieldInfo:
         return json.dumps(asdict(self), indent=2)
 
 
-def draft(workspace: Workspace, plans: list[TablePlan]) -> Registry:
-    """Draft the registry for a freshly loaded workspace and save it as the draft."""
-    engine: Engine = readonly_engine(f"sqlite:///{workspace.db_path}")
+def draft(db_path: Path, plans: list[TablePlan]) -> dict[str, str]:
+    """Draft the registry for a freshly loaded database. Returns the draft files by
+    name, for the store to swap in with the database."""
+    engine: Engine = readonly_engine(f"sqlite:///{db_path}")
     try:
         result = init_registry(engine, include_values=True)
     finally:
@@ -106,9 +115,7 @@ def draft(workspace: Workspace, plans: list[TablePlan]) -> Registry:
         entities=entities,
         relationships=relationships,
     )
-    workspace.draft_path.write_text(dump_registry(registry), encoding="utf-8")
-    workspace.fields_path.write_text(info.to_json(), encoding="utf-8")
-    return registry
+    return {DRAFT_FILE: dump_registry(registry), FIELDS_FILE: info.to_json()}
 
 
 def load_draft(workspace: Workspace) -> tuple[Registry, FieldInfo]:
@@ -204,16 +211,32 @@ def field_rows(registry: Registry, info: FieldInfo, edits: Edits) -> list[dict[s
     return tables
 
 
+def normalized(registry: Registry, edits: Edits) -> Edits:
+    """The edits as they take effect: a hidden field never shares its values. Saving
+    this form means the page, the preview and the registry all read the same thing."""
+    out: dict[str, FieldEdit] = {}
+    for key, edit in edits.fields.items():
+        entity, _, name = key.partition(".")
+        hidden = edit.hidden
+        if hidden is None:
+            hidden = registry.entities[entity].fields[name].hidden
+        share = edit.share_values
+        if hidden and share:
+            share = False
+        out[key] = edit.model_copy(update={"share_values": share})
+    return Edits(fields=out)
+
+
 def confirm(store: WorkspaceStore, workspace: Workspace, edits: Edits) -> Registry:
     """Save the edited registry and move to `confirmed`. A confirmed workspace can be
     confirmed again with new edits; its files stay fixed."""
-    if workspace.meta.state == "new":
-        raise WrongStateError("Check your files first.")
-    with store.lock(workspace.id):
-        registry, info = load_draft(workspace)
+    with store.locked(workspace.id) as fresh:
+        if fresh.meta.state == "new":
+            raise WrongStateError("Check your files first.")
+        registry, info = load_draft(fresh)
         applied = apply(registry, info, edits)
-        workspace.registry_path.write_text(dump_registry(applied), encoding="utf-8")
-        workspace.edits_path.write_text(edits.model_dump_json(indent=2), encoding="utf-8")
-        workspace.meta.state = "confirmed"
-        workspace.save()
+        kept = normalized(registry, edits)
+        fresh.registry_path.write_text(dump_registry(applied), encoding="utf-8")
+        fresh.edits_path.write_text(kept.model_dump_json(indent=2), encoding="utf-8")
+        fresh.meta.state = "confirmed"
     return applied

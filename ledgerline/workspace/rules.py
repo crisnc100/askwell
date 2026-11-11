@@ -4,7 +4,9 @@ Check and the loader both use this module, so a value Check accepts is always a 
 the loader can store. A column's type comes from all its non-null values:
 
 - integer: every value is a whole number with no leading zero that fits in 64 bits.
-- number: every value is a whole or decimal number that a float stores exactly.
+- number: every value is a whole or decimal number that a float stores exactly. A
+  whole number past 2^53 does not fit a float exactly, so mixed with decimals it makes
+  the column text instead.
 - date: every value is `YYYY-MM-DD`.
 - datetime: every value is `YYYY-MM-DD HH:MM[:SS]` or a date (a date is its midnight).
 - text: anything else. One leading zero (like `00123`) makes the column text, so IDs
@@ -13,6 +15,11 @@ the loader can store. A column's type comes from all its non-null values:
 Values that look like a damaged number or date (`1,234`, `$5`, `45%`, `1.2E+11`,
 `3/4/25`) are not silently read as text when the rest of the column is numbers or
 dates: Check reports each one with its fix.
+
+Every pattern here runs in time proportional to the cell's length: no two quantifiers
+can match the same characters, so a long cell that almost matches cannot make the
+matcher try exponentially many ways. Digit strings longer than any 64-bit number are
+classified by length before Python parses them.
 """
 
 from __future__ import annotations
@@ -24,7 +31,8 @@ from typing import Literal
 
 ColumnType = Literal["integer", "number", "date", "datetime", "text"]
 Kind = Literal[
-    "int",  # a plain whole number
+    "int",  # a plain whole number a float stores exactly (at most 2^53 either way)
+    "wide_int",  # a whole number past 2^53 that still fits in 64 bits
     "zero_int",  # a whole or decimal number with a leading zero, like 00123
     "big_int",  # a whole number past 64 bits
     "num",  # a plain decimal number a float stores exactly
@@ -38,6 +46,11 @@ Kind = Literal[
 
 NULL_SPELLINGS: frozenset[str] = frozenset({"", "null", "na", "n/a", "-"})
 INT64_MIN, INT64_MAX = -(2**63), 2**63 - 1
+FLOAT_EXACT = 2**53
+# More digits than any 64-bit number has; longer digit strings are never parsed.
+_MAX_INT_DIGITS = 19
+# A decimal longer than this cannot be stored exactly in a float anyway.
+_MAX_NUM_CHARS = 40
 
 _INT = re.compile(r"[-+]?\d+")
 _NUM = re.compile(r"[-+]?(?:\d+\.\d*|\.\d+)")
@@ -46,8 +59,11 @@ _DATE = re.compile(r"\d{4}-\d{2}-\d{2}")
 _DATETIME = re.compile(r"\d{4}-\d{2}-\d{2} \d{2}:\d{2}(?::\d{2})?")
 
 _THOUSANDS = re.compile(r"[-+]?\d{1,3}(?:,\d{3})+(?:\.\d+)?")
-_CURRENCY = re.compile(r"[-+]?[$€£¥]\s?[\d,]*\.?\d+|[-+]?[\d,]*\.?\d+\s?[$€£¥]")
-_PERCENT = re.compile(r"[-+]?[\d,]*\.?\d+\s?%")
+# A number written loosely: digits and commas, then an optional fraction (or only a
+# fraction). The comma run and the fraction cannot overlap, so matching is linear.
+_LOOSE = r"(?:\d[\d,]*(?:\.\d+)?|\.\d+)"
+_CURRENCY = re.compile(rf"[-+]?[$€£¥]\s?{_LOOSE}|[-+]?{_LOOSE}\s?[$€£¥]")
+_PERCENT = re.compile(rf"[-+]?{_LOOSE}\s?%")
 _EXPONENT = re.compile(r"[-+]?\d+(?:\.\d+)?[eE][-+]?\d+")
 _SLASH_DATE = re.compile(r"(\d{1,2})[/.-](\d{1,2})[/.-](\d{2}|\d{4})(?:[ T].*)?")
 _YMD_SLASH = re.compile(r"(\d{4})/(\d{1,2})/(\d{1,2})")
@@ -56,6 +72,7 @@ _ISO_ZONED = re.compile(
 )
 
 NUMBER_KINDS: frozenset[str] = frozenset({"int", "num"})
+INTEGER_KINDS: frozenset[str] = frozenset({"int", "wide_int"})
 DATE_KINDS: frozenset[str] = frozenset({"date", "datetime"})
 
 
@@ -69,11 +86,17 @@ def kind(cell: str) -> Kind:
     if _INT.fullmatch(cell):
         if _LEADING_ZERO.match(cell):
             return "zero_int"
+        if len(cell.lstrip("+-")) > _MAX_INT_DIGITS:
+            return "big_int"
         value = int(cell)
-        return "int" if INT64_MIN <= value <= INT64_MAX else "big_int"
+        if not INT64_MIN <= value <= INT64_MAX:
+            return "big_int"
+        return "int" if abs(value) <= FLOAT_EXACT else "wide_int"
     if _NUM.fullmatch(cell):
         if _LEADING_ZERO.match(cell):
             return "zero_int"
+        if len(cell) > _MAX_NUM_CHARS:
+            return "long_num"
         return "num" if _float_is_exact(cell) else "long_num"
     if _DATE.fullmatch(cell):
         return "date" if _valid_date(cell) else "bad_date"
@@ -118,7 +141,7 @@ def column_type(kinds: set[str]) -> ColumnType:
     """The type of a column whose non-null values have these kinds."""
     if not kinds:
         return "text"
-    if kinds == {"int"}:
+    if kinds <= INTEGER_KINDS:
         return "integer"
     if kinds <= NUMBER_KINDS:
         return "number"
@@ -134,7 +157,7 @@ def intended_type(kinds: set[str]) -> ColumnType | None:
     or dates and every other value is a clean one; None when nothing is damaged."""
     if "zero_int" in kinds:
         return None
-    if "bad_number" in kinds and kinds <= NUMBER_KINDS | {"bad_number"}:
+    if "bad_number" in kinds and kinds <= NUMBER_KINDS | INTEGER_KINDS | {"bad_number"}:
         return "number"
     if "bad_date" in kinds and kinds <= DATE_KINDS | {"bad_date"}:
         return "date"
@@ -151,7 +174,7 @@ def convert(cell: str, ctype: ColumnType) -> Stored:
         return cell
     found = kind(cell)
     if ctype == "integer":
-        if found != "int":
+        if found not in INTEGER_KINDS:
             raise ValueError(f"{cell!r} is not a whole number")
         return int(cell)
     if ctype == "number":
