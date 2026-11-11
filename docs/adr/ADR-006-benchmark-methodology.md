@@ -2,7 +2,7 @@
 
 - **Status:** Proposed. Gold, Spider IDs and this prediction committed 2026-11-09 (P1),
   before any intent code.
-- **Result:** PENDING.
+- **Result:** recorded 2026-11-11 from the simulated run `sim-1` (see Result).
 
 ## Context
 The portfolio claim is that Ledgerline works on schemas it was not tuned on, compared
@@ -43,7 +43,29 @@ model:
    `builder_bug` under 5%.
 
 ## Result
-PENDING. The simulated run `sim-1` ([evals/reports/sim-1.md](../../evals/reports/sim-1.md))
-covers all six databases with Ledgerline and oneshot, one trial, and is not a measurement
-of the target model. The sql_agent baseline is not built yet: its many tool calls per
-question cannot be honestly simulated, so it waits for a live model.
+Measured on the eval run `sim-1` ([evals/reports/sim-1.md](../../evals/reports/sim-1.md)). Its model answers were **simulated**: claude-haiku-5-5 answered every request as a stand-in for `openai/gpt-oss-120b`, because there is no OpenRouter key yet. A simulated run tests the pipeline and the scoring; it does not measure the target model. One trial. The sql_agent baseline is not built yet: its many tool calls per question cannot be
+honestly simulated, so it waits for a live model.
+
+The Spider numbers below pool the 5 databases (250 questions). Square brackets are Wilson
+95% intervals.
+
+| Spider, 5 databases | Ledgerline | one-shot |
+|---|---|---|
+| Coverage (questions attempted) | 65.6% [60-71], 164/250 | 100% [98-100], 250/250 |
+| Execution accuracy | 58.0% [52-64], 145/250 | 80.0% [75-84], 200/250 |
+| Accuracy given attempted | 88.4% [83-92], 145/164 | 80.0% [75-84], 200/250 |
+| Wrong answers among answered | 11.6% [8-17], 19/164 | 19.7% [15-25], 49/249 |
+
+1. **Ledgerline coverage 35–55%:** wrong. It was 65.6%, from 48% on network_1 to 96% on
+   wta_1.
+2. **Accuracy given attempted ≥ 80%:** held (88.4%). **Wrong answers among answered
+   ≤ 10%:** failed (11.6%).
+3. **Both baselines beat Ledgerline on execution accuracy:** held for one-shot, which
+   scored 80.0% against Ledgerline's 58.0%. Both were above their predicted ranges
+   (one-shot 55–70%, Ledgerline 30–50%). sql_agent: not measured.
+4. **Ledgerline has the lowest wrong-answer rate:** held against one-shot on both Spider
+   (11.6% [8-17] against 19.7% [15-25]) and fieldservice (13.2% [6-27] against 30.2%
+   [19-45]). On both, the two intervals overlap. sql_agent: not measured.
+5. **Most Spider misses are `grammar_gap`, and `builder_bug` is under 5%:** held. Of 105
+   Spider misses, 76 (72%) are `grammar_gap`, 12 `validator_false_reject`, 11 `gold_issue`,
+   6 `misread` and none `builder_bug`.

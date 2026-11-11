@@ -17,7 +17,9 @@ Values that look like a damaged number or date (`1,234`, `$5`, `45%`, `1.2E+11`,
 dates: Check reports each one with its fix.
 
 Every pattern reads ASCII digits only (re.ASCII), so digits from other scripts, such as
-full-width digits, make a column text and keep their exact text.
+full-width digits, make a column text and keep their exact text. re.ASCII also limits
+the space class to ASCII spaces, so where a pattern allows a space it also names the
+no-break spaces (U+00A0, U+202F) that locale formats put before `%` or a currency sign.
 
 Every pattern here runs in time proportional to the cell's length: no two quantifiers
 can match the same characters, so a long cell that almost matches cannot make the
@@ -52,8 +54,10 @@ INT64_MIN, INT64_MAX = -(2**63), 2**63 - 1
 FLOAT_EXACT = 2**53
 # The most digits a 64-bit number has; longer digit strings are never parsed.
 _MAX_INT_DIGITS = 19
-# A decimal longer than this cannot be stored exactly in a float anyway.
-_MAX_NUM_CHARS = 40
+# A float's shortest decimal form has at most 17 significant digits, so a decimal with
+# more can never equal it and is not parsed. Zeros at either end are not significant,
+# so 1.50000 and 0.00025 are as short as 1.5 and 25.
+_MAX_EXACT_DIGITS = 17
 
 _INT = re.compile(r"[-+]?\d+", re.ASCII)
 _NUM = re.compile(r"[-+]?(?:\d+\.\d*|\.\d+)", re.ASCII)
@@ -65,8 +69,9 @@ _THOUSANDS = re.compile(r"[-+]?\d{1,3}(?:,\d{3})+(?:\.\d+)?", re.ASCII)
 # A number written loosely: digits and commas, then an optional fraction (or only a
 # fraction). The comma run and the fraction cannot overlap, so matching is linear.
 _LOOSE = r"(?:\d[\d,]*(?:\.\d+)?|\.\d+)"
-_CURRENCY = re.compile(rf"[-+]?[$€£¥]\s?{_LOOSE}|[-+]?{_LOOSE}\s?[$€£¥]", re.ASCII)
-_PERCENT = re.compile(rf"[-+]?{_LOOSE}\s?%", re.ASCII)
+_SPACE = r"[\s\u00a0\u202f]"
+_CURRENCY = re.compile(rf"[-+]?[$€£¥]{_SPACE}?{_LOOSE}|[-+]?{_LOOSE}{_SPACE}?[$€£¥]", re.ASCII)
+_PERCENT = re.compile(rf"[-+]?{_LOOSE}{_SPACE}?%", re.ASCII)
 _EXPONENT = re.compile(r"[-+]?\d+(?:\.\d+)?[eE][-+]?\d+", re.ASCII)
 _SLASH_DATE = re.compile(r"(\d{1,2})[/.-](\d{1,2})[/.-](\d{2}|\d{4})(?:[ T](.*))?", re.ASCII)
 _CLOCK = re.compile(r"(\d{1,2}):(\d{2})(?::(\d{2}))?", re.ASCII)
@@ -102,7 +107,7 @@ def kind(cell: str) -> Kind:
     if _NUM.fullmatch(cell):
         if _LEADING_ZERO.match(cell):
             return "zero_int"
-        if len(cell) > _MAX_NUM_CHARS:
+        if _significant_digits(cell) > _MAX_EXACT_DIGITS:
             return "long_num"
         return "num" if _float_is_exact(cell) else "long_num"
     if _DATE.fullmatch(cell):
@@ -119,6 +124,10 @@ def kind(cell: str) -> Kind:
     if _SLASH_DATE.fullmatch(cell) or _YMD_SLASH.fullmatch(cell) or _ISO_ZONED.fullmatch(cell):
         return "bad_date"
     return "text"
+
+
+def _significant_digits(cell: str) -> int:
+    return len(cell.lstrip("+-").replace(".", "").strip("0"))
 
 
 def _float_is_exact(cell: str) -> bool:
@@ -206,7 +215,7 @@ def number_fix(cell: str) -> str:
             "a spreadsheet shortened this number; format the column as a whole number "
             "(or as text) and export again"
         )
-    plain = re.sub(r"[\s,$€£¥%]", "", cell, flags=re.ASCII)
+    plain = re.sub(rf"{_SPACE}|[,$€£¥%]", "", cell, flags=re.ASCII)
     if _PERCENT.fullmatch(cell):
         try:
             fraction = format(Decimal(plain) / 100, "f")

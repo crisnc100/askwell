@@ -1,4 +1,4 @@
-# Acceptance floors (plan.md L11), checked by the eval report for Ledgerline.
+# The minimum scores v0.1 set out to reach, checked by the eval report for Ledgerline.
 # The report computes met / not met from the numbers. `status_note`, `cause` and `next`
 # are the written explanation for the current release.
 fieldservice:

@@ -1,53 +1,139 @@
 # ledgerline
 
-Ledgerline is a governed AI data analyst. A person asks a business question in plain
-English. A model turns it into an *intent*: a small, typed description of a query (which
-table, which numbers, which filters). Plain Python checks every part of the intent
-against a *registry*, a YAML file that says what a database may expose. Only a valid
-intent becomes SQL, and that SQL runs read-only.
+Ledgerline answers plain-English questions about a database, and shows the SQL behind
+every answer. It is built so that a wrong number is rare and easy to spot.
 
-The model never writes SQL, so it cannot invent a column or slip a value into the query
-text. The cost is coverage: a question the intent cannot express is refused.
-[ADR-001](docs/adr/ADR-001-intent-not-sql.md) explains the choice.
+A model never writes the SQL. It fills in an *intent*: a small, typed form that says which
+table, which numbers, which filters and which dates. Plain Python checks every part of the
+intent against a *registry*, a file that lists what the database may expose. Only a valid
+intent becomes SQL, and that SQL runs read-only; a rejected intent is refused with a
+reason. A question the intent cannot express can still get a wrong answer, when the model
+fills in a valid intent for a nearby question instead of refusing. [docs/product-brief.md](docs/product-brief.md) explains
+who it is for and what it leaves out on purpose.
 
-**Status.** v0.1 runs end to end: ask a question from the command line or over HTTP, and
-get the rows back with the SQL that produced them. There is no OpenRouter key yet, so
-every model answer in this repo is *simulated*: another model wrote it, standing in for
-the target model (see [Simulated answers](#simulated-answers)). The eval results are
-labelled that way, and the accuracy floor for fieldservice is not met in v0.1.
+**Status.** v0.1 runs on your machine. There is no model key yet, so every model answer in
+this repo was written by a stand-in model and is labelled *simulated* (see
+[Simulated answers](#simulated-answers)). On that run Ledgerline does not reach its own
+accuracy target; the results below say so.
 
-## Quick start
+## Try it
 
-You need [uv](https://docs.astral.sh/uv/), Docker, `psql` (the PostgreSQL client) and
-Node with npm (CI uses Node 22). The tests run `infra/postgres/roles.sql` with `psql`,
-and fail without it. The browser tests need Chromium, installed once from the
-repository root with `(cd web && npm ci && npx playwright install chromium)`.
+You need [uv](https://docs.astral.sh/uv/), Docker, `psql` (the PostgreSQL client) and Node
+with npm. No API key is needed.
 
 ```sh
 uv sync
-docker compose up -d   # starts Postgres, then runs `ledgerline seed` once
-./verify.sh            # every check; the tests use the seeded database
+docker compose up -d                  # a demo database, filled with made-up data
+(cd web && npm ci && npm run build)   # the web pages
+uv run uvicorn ledgerline.api:create_app --factory
 ```
+
+Open `http://localhost:8000/` and go through the five steps with the sample shop data
+linked on the first page:
+
+1. **Prepare.** Read the rules a CSV file must follow, then start a *workspace*: a private
+   folder for your files. Bookmark the link it gives you.
+2. **Upload** the CSV files.
+3. **Check** reads every file. Each problem names the file, row, column and the fix.
+   Nothing loads until every file passes.
+4. **Confirm** shows exactly what the model will be sent: table and column names, types
+   and your descriptions, never your rows. Hide any field you like.
+5. **Ask** a question. With a model key you get the rows and the SQL. Without one, the page
+   says that live answers need a key.
+
+To see an answer with no key, ask the demo database one of its recorded questions:
+
+```sh
+uv run ledgerline ask "How many invoices are still unpaid?"
+```
+
+It prints the intent, the check, the SQL and the rows.
+
+## Results
+
+`http://localhost:8000/results/` shows the benchmark: how often Ledgerline answers, how
+often it is right, and how often it refuses, next to a baseline where the same model writes
+SQL directly. Each number has a plain definition and a 95% range. On fieldservice, the
+made-up business in the demo database:
+
+| Simulated, fieldservice | Ledgerline | one-shot |
+|---|---|---|
+| Rows match the expected answer | 76.7% (33/43) | 69.8% (30/43) |
+| Wrong answers among answered | 13.2% (5/38) | 30.2% (13/43) |
+
+Ledgerline gives fewer wrong answers, but it misses its v0.1 target (at least 80% right,
+at most 5% wrong). [docs/failures/](docs/failures/README.md) walks through four misses.
+
+## Read more
+
+- [docs/product-brief.md](docs/product-brief.md): the problem, who it is for, what it
+  does and does not do.
+- [docs/adr/](docs/adr/README.md): each design decision, with a prediction made before
+  the code and the measured result.
+- [docs/build-log.md](docs/build-log.md): how v0.1 was built, and what reviews caught.
+- [evals/reports/sim-1.md](evals/reports/sim-1.md): the full simulated report.
+- The sections below: each part of the system in detail.
+
+## Setup details
+
+The tests run `infra/postgres/roles.sql` with `psql`, and fail without it. CI uses Node 22.
+The browser tests need Chromium, installed once from the repository root with
+`(cd web && npm ci && npx playwright install chromium)`. `./verify.sh` runs every check
+against the seeded database.
 
 Postgres listens on `localhost:56432`. On first start it creates two roles:
 `ledgerline_owner`, which owns the data, and `ledgerline_ro`, which can only read. The
 defaults in `ledgerline/config.py` match them. To change them, copy `.env.example` to
 `.env`.
 
-No API key is needed. Model calls default to replay mode, which answers only from
-recorded responses. A model is called live only with `--mode record` or `--mode live`,
-with `LEDGERLINE_LLM_MODE=record` or `live` in the environment (it sets the mode for
-`ledgerline ask` and the API when no `--mode` is given), or by `ledgerline spike`. Each
-of those needs `OPENROUTER_API_KEY`.
+Model calls default to replay mode, which answers only from recorded responses. A model is
+called live only with `--mode record` or `--mode live`, with `LEDGERLINE_LLM_MODE=record`
+or `live` in the environment (it sets the mode for `ledgerline ask` and the API when no
+`--mode` is given), or by `ledgerline spike`. Each of those needs `OPENROUTER_API_KEY`.
 
-## Asking a question
+## Your data
 
-```sh
-uv run ledgerline ask "How many invoices are still unpaid?"
-```
+[Try it](#try-it) walks through the five pages. More on each:
 
-It prints the whole trace as JSON: the intent, each attempt and its validation result,
-the SQL with its parameters, the columns and rows, or a refusal with its reason.
+- **Prepare.** A file needs one table, a header row, an ID column, `YYYY-MM-DD` dates and
+  plain numbers. You pick your time zone, and the workspace lives in its own folder under
+  `data/workspaces/`. Anyone with the workspace link can see your data.
+- **Upload.** A file with the same name replaces the old one.
+- **Check.** Up to 20 problems are listed per file.
+- **Confirm.** Fields with names that look sensitive (email, phone and similar) start
+  hidden.
+
+What stays private:
+
+- **Your rows.** They never go to the model. A column's values (an order's statuses, for
+  example) go only if you tick "Share these values with the model" on Confirm, because
+  shared values leave your machine.
+- **The workspace link.** Its id is a random 128-bit code after the `#`, a part of the
+  link browsers never send to a server. The pages send it in a request header instead,
+  so it never appears in a URL the server sees or logs.
+- **Your address.** It is not stored. A keyed hash of it counts your workspaces.
+- **Your files.** They expire after 7 days without use and are deleted the next time
+  `uv run ledgerline sweep` runs (run it from cron, for example once an hour) or the
+  workspace is opened. "Delete my data" removes them at once.
+
+Limits: at most 10 files per workspace, and per file 10 MB, 200 columns, 1,000,000 rows
+and 10,000 characters per value. Each address gets 3 workspaces at a time, 20 uploads and
+30 questions an hour (questions to `/ask` count too). The hourly counts live in the
+server process and start again when it restarts; the workspace count does not. All
+workspaces together share 2 GB of disk. Behind a proxy that sets `X-Forwarded-For`, set `LEDGERLINE_TRUST_PROXY=1` so the limits
+see the real address. Leave it off otherwise, or any client could claim any address.
+
+Answers on your own data need a live model, because no answers are recorded for your
+files. Set `OPENROUTER_API_KEY` and `LEDGERLINE_LLM_MODE=live` (see
+[.env.example](.env.example)). Without them, Ask replies "Live answers need a model key;
+see the README." Questions like "last month" use today's date in your workspace's time
+zone.
+
+## Asking from the command line and the API
+
+`ledgerline ask` prints the whole trace as JSON: the intent, each attempt and its
+validation result, the SQL with its parameters, the columns and rows, or a refusal with its
+reason.
 `--schema` picks a schema from `config/schemas.yaml` (default `fieldservice`).
 
 The same pipeline is an HTTP API:
@@ -73,57 +159,6 @@ Every `ask` and `/ask` writes one row to the audit log (`ask_log`, below), wheth
 was answered, refused or failed. In live or record mode each ask also has its own
 spending limit (`LEDGERLINE_ASK_BUDGET_USD`, default $0.05). A question that would go
 over it is refused, and that refusal is audited too.
-
-## Your data
-
-You can also ask questions about your own CSV files. This runs on your machine for now.
-Build the pages once, then start the server:
-
-```sh
-(cd web && npm ci && npm run build)
-uv run uvicorn ledgerline.api:create_app --factory
-```
-
-Open `http://localhost:8000/` and follow the five steps:
-
-1. **Prepare.** Read the rules a file must follow: one table per file, a header row, an
-   ID column, `YYYY-MM-DD` dates and plain numbers. A small sample shop is there to try.
-   Pick your time zone and start a *workspace*: a private folder of its own under
-   `data/workspaces/`. The page gives you a link back to it. Bookmark it; anyone with the
-   link can see your data.
-2. **Upload** your files. A file with the same name replaces the old one.
-3. **Check** reads every file. Each problem names the file, the row and column where there
-   is one, and the fix, up to 20 per file. Nothing loads until every file passes.
-4. **Confirm** shows exactly what the model will be sent: table and column names, types,
-   links and your descriptions. You can hide any field. Fields with names that look
-   sensitive (email, phone and similar) start hidden.
-5. **Ask** a question in plain English. The answer shows the rows and the SQL behind them.
-
-What stays private:
-
-- **Your rows.** They never go to the model. A column's values (an order's statuses, for
-  example) go only if you tick "Share these values with the model" on Confirm, because
-  shared values leave your machine.
-- **The workspace link.** Its id is a random 128-bit code after the `#`, a part of the
-  link browsers never send to a server. The pages send it in a request header instead,
-  so it never appears in a URL the server sees or logs.
-- **Your address.** It is not stored. A keyed hash of it counts your workspaces.
-- **Your files.** They expire after 7 days without use and are deleted the next time
-  `uv run ledgerline sweep` runs (run it from cron, for example once an hour) or the
-  workspace is opened. "Delete my data" removes them at once.
-
-Limits: at most 10 files per workspace, and per file 10 MB, 200 columns, 1,000,000 rows
-and 10,000 characters per value. Each address gets 3 workspaces at a time, 20 uploads and
-30 questions an hour (questions to `/ask` count too). The hourly counts live in the
-server process and start again when it restarts; the workspace count does not. All workspaces together share 2 GB of disk.
-Behind a proxy that sets `X-Forwarded-For`, set `LEDGERLINE_TRUST_PROXY=1` so the limits
-see the real address. Leave it off otherwise, or any client could claim any address.
-
-Answers on your own data need a live model, because no answers are recorded for your
-files. Set `OPENROUTER_API_KEY` and `LEDGERLINE_LLM_MODE=live` (see
-[.env.example](.env.example)). Without them, Ask replies "Live answers need a model key;
-see the README." Questions like "last month" use today's date in your workspace's time
-zone.
 
 ## The demo database
 
@@ -255,8 +290,9 @@ when recordings go stale, and how to record with a real key.
 
 ## Evaluation
 
-The eval questions were written and frozen before the intent code existed: a gold set
-for fieldservice and a list of Spider question IDs. Spider is a public text-to-SQL
+The eval questions were written and frozen before the intent code existed: for
+fieldservice, each question with its expected answer (the *gold*), and for Spider, a list
+of question IDs. Spider is a public text-to-SQL
 benchmark; its data is downloaded, never committed. See
 [evals/gold/README.md](evals/gold/README.md) and
 [ADR-006](docs/adr/ADR-006-benchmark-methodology.md).
@@ -284,6 +320,12 @@ Ledgerline miss with a tag for its cause;
 [ADR-001](docs/adr/ADR-001-intent-not-sql.md) explains the result against its
 prediction. `./verify.sh` replays the committed fieldservice recordings and checks that
 they reproduce `evals/reports/replay-fieldservice.md`.
+
+The Results page (`/results/`) draws every report in `evals/reports/` from its JSON file.
+`evals/report.schema.json` is the shape of that file. It is generated from
+`ledgerline/bench/report_schema.py` (`uv run python -m ledgerline.bench.report_schema
+--write`), and a test checks every committed report against it. The page links each
+schema's triage file, `evals/triage/<schema>.yaml`, which gives every miss its cause.
 
 ## Checks
 

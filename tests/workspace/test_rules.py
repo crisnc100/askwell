@@ -95,3 +95,34 @@ def test_date_fixes() -> None:
     assert date_fix("2025-03-04T10:30Z") == (
         "use a space between date and time and no time zone: 2025-03-04 10:30"
     )
+
+
+@pytest.mark.parametrize(
+    "cell",
+    [
+        "1.5" + "0" * 40,
+        "0." + "0" * 40 + "25",
+        "-1234567890123456.5" + "0" * 30,
+    ],
+)
+def test_a_long_decimal_a_float_stores_exactly_is_a_number(cell: str) -> None:
+    assert len(cell) > 40
+    assert kind(cell) == "num"
+    assert convert(cell, "number") == float(cell)
+
+
+def test_a_decimal_with_more_than_17_significant_digits_is_never_a_number() -> None:
+    assert kind("0.12345678901234567") == "long_num"
+    assert kind("1" + "0" * 30 + ".5") == "long_num"
+
+
+@pytest.mark.parametrize("space", ["\u00a0", "\u202f"])
+def test_no_break_spaces_in_money_and_percent_are_damaged_numbers(space: str) -> None:
+    for cell, fix in (
+        (f"12.5{space}%", "remove the % sign: use 12.5 (or the fraction, 0.125)"),
+        (f"5{space}€", "remove the currency symbol: use 5"),
+        (f"${space}1,234.50", "remove the currency symbol: use 1234.50"),
+    ):
+        assert kind(cell) == "bad_number", cell
+        assert number_fix(cell) == fix
+    assert intended_type({"num", kind(f"5{space}€")}) == "number"

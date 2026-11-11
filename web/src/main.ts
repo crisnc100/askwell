@@ -90,6 +90,7 @@ function header(): HTMLElement {
     {},
     h("p", { class: "brand" }, "Ledgerline"),
     h("p", { class: "tagline" }, "Ask questions about your own data. See the SQL behind every answer."),
+    h("p", {}, h("a", { attrs: { href: "/results/" } }, "Benchmark results")),
   );
 }
 

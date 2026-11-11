@@ -49,3 +49,12 @@ th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--line
 pre { background: var(--panel); border: 1px solid var(--line); padding: 10px; overflow-x: auto; white-space: pre-wrap; font-size: 0.85rem; }
 .prompt { max-height: 360px; overflow-y: auto; }
 .trace { margin-top: 16px; }
+.banner { font-size: 1.02rem; }
+.definitions dt { font-weight: 600; margin-top: 8px; }
+.definitions dd { margin: 0 0 4px; }
+.schema { margin-top: 32px; }
+.scroll { overflow-x: auto; }
+.metrics th, .metrics td { font-size: 0.9rem; white-space: nowrap; }
+.floor ul { margin: 6px 0; }
+.misses { margin: 8px 0; }
+.misses td { font-size: 0.88rem; }

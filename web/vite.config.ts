@@ -1,4 +1,5 @@
 import { defineConfig } from "vite";
+import { resolve } from "node:path";
 
 // `npm run dev` serves the page on its own port and sends API calls to a local
 // `uvicorn ledgerline.api:create_app --factory` on port 8000.
@@ -8,5 +9,11 @@ export default defineConfig({
       "/api": "http://127.0.0.1:8000",
     },
   },
-  build: { outDir: "dist", emptyOutDir: true },
+  build: {
+    outDir: "dist",
+    emptyOutDir: true,
+    rollupOptions: {
+      input: { main: resolve(__dirname, "index.html"), results: resolve(__dirname, "results/index.html") },
+    },
+  },
 });

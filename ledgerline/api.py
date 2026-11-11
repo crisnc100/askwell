@@ -1,5 +1,6 @@
-"""The HTTP API: POST /ask, GET /schemas, GET /schemas/{id}/examples, GET /healthz, and
-the workspace routes under /api (ledgerline/workspace/api.py)."""
+"""The HTTP API: POST /ask, GET /schemas, GET /schemas/{id}/examples, GET /healthz, the
+workspace routes under /api (ledgerline/workspace/api.py) and the Results page's report
+routes (ledgerline/bench/results.py)."""
 
 from __future__ import annotations
 
@@ -12,6 +13,7 @@ from fastapi import FastAPI, HTTPException, Request, Response
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
+from ledgerline.bench import results
 from ledgerline.config import get_settings
 from ledgerline.llm.errors import ReplayMissError
 from ledgerline.llm.simulate import PendingRequestError
@@ -68,6 +70,7 @@ def create_app(
         return response
 
     workspace_api.install(app, workspaces)
+    results.install(app)
 
     def svc() -> AskService:
         return app.state.service  # type: ignore[no-any-return]

@@ -33,7 +33,7 @@ On the fieldservice gold set (43 in_schema items, default model, mean of 3 trial
    fs-030, fs-039), a column-to-column comparison (fs-029), two date fields in one
    series (fs-035), a distinct count over a calendar grain in HAVING (fs-037), or an
    anti-join (fs-042). So at most 31/43 can be attempted correctly.
-2. **Execution accuracy 60–70%**, below the plan's 80% floor (L11), because of item 1
+2. **Execution accuracy 60–70%**, below the plan's 80% floor, because of item 1
    plus some misreads. The floor is predicted to fail unless the grammar grows.
 3. **Accuracy given attempted ≥ 85%** and **wrong-answer rate given answered ≤ 5%.**
 4. **The oneshot baseline answers more but is wrong more:** execution accuracy within
@@ -84,7 +84,7 @@ How the predictions held:
    Ledgerline's, and 30.2% of its answers are wrong.
 5. **Refusal recall ≥ 95%:** held (100%). No hidden-field value was returned.
 
-**Floor L11: not met in v0.1 (simulated run).** Execution accuracy is 76.7% against a floor of
+**The v0.1 floor is not met (simulated run).** Execution accuracy is 76.7% against a floor of
 80%, and wrong answers among answered are 13.2% against a ceiling of 5%.
 
 Why: for a question the grammar cannot express, the stand-in model often answered a nearby
