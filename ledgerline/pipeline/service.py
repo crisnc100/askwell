@@ -23,6 +23,7 @@ from ledgerline.core.intent import Intent
 from ledgerline.core.registry import Registry, load_registry
 from ledgerline.core.validate import QueryPlan, ValidationResult, validate
 from ledgerline.llm.budget import BudgetGuard
+from ledgerline.llm.daily import DailySpend
 from ledgerline.llm.errors import ReplayMissError
 from ledgerline.llm.gateway import Gateway, OpenRouterTransport
 from ledgerline.llm.pricing import PriceBook
@@ -122,6 +123,11 @@ def build_gateway(
             pending_dir=pending_dir or ROOT / settings.pending_dir,
         )
     book = PriceBook.fetch(settings.openrouter_base_url)
+    daily = (
+        DailySpend(ROOT / settings.spend_db, settings.daily_spend_cap_usd)
+        if settings.daily_spend_cap_usd is not None
+        else None
+    )
     return Gateway(
         mode=chosen,  # type: ignore[arg-type]
         store=store,
@@ -129,6 +135,8 @@ def build_gateway(
         price_lookup=book.get,
         guard=BudgetGuard(budget_usd if budget_usd is not None else settings.ask_budget_usd),
         max_tokens=settings.max_tokens,
+        daily=daily,
+        live_answers_off=settings.live_answers_off,
     )
 
 

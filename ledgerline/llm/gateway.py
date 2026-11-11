@@ -24,7 +24,8 @@ from pydantic import BaseModel, ValidationError
 
 from ledgerline.config import LLMMode, Settings
 from ledgerline.llm.budget import BudgetGuard, with_backoff
-from ledgerline.llm.errors import ParseError, PricingUnavailableError
+from ledgerline.llm.daily import DailySpend
+from ledgerline.llm.errors import LiveAnswersOffError, ParseError, PricingUnavailableError
 from ledgerline.llm.pricing import ModelPrice, cost_from_usage, worst_case_cost
 from ledgerline.llm.replay import ReplayStore, canonical_json, replay_key
 from ledgerline.llm.simulate import PendingRequestError, export_request, register_response_model
@@ -92,6 +93,8 @@ class Gateway:
         max_tokens: int,
         backoff_sleep: Callable[[float], None] | None = None,
         pending_dir: Path | None = None,
+        daily: DailySpend | None = None,
+        live_answers_off: bool = False,
     ) -> None:
         if mode in ("record", "replay", "export") and store is None:
             raise ValueError(f"{mode} mode needs a replay store")
@@ -107,6 +110,9 @@ class Gateway:
         self.max_tokens = max_tokens
         self._backoff_sleep = backoff_sleep
         self.pending_dir = pending_dir
+        # The hosted beta's global daily cap and kill switch; both apply to live calls only.
+        self.daily = daily
+        self.live_answers_off = live_answers_off
 
     def complete[T: BaseModel](
         self,
@@ -154,6 +160,8 @@ class Gateway:
             )
 
         assert self.transport is not None
+        if self.live_answers_off:
+            raise LiveAnswersOffError
         budget = guard or self.guard
         assert budget is not None
         transport = self.transport
@@ -165,7 +173,9 @@ class Gateway:
         prompt_bytes = len(
             canonical_json([m.model_dump() for m in messages]).encode("utf-8")
         ) + len(canonical_json(json_schema).encode("utf-8"))
-        budget.precheck(worst_case_cost(price, prompt_bytes, self.max_tokens))
+        worst = worst_case_cost(price, prompt_bytes, self.max_tokens)
+        budget.precheck(worst)
+        day = self.daily.reserve(worst) if self.daily is not None else None
 
         def call() -> RawResponse:
             return transport(
@@ -176,11 +186,18 @@ class Gateway:
                 max_tokens=self.max_tokens,
             )
 
-        if self._backoff_sleep is None:
-            raw = with_backoff(call)
-        else:
-            raw = with_backoff(call, sleep=self._backoff_sleep)
-        cost, source = cost_from_usage(raw.usage, price)
+        billed = 0.0
+        try:
+            if self._backoff_sleep is None:
+                raw = with_backoff(call)
+            else:
+                raw = with_backoff(call, sleep=self._backoff_sleep)
+            cost, source = cost_from_usage(raw.usage, price)
+            billed = cost
+        finally:
+            if self.daily is not None and day is not None:
+                # A call that raised was not billed, so its reservation is given back.
+                self.daily.settle(day, worst, billed)
         budget.charge(cost)
         if self.mode == "record":
             assert self.store is not None

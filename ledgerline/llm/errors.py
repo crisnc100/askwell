@@ -45,3 +45,13 @@ class PricingUnavailableError(LLMError):
 
 class RateLimitedError(LLMError):
     """Still rate limited (HTTP 429) after every backoff retry."""
+
+
+LIVE_ANSWERS_OFF = "Live answers are turned off right now. Try again later."
+
+
+class LiveAnswersOffError(LLMError):
+    """The kill switch (`LEDGERLINE_LIVE_ANSWERS_OFF`) is on, so no live call is made."""
+
+    def __init__(self) -> None:
+        super().__init__(LIVE_ANSWERS_OFF)

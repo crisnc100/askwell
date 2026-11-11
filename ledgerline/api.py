@@ -1,6 +1,7 @@
 """The HTTP API: POST /ask, GET /schemas, GET /schemas/{id}/examples, GET /healthz, the
-workspace routes under /api (ledgerline/workspace/api.py) and the Results page's report
-routes (ledgerline/bench/results.py)."""
+workspace routes under /api (ledgerline/workspace/api.py), the Results page's report
+routes (ledgerline/bench/results.py) and, when invite codes are set, the invite gate
+(ledgerline/invite.py)."""
 
 from __future__ import annotations
 
@@ -10,12 +11,16 @@ from pathlib import Path
 from typing import Any
 
 from fastapi import FastAPI, HTTPException, Request, Response
+from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
+from sqlalchemy import text
 
+from ledgerline import invite
 from ledgerline.bench import results
 from ledgerline.config import get_settings
-from ledgerline.llm.errors import ReplayMissError
+from ledgerline.llm.daily import DailyCapReachedError
+from ledgerline.llm.errors import LiveAnswersOffError, ReplayMissError
 from ledgerline.llm.simulate import PendingRequestError
 from ledgerline.pipeline.service import AskService, UnknownSchemaError
 from ledgerline.workspace import api as workspace_api
@@ -35,9 +40,11 @@ def create_app(
     service: AskService | None = None,
     workspaces: WorkspaceApp | None = None,
     web_dir: Path = WEB_DIST,
+    invite_codes: list[bytes] | None = None,
 ) -> FastAPI:
     """The API, plus the pages from `web_dir` at `/` when they have been built
-    (`npm run build` in web/)."""
+    (`npm run build` in web/). `invite_codes` overrides `LEDGERLINE_INVITE_CODES`;
+    an empty list means no gate."""
 
     @asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncIterator[None]:
@@ -57,6 +64,11 @@ def create_app(
             prompt_budget_chars=settings.prompt_budget_chars,
         )
     app.state.workspaces = workspaces
+    if invite_codes is None:
+        raw = get_settings().invite_codes
+        invite_codes = invite.parse_codes(raw.get_secret_value() if raw else None)
+    # Installed before the header middleware, so its refusals get those headers too.
+    invite.install(app, invite_codes, workspaces.client_ip)
 
     @app.middleware("http")
     async def _headers(  # pyright: ignore[reportUnusedFunction]
@@ -76,8 +88,21 @@ def create_app(
         return app.state.service  # type: ignore[no-any-return]
 
     @app.get("/healthz")
-    def healthz() -> dict[str, str]:
-        return {"status": "ok", "mode": svc().gateway.mode}
+    def healthz() -> JSONResponse:
+        """Up, and every demo database answers. It is open without an invite code, so
+        it says nothing about settings, spend or data."""
+        service = svc()
+        broken: list[str] = []
+        for schema_id in service.schemas:
+            try:
+                with service.engine(schema_id).connect() as conn:
+                    conn.execute(text("SELECT 1"))
+            except Exception:
+                broken.append(schema_id)
+        body: dict[str, Any] = {"status": "error" if broken else "ok", "mode": service.gateway.mode}
+        if broken:
+            body["unavailable"] = broken
+        return JSONResponse(body, status_code=503 if broken else 200)
 
     @app.get("/schemas")
     def schemas() -> list[dict[str, Any]]:
@@ -102,6 +127,8 @@ def create_app(
             raise HTTPException(404, f"unknown schema {request.schema_id!r}") from exc
         except PendingRequestError as exc:
             raise HTTPException(409, f"exported for a simulated answer: {exc.path.name}") from exc
+        except (LiveAnswersOffError, DailyCapReachedError) as exc:
+            raise HTTPException(503, str(exc)) from exc
         except ReplayMissError as exc:
             raise HTTPException(
                 409,

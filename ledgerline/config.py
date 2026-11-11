@@ -68,6 +68,15 @@ class Settings(BaseSettings):
     prompt_budget_chars: int = 16000
     max_tokens: int = 1024
 
+    # The hosted beta. Invite codes, comma-separated; when unset, there is no gate.
+    invite_codes: SecretStr | None = None
+    # A cap on all live model spend per UTC day, kept in `spend_db` across restarts.
+    # Unset means no daily cap (each ask still has `ask_budget_usd`).
+    daily_spend_cap_usd: float | None = None
+    spend_db: str = "data/spend.sqlite"
+    # The kill switch: no live model calls at all; asks get a plain message.
+    live_answers_off: bool = False
+
     # Uploaded workspaces, one folder each (see ledgerline/workspace/store.py).
     workspace_dir: str = "data/workspaces"
     # Read the client address from X-Forwarded-For. Set it only behind a proxy that

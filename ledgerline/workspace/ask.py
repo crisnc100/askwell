@@ -25,6 +25,8 @@ from sqlalchemy import create_engine
 from ledgerline.core.audit import AuditLog
 from ledgerline.core.executor import readonly_engine
 from ledgerline.core.registry import Registry, load_registry
+from ledgerline.llm.daily import DailyCapReachedError
+from ledgerline.llm.errors import LiveAnswersOffError
 from ledgerline.pipeline.prompt import registry_view, system_message
 from ledgerline.pipeline.service import AskService, AskTarget
 from ledgerline.workspace.store import (
@@ -37,6 +39,14 @@ from ledgerline.workspace.store import (
 log = logging.getLogger("ledgerline.workspace")
 
 NEEDS_KEY = "Live answers need a model key; see the README."
+
+
+class LiveAnswersUnavailableError(WorkspaceError):
+    """The kill switch is on, or today's spending cap is reached."""
+
+    status = 503
+
+
 CONFIRM_FIRST = "Confirm your fields first."
 WORKSPACE_SCHEMA_ID = "workspace"
 
@@ -101,6 +111,8 @@ def ask_workspace(
     with workspace_target(workspace, clock) as target:
         try:
             result = service.ask_target(target, question).to_dict()
+        except (LiveAnswersOffError, DailyCapReachedError) as exc:
+            raise LiveAnswersUnavailableError(str(exc)) from exc
         except Exception as exc:
             log.exception("workspace ask failed")
             raise ModelFailedError(
