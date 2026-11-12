@@ -327,8 +327,10 @@ and the eval stops if one no longer matches its committed hash.
 
 The live run `select-2026-11-11` compared four OpenRouter models on fieldservice
 ([report](evals/reports/select-2026-11-11.md)), and `select-haiku-2026-11-11` measured
-Claude Haiku 5.5, the default ([report](evals/reports/select-haiku-2026-11-11.md)); its
-numbers are in [Results](#results). Before a key existed, the simulated run
+Claude Haiku 5.5, the default, with v0.1 on the seen questions: 35/43 right and 2 of 37
+answered wrong, 1 trial ([report](evals/reports/select-haiku-2026-11-11.md),
+[ADR-004](docs/adr/ADR-004-model-choice.md)). [Results](#results) shows the v0.2 runs.
+Before a key existed, the simulated run
 `sim-1` ([evals/reports/sim-1.md](evals/reports/sim-1.md)) checked the pipeline and the
 scoring. Every answer in it was written by claude-haiku-5-5 standing in for
 `openai/gpt-oss-120b`, so those are simulated numbers, not a measurement of that model.
