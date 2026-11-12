@@ -1,6 +1,7 @@
 # The hosted beta on one host, behind Caddy. See "Deploy the hosted beta" in the README.
 #   docker compose -f compose.prod.yaml up -d --build
 # Settings come from .env.beta next to this file (never committed; see .env.beta.example).
+# The ${LEDGERLINE_PORT} fallback keeps a pre-0.2.0 .env.beta working for one release.
 services:
   app:
     build: .
@@ -14,7 +15,7 @@ services:
       ASKWELL_TRUST_PROXY: "1"
     ports:
       # Only Caddy on this host can reach the app.
-      - "127.0.0.1:${ASKWELL_PORT:-8000}:8000"
+      - "127.0.0.1:${ASKWELL_PORT:-${LEDGERLINE_PORT:-8000}}:8000"
     volumes:
       - askwell-data:/data
     healthcheck:

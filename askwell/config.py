@@ -2,12 +2,21 @@
 
 from __future__ import annotations
 
+import logging
+import os
 from datetime import UTC, datetime
 from functools import lru_cache
-from typing import Literal
+from pathlib import Path
+from typing import Any, Literal
 
+from dotenv import dotenv_values
 from pydantic import AliasChoices, Field, SecretStr, field_validator
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic.fields import FieldInfo
+from pydantic_settings import (
+    BaseSettings,
+    PydanticBaseSettingsSource,
+    SettingsConfigDict,
+)
 
 DEFAULT_NOW = datetime(2026, 6, 30, tzinfo=UTC)
 
@@ -16,10 +25,17 @@ DEFAULT_NOW = datetime(2026, 6, 30, tzinfo=UTC)
 # docs/rerecord.md). record / live: a live provider (OpenRouter or Anthropic), budget-guarded.
 LLMMode = Literal["record", "replay", "live", "export"]
 
+PREFIX = "ASKWELL_"
+# The product was called Ledgerline. Its variable names still work for one release, so a
+# deployed .env keeps running; remove this fallback in the release after 0.2.0.
+LEGACY_PREFIX = "LEDGERLINE_"
+
+log = logging.getLogger(__name__)
+
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
-        env_prefix="ASKWELL_",
+        env_prefix=PREFIX,
         env_file=".env",
         env_file_encoding="utf-8",
         extra="ignore",
@@ -110,12 +126,73 @@ class Settings(BaseSettings):
     # writes that header; otherwise any client could claim any address.
     trust_proxy: bool = False
 
+    @classmethod
+    def settings_customise_sources(
+        cls,
+        settings_cls: type[BaseSettings],
+        init_settings: PydanticBaseSettingsSource,
+        env_settings: PydanticBaseSettingsSource,
+        dotenv_settings: PydanticBaseSettingsSource,
+        file_secret_settings: PydanticBaseSettingsSource,
+    ) -> tuple[PydanticBaseSettingsSource, ...]:
+        # Earlier sources win, so an ASKWELL_ name always beats its LEDGERLINE_ twin.
+        return (
+            init_settings,
+            env_settings,
+            dotenv_settings,
+            LegacyNamesSource(settings_cls),
+            file_secret_settings,
+        )
+
     @field_validator("now")
     @classmethod
     def _require_utc(cls, value: datetime) -> datetime:
         if value.tzinfo is None:
             return value.replace(tzinfo=UTC)
         return value.astimezone(UTC)
+
+
+class LegacyNamesSource(PydanticBaseSettingsSource):
+    """Values set under the old LEDGERLINE_ names, from the environment or `.env`, with a
+    warning naming each one to rename."""
+
+    def get_field_value(self, field: FieldInfo, field_name: str) -> tuple[Any, str, bool]:
+        # Unused: __call__ reads every name at once.
+        return None, field_name, False
+
+    def __call__(self) -> dict[str, Any]:
+        found: dict[str, str] = {}
+        env_file = self.config.get("env_file")
+        if isinstance(env_file, str) and Path(env_file).is_file():
+            for key, value in dotenv_values(env_file).items():
+                if value is not None:
+                    found[key.upper()] = value
+        found.update({key.upper(): value for key, value in os.environ.items()})
+
+        values: dict[str, Any] = {}
+        used: list[str] = []
+        for field_name, field in self.settings_cls.model_fields.items():
+            # A field with aliases is read under each ASKWELL_ alias; others under the prefix.
+            alias = field.validation_alias
+            if isinstance(alias, AliasChoices):
+                names = [
+                    (str(choice), str(choice))
+                    for choice in alias.choices
+                    if str(choice).startswith(PREFIX)
+                ]
+            else:
+                names = [(PREFIX + field_name.upper(), field_name)]
+            for new_name, key in names:
+                old_name = LEGACY_PREFIX + new_name.removeprefix(PREFIX)
+                if old_name in found:
+                    values.setdefault(key, found[old_name])
+                    used.append(f"{old_name} -> {new_name}")
+        if used:
+            log.warning(
+                "Deprecated LEDGERLINE_ settings are still read for this release; rename them: %s",
+                ", ".join(used),
+            )
+        return values
 
 
 @lru_cache(maxsize=1)

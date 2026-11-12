@@ -90,6 +90,13 @@ Postgres listens on `localhost:56432`. On first start it creates two roles:
 defaults in `askwell/config.py` match them. To change them, copy `.env.example` to
 `.env`.
 
+Askwell was called Ledgerline before 0.2.0. For this release, a `LEDGERLINE_` setting
+still works when its `ASKWELL_` name is not set: in the environment, `.env` and
+`.env.beta`, and in the compose files' port and password variables. The app logs a
+warning naming each old name it reads. The next release drops the old names. A Postgres volume created before the rename still has the old role
+names: run `docker compose down -v` and `docker compose up -d` to recreate it with the
+new ones.
+
 Model calls default to replay mode, which answers only from recorded responses. A model is
 called live only with `--mode record` or `--mode live`, with `ASKWELL_LLM_MODE=record`
 or `live` in the environment (it sets the mode for `askwell ask` and the API when no

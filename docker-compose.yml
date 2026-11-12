@@ -2,16 +2,17 @@
 # `docker compose up -d` also runs `seed`, which is `uv run askwell seed` in a container
 # (the same command you can run on the host).
 # Credentials here are local-dev defaults; override them in .env.
+# Each ${LEDGERLINE_*} fallback keeps a pre-0.2.0 .env working for one release.
 services:
   db:
     image: postgres:16
     environment:
       POSTGRES_DB: askwell
       POSTGRES_USER: askwell_owner
-      POSTGRES_PASSWORD: ${ASKWELL_OWNER_PASSWORD:-askwell}
-      ASKWELL_RO_PASSWORD: ${ASKWELL_RO_PASSWORD:-askwell_ro}
+      POSTGRES_PASSWORD: ${ASKWELL_OWNER_PASSWORD:-${LEDGERLINE_OWNER_PASSWORD:-askwell}}
+      ASKWELL_RO_PASSWORD: ${ASKWELL_RO_PASSWORD:-${LEDGERLINE_RO_PASSWORD:-askwell_ro}}
     ports:
-      - "127.0.0.1:${ASKWELL_DB_PORT:-56432}:5432"
+      - "127.0.0.1:${ASKWELL_DB_PORT:-${LEDGERLINE_DB_PORT:-56432}}:5432"
     volumes:
       - ./infra/postgres/init:/docker-entrypoint-initdb.d:ro
       - ./infra/postgres/roles.sql:/askwell/roles.sql:ro
@@ -32,7 +33,7 @@ services:
     environment:
       UV_PROJECT_ENVIRONMENT: /venv
       UV_LINK_MODE: copy
-      ASKWELL_DATABASE_URL: postgresql+psycopg://askwell_owner:${ASKWELL_OWNER_PASSWORD:-askwell}@db:5432/askwell
+      ASKWELL_DATABASE_URL: postgresql+psycopg://askwell_owner:${ASKWELL_OWNER_PASSWORD:-${LEDGERLINE_OWNER_PASSWORD:-askwell}}@db:5432/askwell
     volumes:
       - .:/app:ro
       - uvcache:/root/.cache/uv
