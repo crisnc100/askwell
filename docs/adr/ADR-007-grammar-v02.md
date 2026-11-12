@@ -63,5 +63,46 @@ All on `anthropic:claude-haiku-5-5`, 3 trials unless stated.
 10. **Cost:** cost per question rises by at most 30% from $0.000415, because the prompt
     is longer. Total live spend for re-recording and the five runs is under $1.20.
 
+## Method notes
+
+**Gold revision 5 (held-out set), before any held-out result.** The held-out file was
+revealed unchanged as revision 4, and its SHA-256 matched the pending hash committed
+before any v0.2 code (`09451c63…`, `f2e6191`). Revision 5 then changed presentation
+only, so that a right answer can match: no rounding, a fraction where the question asks
+for one, and periods as dates, as in the seen set. No question text, filter or join
+changed. Each edit below appears exactly once in its item's `gold_sql`, and
+`tests/test_gold_manifest.py` undoes them and checks that the pending hash comes back.
+
+```text
+ho-001  - ROUND(100.0 * COUNT(*) FILTER (WHERE status = 'cancelled') / COUNT(*), 2)
+        + 100.0 * COUNT(*) FILTER (WHERE status = 'cancelled') / COUNT(*)
+ho-002  - ROUND(100.0 * SUM(amount) FILTER (WHERE status = 'overdue') / SUM(amount), 2)
+        + 100.0 * SUM(amount) FILTER (WHERE status = 'overdue') / SUM(amount)
+ho-003  - ROUND(100.0 * COUNT(*) FILTER (WHERE priority = 'urgent') / COUNT(*), 2) AS pct_urgent
+        + 1.0 * COUNT(*) FILTER (WHERE priority = 'urgent') / COUNT(*) AS share_urgent
+ho-004  - ROUND(100.0 * COUNT(*) FILTER (WHERE w.job_type = 'repair') / COUNT(*), 2)
+        + 100.0 * COUNT(*) FILTER (WHERE w.job_type = 'repair') / COUNT(*)
+ho-005  - ROUND(100.0 * COUNT(*) FILTER (WHERE paid_at <= due_at) / COUNT(*), 2)
+        + 100.0 * COUNT(*) FILTER (WHERE paid_at <= due_at) / COUNT(*)
+ho-006  - ROUND(100.0 * COUNT(*) FILTER (WHERE segment = 'commercial') / COUNT(*), 2)
+        + 100.0 * COUNT(*) FILTER (WHERE segment = 'commercial') / COUNT(*)
+ho-007  - to_char(m.month, 'YYYY-MM')
+        + date_trunc('month', m.month)::date
+ho-008  - to_char(m.month, 'YYYY-MM')
+        + date_trunc('month', m.month)::date
+ho-009  - to_char(q.quarter, 'YYYY-"Q"Q')
+        + date_trunc('quarter', q.quarter)::date
+ho-010  - to_char(m.month, 'YYYY-MM')
+        + date_trunc('month', m.month)::date
+ho-011  - ROUND(AVG(EXTRACT(EPOCH FROM completed_at - opened_at) / 86400)::numeric, 2)
+        + AVG(EXTRACT(EPOCH FROM completed_at - opened_at) / 86400)
+ho-012  - ROUND(AVG(i.paid_at - i.issued_at), 2)
+        + AVG(i.paid_at - i.issued_at)
+ho-019  - ROUND((EXTRACT(EPOCH FROM timestamp '2026-06-30 00:00:00' - opened_at) / 86400)::numeric, 1)
+        + EXTRACT(EPOCH FROM timestamp '2026-06-30 00:00:00' - opened_at) / 86400
+ho-027  - to_char(date_trunc('month', created_at), 'YYYY-MM')
+        + date_trunc('month', created_at)::date
+```
+
 ## Result
 Not measured yet. The five live runs come after the grammar and prompt are frozen.

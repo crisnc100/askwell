@@ -1,10 +1,10 @@
 {
   "description": "SHA-256 of every frozen gold file. Change only via evals/gold/manifest.py --update.",
-  "revision": 4,
+  "revision": 5,
   "files": {
     "fieldservice.jsonl": "bc8d8d2ace8273a5320fe40687884fb9d99d3abb9734e038685341fa5fde9b61",
     "spider_ids.json": "a2e4c2e9a1dd2fc1a45e6554d3db0ef27de45307f066695dd64cc006817c98fb",
     "spider_selection.py": "b5e55b30ac7bd641cbe4acb31c84dabffddd872f59694dc9f0bbf246b4e21b1e",
-    "holdout-v02.jsonl": "09451c630ca1036df761ec9ee08c5357198c4b13308aa1ab0d9128ddb75d4448"
+    "holdout-v02.jsonl": "7792130d82402cebf7e38dafd5352190afcf04b68c5772460486a40a5d5dc8b2"
   }
 }

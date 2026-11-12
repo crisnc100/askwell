@@ -21,3 +21,7 @@ Pending held-out set for v0.2 (40 items: 28 in_schema, 6 out_of_schema, 6 should
 ## Revision 4 — 2026-11-12
 
 Held-out set for v0.2 revealed in Phase 4, after the grammar and prompt were frozen at 4389ca9. Its SHA-256 equals the pending hash committed in revision 3 (f2e6191) before any v0.2 code, so the questions did not change after the code was written. The file is unchanged; it moves from pending into the frozen files.
+
+## Revision 5 — 2026-11-12
+
+Held-out set, presentation only, before any held-out result. ho-001, ho-002, ho-004, ho-005, ho-006, ho-011 and ho-012 drop ROUND(..., 2), and ho-019 drops ROUND(..., 1), so each returns the full value. ho-003 asks for a fraction, so its gold returns a fraction (1.0 * ... / COUNT(*)) instead of a percent. ho-007, ho-008, ho-010 and ho-027 return their month, and ho-009 its quarter, as date_trunc(...)::date instead of to_char text. This matches the seen set's convention (no rounding, periods as dates), which the scorer compares to within 1e-6 and as ISO dates; as written, a right answer could never match. No question text, filter or join changed. Revision 4 matched the pending hash committed in revision 3 (f2e6191) before any v0.2 code; undoing exactly these edits gives that hash back, which tests/test_gold_manifest.py checks.
