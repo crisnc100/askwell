@@ -55,7 +55,12 @@ def test_a_locked_address_keeps_credentials_it_already_used(client: TestClient) 
     with client:
         login = client.post("/invite", data={"code": "alpha-123"}, follow_redirects=False)
         assert login.status_code == 303
+        had = client.cookies.get(invite.COOKIE)
+        assert had is not None
+        client.cookies.clear()  # the guesses come without that cookie
         _guess_wrong(client, invite.ATTEMPTS_PER_HOUR)
+        assert client.get("/schemas", headers={invite.HEADER: "guess"}).status_code == 429
+        client.cookies.set(invite.COOKIE, had)
         assert client.get("/schemas").status_code == 200  # the cookie it already had
 
 
