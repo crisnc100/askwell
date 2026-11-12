@@ -1,8 +1,9 @@
 """The questions whose model answers are recorded for the replay tests and the demo.
 
 `uv run python -m evals.replay_cases record` asks each one of the default model, live,
-and appends its answers to the replay store. It needs `OPENROUTER_API_KEY`; each ask
-has its own budget (`LEDGERLINE_ASK_BUDGET_USD`).
+and appends its answers to the replay store. It needs the key for the default model's
+provider (`ANTHROPIC_API_KEY` for the default); each ask has its own budget
+(`LEDGERLINE_ASK_BUDGET_USD`).
 
 `uv run python -m evals.replay_cases export` is the way without a key: it writes every
 unrecorded model request to evals/pending/ for a simulated answer. After the answers

@@ -2,7 +2,7 @@
 
 The workspace id travels only in the `X-Workspace-Id` header, and a file name only in
 `X-File-Name` (percent-encoded UTF-8), never in a request URL, so they stay out of access
-logs and Referer headers. The page keeps it after the link's `#`,
+logs and Referer headers. The page keeps the workspace id after the link's `#`,
 which browsers never send. Every refusal comes back as `{"detail": <a plain sentence>}`
 with a status the page can show as is.
 """

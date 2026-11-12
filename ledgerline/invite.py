@@ -39,7 +39,7 @@ OPEN_PATHS = frozenset({"/invite", "/healthz"})
 COOKIE_DAYS = 30
 ATTEMPTS_PER_HOUR = 10
 MAX_CODE_CHARS = 200
-# The login form holds one code; anything longer is refused before it is read.
+# One code fits easily; a longer body is refused by its declared length or mid-read.
 MAX_FORM_BYTES = 4096
 NEEDS_CODE = "Enter your invite code first."
 TOO_MANY = "Too many wrong invite codes from your address. Wait an hour and try again."

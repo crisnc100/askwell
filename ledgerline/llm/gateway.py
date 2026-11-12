@@ -1,8 +1,8 @@
 """The model gateway: one structured-output call, recorded, replayed, costed, budgeted.
 
 Modes:
-- `live`: call OpenRouter; nothing is stored.
-- `record`: call OpenRouter and append the response to the replay store.
+- `live`: call the model's provider (ledgerline/llm/providers.py); nothing is stored.
+- `record`: call the provider and append the response to the replay store.
 - `replay`: answer only from the replay store. A miss raises `ReplayMissError`;
   replay never falls back to a live call.
 - `export`: like replay, but a miss writes the request to the pending directory for a
@@ -130,7 +130,8 @@ class Gateway:
         self.max_tokens = max_tokens
         self._backoff_sleep = backoff_sleep
         self.pending_dir = pending_dir
-        # The hosted beta's global daily cap and kill switch; both apply to live calls only.
+        # The hosted beta's daily cap and kill switch. Both apply to every call that would
+        # reach a provider (live and record modes), never to replay or export.
         self.daily = daily
         self.live_answers_off = live_answers_off
 
