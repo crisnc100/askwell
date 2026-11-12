@@ -1,5 +1,5 @@
-"""Replay API tests on the committed recordings (simulated answers; see each record's
-provenance). These replay real recorded model answers through the real pipeline:
+"""Replay API tests on the committed recordings (live answers from the default model).
+These replay real recorded model answers through the real pipeline:
 answerable, out-of-registry refusal, hidden-field refusal, write refusal, and
 registry init -> ask on a Spider DB. Every ask writes an ask_log row."""
 
@@ -21,9 +21,9 @@ from ledgerline.pipeline.service import AskService, build_gateway
 
 EXAMPLES = {
     "unpaid": "How many invoices are still unpaid?",
-    "top_techs": "Which five technicians billed the most labor hours this year?",
+    "by_skill": "How many technicians are there at each skill level?",
     "segment_avg": "What is the average invoice amount for each customer segment?",
-    "urgent_regions": "How many urgent work orders were opened in each customer region last month?",
+    "by_status": "What is the total invoiced amount for each invoice status?",
     "hidden": "Show me the email address of every dispatcher.",
     "out_of_registry": "What did we spend on marketing last quarter?",
     "write": "Delete all void invoices.",
@@ -62,8 +62,8 @@ def test_every_canned_example_replays(client: TestClient) -> None:
     assert set(examples) == set(EXAMPLES.values())
     for question in examples:
         body = _ask(client, "fieldservice", question)
-        assert body["provenance"] is not None
-        assert set(body["provenance"]) == {"simulated_by", "standing_in_for"}
+        assert body["model"] == get_settings().default_model
+        assert body["provenance"] is None
 
 
 def test_answerable_matches_the_database(
@@ -84,7 +84,7 @@ def test_answerable_matches_the_database(
     assert (row["outcome"], row["trace_id"], row["row_count"]) == ("answered", body["trace_id"], 1)
 
 
-@pytest.mark.parametrize("name", ["top_techs", "segment_avg", "urgent_regions"])
+@pytest.mark.parametrize("name", ["by_skill", "segment_avg", "by_status"])
 def test_other_answerable_examples_return_rows(client: TestClient, name: str) -> None:
     body = _ask(client, "fieldservice", EXAMPLES[name])
     assert body["refusal"] is None, body["validation"]
@@ -133,6 +133,7 @@ def test_cli_ask_replays_an_example(pg_seeded: Engine) -> None:
     assert result.exit_code == 0, result.output
     body = json.loads(result.output)
     assert body["rows"]
-    assert body["provenance"]["standing_in_for"] == "openai/gpt-oss-120b"
+    assert body["model"] == get_settings().default_model
+    assert body["provenance"] is None
     missing = runner.invoke(app, ["ask", "Nobody recorded this?", "--mode", "replay"])
     assert missing.exit_code == 4

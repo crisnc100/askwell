@@ -236,7 +236,11 @@ def confirm(store: WorkspaceStore, workspace: Workspace, edits: Edits) -> Regist
         registry, info = load_draft(fresh)
         applied = apply(registry, info, edits)
         kept = normalized(registry, edits)
-        fresh.registry_path.write_text(dump_registry(applied), encoding="utf-8")
-        fresh.edits_path.write_text(kept.model_dump_json(indent=2), encoding="utf-8")
+        store.write_counted_together(
+            [
+                (fresh.registry_path, dump_registry(applied).encode("utf-8")),
+                (fresh.edits_path, kept.model_dump_json(indent=2).encode("utf-8")),
+            ]
+        )
         fresh.meta.state = "confirmed"
     return applied

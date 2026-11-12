@@ -3,28 +3,42 @@
   "baseline_wins": [
     {
       "item_id": "fs-025",
-      "model": "openai/gpt-oss-120b",
+      "model": "anthropic:claude-haiku-5-5",
       "schema": "fieldservice",
       "system": "oneshot",
       "trial": 1
     },
     {
       "item_id": "fs-030",
-      "model": "openai/gpt-oss-120b",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "fieldservice",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "item_id": "fs-035",
+      "model": "anthropic:claude-haiku-5-5",
       "schema": "fieldservice",
       "system": "oneshot",
       "trial": 1
     },
     {
       "item_id": "fs-037",
-      "model": "openai/gpt-oss-120b",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "fieldservice",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "item_id": "fs-038",
+      "model": "anthropic:claude-haiku-5-5",
       "schema": "fieldservice",
       "system": "oneshot",
       "trial": 1
     },
     {
       "item_id": "fs-042",
-      "model": "openai/gpt-oss-120b",
+      "model": "anthropic:claude-haiku-5-5",
       "schema": "fieldservice",
       "system": "oneshot",
       "trial": 1
@@ -33,19 +47,19 @@
   "deferred": {},
   "floors": [
     {
-      "cause": "For questions the intent grammar cannot express, the stand-in model often answers a nearby question instead of refusing. Example: asked for a percentage, it returned a count per status. Each such answer is a wrong answer, not a refusal.",
+      "cause": "Accuracy is met (35 of 43); wrong answers miss by one (2 of 37 answered, 5.4%). Both wrong answers are questions the intent grammar cannot express (a ratio, two date fields in one series), where the model answered a nearby question instead of refusing. Of its 6 refusals, 5 are correct refusals of such questions; 1 (fs-038) is a misread after one intent failed validation.",
       "checks": [
         {
-          "met": false,
+          "met": true,
           "metric": "execution_accuracy",
           "rate": {
             "ci95": [
-              0.6225547970219101,
-              0.8684632152061551
+              0.6738299634272562,
+              0.9025824857100377
             ],
-            "n": 33,
+            "n": 35,
             "of": 43,
-            "rate": 0.7674418604651163
+            "rate": 0.813953488372093
           },
           "rule": ">= 80%"
         },
@@ -54,56 +68,32 @@
           "metric": "wrong_answer_rate_given_answered",
           "rate": {
             "ci95": [
-              0.05753867690120133,
-              0.2732685944229131
+              0.014950976833157673,
+              0.17704654350813104
             ],
-            "n": 5,
-            "of": 38,
-            "rate": 0.13157894736842105
+            "n": 2,
+            "of": 37,
+            "rate": 0.05405405405405406
           },
           "rule": "<= 5%"
         }
       ],
       "met": false,
-      "model": "openai/gpt-oss-120b",
-      "next": "v0.2 changes the prompt to refuse first when a question needs something the grammar lacks, then measures it on a fresh run. The v0.1 prompt is not changed after seeing these results.",
+      "model": "anthropic:claude-haiku-5-5",
+      "next": "v0.2 changes the prompt and the grammar, then measures them on a fresh run. The v0.1 prompt is not changed after seeing these results.",
       "schema": "fieldservice",
-      "status_note": "in v0.1 (simulated run)"
+      "status_note": "in v0.1 (live, default model)"
     }
   ],
   "misses": [
     {
       "error": null,
       "issue_codes": [],
-      "item_id": "fs-022",
-      "model": "openai/gpt-oss-120b",
-      "note": "Ambiguous date: the answer filtered on completion date (when parts are used), the gold on opening date. Both readings are defensible.",
-      "outcome": "wrong",
-      "refusal": null,
-      "schema": "fieldservice",
-      "tag": "gold_issue",
-      "trial": 1
-    },
-    {
-      "error": null,
-      "issue_codes": [],
-      "item_id": "fs-024",
-      "model": "openai/gpt-oss-120b",
-      "note": "Ambiguous date: 'did work for last month' was read as completed last month; the gold uses opened last month.",
-      "outcome": "wrong",
-      "refusal": null,
-      "schema": "fieldservice",
-      "tag": "gold_issue",
-      "trial": 1
-    },
-    {
-      "error": null,
-      "issue_codes": [],
       "item_id": "fs-025",
-      "model": "openai/gpt-oss-120b",
-      "note": "Needs the difference between two dates (opened to completed). Refused correctly.",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "Haiku 5.5 (select-haiku-2026-11-11): Needs the difference between two dates (opened to completed). Refused correctly, naming the missing duration. mistral-small (select-2026-11-11): Needs the difference between two dates (opened to completed). Refused, by failing validation twice.",
       "outcome": "refused",
-      "refusal": "Average days to complete needs the elapsed time between work_orders.opened_at and work_orders.completed_at, and the registry has no way to compute a difference between two date fields. Metrics aggregate a single field only.",
+      "refusal": "The registry cannot compute elapsed days between opened_at and completed_at. Metrics aggregate a single field, and no duration field exists. Average labour hours for urgent work orders is available instead, if that helps.",
       "schema": "fieldservice",
       "tag": "grammar_gap",
       "trial": 1
@@ -112,8 +102,8 @@
       "error": null,
       "issue_codes": [],
       "item_id": "fs-028",
-      "model": "openai/gpt-oss-120b",
-      "note": "Needs a ratio of two counts. The model returned counts per status instead of refusing: a wrong answer, not a refusal.",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "Haiku 5.5 (select-haiku-2026-11-11): Needs a ratio of two counts. The model returned work order counts per status instead of refusing: a wrong answer, not a refusal. mistral-small (select-2026-11-11): Needs a ratio of two counts. The model returned two counts of cancelled orders instead of refusing: a wrong answer, not a refusal.",
       "outcome": "wrong",
       "refusal": null,
       "schema": "fieldservice",
@@ -124,10 +114,10 @@
       "error": null,
       "issue_codes": [],
       "item_id": "fs-030",
-      "model": "openai/gpt-oss-120b",
-      "note": "Needs a computed value (quantity times unit price). Refused correctly.",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "Haiku 5.5 (select-haiku-2026-11-11): Needs a computed value (quantity times unit price). Refused correctly. mistral-small (select-2026-11-11): Needs a computed value (quantity times unit price). Refused, by failing validation twice.",
       "outcome": "refused",
-      "refusal": "Parts revenue needs quantity times unit_price per line, and the registry has no computed line-revenue field. A metric aggregates a single field, so summing unit_price or quantity alone would give a different number.",
+      "refusal": "Parts revenue requires multiplying quantity by unit_price per line, and the registry metrics only aggregate a single field. No product or computed revenue measure is available.",
       "schema": "fieldservice",
       "tag": "grammar_gap",
       "trial": 1
@@ -136,8 +126,8 @@
       "error": null,
       "issue_codes": [],
       "item_id": "fs-035",
-      "model": "openai/gpt-oss-120b",
-      "note": "Needs two date fields in one monthly series. The model counted completions among the orders opened each month instead of refusing: a wrong answer.",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "Haiku 5.5 (select-haiku-2026-11-11): Needs two date fields in one monthly series. The model counted completions among the orders opened each month instead of refusing: a wrong answer. mistral-small (select-2026-11-11): Needs two date fields in one monthly series. Refused, by failing validation twice.",
       "outcome": "wrong",
       "refusal": null,
       "schema": "fieldservice",
@@ -148,34 +138,36 @@
       "error": null,
       "issue_codes": [],
       "item_id": "fs-037",
-      "model": "openai/gpt-oss-120b",
-      "note": "Needs a distinct count of months in HAVING. The model returned per-technician monthly counts instead of refusing: a wrong answer.",
-      "outcome": "wrong",
-      "refusal": null,
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "Haiku 5.5 (select-haiku-2026-11-11): Needs a distinct count of months in HAVING. Refused correctly. mistral-small (select-2026-11-11): Needs a distinct count of months in HAVING. Refused correctly.",
+      "outcome": "refused",
+      "refusal": "The registry can't express a per-technician check that every month in the quarter has at least one completion. A grouped query can't require all months to be present, and count_distinct on completed_at counts distinct timestamps, not distinct months.",
       "schema": "fieldservice",
       "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "issue_codes": [
+        "unknown_field"
+      ],
+      "item_id": "fs-038",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "Haiku 5.5 (select-haiku-2026-11-11): The first intent named a field that does not exist; on the retry the model said invoices cannot be grouped by customer. They can: the registry links invoices to customers through work orders and sites. mistral-small (select-2026-11-11): The model left out the \"paid\" filter and grouped by site and customer ID instead of by customer, with no \"more than $20,000\" condition.",
+      "outcome": "refused",
+      "refusal": "The registry has no direct link from invoices to customers. Invoices join only to work_orders, and customers are reachable only through work_orders and sites, a multi-step path that the registry cannot group by. Customer totals cannot be computed from the listed fields.",
+      "schema": "fieldservice",
+      "tag": "misread",
       "trial": 1
     },
     {
       "error": null,
       "issue_codes": [],
       "item_id": "fs-039",
-      "model": "openai/gpt-oss-120b",
-      "note": "Needs date arithmetic and a ratio. Refused correctly.",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "Haiku 5.5 (select-haiku-2026-11-11): Needs date arithmetic and a ratio. Refused correctly. mistral-small (select-2026-11-11): Needs date arithmetic and a ratio. Refused, by failing validation twice.",
       "outcome": "refused",
-      "refusal": "The question needs a 2-day elapsed-time test between completed_at and opened_at and a ratio of two counts; the intent language supports neither a date arithmetic comparison nor a share metric.",
-      "schema": "fieldservice",
-      "tag": "grammar_gap",
-      "trial": 1
-    },
-    {
-      "error": null,
-      "issue_codes": [],
-      "item_id": "fs-041",
-      "model": "openai/gpt-oss-120b",
-      "note": "Needs a conditional count beside a sum. Refused correctly.",
-      "outcome": "refused",
-      "refusal": "The question needs two different row sets at once: a sum over unpaid and overdue invoices, and a count of overdue invoices only per customer. Filters apply to every row and having applies to whole groups, so the registry cannot express a conditional count alongside the sum.",
+      "refusal": "The registry has no way to express an elapsed-time comparison (completed_at within 2 days of opened_at) or a share computed from two counts. Filters can only compare a field to a fixed value or another field directly, not to a date plus an interval.",
       "schema": "fieldservice",
       "tag": "grammar_gap",
       "trial": 1
@@ -184,53 +176,51 @@
       "error": null,
       "issue_codes": [],
       "item_id": "fs-042",
-      "model": "openai/gpt-oss-120b",
-      "note": "Needs an anti-join (sites with no work orders). Refused correctly.",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "Haiku 5.5 (select-haiku-2026-11-11): Needs an anti-join (sites with no work orders). Refused correctly. mistral-small (select-2026-11-11): Needs an anti-join (sites with no work orders). Refused correctly.",
       "outcome": "refused",
-      "refusal": "Finding sites with no work orders in a window needs an anti-join (sites with no matching work_orders rows), which this intent format cannot express. Filters on work_orders fields only return sites that do have matching rows.",
+      "refusal": "The registry cannot express 'sites with no work orders in a period'. That needs an anti-join from sites to work_orders, and the only listed relationship runs from work_orders to sites, so it cannot be filtered by the absence of related work orders.",
       "schema": "fieldservice",
       "tag": "grammar_gap",
       "trial": 1
     }
   ],
   "notes": [
-    "sql_agent baseline not run: needs a live model (multi-step tool calls can't be honestly simulated in one pass).",
-    "One target model (openai/gpt-oss-120b). A second model runs once there is an OpenRouter key: simulating a second vendor with the same stand-in would add no real diversity.",
-    "Trials: 1. Repeating trials with the same stand-in would measure the stand-in's variance, not the target model's."
+    "sql_agent baseline not run: needs a live model (multi-step tool calls can't be honestly simulated in one pass)."
   ],
   "registry_hashes": {},
   "run_id": "replay-fieldservice",
-  "simulation": "Model responses simulated by claude-haiku-5-5, standing in for openai/gpt-oss-120b. This is not an OpenRouter measurement.",
-  "spent_usd": 0.0,
+  "simulation": null,
+  "spent_usd": 0.05474179999999999,
   "status": "complete",
   "table": [
     {
       "accuracy_given_attempted": {
         "ci95": [
-          0.7267314055770869,
-          0.9424613230987987
+          0.822953456491869,
+          0.9850490231668423
         ],
-        "n": 33,
-        "of": 38,
-        "rate": 0.868421052631579
+        "n": 35,
+        "of": 37,
+        "rate": 0.9459459459459459
       },
       "coverage": {
         "ci95": [
-          0.7552083818991787,
-          0.9492957226019584
+          0.7273641203261714,
+          0.9344427657203511
         ],
-        "n": 38,
+        "n": 37,
         "of": 43,
-        "rate": 0.8837209302325582
+        "rate": 0.8604651162790697
       },
       "execution_accuracy": {
         "ci95": [
-          0.6225547970219101,
-          0.8684632152061551
+          0.6738299634272562,
+          0.9025824857100377
         ],
-        "n": 33,
+        "n": 35,
         "of": 43,
-        "rate": 0.7674418604651163
+        "rate": 0.813953488372093
       },
       "execution_error_rate": {
         "ci95": [
@@ -243,17 +233,17 @@
       },
       "false_refusal_rate": {
         "ci95": [
-          0.05070427739804166,
-          0.24479161810082128
+          0.06555723427964878,
+          0.2726358796738286
         ],
-        "n": 5,
+        "n": 6,
         "of": 43,
-        "rate": 0.11627906976744186
+        "rate": 0.13953488372093023
       },
       "items": 67,
-      "mean_cost_usd": 0.0,
-      "model": "openai/gpt-oss-120b",
-      "p50_latency_ms": 5.720874993130565,
+      "mean_cost_usd": 0.0004146164179104478,
+      "model": "anthropic:claude-haiku-5-5",
+      "p50_latency_ms": 6.187083083204925,
       "pending": 0,
       "refusal_recall": {
         "ci95": [
@@ -269,23 +259,23 @@
       "trials": 1,
       "wrong_answer_rate_given_answered": {
         "ci95": [
-          0.05753867690120133,
-          0.2732685944229131
+          0.014950976833157673,
+          0.17704654350813104
         ],
-        "n": 5,
-        "of": 38,
-        "rate": 0.13157894736842105
+        "n": 2,
+        "of": 37,
+        "rate": 0.05405405405405406
       }
     },
     {
       "accuracy_given_attempted": {
         "ci95": [
-          0.5489463582227039,
-          0.8139799986415182
+          0.6479435728926356,
+          0.885771657790044
         ],
-        "n": 30,
+        "n": 34,
         "of": 43,
-        "rate": 0.6976744186046512
+        "rate": 0.7906976744186046
       },
       "coverage": {
         "ci95": [
@@ -298,12 +288,12 @@
       },
       "execution_accuracy": {
         "ci95": [
-          0.5489463582227039,
-          0.8139799986415182
+          0.6479435728926356,
+          0.885771657790044
         ],
-        "n": 30,
+        "n": 34,
         "of": 43,
-        "rate": 0.6976744186046512
+        "rate": 0.7906976744186046
       },
       "execution_error_rate": {
         "ci95": [
@@ -324,9 +314,9 @@
         "rate": 0.0
       },
       "items": 67,
-      "mean_cost_usd": 0.0,
-      "model": "openai/gpt-oss-120b",
-      "p50_latency_ms": 2.3195409448817372,
+      "mean_cost_usd": 0.0004024253731343284,
+      "model": "anthropic:claude-haiku-5-5",
+      "p50_latency_ms": 2.5450839893892407,
       "pending": 0,
       "refusal_recall": {
         "ci95": [
@@ -342,12 +332,12 @@
       "trials": 1,
       "wrong_answer_rate_given_answered": {
         "ci95": [
-          0.1860200013584818,
-          0.45105364177729607
+          0.11422834220995602,
+          0.3520564271073644
         ],
-        "n": 13,
+        "n": 9,
         "of": 43,
-        "rate": 0.3023255813953488
+        "rate": 0.20930232558139536
       }
     }
   ],

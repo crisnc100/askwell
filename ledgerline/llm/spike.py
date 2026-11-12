@@ -20,6 +20,7 @@ import httpx
 from pydantic import BaseModel, ConfigDict
 
 from ledgerline.llm.budget import BudgetGuard
+from ledgerline.llm.daily import DailySpend
 from ledgerline.llm.errors import BudgetExceededError, LLMError, ParseError
 from ledgerline.llm.gateway import Gateway, Transport
 from ledgerline.llm.types import ChatMessage
@@ -94,6 +95,9 @@ class ProbeResult:
     cost_usd: float
     latency_ms: int
     detail: str = ""
+    # What the model returned: the parsed fields, or the raw text when it did not
+    # parse. It lets a reader see which field differed from the expected answer.
+    answer: dict[str, Any] | str | None = None
 
 
 @dataclass
@@ -181,7 +185,16 @@ def run_spike(
                 return reports, stopped
             except ParseError as exc:
                 report.probes.append(
-                    _failed(index, "parse_error", gateway, spent_before, started, clock, exc.reason)
+                    _failed(
+                        index,
+                        "parse_error",
+                        gateway,
+                        spent_before,
+                        started,
+                        clock,
+                        exc.reason,
+                        answer=exc.raw[:2000],
+                    )
                 )
                 continue
             except LLMError as exc:
@@ -196,6 +209,7 @@ def run_spike(
                     exact=_matches(result.value, want),
                     cost_usd=result.cost_usd,
                     latency_ms=int((clock() - started) * 1000),
+                    answer=result.value.model_dump(mode="json"),
                 )
             )
     return reports, stopped
@@ -209,6 +223,7 @@ def _failed(
     started: float,
     clock: Any,
     detail: str,
+    answer: str | None = None,
 ) -> ProbeResult:
     spent = (gateway.guard.spent_usd if gateway.guard else 0.0) - spent_before
     return ProbeResult(
@@ -218,6 +233,7 @@ def _failed(
         cost_usd=spent,
         latency_ms=int((clock() - started) * 1000),
         detail=detail[:300],
+        answer=answer,
     )
 
 
@@ -243,8 +259,16 @@ def write_report(
 
 
 def make_live_gateway(
-    transport: Transport, price_lookup: Any, budget_usd: float, max_tokens: int
+    transport: Transport,
+    price_lookup: Any,
+    budget_usd: float,
+    max_tokens: int,
+    *,
+    daily: DailySpend | None = None,
+    live_answers_off: bool = False,
 ) -> Gateway:
+    """The spike's gateway. The CLI passes the beta's daily cap and kill switch, so a
+    spike can never spend what the beta is not allowed to."""
     return Gateway(
         mode="live",
         store=None,
@@ -252,4 +276,6 @@ def make_live_gateway(
         price_lookup=price_lookup,
         guard=BudgetGuard(budget_usd),
         max_tokens=max_tokens,
+        daily=daily,
+        live_answers_off=live_answers_off,
     )

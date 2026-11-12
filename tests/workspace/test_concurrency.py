@@ -124,7 +124,7 @@ async def test_two_uploads_cannot_spend_the_same_free_space(
     assert sum(isinstance(r, DiskFullError) for r in results) == 1
     assert store.disk_usage() <= store.limits.disk_cap_bytes
     # The refused upload gave its reservation back: what is left can still be used.
-    _fill_to(store, 400)
+    _fill_to(store, 600)
     await store.upload(store.open(workspace_id), "c.csv", body(b"z" * 300))
 
 

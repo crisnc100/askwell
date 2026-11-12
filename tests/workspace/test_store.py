@@ -9,7 +9,7 @@ import pytest
 from fastapi.testclient import TestClient
 from typer.testing import CliRunner
 
-from ledgerline.workspace.api import HEADER
+from ledgerline.workspace.api import FILE_HEADER, HEADER
 from ledgerline.workspace.store import (
     WorkspaceStore,
     WrongStateError,
@@ -59,10 +59,10 @@ def test_remove_one_file_then_check_again(client: TestClient) -> None:
     upload_sample(client, headers)
     assert upload(client, headers, "visits.csv", b"id,day\n1,3/4/25\n") == 200
     client.post("/api/workspace/check", headers=headers)
-    response = client.delete("/api/workspace/files", params={"name": "visits.csv"}, headers=headers)
+    response = client.delete("/api/workspace/files", headers={**headers, FILE_HEADER: "visits.csv"})
     assert response.status_code == 200
     assert client.post("/api/workspace/check", headers=headers).json()["state"] == "checked"
-    missing = client.delete("/api/workspace/files", params={"name": "nope.csv"}, headers=headers)
+    missing = client.delete("/api/workspace/files", headers={**headers, FILE_HEADER: "nope.csv"})
     assert missing.status_code == 404
 
 

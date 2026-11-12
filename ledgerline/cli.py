@@ -173,6 +173,7 @@ def spike(
         run_spike,
         write_report,
     )
+    from ledgerline.pipeline.service import daily_spend
 
     settings = get_settings()
     if settings.openrouter_api_key is None:
@@ -184,7 +185,14 @@ def spike(
     transport = OpenRouterTransport(
         settings, providers=[p.strip() for p in providers.split(",")] if providers else None
     )
-    gateway = make_live_gateway(transport, book.get, budget, max_tokens)
+    gateway = make_live_gateway(
+        transport,
+        book.get,
+        budget,
+        max_tokens,
+        daily=daily_spend(settings),
+        live_answers_off=settings.live_answers_off,
+    )
     reports, stopped = run_spike(candidates, gateway, advertised_support(payload))
     path = write_report(reports, stopped, budget, Path(out_dir))
     for r in reports:

@@ -87,9 +87,17 @@ export function useWorkspace(id: string | null): void {
   workspaceId = id;
 }
 
-async function call<T>(method: string, path: string, body?: BodyInit, json = true): Promise<T> {
+async function call<T>(
+  method: string,
+  path: string,
+  body?: BodyInit,
+  json = true,
+  fileName?: string,
+): Promise<T> {
   const headers: Record<string, string> = {};
   if (workspaceId) headers["X-Workspace-Id"] = workspaceId;
+  // A header, not the URL, so the name stays out of access logs.
+  if (fileName !== undefined) headers["X-File-Name"] = encodeURIComponent(fileName);
   if (body !== undefined && json) headers["Content-Type"] = "application/json";
   const response = await fetch(path, { method, headers, body });
   const data: unknown = await response.json().catch(() => null);
@@ -107,10 +115,9 @@ export const api = {
   create: (time_zone: string) =>
     call<Status>("POST", "/api/workspaces", JSON.stringify({ time_zone })),
   status: () => call<Status>("GET", "/api/workspace"),
-  upload: (file: File) =>
-    call<Status>("PUT", `/api/workspace/files?name=${encodeURIComponent(file.name)}`, file, false),
+  upload: (file: File) => call<Status>("PUT", "/api/workspace/files", file, false, file.name),
   remove: (name: string) =>
-    call<Status>("DELETE", `/api/workspace/files?name=${encodeURIComponent(name)}`),
+    call<Status>("DELETE", "/api/workspace/files", undefined, true, name),
   check: () => call<Status>("POST", "/api/workspace/check"),
   fields: () => call<{ tables: { name: string; fields: Field[] }[]; edits: Edits }>(
     "GET",

@@ -1,0 +1,46 @@
+{
+ "mode": "pr",
+ "purpose": "Ledgerline PR5, 'Hosted beta': makes Ledgerline safe to put online for invited users. It adds an invite-code gate, a daily spending cap, a kill switch, a production Docker setup and safeguards carried over from PR3, and runs on Claude Haiku 5.5 through Anthropic's API after a measured model choice.",
+ "mechanism": "1. Invite gate (ledgerline/invite.py): every page and API route except /invite and /healthz needs a code from LEDGERLINE_INVITE_CODES, by form login (a cookie holding the code's SHA-256 hash, HttpOnly, Secure, SameSite=lax) or the X-Invite-Code header (raw bytes); constant-time comparison; only wrong codes count against a per-address limit of 10 an hour, each login reserves its try before reading the body and gets it back when the code is right; a locked address keeps credentials it already used; a 4 KB body cap; the app refuses to start with no codes when LEDGERLINE_ENV is beta or prod.\n2. Daily cap (ledgerline/llm/daily.py): each model call reserves its worst-case cost in SQLite before it is sent and settles to the real cost; spend survives restarts and resets at the UTC day; a lost response is charged at the worst case and not retried.\n3. Kill switch: LEDGERLINE_LIVE_ANSWERS_OFF refuses before any call with a plain 503.\n4. Transports (ledgerline/llm/): the model name picks the provider: 'anthropic:<id>' uses the official anthropic SDK (no output_config.format because the answer schema's grammar is too large; JSON text is parsed and validated; effort low; no sampling settings), anything else uses OpenRouter; length, content-filter and refusal stops are charged, then become ParseError; OpenRouter prices are fetched only when needed.\n5. Model choice (scripts/select_model.py, ADR-004 amendments): one live pass with gates on unreadable answers, refusal recall and latency; Claude Haiku 5.5 is the default (35/43 correct), gemma-4 the second.\n6. Workspace safeguards (ledgerline/workspace/): disk-cap accounting covering reports, metadata and other processes' temp files, with a stale sweep; a Check rate limit; 0700 folders and 0600 files; a 120 s upload limit and 2 uploads at a time per address; file names only in a header.\n7. Deploy files: Dockerfile pinned by digest, compose.prod.yaml with a memory limit, .env.beta.example, a README deploy section with Caddy.",
+ "decisions": "Haiku 5.5 over the cheapest OpenRouter model, because Cristian's plan includes Anthropic API credits and Haiku was the most accurate (rejected: mistral-small, cheapest but 21/43). Plain JSON answers on the Anthropic transport (rejected: structured output, refused for grammar size; a non-strict tool, not needed). The invite limit counts only wrong codes and keeps a locked address's existing credentials (rejected: counting every login, which locked out offices). A lost response is assumed billed (rejected: retrying under one reservation).",
+ "readers": "README: people running or deploying Ledgerline. docs/adr: engineers judging the design. Code comments: the next maintainer.",
+ "base": "origin/main",
+ "docMap": [
+  {
+   "behavior": "Invite gate, daily cap, kill switch, deploy",
+   "docs": [
+    "README.md",
+    ".env.beta.example"
+   ]
+  },
+  {
+   "behavior": "Anthropic transport and provider routing",
+   "docs": [
+    "README.md",
+    "docs/adr/ADR-004-model-choice.md",
+    ".env.example"
+   ]
+  },
+  {
+   "behavior": "Model selection rule and results",
+   "docs": [
+    "docs/adr/ADR-004-model-choice.md",
+    "evals/floors.yaml"
+   ]
+  },
+  {
+   "behavior": "Workspace safeguards",
+   "docs": [
+    "README.md"
+   ]
+  }
+ ],
+ "untouchable": [
+  "evals/recordings/**",
+  "evals/reports/**",
+  "evals/spike/**",
+  "evals/triage/**",
+  "tests/**",
+  "builds/**"
+ ]
+}

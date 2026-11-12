@@ -43,8 +43,8 @@ test("the Share box and the saved edits never disagree", async ({ page }) => {
 test("changing the link's workspace switches the page to it", async ({ page }) => {
   const first = await newWorkspace(page);
   const second = await newWorkspace(page);
-  const put = await page.request.put("/api/workspace/files?name=only-in-first.csv", {
-    headers: { "X-Workspace-Id": first },
+  const put = await page.request.put("/api/workspace/files", {
+    headers: { "X-Workspace-Id": first, "X-File-Name": "only-in-first.csv" },
     data: Buffer.from("id\n1\n"),
   });
   expect(put.status()).toBe(200);

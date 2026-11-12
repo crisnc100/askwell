@@ -13,7 +13,7 @@ DEFAULT_NOW = datetime(2026, 6, 30, tzinfo=UTC)
 
 # replay: recordings only. export: recordings, and every unrecorded request is written
 # to the pending directory for a simulated answer (no API key needed; see
-# docs/rerecord.md). record / live: OpenRouter, budget-guarded.
+# docs/rerecord.md). record / live: a live provider (OpenRouter or Anthropic), budget-guarded.
 LLMMode = Literal["record", "replay", "live", "export"]
 
 
@@ -54,10 +54,36 @@ class Settings(BaseSettings):
     )
     openrouter_base_url: str = "https://openrouter.ai/api/v1"
 
-    # Model ids come from config only. The real spike (ADR-004) is deferred until a key
-    # exists; this provisional target is what simulated answers stand in for.
-    default_model: str | None = "openai/gpt-oss-120b"
-    second_model: str | None = None
+    # Model names come from config only; `anthropic:<id>` goes to the Anthropic API,
+    # anything else to OpenRouter (ledgerline/llm/providers.py). The default is
+    # Cristian's choice, measured under ADR-004's gates (Amendment 3); the second is the
+    # best eligible model from another vendor (Amendment 2).
+    default_model: str | None = "anthropic:claude-haiku-5-5"
+    second_model: str | None = "google/gemma-4-26b-a4b-it"
+
+    # The direct Anthropic API, for models configured as `anthropic:<model id>`
+    # (ledgerline/llm/providers.py). Every other model goes through OpenRouter.
+    anthropic_api_key: SecretStr | None = Field(
+        default=None,
+        validation_alias=AliasChoices("ANTHROPIC_API_KEY", "LEDGERLINE_ANTHROPIC_API_KEY"),
+    )
+    anthropic_base_url: str | None = None
+    # How much the model thinks before answering. A short structured form needs little.
+    anthropic_effort: Literal["low", "medium", "high"] = "low"
+    # USD per million tokens. Haiku 5.5's price for prompts up to 100,000 tokens; ours are
+    # far smaller. The daily cap and per-ask budgets charge at these prices.
+    anthropic_input_usd_per_mtok: float = Field(
+        default=0.10,
+        validation_alias=AliasChoices(
+            "ANTHROPIC_INPUT_USD_PER_MTOK", "LEDGERLINE_ANTHROPIC_INPUT_USD_PER_MTOK"
+        ),
+    )
+    anthropic_output_usd_per_mtok: float = Field(
+        default=0.50,
+        validation_alias=AliasChoices(
+            "ANTHROPIC_OUTPUT_USD_PER_MTOK", "LEDGERLINE_ANTHROPIC_OUTPUT_USD_PER_MTOK"
+        ),
+    )
 
     llm_mode: LLMMode = "replay"
     replay_dir: str = "evals/recordings"
@@ -67,6 +93,18 @@ class Settings(BaseSettings):
     # The interpret prompt's registry view is truncated deterministically past this size.
     prompt_budget_chars: int = 16000
     max_tokens: int = 1024
+
+    # Where this runs. In "beta" or "prod" the app refuses to start without invite codes,
+    # so a missing setting can never open the hosted beta to everyone.
+    env: Literal["dev", "beta", "prod"] = "dev"
+    # The hosted beta. Invite codes, comma-separated; when unset, there is no gate.
+    invite_codes: SecretStr | None = None
+    # A cap on all live model spend per UTC day, kept in `spend_db` across restarts.
+    # Unset means no daily cap (each ask still has `ask_budget_usd`).
+    daily_spend_cap_usd: float | None = None
+    spend_db: str = "data/spend.sqlite"
+    # The kill switch: no live model calls at all; asks get a plain message.
+    live_answers_off: bool = False
 
     # Uploaded workspaces, one folder each (see ledgerline/workspace/store.py).
     workspace_dir: str = "data/workspaces"

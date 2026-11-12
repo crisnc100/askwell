@@ -1,31 +1,482 @@
-{"rows":[
-{"behavior":"Results page and its API routes: GET /api/reports, /api/reports/{id}, /api/triage/{schema}, a second Vite page at /results/ linked from the main page","files":["ledgerline/bench/results.py","ledgerline/api.py","web/results/index.html","web/src/results.ts","web/src/style.css","web/vite.config.ts","web/src/main.ts"],"docs":[
- {"path":"README.md","claims":[
-  {"claim":"http://localhost:8000/results/ shows the benchmark","at":"web/vite.config.ts:16"},
-  {"claim":"the app serves the built pages, so /results/ is reachable","at":"ledgerline/api.py:114"},
-  {"claim":"The Results page draws every report in evals/reports/ from its JSON file","at":"ledgerline/bench/results.py:37"},
-  {"claim":"The page links each schema's triage file, evals/triage/<schema>.yaml","at":"ledgerline/bench/results.py:58"},
-  {"claim":"the routes are installed in the app","at":"ledgerline/api.py:73"}]},
- {"path":"docs/build-log.md","claims":[
-  {"claim":"The Results page draws every committed report from its JSON file","at":"ledgerline/bench/results.py:45"}]}]},
-{"behavior":"Report schema generated from Pydantic models","files":["ledgerline/bench/report_schema.py"],"docs":[
- {"path":"README.md","claims":[
-  {"claim":"evals/report.schema.json is generated from ledgerline/bench/report_schema.py with --write","at":"ledgerline/bench/report_schema.py:130"},
-  {"claim":"a test checks every committed report against it","at":"tests/bench/test_report_schema.py:28"}]},
- {"path":"docs/build-log.md","claims":[
-  {"claim":"The report's shape is a committed schema, and a test checks every report against it","at":"tests/bench/test_report_schema.py:19"}]}]},
-{"behavior":"Report floor heading and floors.yaml wording drop the plan line reference","files":["ledgerline/bench/report.py","evals/floors.yaml"],"docs":[
- {"path":"evals/floors.yaml","claims":[
-  {"claim":"The minimum scores v0.1 set out to reach, checked by the eval report","at":"ledgerline/bench/report.py:262"}]},
- {"path":"docs/adr/ADR-001-intent-not-sql.md","claims":[
-  {"claim":"below the plan's 80% floor","at":"evals/floors.yaml:6"},
-  {"claim":"execution accuracy 76.7% against a floor of 80%, wrong answers 13.2% against a ceiling of 5%","at":"evals/floors.yaml:7"}]}]},
-{"behavior":"Decimals over 17 significant digits are long_num; no-break spaces accepted in money and percent values; a blank header no longer hides a duplicate name","files":["ledgerline/workspace/rules.py","ledgerline/workspace/check.py"],"docs":[
- {"path":"docs/build-log.md","claims":[
-  {"claim":"long decimals are judged by significant digits, not length","at":"ledgerline/workspace/rules.py:110"},
-  {"claim":"no-break spaces in money and percent values are read as spaces","at":"ledgerline/workspace/rules.py:72"},
-  {"claim":"a blank column name no longer hides a duplicate name in the same Check","at":"ledgerline/workspace/check.py:474"}]}]},
-{"behavior":"verify.sh comment gives the same Chromium install command as the README","files":["verify.sh"],"docs":[
- {"path":"README.md","claims":[
-  {"claim":"(cd web && npm ci && npx playwright install chromium)","at":"verify.sh:37"}]}]}
-]}
+{
+ "rows": [
+  {
+   "behavior": "Invite gate: code from LEDGERLINE_INVITE_CODES, hashed 30-day HttpOnly cookie or raw X-Invite-Code header, only wrong codes count, reserve-then-refund login, locked address keeps accepted credentials, 4 KB body cap, refuses to start in beta/prod with no codes",
+   "files": [
+    "ledgerline/invite.py",
+    "ledgerline/api.py",
+    "ledgerline/config.py",
+    "ledgerline/workspace/limits.py"
+   ],
+   "docs": [
+    {
+     "path": "README.md",
+     "claims": [
+      {
+       "claim": "Every page and API route needs an invite code, except /healthz",
+       "at": "ledgerline/invite.py:38"
+      },
+      {
+       "claim": "The browser keeps a hash of the code for 30 days",
+       "at": "ledgerline/invite.py:186"
+      },
+      {
+       "claim": "The cookie holds the code's SHA-256 hash",
+       "at": "ledgerline/invite.py:66"
+      },
+      {
+       "claim": "The cookie is one scripts cannot read (HttpOnly)",
+       "at": "ledgerline/invite.py:187"
+      },
+      {
+       "claim": "Scripts can send the code in the X-Invite-Code header",
+       "at": "ledgerline/invite.py:36"
+      },
+      {
+       "claim": "Only wrong codes count; a right code never does (a login's try is given back)",
+       "at": "ledgerline/invite.py:179"
+      },
+      {
+       "claim": "Wrong codes from any route count against the address",
+       "at": "ledgerline/invite.py:144"
+      },
+      {
+       "claim": "Ten wrong codes within an hour lock new logins from the address",
+       "at": "ledgerline/invite.py:40"
+      },
+      {
+       "claim": "The lockout is a sliding hour: it ends when the oldest wrong code is an hour old",
+       "at": "ledgerline/workspace/limits.py:60"
+      },
+      {
+       "claim": "People already signed in from a locked address keep working",
+       "at": "ledgerline/invite.py:138"
+      },
+      {
+       "claim": "LEDGERLINE_ENV=beta refuses to start without codes",
+       "at": "ledgerline/api.py:62"
+      },
+      {
+       "claim": "The image sets LEDGERLINE_ENV=beta",
+       "at": "Dockerfile:40"
+      }
+     ]
+    },
+    {
+     "path": ".env.beta.example",
+     "claims": [
+      {
+       "claim": "The app refuses to start without at least one invite code",
+       "at": "ledgerline/api.py:62"
+      },
+      {
+       "claim": "Removing a code locks out whoever has it",
+       "at": "ledgerline/invite.py:130"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "behavior": "Daily cap: reserve worst case in SQLite before the call, settle to real cost, lost response charged at worst case and not retried, resets at the UTC day, 503 when reached",
+   "files": [
+    "ledgerline/llm/daily.py",
+    "ledgerline/llm/gateway.py",
+    "ledgerline/pipeline/service.py",
+    "ledgerline/llm/spike.py",
+    "ledgerline/cli.py",
+    "ledgerline/api.py",
+    "ledgerline/workspace/ask.py"
+   ],
+   "docs": [
+    {
+     "path": "README.md",
+     "claims": [
+      {
+       "claim": "Each model call reserves its worst-case cost before it is sent",
+       "at": "ledgerline/llm/gateway.py:198"
+      },
+      {
+       "claim": "The reservation and check are one write transaction, so overlapping requests cannot both pass",
+       "at": "ledgerline/llm/daily.py:69"
+      },
+      {
+       "claim": "When the answer arrives, the real cost replaces the reservation",
+       "at": "ledgerline/llm/daily.py:89"
+      },
+      {
+       "claim": "A lost answer keeps the worst case charged",
+       "at": "ledgerline/llm/gateway.py:222"
+      },
+      {
+       "claim": "A lost answer is not retried (only 429s are retried by the gateway)",
+       "at": "ledgerline/llm/budget.py:67"
+      },
+      {
+       "claim": "The day's total is kept on disk",
+       "at": "ledgerline/llm/daily.py:48"
+      },
+      {
+       "claim": "The day is a UTC day",
+       "at": "ledgerline/llm/daily.py:56"
+      },
+      {
+       "claim": "Once the cap is reached, asks get a 503",
+       "at": "ledgerline/api.py:136"
+      }
+     ]
+    },
+    {
+     "path": ".env.beta.example",
+     "claims": [
+      {
+       "claim": "LEDGERLINE_DAILY_SPEND_CAP_USD is the most all live answers may cost per UTC day",
+       "at": "ledgerline/config.py:104"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "behavior": "Kill switch: LEDGERLINE_LIVE_ANSWERS_OFF refuses before any call with a 503",
+   "files": [
+    "ledgerline/llm/errors.py",
+    "ledgerline/llm/gateway.py",
+    "ledgerline/config.py"
+   ],
+   "docs": [
+    {
+     "path": "README.md",
+     "claims": [
+      {
+       "claim": "Asks get a 503 when live answers are off",
+       "at": "ledgerline/api.py:136"
+      },
+      {
+       "claim": "The message is 'Live answers are turned off right now.'",
+       "at": "ledgerline/llm/errors.py:50"
+      },
+      {
+       "claim": "No model is called",
+       "at": "ledgerline/llm/gateway.py:184"
+      },
+      {
+       "claim": "Restart the app after changing it: settings are read once",
+       "at": "ledgerline/config.py:123"
+      }
+     ]
+    },
+    {
+     "path": ".env.beta.example",
+     "claims": [
+      {
+       "claim": "The app reads the kill switch when it starts",
+       "at": "ledgerline/config.py:123"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "behavior": "Provider routing by model name; Anthropic transport sends JSON text, effort low, adaptive thinking, no sampling settings; length, content-filter and refusal stops are charged then become ParseError",
+   "files": [
+    "ledgerline/llm/providers.py",
+    "ledgerline/llm/anthropic_transport.py",
+    "ledgerline/llm/gateway.py",
+    "ledgerline/llm/types.py",
+    "ledgerline/config.py",
+    "pyproject.toml"
+   ],
+   "docs": [
+    {
+     "path": "README.md",
+     "claims": [
+      {
+       "claim": "anthropic:<model id> goes to the Anthropic API; any other name to OpenRouter",
+       "at": "ledgerline/llm/providers.py:26"
+      },
+      {
+       "claim": "The Anthropic API is called with the official SDK",
+       "at": "ledgerline/llm/anthropic_transport.py:67"
+      },
+      {
+       "claim": "That transport asks for the JSON as text",
+       "at": "ledgerline/llm/anthropic_transport.py:43"
+      },
+      {
+       "claim": "Anthropic prices come from config",
+       "at": "ledgerline/llm/providers.py:55"
+      },
+      {
+       "claim": "OpenRouter prices come from its own price list, fetched when first needed",
+       "at": "ledgerline/llm/providers.py:59"
+      },
+      {
+       "claim": "A cut-off, filtered or refused answer is charged and counted as unreadable",
+       "at": "ledgerline/llm/gateway.py:68"
+      },
+      {
+       "claim": "The spike always uses OpenRouter",
+       "at": "ledgerline/cli.py:185"
+      },
+      {
+       "claim": "Answers on your own data need ANTHROPIC_API_KEY for the default model",
+       "at": "ledgerline/config.py:61"
+      }
+     ]
+    },
+    {
+     "path": "docs/adr/ADR-004-model-choice.md",
+     "claims": [
+      {
+       "claim": "The transport sends no output_config.format, only effort",
+       "at": "ledgerline/llm/anthropic_transport.py:94"
+      },
+      {
+       "claim": "Adaptive thinking",
+       "at": "ledgerline/llm/anthropic_transport.py:95"
+      },
+      {
+       "claim": "Effort defaults to low",
+       "at": "ledgerline/config.py:72"
+      },
+      {
+       "claim": "One added line asks for the JSON object alone",
+       "at": "ledgerline/llm/anthropic_transport.py:43"
+      }
+     ]
+    },
+    {
+     "path": ".env.example",
+     "claims": [
+      {
+       "claim": "ANTHROPIC_API_KEY serves models named anthropic:<id>, the default included",
+       "at": "ledgerline/config.py:61"
+      },
+      {
+       "claim": "OpenRouter's key is for models not named anthropic:<id>",
+       "at": "ledgerline/llm/providers.py:27"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "behavior": "Model selection: gates on unreadable answers, refusal recall and latency; Haiku 5.5 default, gemma-4 second",
+   "files": [
+    "scripts/select_model.py",
+    "ledgerline/bench/systems.py",
+    "ledgerline/config.py"
+   ],
+   "docs": [
+    {
+     "path": "README.md",
+     "claims": [
+      {
+       "claim": "Gate: few unreadable answers (at most 2%)",
+       "at": "scripts/select_model.py:22"
+      },
+      {
+       "claim": "Gate: near-perfect refusals (23 of 24)",
+       "at": "scripts/select_model.py:23"
+      },
+      {
+       "claim": "Gate: median answer within 3 seconds",
+       "at": "scripts/select_model.py:24"
+      },
+      {
+       "claim": "The default is Claude Haiku 5.5",
+       "at": "ledgerline/config.py:61"
+      },
+      {
+       "claim": "The second is gemma-4-26b-a4b-it, from another vendor",
+       "at": "ledgerline/config.py:62"
+      }
+     ]
+    },
+    {
+     "path": "docs/adr/ADR-004-model-choice.md",
+     "claims": [
+      {
+       "claim": "The second model is the best eligible model from a different vendor",
+       "at": "scripts/select_model.py:118"
+      },
+      {
+       "claim": "Unreadable answers are counted directly from parse errors",
+       "at": "ledgerline/bench/systems.py:116"
+      }
+     ]
+    },
+    {
+     "path": "evals/floors.yaml",
+     "claims": [
+      {
+       "claim": "Accuracy 35 of 43; wrong 2 of 37; 6 refusals, fs-038 a misread",
+       "at": "evals/reports/select-haiku-2026-11-11.md:10"
+      }
+     ]
+    },
+    {
+     "path": ".env.example",
+     "claims": [
+      {
+       "claim": "Commented model lines match the defaults in config.py",
+       "at": "ledgerline/config.py:61"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "behavior": "Workspace safeguards: Check rate limit, 120 s upload limit, 2 uploads at a time, file names in X-File-Name, 0700/0600, disk-cap accounting and stale-temp sweep",
+   "files": [
+    "ledgerline/workspace/api.py",
+    "ledgerline/workspace/limits.py",
+    "ledgerline/workspace/store.py",
+    "ledgerline/workspace/fields.py",
+    "ledgerline/workspace/ask.py",
+    "web/src/api.ts",
+    "web/e2e/review.spec.ts"
+   ],
+   "docs": [
+    {
+     "path": "README.md",
+     "claims": [
+      {
+       "claim": "20 checks an hour per address",
+       "at": "ledgerline/workspace/limits.py:32"
+      },
+      {
+       "claim": "An upload must finish within 2 minutes",
+       "at": "ledgerline/workspace/limits.py:35"
+      },
+      {
+       "claim": "At most 2 uploads running at once per address",
+       "at": "ledgerline/workspace/limits.py:36"
+      },
+      {
+       "claim": "File names travel in a header, not the URL",
+       "at": "ledgerline/workspace/api.py:38"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "behavior": "Deploy files: Dockerfile pinned by digest, compose with a memory limit and a sweep service, .env.beta.example, /data volume",
+   "files": [
+    "Dockerfile",
+    "compose.prod.yaml",
+    ".dockerignore",
+    ".env.beta.example",
+    ".gitignore"
+   ],
+   "docs": [
+    {
+     "path": "README.md",
+     "claims": [
+      {
+       "claim": "Both base images are pinned by digest",
+       "at": "Dockerfile:12"
+      },
+      {
+       "claim": "compose.prod.yaml caps the app at 1 GB of memory",
+       "at": "compose.prod.yaml:10"
+      },
+      {
+       "claim": "The audit log is app.sqlite in /data",
+       "at": "Dockerfile:43"
+      },
+      {
+       "claim": "The day's spend is spend.sqlite in /data",
+       "at": "Dockerfile:45"
+      },
+      {
+       "claim": "The audit log is written to the app database",
+       "at": "ledgerline/pipeline/service.py:220"
+      },
+      {
+       "claim": "/healthz answers 503 if a demo database cannot be read",
+       "at": "ledgerline/api.py:111"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "behavior": "Replay cases can be recorded live",
+   "files": [
+    "evals/replay_cases.py"
+   ],
+   "none": "Its module docstring names the wrong key for the default model; the fix is a docstring edit, refused by the commit checker and listed in the docstring diff."
+  },
+  {
+   "behavior": "Example questions changed to ones the default model answers",
+   "files": [
+    "config/schemas.yaml"
+   ],
+   "docs": [
+    {
+     "path": "README.md",
+     "claims": [
+      {
+       "claim": "The examples are ones the current model answers",
+       "at": "config/schemas.yaml:2"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "behavior": "Secrets baseline line numbers",
+   "files": [
+    ".secrets.baseline"
+   ],
+   "none": "Generated by detect-secrets; no doc describes it."
+  },
+  {
+   "behavior": "Dependency lock",
+   "files": [
+    "uv.lock"
+   ],
+   "none": "Generated by uv from pyproject.toml; no doc describes it."
+  },
+  {
+   "behavior": "Live run recordings",
+   "files": [
+    "evals/recordings/eval/fieldservice/ledgerline.jsonl",
+    "evals/recordings/eval/fieldservice/oneshot.jsonl",
+    "evals/recordings/interpret.jsonl"
+   ],
+   "none": "Generated recordings; ADR-004 already gives the replay commands that use them."
+  },
+  {
+   "behavior": "Eval and selection reports",
+   "files": [
+    "evals/reports/model-selection-select-2026-11-11.md",
+    "evals/reports/model-selection-select-haiku-2026-11-11.md",
+    "evals/reports/replay-fieldservice.json",
+    "evals/reports/replay-fieldservice.md",
+    "evals/reports/select-2026-11-11.json",
+    "evals/reports/select-2026-11-11.md",
+    "evals/reports/select-haiku-2026-11-11.json",
+    "evals/reports/select-haiku-2026-11-11.md"
+   ],
+   "none": "Generated reports; README and ADR-004 link to them and quote their numbers."
+  },
+  {
+   "behavior": "Spike report",
+   "files": [
+    "evals/spike/spike-2026-11-11T201030Z.json"
+   ],
+   "none": "Generated by ledgerline spike; ADR-004 Amendment 1 links it."
+  },
+  {
+   "behavior": "Triage notes",
+   "files": [
+    "evals/triage/fieldservice.yaml"
+   ],
+   "none": "Untouchable data file read by the report; it is its own explanation of each miss."
+  }
+ ]
+}

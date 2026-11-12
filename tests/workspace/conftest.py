@@ -3,12 +3,13 @@ from __future__ import annotations
 from collections.abc import Iterator
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
+from urllib.parse import quote
 
 import pytest
 from fastapi.testclient import TestClient
 
 from ledgerline.api import create_app
-from ledgerline.workspace.api import HEADER, WorkspaceApp
+from ledgerline.workspace.api import FILE_HEADER, HEADER, WorkspaceApp
 from ledgerline.workspace.check import CheckResult, UploadedFile, check_files
 from ledgerline.workspace.limits import Limits
 from ledgerline.workspace.store import WorkspaceStore
@@ -74,7 +75,7 @@ def new_workspace(client: TestClient) -> dict[str, str]:
 
 def upload(client: TestClient, headers: dict[str, str], name: str, data: bytes) -> int:
     response = client.put(
-        "/api/workspace/files", params={"name": name}, content=data, headers=headers
+        "/api/workspace/files", content=data, headers={**headers, FILE_HEADER: quote(name)}
     )
     return response.status_code
 

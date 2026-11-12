@@ -11,10 +11,11 @@ reason. A question the intent cannot express can still get a wrong answer, when 
 fills in a valid intent for a nearby question instead of refusing. [docs/product-brief.md](docs/product-brief.md) explains
 who it is for and what it leaves out on purpose.
 
-**Status.** v0.1 runs on your machine. There is no model key yet, so every model answer in
-this repo was written by a stand-in model and is labelled *simulated* (see
-[Simulated answers](#simulated-answers)). On that run Ledgerline does not reach its own
-accuracy target; the results below say so.
+**Status.** v0.1 runs on your machine, and an invite-only beta answers live questions
+(see [Deploy the hosted beta](#deploy-the-hosted-beta)). The default model is Claude
+Haiku 5.5, measured against the same gates as the others
+([ADR-004](docs/adr/ADR-004-model-choice.md)). It reaches the accuracy target but gives one
+wrong answer too many.
 
 ## Try it
 
@@ -47,22 +48,23 @@ To see an answer with no key, ask the demo database one of its recorded question
 uv run ledgerline ask "How many invoices are still unpaid?"
 ```
 
-It prints the intent, the check, the SQL and the rows.
+It prints the intent, the check, the SQL and the rows. Recorded questions are ones the
+model answers; [Results](#results) has its measured accuracy.
 
 ## Results
 
 `http://localhost:8000/results/` shows the benchmark: how often Ledgerline answers, how
 often it is right, and how often it refuses, next to a baseline where the same model writes
 SQL directly. Each number has a plain definition and a 95% range. On fieldservice, the
-made-up business in the demo database:
+made-up business in the demo database, with the default model, live:
 
-| Simulated, fieldservice | Ledgerline | one-shot |
+| Live, fieldservice | Ledgerline | one-shot |
 |---|---|---|
-| Rows match the expected answer | 76.7% (33/43) | 69.8% (30/43) |
-| Wrong answers among answered | 13.2% (5/38) | 30.2% (13/43) |
+| Rows match the expected answer | 81.4% (35/43) | 79.1% (34/43) |
+| Wrong answers among answered | 5.4% (2/37) | 20.9% (9/43) |
 
-Ledgerline gives fewer wrong answers, but it misses its v0.1 target (at least 80% right,
-at most 5% wrong). [docs/failures/](docs/failures/README.md) walks through four misses.
+Ledgerline gives a quarter of the baseline's wrong answers, but it misses its v0.1
+target (at least 80% right, at most 5% wrong) by one wrong answer. [docs/failures/](docs/failures/README.md) walks through four misses.
 
 ## Read more
 
@@ -71,7 +73,8 @@ at most 5% wrong). [docs/failures/](docs/failures/README.md) walks through four 
 - [docs/adr/](docs/adr/README.md): each design decision, with a prediction made before
   the code and the measured result.
 - [docs/build-log.md](docs/build-log.md): how v0.1 was built, and what reviews caught.
-- [evals/reports/sim-1.md](evals/reports/sim-1.md): the full simulated report.
+- [evals/reports/](evals/reports/): the live runs (`select-haiku-2026-11-11` for the
+  default) and `sim-1`, run earlier on simulated answers.
 - The sections below: each part of the system in detail.
 
 ## Setup details
@@ -89,7 +92,9 @@ defaults in `ledgerline/config.py` match them. To change them, copy `.env.exampl
 Model calls default to replay mode, which answers only from recorded responses. A model is
 called live only with `--mode record` or `--mode live`, with `LEDGERLINE_LLM_MODE=record`
 or `live` in the environment (it sets the mode for `ledgerline ask` and the API when no
-`--mode` is given), or by `ledgerline spike`. Each of those needs `OPENROUTER_API_KEY`.
+`--mode` is given), or by `ledgerline spike`. Each of those needs the key for the model's
+provider: `ANTHROPIC_API_KEY` for a model named `anthropic:<id>`, `OPENROUTER_API_KEY` for
+any other (the spike always uses OpenRouter).
 
 ## Your data
 
@@ -110,21 +115,22 @@ What stays private:
   shared values leave your machine.
 - **The workspace link.** Its id is a random 128-bit code after the `#`, a part of the
   link browsers never send to a server. The pages send it in a request header instead,
-  so it never appears in a URL the server sees or logs.
+  so it never appears in a URL the server sees or logs. File names travel the same way.
 - **Your address.** It is not stored. A keyed hash of it counts your workspaces.
 - **Your files.** They expire after 7 days without use and are deleted the next time
   `uv run ledgerline sweep` runs (run it from cron, for example once an hour) or the
   workspace is opened. "Delete my data" removes them at once.
 
 Limits: at most 10 files per workspace, and per file 10 MB, 200 columns, 1,000,000 rows
-and 10,000 characters per value. Each address gets 3 workspaces at a time, 20 uploads and
-30 questions an hour (questions to `/ask` count too). The hourly counts live in the
+and 10,000 characters per value. Each address gets 3 workspaces at a time, 20 uploads, 20 checks and
+30 questions an hour (questions to `/ask` count too), and at most 2 uploads running at
+once. An upload must finish within 2 minutes. The hourly counts live in the
 server process and start again when it restarts; the workspace count does not. All
 workspaces together share 2 GB of disk. Behind a proxy that sets `X-Forwarded-For`, set `LEDGERLINE_TRUST_PROXY=1` so the limits
 see the real address. Leave it off otherwise, or any client could claim any address.
 
 Answers on your own data need a live model, because no answers are recorded for your
-files. Set `OPENROUTER_API_KEY` and `LEDGERLINE_LLM_MODE=live` (see
+files. Set `ANTHROPIC_API_KEY` (for the default model) and `LEDGERLINE_LLM_MODE=live` (see
 [.env.example](.env.example)). Without them, Ask replies "Live answers need a model key;
 see the README." Questions like "last month" use today's date in your workspace's time
 zone.
@@ -145,7 +151,8 @@ curl -s localhost:8000/ask -H 'content-type: application/json' \
 ```
 
 `GET /schemas` lists the schemas, and `GET /schemas/{id}/examples` lists the example
-questions. In replay mode only those examples have recorded answers; any other question
+questions. They are examples the current model answers; `/results/` has its measured
+accuracy. In replay mode only those examples have recorded answers; any other question
 gets a 409 (the CLI exits with code 4).
 
 Each question goes through the same steps. The model makes one call and returns an
@@ -262,17 +269,31 @@ instead, because a work order can have more than one invoice.
 
 ## Model gateway
 
-`ledgerline/llm/` makes one structured-output call to a model on OpenRouter, through
-LangChain. It has four modes: `record`, `replay`, `live` and `export`. In replay mode a
+`ledgerline/llm/` makes one call to a model and parses its answer into the requested
+form. The model's configured name picks the provider: `anthropic:<model id>` (for example
+`anthropic:claude-haiku-5-5`) calls the Anthropic API directly with the official SDK;
+any other name is an OpenRouter model, called through LangChain with structured output.
+The Anthropic API refuses the intent schema as structured output (it is too large for
+its grammar), so that transport asks for the JSON as text; the same parser and
+validator check it. Anthropic prices come from config (`ANTHROPIC_INPUT_USD_PER_MTOK`,
+`ANTHROPIC_OUTPUT_USD_PER_MTOK`); OpenRouter reports its own. The gateway has four modes: `record`, `replay`, `live` and `export`. In replay mode a
 missing recording is an error; it never falls back to a live call. Before each live
 call, a budget guard checks the call's worst-case cost against what is left of the
 budget, and stops when it would go over. A long eval run saves each finished item, so a
 stopped run can resume and its spend still counts.
 [ADR-005](docs/adr/ADR-005-replay-and-budget.md) has the details.
 
-`ledgerline spike` checks which candidate models return valid structured output. It
-has not run yet. Until it does, the default model is a provisional target,
-`openai/gpt-oss-120b`; see [ADR-004](docs/adr/ADR-004-model-choice.md).
+An answer cut off at the token limit (`LEDGERLINE_MAX_TOKENS`), blocked by a content
+filter or refused by the model is still paid for, so it is charged and counted as
+unreadable, like any answer that does not parse.
+
+The default and second models (`LEDGERLINE_DEFAULT_MODEL`, `LEDGERLINE_SECOND_MODEL`) were
+measured on the fieldservice benchmark against three gates (few unreadable answers,
+near-perfect refusals, a median answer within 3 seconds). The default, Claude Haiku 5.5,
+was Cristian's choice and passed them; the second is the best eligible model from
+another vendor. [ADR-004](docs/adr/ADR-004-model-choice.md) has the rule and the numbers.
+`ledgerline spike` is the earlier, smaller check of structured output; its report is in
+`evals/spike/`.
 
 ## Simulated answers
 
@@ -303,10 +324,14 @@ single SELECT, and the database driver refuses a second statement, so it cannot 
 the read-only transaction. Spider registries come from `registry init` with no edits,
 and the eval stops if one no longer matches its committed hash.
 
-Results of the simulated run `sim-1` are in
-[evals/reports/sim-1.md](evals/reports/sim-1.md). Every answer in it was written by
-claude-haiku-5-5 standing in for `openai/gpt-oss-120b`, so these are simulated numbers,
-not a measurement of that model. On fieldservice:
+The live run `select-2026-11-11` compared four OpenRouter models on fieldservice
+([report](evals/reports/select-2026-11-11.md)), and `select-haiku-2026-11-11` measured
+Claude Haiku 5.5, the default ([report](evals/reports/select-haiku-2026-11-11.md)); its
+numbers are in [Results](#results). Before a key existed, the simulated run
+`sim-1` ([evals/reports/sim-1.md](evals/reports/sim-1.md)) checked the pipeline and the
+scoring. Every answer in it was written by claude-haiku-5-5 standing in for
+`openai/gpt-oss-120b`, so those are simulated numbers, not a measurement of that model.
+On fieldservice:
 
 | Simulated, fieldservice | Ledgerline | one-shot |
 |---|---|---|
@@ -315,7 +340,7 @@ not a measurement of that model. On fieldservice:
 | Refusal recall (refused what it should) | 100% (24/24) | 100% (24/24) |
 
 The floor for fieldservice, the minimum v0.1 set out to reach (execution accuracy at
-least 80%, wrong answers at most 5%), is **not met in v0.1**. The report lists every
+least 80%, wrong answers at most 5%), is **not met in v0.1**, simulated or live. The report lists every
 Ledgerline miss with a tag for its cause;
 [ADR-001](docs/adr/ADR-001-intent-not-sql.md) explains the result against its
 prediction. `./verify.sh` replays the committed fieldservice recordings and checks that
@@ -326,6 +351,76 @@ The Results page (`/results/`) draws every report in `evals/reports/` from its J
 `ledgerline/bench/report_schema.py` (`uv run python -m ledgerline.bench.report_schema
 --write`), and a test checks every committed report against it. The page links each
 schema's triage file, `evals/triage/<schema>.yaml`, which gives every miss its cause.
+
+## Deploy the hosted beta
+
+The hosted beta is one container on one host, behind [Caddy](https://caddyserver.com),
+a web server that handles HTTPS. It answers live questions with Claude Haiku 5.5, through a
+beta-only Anthropic API key. Three controls keep it small and cheap:
+
+- **Invite gate.** Every page and API route needs an invite code, except `/healthz`.
+  A visitor enters the code once; for 30 days the browser keeps a hash of it in a cookie
+  scripts cannot read. Scripts can send the code in the `X-Invite-Code` header instead.
+  Only wrong codes count against an address, by any route; a right code never does.
+  After ten wrong codes within an hour, that address gets no new login until the oldest
+  of them is an hour old. People already signed in from it keep working, so one guesser
+  cannot lock out a whole office. The image sets `LEDGERLINE_ENV=beta`, which refuses to
+  start without codes.
+- **Daily cap.** All live answers together may spend at most a set amount per UTC day.
+  Each model call reserves its worst-case cost before it is sent, so the cap holds even
+  when requests overlap. When the answer arrives, the real cost replaces the reservation.
+  If the answer is lost after the request went out, the provider may still bill it, so
+  the worst case stays charged and the call is not retried. The day's total is kept on
+  disk, so a restart does not reset it. Once the cap is reached, asks get a 503 until
+  the next UTC day.
+- **Kill switch.** One setting turns live answers off. Asks then get a 503, "Live answers
+  are turned off right now.", and no model is called.
+
+The image (`Dockerfile`) builds the pages, installs the app and builds the fieldservice
+demo as a read-only SQLite file, so the beta needs no Postgres. It runs as an
+unprivileged user, and everything it writes lives in one volume, `/data`: uploaded
+workspaces, the audit log (`app.sqlite`) and the day's spend (`spend.sqlite`). Both base
+images are pinned by digest, so a rebuild uses exactly the same layers.
+`compose.prod.yaml` caps the app at 1 GB of memory, so a runaway request cannot take
+the whole host down.
+
+On the host:
+
+1. Copy `.env.beta.example` to `.env.beta` and fill it in:
+
+   | Setting | What it does |
+   |---|---|
+   | `ANTHROPIC_API_KEY` | The key for the default model, `anthropic:claude-haiku-5-5`. Set a spend limit on it in the Anthropic console too. |
+   | `OPENROUTER_API_KEY` | Only if `LEDGERLINE_DEFAULT_MODEL` names an OpenRouter model. Give that key a credit limit on OpenRouter too. |
+   | `LEDGERLINE_INVITE_CODES` | The invite codes, comma-separated. Make each one long and random, for example from `python -c "import secrets; print(secrets.token_urlsafe(16))"`. The app will not start without them. |
+   | `LEDGERLINE_DAILY_SPEND_CAP_USD` | The most live answers may cost per UTC day, for example `1.00`. |
+   | `LEDGERLINE_LIVE_ANSWERS_OFF` | `1` turns live answers off. Restart the app after changing it. |
+
+   `compose.prod.yaml` also sets `LEDGERLINE_TRUST_PROXY=1`, because Caddy is the only
+   client and it writes `X-Forwarded-For`. The image sets the database and data paths.
+2. Start it: `docker compose -f compose.prod.yaml up -d --build`. It starts two
+   services: `app`, on `127.0.0.1:8000` so only the host can reach it, and `sweep`,
+   which deletes expired workspaces once an hour.
+3. Point Caddy at it. Caddy gets the HTTPS certificate on its own:
+
+   ```
+   ledgerline.example.com {
+       request_body {
+           max_size 12MB
+       }
+       reverse_proxy 127.0.0.1:8000
+   }
+   ```
+
+   `max_size` stops an oversized request at Caddy; the largest real request is one
+   10 MB CSV.
+
+4. Check it: `curl https://ledgerline.example.com/healthz` returns
+   `{"status": "ok", "mode": "live"}`. It answers 503 if the demo database cannot be read.
+
+To turn live answers off in a hurry, set `LEDGERLINE_LIVE_ANSWERS_OFF=1` in `.env.beta`
+and run `docker compose -f compose.prod.yaml up -d`. To back up or move the beta, copy
+the `ledgerline-data` volume.
 
 ## Checks
 

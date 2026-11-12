@@ -1,7 +1,8 @@
 """The workspace HTTP routes, under `/api`.
 
-The workspace id travels only in the `X-Workspace-Id` header, never in a request URL, so
-it stays out of access logs and Referer headers. The page keeps it after the link's `#`,
+The workspace id travels only in the `X-Workspace-Id` header, and a file name only in
+`X-File-Name` (percent-encoded UTF-8), never in a request URL, so they stay out of access
+logs and Referer headers. The page keeps the workspace id after the link's `#`,
 which browsers never send. Every refusal comes back as `{"detail": <a plain sentence>}`
 with a status the page can show as is.
 """
@@ -10,8 +11,12 @@ from __future__ import annotations
 
 import asyncio
 import json
+import threading
+from collections.abc import Generator
+from contextlib import contextmanager
 from dataclasses import dataclass, field
 from typing import Any
+from urllib.parse import unquote
 
 from fastapi import APIRouter, FastAPI, Request
 from fastapi.responses import JSONResponse
@@ -30,6 +35,7 @@ from ledgerline.workspace.store import (
 )
 
 HEADER = "X-Workspace-Id"
+FILE_HEADER = "X-File-Name"
 HOUR_S = 3600.0
 
 
@@ -53,11 +59,32 @@ class WorkspaceApp:
     prompt_budget_chars: int = 16000
     uploads: RateLimiter = field(init=False)
     asks: RateLimiter = field(init=False)
+    checks: RateLimiter = field(init=False)
+    _in_flight: dict[str, int] = field(init=False, default_factory=dict[str, int])
+    _in_flight_lock: threading.Lock = field(init=False, default_factory=threading.Lock)
 
     def __post_init__(self) -> None:
         limits = self.limits
         self.uploads = RateLimiter(limits.uploads_per_hour, HOUR_S)
         self.asks = RateLimiter(limits.asks_per_hour, HOUR_S)
+        self.checks = RateLimiter(limits.checks_per_hour, HOUR_S)
+
+    @contextmanager
+    def upload_slot(self, ip: str) -> Generator[None]:
+        """Hold one of the address's concurrent upload slots for the upload's length."""
+        with self._in_flight_lock:
+            if self._in_flight.get(ip, 0) >= self.limits.uploads_in_flight_per_ip:
+                raise TooManyRequestsError(
+                    "Your address already has uploads running. Wait for them to finish."
+                )
+            self._in_flight[ip] = self._in_flight.get(ip, 0) + 1
+        try:
+            yield
+        finally:
+            with self._in_flight_lock:
+                self._in_flight[ip] -= 1
+                if not self._in_flight[ip]:
+                    del self._in_flight[ip]
 
     @property
     def limits(self) -> Limits:
@@ -119,6 +146,15 @@ def install(fastapi_app: FastAPI, app: WorkspaceApp) -> APIRouter:
     def opened(request: Request) -> Workspace:
         return app.store.open(request.headers.get(HEADER))
 
+    def file_name(request: Request) -> str:
+        raw = request.headers.get(FILE_HEADER)
+        if raw is None:
+            raise WorkspaceError(f"Send the file name in the {FILE_HEADER} header.")
+        try:
+            return unquote(raw, errors="strict")
+        except UnicodeDecodeError as exc:
+            raise WorkspaceError("Send the file name percent-encoded as UTF-8.") from exc
+
     @router.get("/time-zones")
     def list_time_zones() -> list[str]:
         return sorted(time_zones())
@@ -157,33 +193,40 @@ def install(fastapi_app: FastAPI, app: WorkspaceApp) -> APIRouter:
         return status(app, opened(request))
 
     @router.put("/workspace/files")
-    async def upload(request: Request, name: str) -> dict[str, Any]:
+    async def upload(request: Request) -> dict[str, Any]:
         # Opening takes the workspace lock, so it runs off the event loop.
         workspace = await asyncio.to_thread(opened, request)
-        if not app.uploads.allow(app.client_ip(request)):
+        ip = app.client_ip(request)
+        if not app.uploads.allow(ip):
             raise TooManyRequestsError(
                 f"Too many uploads from your address (the limit is "
                 f"{app.limits.uploads_per_hour} an hour). Try again later."
             )
         length = request.headers.get("content-length")
-        await app.store.upload(
-            workspace,
-            name,
-            request.stream(),
-            int(length) if length and length.isdigit() else None,
-        )
+        with app.upload_slot(ip):
+            await app.store.upload(
+                workspace,
+                file_name(request),
+                request.stream(),
+                int(length) if length and length.isdigit() else None,
+            )
         fresh = await asyncio.to_thread(app.store.open, workspace.id, touch=False)
         return status(app, fresh)
 
     @router.delete("/workspace/files")
-    def remove_file(request: Request, name: str) -> dict[str, Any]:
+    def remove_file(request: Request) -> dict[str, Any]:
         workspace = opened(request)
-        app.store.remove_file(workspace, name)
+        app.store.remove_file(workspace, file_name(request))
         return status(app, app.store.open(workspace.id, touch=False))
 
     @router.post("/workspace/check")
     def check(request: Request) -> dict[str, Any]:
         workspace = opened(request)
+        if not app.checks.allow(app.client_ip(request)):
+            raise TooManyRequestsError(
+                f"Too many checks from your address (the limit is "
+                f"{app.limits.checks_per_hour} an hour). Try again later."
+            )
         app.store.check(workspace, after_load=fields.draft)
         return status(app, app.store.open(workspace.id, touch=False))
 

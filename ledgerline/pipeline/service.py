@@ -23,9 +23,11 @@ from ledgerline.core.intent import Intent
 from ledgerline.core.registry import Registry, load_registry
 from ledgerline.core.validate import QueryPlan, ValidationResult, validate
 from ledgerline.llm.budget import BudgetGuard
+from ledgerline.llm.daily import DailySpend
 from ledgerline.llm.errors import ReplayMissError
-from ledgerline.llm.gateway import Gateway, OpenRouterTransport
+from ledgerline.llm.gateway import Gateway
 from ledgerline.llm.pricing import PriceBook
+from ledgerline.llm.providers import ProviderRouter
 from ledgerline.llm.replay import ReplayStore
 from ledgerline.llm.simulate import PendingRequestError, register_response_model
 from ledgerline.llm.types import ChatMessage, LLMResult
@@ -99,6 +101,13 @@ def load_schemas(settings: Settings, path: Path = SCHEMAS_FILE) -> dict[str, Sch
     return out
 
 
+def daily_spend(settings: Settings) -> DailySpend | None:
+    """The global daily cap, when one is configured. Every live gateway shares it."""
+    if settings.daily_spend_cap_usd is None:
+        return None
+    return DailySpend(ROOT / settings.spend_db, settings.daily_spend_cap_usd)
+
+
 def build_gateway(
     settings: Settings,
     mode: str | None = None,
@@ -121,14 +130,18 @@ def build_gateway(
             max_tokens=settings.max_tokens,
             pending_dir=pending_dir or ROOT / settings.pending_dir,
         )
-    book = PriceBook.fetch(settings.openrouter_base_url)
+    router = ProviderRouter(
+        settings, load_openrouter_prices=lambda: PriceBook.fetch(settings.openrouter_base_url)
+    )
     return Gateway(
         mode=chosen,  # type: ignore[arg-type]
         store=store,
-        transport=OpenRouterTransport(settings),
-        price_lookup=book.get,
+        transport=router,
+        price_lookup=router.price,
         guard=BudgetGuard(budget_usd if budget_usd is not None else settings.ask_budget_usd),
         max_tokens=settings.max_tokens,
+        daily=daily_spend(settings),
+        live_answers_off=settings.live_answers_off,
     )
 
 

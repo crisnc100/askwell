@@ -19,6 +19,7 @@ dependencies = [
     "typer",
     "httpx",
     "faker",
+    "anthropic>=2.8.0",
 ]
 
 [dependency-groups]

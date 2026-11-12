@@ -1,8 +1,8 @@
 """The model gateway: one structured-output call, recorded, replayed, costed, budgeted.
 
 Modes:
-- `live`: call OpenRouter; nothing is stored.
-- `record`: call OpenRouter and append the response to the replay store.
+- `live`: call the model's provider (ledgerline/llm/providers.py); nothing is stored.
+- `record`: call the provider and append the response to the replay store.
 - `replay`: answer only from the replay store. A miss raises `ReplayMissError`;
   replay never falls back to a live call.
 - `export`: like replay, but a miss writes the request to the pending directory for a
@@ -17,12 +17,17 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import Any, Protocol
 
+import anthropic
 import httpx
+import httpx2
+import openai
+from openai.types.chat import ChatCompletion
 from pydantic import BaseModel, ValidationError
 
 from ledgerline.config import LLMMode, Settings
 from ledgerline.llm.budget import BudgetGuard, with_backoff
-from ledgerline.llm.errors import ParseError, PricingUnavailableError
+from ledgerline.llm.daily import DailySpend
+from ledgerline.llm.errors import LiveAnswersOffError, ParseError, PricingUnavailableError
 from ledgerline.llm.pricing import ModelPrice, cost_from_usage, worst_case_cost
 from ledgerline.llm.replay import ReplayStore, canonical_json, replay_key
 from ledgerline.llm.simulate import PendingRequestError, export_request, register_response_model
@@ -46,8 +51,26 @@ PriceLookup = Callable[[str], ModelPrice | None]
 _FENCE = re.compile(r"^\s*```(?:json)?\s*(.*?)\s*```\s*$", re.DOTALL)
 
 
+_NOT_SENT = (httpx.ConnectError, httpx.ConnectTimeout, httpx2.ConnectError, httpx2.ConnectTimeout)
+
+
+def may_have_been_billed(exc: BaseException) -> bool:
+    """Whether a failed call may still have been billed: the request could have reached
+    the provider before the connection failed or timed out. A refused or timed-out
+    connect never sent it; an HTTP error status is an answer, and is not billed."""
+    if not isinstance(exc, anthropic.APIConnectionError | openai.APIConnectionError):
+        return False
+    return not isinstance(exc.__cause__, _NOT_SENT)
+
+
 def parse_output[T: BaseModel](raw: RawResponse, schema: type[T]) -> T:
     """Validate the provider's parse, or fall back to parsing the text with Pydantic."""
+    if raw.finish_reason == "length":
+        raise ParseError("the answer was cut off at the max_tokens limit", raw.content)
+    if raw.finish_reason == "content_filter":
+        raise ParseError("the provider's content filter blocked the answer", raw.content)
+    if raw.finish_reason == "refusal":
+        raise ParseError("the model refused to answer", raw.content)
     if raw.parsed is not None:
         try:
             return schema.model_validate(raw.parsed)
@@ -61,6 +84,8 @@ def parse_output[T: BaseModel](raw: RawResponse, schema: type[T]) -> T:
         return schema.model_validate_json(text)
     except ValidationError as exc:
         raise ParseError(f"text did not validate: {exc.errors()[0]['msg']}", raw.content) from exc
+    except RecursionError as exc:
+        raise ParseError("the answer is nested too deeply to read", raw.content[:2000]) from exc
 
 
 def _parse_charged[T: BaseModel](
@@ -88,6 +113,8 @@ class Gateway:
         max_tokens: int,
         backoff_sleep: Callable[[float], None] | None = None,
         pending_dir: Path | None = None,
+        daily: DailySpend | None = None,
+        live_answers_off: bool = False,
     ) -> None:
         if mode in ("record", "replay", "export") and store is None:
             raise ValueError(f"{mode} mode needs a replay store")
@@ -103,6 +130,10 @@ class Gateway:
         self.max_tokens = max_tokens
         self._backoff_sleep = backoff_sleep
         self.pending_dir = pending_dir
+        # The hosted beta's daily cap and kill switch. Both apply to every call that would
+        # reach a provider (live and record modes), never to replay or export.
+        self.daily = daily
+        self.live_answers_off = live_answers_off
 
     def complete[T: BaseModel](
         self,
@@ -150,6 +181,8 @@ class Gateway:
             )
 
         assert self.transport is not None
+        if self.live_answers_off:
+            raise LiveAnswersOffError
         budget = guard or self.guard
         assert budget is not None
         transport = self.transport
@@ -161,7 +194,9 @@ class Gateway:
         prompt_bytes = len(
             canonical_json([m.model_dump() for m in messages]).encode("utf-8")
         ) + len(canonical_json(json_schema).encode("utf-8"))
-        budget.precheck(worst_case_cost(price, prompt_bytes, self.max_tokens))
+        worst = worst_case_cost(price, prompt_bytes, self.max_tokens)
+        budget.precheck(worst)
+        day = self.daily.reserve(worst) if self.daily is not None else None
 
         def call() -> RawResponse:
             return transport(
@@ -172,11 +207,26 @@ class Gateway:
                 max_tokens=self.max_tokens,
             )
 
-        if self._backoff_sleep is None:
-            raw = with_backoff(call)
-        else:
-            raw = with_backoff(call, sleep=self._backoff_sleep)
-        cost, source = cost_from_usage(raw.usage, price)
+        billed = 0.0
+        try:
+            if self._backoff_sleep is None:
+                raw = with_backoff(call)
+            else:
+                raw = with_backoff(call, sleep=self._backoff_sleep)
+            cost, source = cost_from_usage(raw.usage, price)
+            billed = cost
+        except BaseException as exc:
+            if may_have_been_billed(exc):
+                # The request was sent but its answer was lost, so the provider may
+                # have billed it. Charge the worst case: a lost answer must never get
+                # past the budget or the daily cap.
+                billed = worst
+                budget.charge(worst)
+            raise
+        finally:
+            if self.daily is not None and day is not None:
+                # A call known not to be billed gives its reservation back.
+                self.daily.settle(day, worst, billed)
         budget.charge(cost)
         if self.mode == "record":
             assert self.store is not None
@@ -253,7 +303,17 @@ class OpenRouterTransport:
             include_raw=True,
             strict=self._strict,
         )
-        out: Any = structured.invoke([(m.role, m.content) for m in messages])
+        try:
+            out: Any = structured.invoke([(m.role, m.content) for m in messages])
+        except openai.LengthFinishReasonError as exc:
+            # The SDK raises this when the answer stops at max_tokens. The call was
+            # still billed, so its usage goes back to the gateway to be charged; the
+            # gateway's parse then turns it into a ParseError.
+            return _unfinished_response(exc.completion, model, "length")
+        except openai.ContentFilterFinishReasonError as exc:
+            # Billed too, for the same reason. The SDK sends the completion on every
+            # non-streaming call; without one the usage is unknown and nothing is charged.
+            return _unfinished_response(exc.completion, model, "content_filter")
         message = out["raw"]
         content = (
             message.content if isinstance(message.content, str) else json.dumps(message.content)
@@ -267,3 +327,20 @@ class OpenRouterTransport:
             usage=usage,
             model=str(metadata.get("model_name") or model),
         )
+
+
+def _unfinished_response(
+    completion: ChatCompletion | None, model: str, finish_reason: str
+) -> RawResponse:
+    if completion is None:
+        return RawResponse(content="", model=model, finish_reason=finish_reason)
+    choice = completion.choices[0] if completion.choices else None
+    content = (choice.message.content if choice else None) or ""
+    usage: dict[str, Any] = completion.usage.model_dump() if completion.usage else {}
+    return RawResponse(
+        content=content,
+        parsed=None,
+        usage=usage,
+        model=completion.model or model,
+        finish_reason=finish_reason,
+    )

@@ -101,3 +101,17 @@ def test_spike_command_refuses_without_a_key(monkeypatch: pytest.MonkeyPatch) ->
     result = CliRunner().invoke(app, ["spike", "--models", "x/y"])
     assert result.exit_code == 2
     assert "OPENROUTER_API_KEY" in result.output
+
+
+def test_spike_report_stores_each_answer_so_a_miss_can_be_read(tmp_path: Path) -> None:
+    transport = ScriptedTransport({"m/good": "good", "m/junk": "junk"})
+    gateway = make_live_gateway(transport, lambda _m: PRICE, budget_usd=1.0, max_tokens=100)
+    reports, stopped = run_spike(["m/good", "m/junk"], gateway, {})
+
+    path = write_report(reports, stopped, 1.0, tmp_path, now=datetime(2026, 11, 11, tzinfo=UTC))
+    body = json.loads(path.read_text())
+    by_model = {c["model"]: c for c in body["candidates"]}
+    good = by_model["m/good"]["probes"]
+    assert [p["answer"] for p in good] == [want.model_dump(mode="json") for _, want in PROBES]
+    junk = by_model["m/junk"]["probes"]
+    assert {p["answer"] for p in junk} == {"Here is what I found..."}

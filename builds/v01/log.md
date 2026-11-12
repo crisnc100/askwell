@@ -161,3 +161,79 @@ Each fix's test was committed first, in a test-only commit, and failed before th
 - **Triage** (`evals/triage/*.yaml`): every Ledgerline miss is tagged, none left "untriaged". Fieldservice (11 misses): grammar_gap 8, gold_issue 3. Spider (106): grammar_gap 77, validator_false_reject 12, gold_issue 10, misread 6, builder_bug 1. Notes cite Spider items by ID and name schema columns, but never quote question text or data values. A "registry gap" note means registry init could not infer a link, e.g. a foreign key to a non-key column, or a column not named like its target's key.
 - **Gold issues are not edited.** fs-032 contradicts `evals/gold/README.md`: the gold excludes void invoices, but the question does not say to. fs-022 and fs-024 are ambiguous about which date to use. Changing any of them needs a CHANGELOG reason, which is the orchestrator's call.
 - **Committed replay report:** `evals/reports/replay-fieldservice.md` with the fieldservice recordings (`evals/recordings/eval/fieldservice/`). `scripts/check_replay_report.py`, now a verify.sh step, re-runs the fieldservice eval from the recordings in a temp directory and diffs the Markdown. The JSON is not compared, because replay latency varies.
+
+## P5c — Hosted beta (PR5)
+
+### Phase 1: length-limited answers
+- **The bug:** when an answer stops at `max_tokens`, the OpenAI SDK raises `LengthFinishReasonError`. It is not an `LLMError`, so it escaped the gateway, aborted evals and had no API handler. It was raised before the gateway charged the call, so a billed call counted as $0.
+- **The fix:** the transport catches it and returns the cut-off answer with its usage and `finish_reason: "length"`. The gateway charges it like any call (and records it in record mode). `parse_output` then raises `ParseError`, which the pipeline already treats as one failed attempt. A cut-off answer never parses, even when its text happens to be valid JSON.
+- **Spike report:** each probe now stores the model's answer (the parsed fields, or the raw text when it did not parse), so a reader can see which field differed.
+- **Tests:** `tests/test_llm_length_limit.py` (real transport on a mocked server: charged, recorded and replayed as the same error, and the spend reaches a checkpointed run's budget); a new spike test for stored answers.
+- `ContentFilterFinishReasonError` (an answer the provider's content filter blocked) escaped the same way; it now takes the same path, with `finish_reason: "content_filter"`. Tests: `tests/test_llm_content_filter.py`, including the daily cap.
+
+### Phase 3: hardening deferred from PR3
+Each item has a test in `tests/workspace/test_hardening.py`.
+- **Concurrent Checks:** a Check now grows its reservation to the built size in one locked step (`Capacity.resize`) before it swaps files in. Two Checks that both finished building cannot both claim space that fits one.
+- **Uncounted files:** the Check report, `meta.json`, and Confirm's `registry.yaml` and `edits.json` go through `WorkspaceStore.write_counted`, which reserves any growth first. Only growth is reserved, so a visit that rewrites `meta.json` at the same size never fails on a full disk. Counting the metadata changed one test's free-space margin (own commit, `faddd3f`).
+- **Crashed temp files:** temporary upload files and staging folders carry a per-process token. Only this process's own are left out of the disk usage; anyone else's are counted. Ones older than an hour (`STALE_TEMP_S`) are removed when a store starts and on every sweep. The age gate keeps a cron `ledgerline sweep` from deleting a live server's files.
+- **Check rate limit:** 20 an hour per address.
+- **Permissions:** folders 0700, files 0600. The audit SQLite file is created by hand with 0600 first; SQLite gives its journals the same mode.
+- **Slow uploads:** an upload must finish in 120 seconds (408 otherwise), and one address may run at most 2 at once. Both release the reservation.
+- **File names:** sent in `X-File-Name` (percent-encoded UTF-8). The query parameter is refused. The tests moved in their own commit (`14cd35a`) while the server briefly accepted both, so every commit stays green.
+
+### Phase 4: the beta itself (L26)
+- **Invite gate** (`ledgerline/invite.py`): on when `LEDGERLINE_INVITE_CODES` is set. Every page and API route except `/invite` and `/healthz` answers 401 without a code: the gate page for a browser, `{"detail": ...}` for anything else. The code lives in an HttpOnly, Secure, SameSite=Lax cookie, or the `X-Invite-Code` header. `hmac.compare_digest` runs against every code with no early exit. 10 tries an hour per address.
+- **Daily cap** (`ledgerline/llm/daily.py`): on when `LEDGERLINE_DAILY_SPEND_CAP_USD` is set. The gateway reserves each live call's worst case in `spend.sqlite` (`BEGIN IMMEDIATE`, so concurrent requests and processes cannot overspend), then settles to the real cost, or to 0 when the call raised. A UTC day.
+- **Kill switch:** `LEDGERLINE_LIVE_ANSWERS_OFF=1`. The gateway refuses every live call before it is sent. `/ask` and workspace asks answer 503 with a plain sentence for both the switch and the cap.
+- **Health:** `/healthz` keeps its body and now also opens every demo database (`SELECT 1`), answering 503 when one fails.
+- **Image and compose:** `Dockerfile` (pages built in a Node stage; fieldservice seeded at build into a read-only SQLite file; non-root user; `/data` volume; `umask 077`; uvicorn's own proxy-header handling off, since Ledgerline reads `X-Forwarded-For` itself). `compose.prod.yaml`: `app` on `127.0.0.1:8000`, polled at `/healthz`, and `sweep` hourly. `.env.beta.example` lists the four settings.
+- **Local container check** (built here, not deployed): replay mode with a code: `/healthz` 200, `/` and `/schemas` 401 without the code, a recorded demo question answers with it, and every file under `/data` is 0600 and every folder 0700. Live mode with the real key and the kill switch on: it starts, `/healthz` reports `live`, and `/ask` returns the plain 503 with no model call.
+- **Tests:** `tests/pipeline/test_beta.py` (gate, cap, kill switch) and `tests/workspace/test_beta_workspace.py` (the plain message on workspace asks).
+- The deploy section of the README covers the settings, the volume and Caddy. Nothing was deployed.
+
+### Phase 2: model selection
+- **Order, provable in git:** ADR-004 Amendment 1 (rule) `29a20a6` and the selection script `dbb75ea` were committed before the live pass.
+- **Live pass** `select-2026-11-11`: fieldservice, 1 trial, `ledgerline` and `oneshot`, record mode, 4 models, budget $2. Spent $0.1002. Result in ADR-004 Amendment 2 and `evals/reports/model-selection-select-2026-11-11.md`: default mistral-small-24b-2501, second gemma-4-26b-a4b-it. gpt-oss-120b and gpt-4o-mini failed the unreadable gate (7/84 cut off at 1,024 tokens; 4/79 off-schema). Had gpt-oss passed, the default would be gemma; recorded, not rerun (agreed with the orchestrator).
+- **L11 not met:** 48.8% (21/43) correct, 22.2% (6/27) wrong among answered. The simulated stand-in scored 33/43 on the same questions; the gap is the v0.2 question.
+- **Why live misses:** 12 of the 16 refusals are intents that failed validation twice. The common faults are a placeholder `unanswerable_reason` ("", "none", "None") on a normal question, a missing `group_by`, and a sort on a field that does not exist. The validator is right to reject them; the prompt and grammar are the v0.2 lever. Every miss is triaged in `evals/triage/fieldservice.yaml` (replacing sim-1's triage, which stays baked into `sim-1.md`).
+- **Floor text** (`evals/floors.yaml`) rewritten from the live numbers.
+- **Demo re-recorded** live with the new default (`python -m evals.replay_cases record`, $0.0011). Two canned questions failed:
+  - "Which five technicians billed the most labor hours this year?": the first intent was a row list with metrics that counted from technicians (`intent_shape`, `unknown_field`, `fan_out`); the retry refused, saying the join would double count.
+  - "How many urgent work orders were opened in each customer region last month?": both intents had `unanswerable_reason: "None"`, no `group_by`, and a sort on `customer__region` (`intent_shape`, `invalid_order_by`).
+  Both were replaced (option A, approved). Four candidates were written before recording and recorded in a fixed order ($0.0004); the first two, "How many technicians are there at each skill level?" and "What is the total invoiced amount for each invoice status?", both answer and replace them. The README says where the examples appear that they are examples the model answers, with a link to the measured accuracy.
+- **Total live spend in PR5:** $0.1017 of the $3 budget.
+
+### Phase 5: Claude Haiku 5.5 through the Anthropic API
+- **Provider choice:** a model's configured name picks its provider. `anthropic:<id>` goes to the Anthropic API directly; anything else is an OpenRouter id (`ledgerline/llm/providers.py`). Chosen over a single `LEDGERLINE_DEFAULT_PROVIDER` because one eval run can mix providers, and the name is already part of each replay key, so recordings never collide. OpenRouter's own `vendor/model:variant` names keep working.
+- **Transport** (`ledgerline/llm/anthropic_transport.py`, `anthropic` SDK 2.8.0). Each rule was checked against the installed SDK:
+  - model id `claude-haiku-5-5`;
+  - `output_config.effort` low, with adaptive thinking;
+  - no sampling settings (the `create()` signature has none);
+  - `stop_reason` `max_tokens`, `model_context_window_exceeded` and `refusal` are charged, then parse-fail;
+  - prices from config;
+  - SDK retries off, with typed retries on 429, 5xx (529 included) and connection errors, never on a 400.
+- **No structured output:** the API refused the Intent schema with a 400 ("compiled grammar is too large"). Six reduced versions were refused the same way, and the refusals were not billed. Option A was approved: JSON text, checked by the existing parser, Pydantic and the validator. Recorded in ADR-004 Amendment 3. The fallback (C, a non-strict tool) was not needed.
+- **Live pass** `select-haiku-2026-11-11`: $0.0547. Haiku scored 35/43 correct, 2 wrong, 24/24 refusal recall, 0/72 unreadable and a 0.92 s median, so it passes every gate and is the default. gemma stays second.
+- **L11:** accuracy met (81.4%). Wrong answers among answered are 5.4% (2/37), so it misses by one. Floor text and triage are updated; the triage notes name the model they describe.
+- **Demo re-recorded** with Haiku ($0.0029). Every canned example answers, so no question changed.
+- **Phase 5 live spend:** $0.0580 of $1, including one $0.0003 test call. PR5 total: $0.160.
+
+### PR5 fix round (review: Sol for code, Fable for security; findings in `pr5-review-findings.md`)
+The tests came first (`51e1231`, plus a test-only setup fix in `a27eec2`), and 21 of them failed on the code before the fixes. Then came the fixes, one commit per area:
+- **gateway f1** (`0ef185e`): a call whose request may have reached the provider (read timeout, dropped connection) is charged at its worst case to the guard and the daily cap, and is not retried. A refused connect was never sent, so it is still retried and free.
+- **service f2** (`0ef185e`): OpenRouter's price list is fetched on first use, so an Anthropic-only beta starts while OpenRouter is down.
+- **spike f3** (`0ef185e`): the spike uses the configured daily cap and kill switch.
+- **invite f1/s1, f2, s2** (`b8390e8`): wrong header or cookie codes count against the per-address limit, and a wrong cookie is cleared. The cookie holds the code's SHA-256 hash, so codes outside Latin-1 work. The login body is capped at 4 KB, and the try is counted before the body is read.
+- **fields f1, store f2, s1, s2** (`be27aba`):
+  - re-confirm writes both files as one change, restoring both on failure;
+  - a timed-out reservation is waited for and released;
+  - a zero-byte reservation never refuses;
+  - a refused create removes its folder.
+- **select f1/f2, ADR f1** (`4f19c29`): when nothing passes the gates, the best model ships, and `anthropic:` and `anthropic/` are one vendor. ADR-004 now gives the full replay commands; both were run from fresh run folders and reproduced the Markdown reports exactly.
+- **LOWs:** RecursionError becomes a charged ParseError (`0ef185e`). `LEDGERLINE_ENV=beta|prod` refuses to start without codes, and the image sets `beta` (`b8390e8`, `0224375`). Both base images are pinned by digest (`0224375`).
+- **Defense in depth** (`0224375`): `mem_limit: 1g` on the app, a Caddy `request_body` limit in the README, and advice on making strong codes.
+- **Docker smoke test** (rebuilt locally, not deployed):
+  - without codes, the container exits with the fail-closed message;
+  - with codes, the Haiku default, the kill switch on and no OpenRouter key, `/healthz` returns 200 `live`, `/schemas` without a code returns 401, `/ask` returns the plain 503, and `/invite` sets a hashed HttpOnly, Secure cookie.
+- The review findings file had a two-word phrase the privacy scan rejects in f2; it was reworded to "healthz probe".
+- **Coverage:** the new branches dropped `store.py` and `limits.py` under their floors. `30ed566` (tests only) covers the rollback, the refused-save and own-temp paths, and the limiter window. `./verify.sh` passes: 880 tests, 12 browser tests.

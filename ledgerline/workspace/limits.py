@@ -28,6 +28,12 @@ class Limits:
     workspaces_per_ip: int = 3
     asks_per_hour: int = 30
     uploads_per_hour: int = 20
+    # Check is the most expensive route: it reads every upload and rebuilds the database.
+    checks_per_hour: int = 20
+    # An upload holds a share of the disk cap until it ends, so it may not run forever,
+    # and one address may not run many at once.
+    upload_seconds: float = 120.0
+    uploads_in_flight_per_ip: int = 2
     idle_days: int = 7
 
 
@@ -43,6 +49,24 @@ class RateLimiter:
         self.clock = clock
         self._events: dict[str, deque[float]] = {}
         self._lock = threading.Lock()
+
+    def full(self, key: str) -> bool:
+        """Whether `key` has used up the window, without counting an event."""
+        now = self.clock()
+        with self._lock:
+            events = self._events.get(key)
+            if not events:
+                return False
+            while events and events[0] <= now - self.window_s:
+                events.popleft()
+            return len(events) >= self.limit
+
+    def refund(self, key: str) -> None:
+        """Give back the most recent event `allow` counted for `key`."""
+        with self._lock:
+            events = self._events.get(key)
+            if events:
+                events.pop()
 
     def allow(self, key: str) -> bool:
         """Count one event for `key`, or refuse it if the window is full."""
