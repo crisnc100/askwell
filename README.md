@@ -359,20 +359,30 @@ a web server that handles HTTPS. It answers live questions with Claude Haiku 5.5
 beta-only Anthropic API key. Three controls keep it small and cheap:
 
 - **Invite gate.** Every page and API route needs an invite code, except `/healthz`.
-  A visitor enters the code once; the browser keeps a hash of it in a cookie scripts
-  cannot read. Scripts can send the code in the `X-Invite-Code` header instead. Ten
-  wrong codes an hour from one address, by any route, lock that address out for the
-  hour. The image sets `LEDGERLINE_ENV=beta`, which refuses to start without codes.
+  A visitor enters the code once; for 30 days the browser keeps a hash of it in a cookie
+  scripts cannot read. Scripts can send the code in the `X-Invite-Code` header instead.
+  Only wrong codes count against an address, by any route; a right code never does.
+  After ten wrong codes within an hour, that address gets no new login until the oldest
+  of them is an hour old. People already signed in from it keep working, so one guesser
+  cannot lock out a whole office. The image sets `LEDGERLINE_ENV=beta`, which refuses to
+  start without codes.
 - **Daily cap.** All live answers together may spend at most a set amount per UTC day.
   Each model call reserves its worst-case cost before it is sent, so the cap holds even
-  when requests overlap. The day's total is kept on disk, so a restart does not reset it.
-- **Kill switch.** One setting turns live answers off. Asks then get "Live answers are
-  turned off right now." instead of an answer.
+  when requests overlap. When the answer arrives, the real cost replaces the reservation.
+  If the answer is lost after the request went out, the provider may still bill it, so
+  the worst case stays charged and the call is not retried. The day's total is kept on
+  disk, so a restart does not reset it. Once the cap is reached, asks get a 503 until
+  the next UTC day.
+- **Kill switch.** One setting turns live answers off. Asks then get a 503, "Live answers
+  are turned off right now.", and no model is called.
 
 The image (`Dockerfile`) builds the pages, installs the app and builds the fieldservice
 demo as a read-only SQLite file, so the beta needs no Postgres. It runs as an
 unprivileged user, and everything it writes lives in one volume, `/data`: uploaded
-workspaces, the audit log (`app.sqlite`) and the day's spend (`spend.sqlite`).
+workspaces, the audit log (`app.sqlite`) and the day's spend (`spend.sqlite`). Both base
+images are pinned by digest, so a rebuild uses exactly the same layers.
+`compose.prod.yaml` caps the app at 1 GB of memory, so a runaway request cannot take
+the whole host down.
 
 On the host:
 
