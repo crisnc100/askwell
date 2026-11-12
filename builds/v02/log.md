@@ -161,3 +161,57 @@ Deliberate choices made while building, and why. Newest at the bottom of each ph
   model.
 - **Frozen from `4389ca9`** (G10). It is the first live report. After it, `prompt.py` and
   `ledgerline/core/` change only for a logged bug fix, followed by full re-runs.
+
+## Phase 4: the five live runs, triage and the result
+- **Held-out set revealed** (`37e625e`) through `manifest.py --promote`, as revision 4.
+  Its SHA-256 matched the pending hash from `f2e6191`. **Gold revision 5** (`43a4a62`,
+  orchestrator's choice, before any held-out run) changed presentation only: no
+  ROUND, a fraction for ho-003, periods as dates. ADR-007's method notes list every edit,
+  and `tests/test_gold_manifest.py` undoes them and checks the pending hash (`a4eaa36`,
+  tests only). The id-column convention was kept.
+- **Before code:** branch `v02-before` = `fc97462` plus only the `--gold` commit
+  (`f1fc988`), its replay report rewritten for the new report format (`aa88820`), never
+  merged. Both held-out runs scored the same revision 5 file.
+- **The runs** (`anthropic:claude-haiku-5-5`, record mode, one $3 budget for the phase):
+
+  | Run | Trials | Ledgerline right | Wrong among answered | Spend |
+  |---|---|---|---|---|
+  | v02-holdout-before | 3 | 12/84 | 37/49 (75.5%) | $0.1131 |
+  | v02-holdout | 3 | 40/84 | 14/54 (25.9%) | $0.1136 |
+  | v02-seen | 3 | 111/129 | 2/113 (1.8%) | $0.1782 |
+  | v02-spider-before | 1 | 139/250 | 27/166 (16.3%) | $0.1325 |
+  | v02-spider | 1 | 140/250 | 11/151 (7.3%) | $0.1540 |
+
+  The five runs cost **$0.6914**. With Phase 3's demo ($0.0046) and replay re-record
+  ($0.0588), **live spend in PR-G is $0.7548** of the $3 cap.
+- **A run label fixed with no model calls.** The first before held-out run was given the
+  gold copy's file name. Its checkpoint was relabelled to `holdout-v02.jsonl` and the
+  report rebuilt in replay mode; the numbers are unchanged.
+- **Triage** (`32b3e91`): every miss in all five runs is tagged, none is left
+  `untriaged`. The Spider files now describe the two v0.2 runs and cite ids only.
+  **NULL ordering: 0 misses.** No Spider miss differs from its gold only in row order;
+  the only order-only miss is ho-022, a tie the gold breaks by city.
+- **Reports rebuilt from checkpoints, no model calls.** The before reports must be rebuilt
+  on `v02-before`: their checkpoint keys carry the v0.1 prompt version, so a rebuild on
+  this branch replays v0.2 answers into the before run. That happened once, by mistake;
+  the 120 added lines were cut from the checkpoint and the report restored before
+  anything was committed.
+- **Replay report rewritten.** v02-seen trial 1 re-recorded the replay keys (last write
+  wins). The Ledgerline row is unchanged (38/43, 0 wrong); oneshot moved from 33/43 to
+  32/43.
+- **Floors** (`75b8c21`, `d05e7e4`): an entry can name a `gold` file, so the held-out runs
+  get their own entry with L11's two limits. Seen v0.2: met. Held-out v0.2: not met.
+  The before report was rebuilt on `v02-before` with the held-out text under the
+  `fieldservice` key, because v0.1's floor code keys by schema only.
+- **ADR-007 result** (`5df2a07`): 8 of 10 predictions held. Missed: 4 (held-out wrong
+  answers 25.9%, not at most 8%; 12 of the 14 differ from the gold only by an id column
+  or tie order) and 8 (Spider coverage fell 6 points, not at most 3). On held-out
+  questions the one-shot baseline is right more often than Ledgerline (51/84 against
+  40/84) and wrong more often (33/84 against 14/54).
+- **Secrets baseline** (`43b91e1`): detect-secrets flagged the committed held-out hash in
+  `tests/test_gold_manifest.py`. It is public, and is baselined as a false positive like
+  the Spider id hash.
+- **G10 held:** `git diff 4389ca9 -- ledgerline/pipeline/prompt.py ledgerline/core` is
+  empty. No bug fix was needed.
+- **State of verify.sh:** green. 1,070 tests, validate.py 99.7% and sqlbuild.py 97.0%
+  branch coverage, the replay report reproduces, 13 Playwright tests pass.
