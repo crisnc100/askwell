@@ -160,6 +160,22 @@ _PLAIN: list[tuple[frozenset[str], str, str]] = [
         "Name a date column and a period, like 'orders last month by order date'.",
     ),
     (
+        frozenset({"ratio_ref", "ratio_shape"}),
+        "The question asks for a share or a rate, and its two parts did not line up.",
+        "Name both parts, like 'paid orders as a share of all orders'.",
+    ),
+    (
+        frozenset({"series_shape", "series_date_field"}),
+        "The question asks for counts over time by more than one date, and they could not "
+        "be lined up by period.",
+        "Name each date column and one period, like 'orders placed and orders shipped per month'.",
+    ),
+    (
+        frozenset({"placeholder_reason"}),
+        "The model gave no real reason for its answer.",
+        "Ask again, or put the question another way.",
+    ),
+    (
         frozenset({"limit_out_of_range"}),
         "The question asks for more rows than one answer can show.",
         "Ask for fewer rows (at most 1,000).",
