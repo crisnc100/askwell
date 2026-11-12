@@ -68,6 +68,7 @@ class Floor(_Strict):
     """One schema's acceptance floor from `evals/floors.yaml`, checked on Ledgerline."""
 
     schema_: str = Field(alias="schema")
+    gold: str | None = None  # set only on an entry for a second gold file
     model: str | None
     met: bool
     checks: list[FloorCheck]

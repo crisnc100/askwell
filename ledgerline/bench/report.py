@@ -46,14 +46,25 @@ def floor_checks(
 ) -> list[dict[str, Any]]:
     """Each schema's floors from `evals/floors.yaml`, checked on Ledgerline's row for the
     configured default model, never on whichever model sorts first. With
-    no default model given, a schema is checked only if it has exactly one model row."""
+    no default model given, a schema is checked only if it has exactly one model row.
+    An entry may name its `schema` and a `gold` file; with no `gold` it checks the
+    schema's default gold, so a held-out run never borrows the seen set's verdict."""
     source = path or FLOORS_FILE
     if not source.exists():
         return []
     config: dict[str, Any] = yaml.safe_load(source.read_text()) or {}
     out: list[dict[str, Any]] = []
-    for schema_id, entry in config.items():
-        rows = [r for r in table if r["schema"] == schema_id and r["system"] == "ledgerline"]
+    for name, entry in config.items():
+        schema_id = entry.get("schema", name)
+        gold = entry.get("gold")
+        wanted = gold or default_gold(schema_id)
+        rows = [
+            r
+            for r in table
+            if r["schema"] == schema_id
+            and r["system"] == "ledgerline"
+            and (r.get("gold") or default_gold(schema_id)) == wanted
+        ]
         if default_model is not None:
             rows = [r for r in rows if r.get("model") == default_model]
         if len(rows) != 1:
@@ -72,6 +83,7 @@ def floor_checks(
         out.append(
             {
                 "schema": schema_id,
+                "gold": gold,
                 "model": row.get("model"),
                 "met": all(c["met"] for c in checks),
                 "checks": checks,
@@ -276,7 +288,9 @@ def render_markdown(report: dict[str, Any]) -> str:
         verdict = "met" if floor["met"] else "not met"
         lines += [
             "",
-            f"## Floor check: {floor['schema']}, {floor['model']} (v0.1 acceptance floor)",
+            f"## Floor check: {floor['schema']}, "
+            f"{floor['gold'] + ', ' if floor.get('gold') else ''}{floor['model']} "
+            "(v0.1 acceptance floor)",
             "",
         ]
         for check in floor["checks"]:

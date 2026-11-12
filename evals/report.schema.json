@@ -70,6 +70,18 @@
           "title": "Checks",
           "type": "array"
         },
+        "gold": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Gold"
+        },
         "met": {
           "title": "Met",
           "type": "boolean"
