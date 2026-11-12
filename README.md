@@ -53,18 +53,19 @@ model answers; [Results](#results) has its measured accuracy.
 
 ## Results
 
-`http://localhost:8000/results/` shows the benchmark: how often Ledgerline answers, how
-often it is right, and how often it refuses, next to a baseline where the same model writes
-SQL directly. Each number has a plain definition and a 95% range. On fieldservice, the
-made-up business in the demo database, with the default model, live:
+`http://localhost:8000/results/` shows the benchmark: how often Ledgerline is right,
+wrong or refuses, beside a baseline where the model writes SQL. Fieldservice, live, 3 trials:
 
 | Live, fieldservice | Ledgerline | one-shot |
 |---|---|---|
-| Rows match the expected answer | 81.4% (35/43) | 79.1% (34/43) |
-| Wrong answers among answered | 5.4% (2/37) | 20.9% (9/43) |
+| Held-out: rows match | 47.6% (40/84) | 60.7% (51/84) |
+| Held-out: wrong among answered | 25.9% (14/54) | 39.3% (33/84) |
+| Seen: rows match | 86.0% (111/129) | 76.7% (99/129) |
+| Seen: wrong among answered | 1.8% (2/113) | 23.3% (30/129) |
 
-Ledgerline gives a quarter of the baseline's wrong answers, but it misses its v0.1
-target (at least 80% right, at most 5% wrong) by one wrong answer. [docs/failures/](docs/failures/README.md) walks through four misses.
+v0.2 was built from the seen questions; the held-out ones came first. Both miss the
+held-out target (80% right, 5% wrong); 12 of Ledgerline's 14 wrong answers differ
+only by an id column or tie order. [docs/failures/](docs/failures/README.md) has more.
 
 ## Read more
 

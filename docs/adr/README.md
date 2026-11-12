@@ -18,4 +18,4 @@ model, because there is no OpenRouter key yet. Results come from that simulated 
 | [004](ADR-004-model-choice.md) | Default and second model, chosen by a live test | Not measured: needs a model key |
 | [005](ADR-005-replay-and-budget.md) | Replay recordings and a hard per-run budget | Replay held; spend and cost not measured |
 | [006](ADR-006-benchmark-methodology.md) | Questions fixed in advance, on fieldservice and 5 Spider databases | Recorded (simulated); sql_agent not measured |
-| [007](ADR-007-grammar-v02.md) | Grammar v0.2: ratios, conditional metrics, two-date series, refuse first | Not measured yet |
+| [007](ADR-007-grammar-v02.md) | Grammar v0.2: ratios, conditional metrics, two-date series, refuse first | Measured live: 8 of 10 predictions held; held-out wrong answers 25.9%, not 8% |
