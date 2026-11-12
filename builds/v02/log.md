@@ -152,3 +152,12 @@ Deliberate choices made while building, and why. Newest at the bottom of each ph
   and in the browser by `web/e2e/grammar.spec.ts` (fake model, real validator and builder).
 - **State of verify.sh:** green. 1,031 tests, coverage (validate.py 99.7%, sqlbuild.py
   97.0% branch), the replay report reproduces, and 13 Playwright tests pass.
+- **Deviation from the plan's wording (G8), accepted by the orchestrator.** The plan asks
+  for the Playwright smoke test to cover a ratio and a series question in replay mode.
+  The web app has no demo Ask page; its only Ask page is the workspace's, which answers
+  uploaded data. So the replay-mode cover is the API tests in
+  `tests/pipeline/test_api_replay.py`, which run the recorded live answers through the
+  real pipeline, and the browser cover is `web/e2e/grammar.spec.ts`, with the fake
+  model.
+- **Frozen from `4389ca9`** (G10). It is the first live report. After it, `prompt.py` and
+  `ledgerline/core/` change only for a logged bug fix, followed by full re-runs.
