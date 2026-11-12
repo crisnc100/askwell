@@ -14,7 +14,7 @@ from ledgerline.core.registry import Registry
 from ledgerline.core.sqlbuild import build, compile_sql
 from ledgerline.core.validate import validate
 from tests.core.conftest import NOW, check
-from tests.core.oracle_cases_v02 import RATIO_CASES, SERIES_CASES
+from tests.core.oracle_cases_v02 import ORDER_CASES, RATIO_CASES, SERIES_CASES
 from tests.core.rows import normalise, same_rows
 
 
@@ -390,7 +390,7 @@ def test_series_grains_agree_across_engines(
 
 # --- differential oracle ---
 
-V02_CASES = RATIO_CASES + SERIES_CASES
+V02_CASES = RATIO_CASES + SERIES_CASES + ORDER_CASES
 
 
 def test_the_v02_oracle_cases_are_named_once() -> None:
@@ -425,3 +425,78 @@ def test_v02_builder_matches_reference(
         f"{case_id} on {engine_name}\n got: {normalise(got, ordered)[:5]}\n"
         f"want: {normalise(expected, ordered)[:5]}"
     )
+
+
+# --- review fixes ---
+
+
+@pytest.mark.parametrize(
+    "part",
+    [
+        {"agg": "min", "field": "opened_at", "alias": "first"},
+        {"agg": "max", "field": "scheduled_for", "alias": "first"},
+    ],
+)
+@pytest.mark.parametrize("side", ["numerator", "denominator"])
+def test_a_ratio_refuses_a_date_part(registry: Registry, part: dict[str, Any], side: str) -> None:
+    ratio = {"agg": "ratio", "numerator": "total", "denominator": "total", side: "first"}
+    result = check(
+        registry, intent_type="summary", entity="work_orders", metrics=[TOTAL, part, ratio]
+    )
+    assert result.codes == ["ratio_ref"]
+    assert "numeric" in result.issues[0].message
+
+
+def test_a_ratio_accepts_min_and_max_of_numbers(registry: Registry) -> None:
+    _plan(
+        registry,
+        intent_type="summary",
+        entity="work_orders",
+        metrics=[
+            {"agg": "max", "field": "labor_hours", "alias": "most"},
+            {"agg": "min", "field": "labor_hours", "alias": "least"},
+            {"agg": "ratio", "numerator": "most", "denominator": "least"},
+        ],
+    )
+
+
+@pytest.mark.parametrize(
+    "metric",
+    [
+        {"agg": "count", "distinct": True},
+        {"agg": "count", "distinct": True, "where": [CANCELLED]},
+    ],
+)
+def test_distinct_needs_a_field(registry: Registry, metric: dict[str, Any]) -> None:
+    result = check(registry, intent_type="summary", entity="work_orders", metrics=[metric])
+    assert result.codes == ["value_shape"]
+    assert "distinct" in result.issues[0].message
+
+
+@pytest.mark.parametrize("engine_name", ["postgresql", "sqlite"])
+@pytest.mark.parametrize("direction", ["asc", "desc"])
+def test_nulls_sort_last_in_both_directions_on_both_engines(
+    engine_name: str, direction: str, registry: Registry, pg_seeded: Engine, sqlite_ro: Engine
+) -> None:
+    engine = pg_seeded if engine_name == "postgresql" else sqlite_ro
+    plan = _plan(
+        registry,
+        intent_type="grouped_summary",
+        entity="work_orders",
+        metrics=[
+            TOTAL,
+            _count_where("dropped", "status", "cancelled"),
+            {"agg": "ratio", "alias": "r", "numerator": "total", "denominator": "dropped"},
+        ],
+        group_by=[{"field": "status"}],
+        order_by=[{"target": "r", "direction": direction}],
+    )
+    sql, _ = compile_sql(build(plan), engine_name)
+    assert "NULLS LAST" in sql
+    ratios = [row[3] for row in run(engine, build(plan)).rows]
+    assert ratios[0] is not None
+    assert ratios[1:] == [None] * (len(ratios) - 1)
+
+
+def _count_where(alias: str, field: str, value: str) -> dict[str, Any]:
+    return {"agg": "count", "alias": alias, "where": [{"field": field, "op": "eq", "value": value}]}

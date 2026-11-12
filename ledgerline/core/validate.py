@@ -759,6 +759,11 @@ class _Validator:
     def metric_field(self, metric: Metric, loc: str) -> tuple[bool, ResolvedField | None]:
         """Checks a plain metric's field. Returns (ok, the resolved field or None for a
         count of rows)."""
+        if metric.field is None and metric.distinct:
+            # Rows have no value to be distinct on: a conditional count would collapse
+            # to 0 or 1.
+            self.fail("value_shape", loc, "distinct needs a field to count distinct values of")
+            return False, None
         if metric.field is None:
             if metric.agg != "count":
                 self.fail("value_shape", loc, f"{metric.agg} needs a field")
@@ -914,16 +919,27 @@ class _Validator:
     def _check_ratio_refs(self, metrics: list[PlanMetric]) -> list[PlanMetric]:
         """Both parts must be other, non-ratio metrics of this intent, so a ratio is
         always one level deep and is computed over the same rows as its parts."""
-        plain = {m.label for m in metrics if m.agg != "ratio"}
+        plain = {m.label: m for m in metrics if m.agg != "ratio"}
         out: list[PlanMetric] = []
         for metric in metrics:
             if metric.agg == "ratio":
-                bad = [r for r in (metric.numerator, metric.denominator) if r not in plain]
+                parts = (metric.numerator, metric.denominator)
+                bad = [r for r in parts if r not in plain]
                 if bad:
                     self.fail(
                         "ratio_ref",
                         f"metrics.{metric.label}",
                         f"{bad[0]!r} is not another non-ratio metric of this intent",
+                    )
+                    continue
+                # min or max of a date is a date: dividing it errors on Postgres and
+                # gives a meaningless number on SQLite.
+                dated = [r for r in parts if _is_temporal(plain[r or ""])]
+                if dated:
+                    self.fail(
+                        "ratio_ref",
+                        f"metrics.{metric.label}",
+                        f"{dated[0]!r} is a date, and a ratio's parts must be numeric",
                     )
                     continue
             out.append(metric)
@@ -1099,6 +1115,14 @@ def _period_predicates(rfield: ResolvedField, period: tuple[datetime, datetime])
         # A date column and a mid-day end: include that day.
         high = date.fromordinal(end.date().toordinal() + 1)
     return [Predicate(rfield, "gte", (low,)), Predicate(rfield, "lt", (high,))]
+
+
+def _is_temporal(metric: PlanMetric) -> bool:
+    return (
+        metric.agg in ("min", "max")
+        and metric.field is not None
+        and metric.field.type in TEMPORAL_TYPES
+    )
 
 
 def _is_placeholder(reason: str) -> bool:

@@ -556,7 +556,10 @@ def build(plan: QueryPlan) -> Select[Any]:
     order: list[ColumnElement[Any]] = []
     for item in plan.order_by:
         expr = tables.value(item.field) if item.field is not None else labelled[item.label or ""]
-        order.append(expr.desc() if item.direction == "desc" else expr.asc())
+        # Explicit NULLS LAST both ways: by default Postgres puts NULLs first when
+        # descending and SQLite puts them last, so the same intent would sort differently.
+        ordered = expr.desc() if item.direction == "desc" else expr.asc()
+        order.append(ordered.nulls_last())
     if order:
         stmt = stmt.order_by(*order)
     if plan.limit is not None:

@@ -170,6 +170,34 @@ RATIO_CASES: list[tuple[str, dict[str, Any], str]] = [
 ]
 
 
+# NULL placement in ORDER BY must be the same on both engines.
+ORDER_CASES: list[tuple[str, dict[str, Any], str]] = [
+    (
+        "v13_null_ratios_sort_last_descending",
+        {
+            "intent_type": "grouped_summary",
+            "entity": "work_orders",
+            "metrics": [
+                _count("urgent", _eq("priority", "urgent")),
+                _count("dropped", _eq("status", "cancelled")),
+                _ratio("urgent_per_dropped", "urgent", "dropped"),
+            ],
+            "group_by": [{"field": "status"}],
+            "order_by": [
+                {"target": "urgent_per_dropped", "direction": "desc"},
+                {"target": "status"},
+            ],
+        },
+        # Only the cancelled group has a denominator; the other four are NULL and last.
+        "SELECT status, count(*) FILTER (WHERE priority = 'urgent'), "
+        "count(*) FILTER (WHERE status = 'cancelled'), "
+        "count(*) FILTER (WHERE priority = 'urgent')::float "
+        "/ NULLIF(count(*) FILTER (WHERE status = 'cancelled'), 0) AS r "
+        "FROM work_orders GROUP BY status ORDER BY r DESC NULLS LAST, status NULLS LAST",
+    )
+]
+
+
 SERIES_CASES: list[tuple[str, dict[str, Any], str]] = [
     (
         "v09_opened_and_completed_by_month_2025",
