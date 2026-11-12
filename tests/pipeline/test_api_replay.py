@@ -27,6 +27,8 @@ EXAMPLES = {
     "hidden": "Show me the email address of every dispatcher.",
     "out_of_registry": "What did we spend on marketing last quarter?",
     "write": "Delete all void invoices.",
+    "ratio": "What percentage of work orders were cancelled?",
+    "series": "Per month this year, show work orders opened next to work orders completed.",
 }
 
 
@@ -84,7 +86,7 @@ def test_answerable_matches_the_database(
     assert (row["outcome"], row["trace_id"], row["row_count"]) == ("answered", body["trace_id"], 1)
 
 
-@pytest.mark.parametrize("name", ["by_skill", "segment_avg", "by_status"])
+@pytest.mark.parametrize("name", ["by_skill", "segment_avg", "by_status", "ratio", "series"])
 def test_other_answerable_examples_return_rows(client: TestClient, name: str) -> None:
     body = _ask(client, "fieldservice", EXAMPLES[name])
     assert body["refusal"] is None, body["validation"]
@@ -137,3 +139,18 @@ def test_cli_ask_replays_an_example(pg_seeded: Engine) -> None:
     assert body["provenance"] is None
     missing = runner.invoke(app, ["ask", "Nobody recorded this?", "--mode", "replay"])
     assert missing.exit_code == 4
+
+
+def test_the_ratio_and_series_examples_use_the_v02_grammar(client: TestClient) -> None:
+    ratio = _ask(client, "fieldservice", EXAMPLES["ratio"])
+    assert ratio["refusal"] is None, ratio["validation"]
+    assert [m for m in ratio["intent"]["metrics"] if m["agg"] == "ratio"]
+    assert len(ratio["rows"]) == 1
+    series = _ask(client, "fieldservice", EXAMPLES["series"])
+    assert series["refusal"] is None, series["validation"]
+    assert series["intent"]["intent_type"] == "date_series"
+    assert series["columns"][0] == "period"
+    assert {s["date_field"].split(".")[-1] for s in series["intent"]["series"]} == {
+        "opened_at",
+        "completed_at",
+    }
