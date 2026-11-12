@@ -9,10 +9,14 @@ code in the `X-Invite-Code` header instead. Removing a code from the setting loc
 everyone using it at their next request.
 
 Codes and hashes are compared in constant time, and every configured one is compared on
-every check, so the response time does not hint at how much was right. Every wrong code,
-from the form, the header or the cookie, counts against one limit per address; once it
-is used up, that address gets 429 until the hour has passed, right code or not.
-Requests that present no code do not count.
+every check, so the response time does not hint at how much was right.
+
+Only wrong codes count against the limit, one per address, whether they come from the
+form, the header or the cookie; requests that present no code do not count, and a right
+code never does, so many people behind one office address are never locked out. Once an
+address has used up its tries, it can still use the credentials already accepted from
+it, but anything new from it, right or wrong, gets 429 until the hour has passed.
+Otherwise a locked-out guesser could keep testing codes and spot the one that works.
 """
 
 from __future__ import annotations
@@ -101,9 +105,12 @@ def install(
     if not codes:
         return
     attempts = RateLimiter(ATTEMPTS_PER_HOUR, 3600.0)
+    # Per address: the hashes of credentials already accepted from it, so a locked-out
+    # address keeps working for the people who had logged in. Bounded by the codes.
+    accepted: dict[str, set[str]] = {}
 
-    def too_many() -> HTMLResponse:
-        return HTMLResponse(_page("Too many tries. Wait an hour and try again."), 429)
+    def remember(ip: str, code_hash: str) -> None:
+        accepted.setdefault(ip, set()).add(code_hash)
 
     @app.middleware("http")
     async def _gate(  # pyright: ignore[reportUnusedFunction]
@@ -116,9 +123,19 @@ def install(
         if cookie is None and header is None:
             return _refused(request)
         ip = client_ip(request)
+        if is_valid_cookie(cookie, codes):
+            presented = cookie
+        elif is_valid(header, codes):
+            assert header is not None
+            presented = cookie_value(header.encode("utf-8"))
+        else:
+            presented = None
         if attempts.full(ip):
-            return JSONResponse({"detail": TOO_MANY}, status_code=429)
-        if is_valid_cookie(cookie, codes) or is_valid(header, codes):
+            if presented is not None and presented in accepted.get(ip, set()):
+                return await call_next(request)
+            return _too_many(request)
+        if presented is not None:
+            remember(ip, presented)
             return await call_next(request)
         attempts.allow(ip)
         response = _refused(request)
@@ -134,33 +151,44 @@ def install(
 
     @app.post("/invite")
     async def invite(request: Request) -> Response:  # pyright: ignore[reportUnusedFunction]
-        # Every try counts, right or wrong, and the limit is checked before any of the
-        # body is read.
-        if not attempts.allow(client_ip(request)):
-            return too_many()
+        ip = client_ip(request)
+        # A locked-out address is refused before any of the body is read.
+        if attempts.full(ip):
+            return _too_many(request)
         length = request.headers.get("content-length", "")
         if length.isdigit() and int(length) > MAX_FORM_BYTES:
+            attempts.allow(ip)
             return HTMLResponse(_page("That is too long to be a code."), 413)
         body = b""
         async for chunk in request.stream():
             body += chunk
             if len(body) > MAX_FORM_BYTES:
+                attempts.allow(ip)
                 return HTMLResponse(_page("That is too long to be a code."), 413)
         form = parse_qs(body.decode("utf-8", errors="replace"))
         code = (form.get("code") or [None])[0]
         if not is_valid(code, codes):
+            attempts.allow(ip)
             return HTMLResponse(_page("That code is not valid."), status_code=401)
         assert code is not None
+        hashed = cookie_value(code.encode("utf-8"))
+        remember(ip, hashed)
         response = RedirectResponse("/", status_code=303)
         response.set_cookie(
             COOKIE,
-            cookie_value(code.encode("utf-8")),
+            hashed,
             max_age=COOKIE_DAYS * 86400,
             httponly=True,
             secure=secure_cookie,
             samesite="lax",
         )
         return response
+
+
+def _too_many(request: Request) -> Response:
+    if _wants_page(request) or request.url.path == "/invite":
+        return HTMLResponse(_page("Too many tries. Wait an hour and try again."), 429)
+    return JSONResponse({"detail": TOO_MANY}, status_code=429)
 
 
 def _refused(request: Request) -> Response:
