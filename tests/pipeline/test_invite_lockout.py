@@ -53,7 +53,8 @@ def test_right_codes_never_spend_tries(client: TestClient) -> None:
 
 def test_a_locked_address_keeps_credentials_it_already_used(client: TestClient) -> None:
     with client:
-        assert client.post("/invite", data={"code": "alpha-123"}).status_code == 200
+        login = client.post("/invite", data={"code": "alpha-123"}, follow_redirects=False)
+        assert login.status_code == 303
         _guess_wrong(client, invite.ATTEMPTS_PER_HOUR)
         assert client.get("/schemas").status_code == 200  # the cookie it already had
 
