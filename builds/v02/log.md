@@ -113,3 +113,42 @@ Deliberate choices made while building, and why. Newest at the bottom of each ph
 - **State of verify.sh:** the same 11 replay API tests and the replay report step miss
   their recordings. Everything else passes: 1,004 tests, the coverage floors and 13
   Playwright tests.
+
+## Core review fix round (reviews 777016 and 19f26a)
+- **Ratio parts must be numeric** (`bfc9638`). The min or max of a date or datetime as a
+  numerator or denominator is now `ratio_ref`. Dividing it errored on Postgres and gave
+  a meaningless number on SQLite.
+- **`distinct` on a count with no field is rejected** (`value_shape`). Rejecting it was
+  simpler than compiling it: a conditional form compiled to
+  `count(DISTINCT CASE … THEN 1)`, which is only ever 0 or 1, and the plain form used to
+  ignore the flag silently.
+- **Explicit NULLS LAST on every ORDER BY item, both directions.** Postgres puts NULLs
+  first when sorting descending and SQLite puts them last. The bundled SQLite is 3.50.4
+  (NULLS LAST needs 3.30). This also changes v0.1 intents that sort descending on a
+  column with NULLs on Postgres: the NULLs now come last there too. Oracle case v13 and
+  a test in each direction on both engines cover it.
+
+## Phase 3: canned questions and the re-record
+- **Two canned demo questions** (`4f81c28`): "What percentage of work orders were
+  cancelled?" and "Per month this year, show work orders opened next to work orders
+  completed." The first wording of the series question shared six 6-word runs with a
+  seen question, found with the no-tuning checker before anything was committed, and was
+  replaced. The replay API tests cover both (`b3b284c`, tests only).
+- **Demo re-recorded live** (`anthropic:claude-haiku-5-5`, record mode, each ask capped at
+  $0.005): 10 questions, 11 calls (one retry), $0.0046. Every canned question answers or
+  refuses as its test expects. The ratio question answers with a ratio metric, and the
+  series question with a `date_series` on `opened_at` and `completed_at`.
+- **Replay report re-recorded live** (budget $0.15): 68 ledgerline calls ($0.0314) and 67
+  oneshot calls ($0.0274), $0.0588 in all. The estimate assumed oneshot would replay, but
+  record mode calls the provider for every request. `scripts.check_replay_report --write`
+  then reproduced the record run's results exactly from the recordings.
+- **Total live spend in PR-G so far: $0.0634** of the $3 cap ($0.20 approved for this step).
+- **This is a live seen-set result.** The re-recorded replay report scores ledgerline 38/43
+  correct and 0 wrong among 38 answered (1 trial). `prompt.py` and `ledgerline/core/`
+  have not changed since it was recorded.
+- **Browser coverage in replay mode.** The web app has no demo Ask page: the only Ask page
+  is the workspace's, which takes uploaded data. The two canned questions are therefore
+  covered in replay mode by the API tests (real recordings through the real pipeline),
+  and in the browser by `web/e2e/grammar.spec.ts` (fake model, real validator and builder).
+- **State of verify.sh:** green. 1,031 tests, coverage (validate.py 99.7%, sqlbuild.py
+  97.0% branch), the replay report reproduces, and 13 Playwright tests pass.
