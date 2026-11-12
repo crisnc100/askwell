@@ -14,7 +14,7 @@ from ledgerline.core.registry import Registry
 from ledgerline.core.sqlbuild import build, compile_sql
 from ledgerline.core.validate import validate
 from tests.core.conftest import NOW, check
-from tests.core.oracle_cases_v02 import RATIO_CASES
+from tests.core.oracle_cases_v02 import RATIO_CASES, SERIES_CASES
 from tests.core.rows import normalise, same_rows
 
 
@@ -258,13 +258,144 @@ def test_a_zero_denominator_gives_null(
     assert ratio is None
 
 
+# --- date series ---
+
+OPENED = {"metric": {"agg": "count"}, "date_field": "opened_at", "alias": "opened"}
+URGENT_INSTALLS = [
+    {"field": "priority", "op": "eq", "value": "urgent"},
+    {"field": "job_type", "op": "eq", "value": "installation"},
+]
+
+
+def _weekly(second: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "intent_type": "date_series",
+        "entity": "work_orders",
+        "grain": "iso_week",
+        "date_range": {"start": "2025-01-06", "end": "2025-04-07"},
+        "series": [OPENED, second],
+    }
+
+
+def test_a_series_plan_holds_each_series_with_its_own_date_field(registry: Registry) -> None:
+    plan = _plan(
+        registry,
+        **_weekly(
+            {
+                "metric": {"agg": "count"},
+                "date_field": "completed_at",
+                "where": URGENT_INSTALLS,
+                "alias": "urgent",
+            }
+        ),
+    )
+    assert plan.intent_type == "date_series"
+    assert plan.grain == "iso_week"
+    assert plan.metrics == ()
+    opened, urgent = plan.series
+    assert (opened.label, opened.date_field.name) == ("opened", "opened_at")
+    assert (urgent.label, urgent.date_field.name) == ("urgent", "completed_at")
+    # The period applies to each series by its own date field.
+    assert {p.field.name for p in opened.where} == {"opened_at"}
+    assert {p.field.name for p in urgent.where} == {"priority", "job_type", "completed_at"}
+
+
+@pytest.mark.parametrize("engine_name", ["postgresql", "sqlite"])
+def test_an_empty_period_is_zero_for_a_count_and_null_for_a_sum(
+    engine_name: str, registry: Registry, pg_seeded: Engine, sqlite_ro: Engine
+) -> None:
+    engine = pg_seeded if engine_name == "postgresql" else sqlite_ro
+    plan = _plan(
+        registry,
+        **{
+            **_weekly(OPENED),
+            "series": [
+                OPENED,
+                {
+                    "metric": {"agg": "count"},
+                    "date_field": "completed_at",
+                    "where": URGENT_INSTALLS,
+                    "alias": "n_urgent",
+                },
+                {
+                    "metric": {"agg": "sum", "field": "labor_hours"},
+                    "date_field": "completed_at",
+                    "where": URGENT_INSTALLS,
+                    "alias": "urgent_hours",
+                },
+            ],
+        },
+    )
+    result = run(engine, build(plan))
+    assert result.columns == ["period", "opened", "n_urgent", "urgent_hours"]
+    rows = result.rows
+    assert len(rows) == 13
+    assert [r[0] for r in rows] == sorted(r[0] for r in rows)
+    empty = [r for r in rows if r[2] == 0]
+    assert empty, rows
+    assert all(r[3] is None for r in empty)
+    assert all(r[3] is not None for r in rows if r[2] > 0)
+
+
+def test_a_one_series_intent_is_ordered_by_period(registry: Registry, sqlite_ro: Engine) -> None:
+    plan = _plan(
+        registry,
+        intent_type="date_series",
+        entity="work_orders",
+        grain="quarter",
+        series=[OPENED],
+    )
+    rows = run(sqlite_ro, build(plan)).rows
+    assert [r[0] for r in rows] == sorted(r[0] for r in rows)
+    assert sum(r[1] for r in rows) == 5000
+
+
+def test_series_skip_rows_without_their_date(registry: Registry, sqlite_ro: Engine) -> None:
+    """A row with no date in one series belongs to no period, so no NULL period row."""
+    plan = _plan(
+        registry,
+        intent_type="date_series",
+        entity="work_orders",
+        grain="year",
+        series=[
+            OPENED,
+            {"metric": {"agg": "count"}, "date_field": "completed_at", "alias": "completed"},
+        ],
+    )
+    rows = run(sqlite_ro, build(plan)).rows
+    assert all(r[0] is not None for r in rows)
+    assert sum(r[2] for r in rows) == 4626
+
+
+@pytest.mark.parametrize("grain", ["day", "iso_week", "month", "quarter", "year"])
+def test_series_grains_agree_across_engines(
+    grain: str, registry: Registry, pg_seeded: Engine, sqlite_ro: Engine
+) -> None:
+    plan = _plan(
+        registry,
+        intent_type="date_series",
+        entity="work_orders",
+        grain=grain,
+        date_range={"start": "2025-12-01", "end": "2026-03-01"},
+        series=[
+            OPENED,
+            {"metric": {"agg": "count"}, "date_field": "scheduled_for", "alias": "scheduled"},
+        ],
+    )
+    pg = run(pg_seeded, build(plan)).rows
+    lite = run(sqlite_ro, build(plan)).rows
+    assert pg
+    assert same_rows(pg, lite, ordered=True)
+
+
 # --- differential oracle ---
 
-V02_CASES = RATIO_CASES
+V02_CASES = RATIO_CASES + SERIES_CASES
 
 
 def test_the_v02_oracle_cases_are_named_once() -> None:
     assert len(RATIO_CASES) == 8
+    assert len(SERIES_CASES) == 4
     assert len({case[0] for case in V02_CASES}) == len(V02_CASES)
 
 

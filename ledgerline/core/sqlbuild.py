@@ -11,6 +11,7 @@ from __future__ import annotations
 from typing import Any
 
 from sqlalchemy import (
+    CTE,
     BigInteger,
     Boolean,
     ColumnElement,
@@ -31,6 +32,7 @@ from sqlalchemy import (
     or_,
     select,
     table,
+    union,
 )
 from sqlalchemy.dialects import postgresql, sqlite
 from sqlalchemy.engine import Dialect
@@ -42,7 +44,9 @@ from sqlalchemy.sql.type_api import TypeEngine
 from sqlalchemy.types import NullType, TypeDecorator
 
 from ledgerline.core.validate import (
+    PERIOD_LABEL,
     PlanMetric,
+    PlanSeries,
     Predicate,
     PredicateGroup,
     QueryPlan,
@@ -270,7 +274,12 @@ def _fields(plan: QueryPlan) -> list[ResolvedField]:
     out += [m.field for m in plan.metrics if m.field is not None]
     out += [g.field for g in plan.group_by]
     out += [o.field for o in plan.order_by if o.field is not None]
+    for series in plan.series:
+        out.append(series.date_field)
+        if series.metric.field is not None:
+            out.append(series.metric.field)
     predicates = [p for m in plan.metrics for p in m.where]
+    predicates += [p for series in plan.series for p in series.where]
     for item in plan.where:
         predicates += item.predicates if isinstance(item, PredicateGroup) else (item,)
     for predicate in predicates:
@@ -300,6 +309,10 @@ def _required_aliases(plan: QueryPlan) -> set[str]:
             used.append(predicate.field)
             if predicate.other is not None:
                 used.append(predicate.other)
+    return _with_parents(plan, used)
+
+
+def _with_parents(plan: QueryPlan, used: list[ResolvedField]) -> set[str]:
     parents = {join.alias: join.parent_alias for join in plan.joins}
     required: set[str] = set()
     for rfield in used:
@@ -425,10 +438,8 @@ def _label(labelled: dict[str, ColumnElement[Any]], label: str, expr: ColumnElem
     labelled[label] = expr
 
 
-def build(plan: QueryPlan) -> Select[Any]:
-    tables = _Tables(plan)
+def _source(plan: QueryPlan, tables: _Tables, required: set[str]) -> FromClause:
     source = tables.tables[plan.base_alias]
-    required = _required_aliases(plan)
     for join in plan.joins:
         parent = tables.tables[join.parent_alias]
         child = tables.tables[join.alias]
@@ -437,6 +448,79 @@ def build(plan: QueryPlan) -> Select[Any]:
             parent.c[join.parent_column] == child.c[join.column],
             isouter=join.alias not in required,
         )
+    return source
+
+
+def _shared_where(tables: _Tables, plan: QueryPlan) -> list[ColumnElement[bool]]:
+    conditions: list[ColumnElement[bool]] = []
+    for item in plan.where:
+        if isinstance(item, PredicateGroup):
+            parts = [_predicate(tables, p) for p in item.predicates]
+            conditions.append(or_(*parts) if item.mode == "any_of" else and_(*parts))
+        else:
+            conditions.append(_predicate(tables, item))
+    return conditions
+
+
+def _series_part(plan: QueryPlan, series: PlanSeries, index: int) -> CTE:
+    """One series as (period, value), grouped by its own date field. Its own tables, so
+    each subquery joins only what it needs to inner-join."""
+    tables = _Tables(plan)
+    used: list[ResolvedField] = [series.date_field, *(p.field for p in series.where)]
+    if series.metric.field is not None:
+        used.append(series.metric.field)
+    for item in plan.where:
+        if isinstance(item, PredicateGroup) and item.mode == "any_of":
+            continue
+        predicates = item.predicates if isinstance(item, PredicateGroup) else (item,)
+        used += [p.field for p in predicates]
+        used += [p.other for p in predicates if p.other is not None]
+    used += [p.other for p in series.where if p.other is not None]
+    source = _source(plan, tables, _with_parents(plan, used))
+    period = GRAINS[plan.grain or ""](tables.value(series.date_field))
+    conditions = _shared_where(tables, plan)
+    conditions += [_predicate(tables, p) for p in series.where]
+    # A row with no date in this series belongs to no period.
+    conditions.append(tables.col(series.date_field).is_not(None))
+    stmt = (
+        select(period.label(PERIOD_LABEL), _metric(tables, series.metric).label("value"))
+        .select_from(source)
+        .where(and_(*conditions))
+        .group_by(period)
+    )
+    # A CTE, not a subquery: the series is read twice (for the periods and for its
+    # values), and a subquery would be written out, and run, twice.
+    return stmt.cte(f"s{index}")
+
+
+def _build_series(plan: QueryPlan) -> Select[Any]:
+    """Each series is its own grouped subquery, left-joined to the union of every
+    series' periods. No FULL OUTER JOIN and no generate_series, so it runs on SQLite
+    and Postgres alike. A period missing from a count series is 0; from any other
+    aggregate, NULL."""
+    parts = [_series_part(plan, series, i) for i, series in enumerate(plan.series)]
+    if len(parts) == 1:
+        periods: FromClause = parts[0]
+    else:
+        periods = union(*[select(part.c[PERIOD_LABEL]) for part in parts]).subquery("periods")
+    period = periods.c[PERIOD_LABEL]
+    source: FromClause = periods
+    columns: list[ColumnElement[Any]] = [period.label(PERIOD_LABEL)]
+    for part, series in zip(parts, plan.series, strict=True):
+        if part is not periods:
+            source = source.outerjoin(part, part.c[PERIOD_LABEL] == period)
+        value: ColumnElement[Any] = part.c.value
+        if series.metric.agg in ("count", "count_distinct"):
+            value = func.coalesce(value, literal_column("0"))
+        columns.append(value.label(series.label))
+    return select(*columns).select_from(source).order_by(period)
+
+
+def build(plan: QueryPlan) -> Select[Any]:
+    if plan.intent_type == "date_series":
+        return _build_series(plan)
+    tables = _Tables(plan)
+    source = _source(plan, tables, _required_aliases(plan))
 
     labelled: dict[str, ColumnElement[Any]] = {}
     group_exprs: list[ColumnElement[Any]] = []
@@ -460,13 +544,7 @@ def build(plan: QueryPlan) -> Select[Any]:
             _label(labelled, metric.label, expr)
 
     stmt = select(*columns).select_from(source)
-    conditions: list[ColumnElement[bool]] = []
-    for item in plan.where:
-        if isinstance(item, PredicateGroup):
-            parts = [_predicate(tables, p) for p in item.predicates]
-            conditions.append(or_(*parts) if item.mode == "any_of" else and_(*parts))
-        else:
-            conditions.append(_predicate(tables, item))
+    conditions = _shared_where(tables, plan)
     if conditions:
         stmt = stmt.where(and_(*conditions))
     if group_exprs:

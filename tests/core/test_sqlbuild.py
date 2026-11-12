@@ -196,6 +196,42 @@ def test_every_metric_where_value_is_bound_never_inlined(
     )
 
 
+@settings(max_examples=150, deadline=None, suppress_health_check=[HealthCheck.too_slow])
+@given(
+    shared=st.lists(condition(), max_size=2),
+    series_conditions=st.lists(st.lists(condition(), max_size=2), min_size=1, max_size=4),
+)
+def test_every_series_filter_value_is_bound_never_inlined(
+    shared: list[tuple[dict[str, Any], list[Any]]],
+    series_conditions: list[list[tuple[dict[str, Any], list[Any]]]],
+) -> None:
+    """Shared filters run once per series subquery, so each of their values is bound
+    once per series; nothing else is bound."""
+    registry = load_registry(FIELDSERVICE_REGISTRY)
+    dates = ["issued_at", "due_at", "paid_at", "work_orders.opened_at"]
+    intent = Intent.model_validate(
+        {
+            "intent_type": "date_series",
+            "entity": "invoices",
+            "grain": "month",
+            "filters": [c for c, _ in shared],
+            "series": [
+                {
+                    "metric": {"agg": "count"},
+                    "date_field": dates[i],
+                    "where": [c for c, _ in conds],
+                    "alias": f"s{i}",
+                }
+                for i, conds in enumerate(series_conditions)
+            ],
+        }
+    )
+    result = validate(intent, registry, now=NOW)
+    assert result.plan is not None, result.issues
+    repeated = shared * len(series_conditions)
+    _assert_all_bound(build(result.plan), repeated + [c for cs in series_conditions for c in cs])
+
+
 # --- compile shape ---
 
 

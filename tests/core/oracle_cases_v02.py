@@ -168,3 +168,106 @@ RATIO_CASES: list[tuple[str, dict[str, Any], str]] = [
         "GROUP BY w.job_type ORDER BY pct DESC",
     ),
 ]
+
+
+SERIES_CASES: list[tuple[str, dict[str, Any], str]] = [
+    (
+        "v09_opened_and_completed_by_month_2025",
+        {
+            "intent_type": "date_series",
+            "entity": "work_orders",
+            "grain": "month",
+            "date_range": {"start": "2025-01-01", "end": "2026-01-01"},
+            "series": [
+                {"metric": {"agg": "count"}, "date_field": "opened_at", "alias": "opened"},
+                {"metric": {"agg": "count"}, "date_field": "completed_at", "alias": "completed"},
+            ],
+        },
+        "WITH o AS (SELECT date_trunc('month', opened_at)::date AS p, count(*) AS n "
+        "FROM work_orders WHERE opened_at >= '2025-01-01' AND opened_at < '2026-01-01' "
+        "GROUP BY 1), "
+        "c AS (SELECT date_trunc('month', completed_at)::date AS p, count(*) AS n "
+        "FROM work_orders WHERE completed_at >= '2025-01-01' AND completed_at < '2026-01-01' "
+        "GROUP BY 1) "
+        "SELECT coalesce(o.p, c.p) AS p, coalesce(o.n, 0), coalesce(c.n, 0) "
+        "FROM o FULL OUTER JOIN c ON o.p = c.p ORDER BY p",
+    ),
+    (
+        "v10_issued_count_and_paid_amount_by_quarter",
+        {
+            "intent_type": "date_series",
+            "entity": "invoices",
+            "grain": "quarter",
+            "filters": [{"field": "status", "op": "neq", "value": "void"}],
+            "series": [
+                {"metric": {"agg": "count"}, "date_field": "issued_at", "alias": "issued"},
+                {
+                    "metric": {"agg": "sum", "field": "amount"},
+                    "date_field": "paid_at",
+                    "where": [{"field": "status", "op": "eq", "value": "paid"}],
+                    "alias": "paid_amount",
+                },
+            ],
+        },
+        "WITH i AS (SELECT date_trunc('quarter', issued_at)::date AS p, count(*) AS n "
+        "FROM invoices WHERE status <> 'void' GROUP BY 1), "
+        "pd AS (SELECT date_trunc('quarter', paid_at)::date AS p, sum(amount) AS s "
+        "FROM invoices WHERE status <> 'void' AND status = 'paid' AND paid_at IS NOT NULL "
+        "GROUP BY 1) "
+        "SELECT coalesce(i.p, pd.p) AS p, coalesce(i.n, 0), pd.s "
+        "FROM i FULL OUTER JOIN pd ON i.p = pd.p ORDER BY p",
+    ),
+    (
+        "v11_weeks_with_no_urgent_installations",
+        {
+            "intent_type": "date_series",
+            "entity": "work_orders",
+            "grain": "iso_week",
+            "date_range": {"start": "2025-01-06", "end": "2025-04-07"},
+            "series": [
+                {"metric": {"agg": "count"}, "date_field": "opened_at", "alias": "opened"},
+                {
+                    "metric": {"agg": "count"},
+                    "date_field": "completed_at",
+                    "where": [
+                        {"field": "priority", "op": "eq", "value": "urgent"},
+                        {"field": "job_type", "op": "eq", "value": "installation"},
+                    ],
+                    "alias": "urgent_installs",
+                },
+            ],
+        },
+        # Every week in the range has opened work orders, so the opened weeks are all
+        # the periods.
+        "WITH o AS (SELECT date_trunc('week', opened_at)::date AS p, count(*) AS n "
+        "FROM work_orders WHERE opened_at >= '2025-01-06' AND opened_at < '2025-04-07' "
+        "GROUP BY 1) "
+        "SELECT o.p, o.n, (SELECT count(*) FROM work_orders u WHERE u.priority = 'urgent' "
+        "AND u.job_type = 'installation' AND u.completed_at >= '2025-01-06' "
+        "AND u.completed_at < '2025-04-07' "
+        "AND date_trunc('week', u.completed_at)::date = o.p) "
+        "FROM o ORDER BY o.p",
+    ),
+    (
+        "v12_invoices_by_issue_and_work_order_open_date",
+        {
+            "intent_type": "date_series",
+            "entity": "invoices",
+            "grain": "year",
+            "series": [
+                {"metric": {"agg": "count"}, "date_field": "issued_at", "alias": "by_issue"},
+                {
+                    "metric": {"agg": "sum", "field": "amount"},
+                    "date_field": "work_orders.opened_at",
+                    "alias": "amount_by_open",
+                },
+            ],
+        },
+        "WITH a AS (SELECT date_trunc('year', issued_at)::date AS p, count(*) AS n "
+        "FROM invoices GROUP BY 1), "
+        "b AS (SELECT date_trunc('year', w.opened_at)::date AS p, sum(i.amount) AS s "
+        "FROM invoices i JOIN work_orders w ON w.id = i.work_order_id GROUP BY 1) "
+        "SELECT coalesce(a.p, b.p) AS p, coalesce(a.n, 0), b.s "
+        "FROM a FULL OUTER JOIN b ON a.p = b.p ORDER BY p",
+    ),
+]

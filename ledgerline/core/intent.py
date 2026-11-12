@@ -10,7 +10,7 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
-IntentType = Literal["summary", "grouped_summary", "row_list", "unanswerable"]
+IntentType = Literal["summary", "grouped_summary", "row_list", "date_series", "unanswerable"]
 Aggregate = Literal["count", "count_distinct", "sum", "avg", "min", "max", "ratio"]
 FilterOp = Literal[
     "eq", "neq", "gt", "gte", "lt", "lte", "between", "in", "is_null", "ilike_contains"
@@ -89,11 +89,24 @@ class GroupBy(_Strict):
 
 
 class DateRange(_Strict):
-    field: str
+    """In a date_series, `field` is left out: the period applies to each series by its
+    own date field. Every other intent needs it."""
+
+    field: str | None = None
     relative: RelativeToken | None = None
     n: int | None = None
     start: str | None = None  # ISO date or datetime, inclusive
     end: str | None = None  # ISO date or datetime, exclusive
+
+
+class Series(_Strict):
+    """One column of a date_series: `metric` counted or summed by its own `date_field`,
+    over the rows that match the shared filters and its own `where`."""
+
+    metric: Metric
+    date_field: str
+    where: list[Condition] = Field(default_factory=list[Condition])
+    alias: str | None = None
 
 
 class OrderBy(_Strict):
@@ -112,4 +125,6 @@ class Intent(_Strict):
     date_range: DateRange | None = None
     order_by: list[OrderBy] = Field(default_factory=list[OrderBy])
     limit: int | None = None
+    grain: Grain | None = None  # date_series only
+    series: list[Series] = Field(default_factory=list[Series])  # date_series only
     unanswerable_reason: str | None = None
