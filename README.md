@@ -11,11 +11,11 @@ reason. A question the intent cannot express can still get a wrong answer, when 
 fills in a valid intent for a nearby question instead of refusing. [docs/product-brief.md](docs/product-brief.md) explains
 who it is for and what it leaves out on purpose.
 
-**Status.** v0.1 runs on your machine, and an invite-only beta answers live questions
-(see [Deploy the hosted beta](#deploy-the-hosted-beta)). The default model is Claude
-Haiku 5.5, measured against the same gates as the others
-([ADR-004](docs/adr/ADR-004-model-choice.md)). It reaches the accuracy target but gives one
-wrong answer too many.
+**Status.** v0.2 runs on your machine, and an invite-only beta answers live questions
+([Deploy the hosted beta](#deploy-the-hosted-beta)). The model is Claude
+Haiku 5.5 ([ADR-004](docs/adr/ADR-004-model-choice.md)). Held-out questions miss both
+targets: 47.6% right (target 80%), 25.9% wrong (target 5%). The seen questions v0.2 was
+built from meet both ([ADR-007](docs/adr/ADR-007-grammar-v02.md)).
 
 ## Try it
 
