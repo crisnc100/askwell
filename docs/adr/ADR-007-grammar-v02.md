@@ -156,5 +156,5 @@ Ledgerline and wrong more often too.
     $0.000445 per question against v0.1's $0.000361 on the same run setup (+23%). Total
     live spend for the re-record ($0.0588) and the five runs ($0.6914) was $0.7502.
 
-Triage of every miss is in `evals/triage/`. The held-out wrong answers are walked through
+Triage of every miss is in `evals/triage/`. The held-out wrong answers are explained
 in [docs/failures/](../failures/README.md).
