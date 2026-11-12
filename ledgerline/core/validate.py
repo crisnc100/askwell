@@ -66,11 +66,15 @@ ErrorCode = Literal[
     "alias_collision",
     "invalid_order_by",
     "limit_out_of_range",
+    "placeholder_reason",
 ]
 
 _ALIAS = re.compile(r"^[a-z][a-z0-9_]{0,62}$")
 _ORDERABLE: frozenset[str] = NUMERIC_TYPES | TEMPORAL_TYPES
 _RANGE_OPS: frozenset[str] = frozenset({"gt", "gte", "lt", "lte", "between"})
+_PLACEHOLDER_REASONS: frozenset[str] = frozenset(
+    {"", "none", "null", "n/a", "na", "-", "unknown", "no reason"}
+)
 
 Value = int | float | str | bool | date | datetime
 
@@ -447,13 +451,28 @@ class _Validator:
                 or intent.order_by
                 or intent.limit is not None
             )
-            if not intent.unanswerable_reason:
+            if intent.unanswerable_reason is None:
                 self.fail("intent_shape", loc, "unanswerable needs an unanswerable_reason")
+            elif _is_placeholder(intent.unanswerable_reason):
+                self.fail(
+                    "placeholder_reason",
+                    "unanswerable_reason",
+                    "say what the question needs that the data does not have",
+                )
             if populated:
                 self.fail("intent_shape", loc, "unanswerable takes no query fields")
             return False
         if intent.unanswerable_reason is not None:
-            self.fail("intent_shape", loc, "only unanswerable takes an unanswerable_reason")
+            if _is_placeholder(intent.unanswerable_reason):
+                # Models fill the field with "none" on ordinary questions; telling them to
+                # drop it lets the retry succeed.
+                self.fail(
+                    "placeholder_reason",
+                    "unanswerable_reason",
+                    "leave unanswerable_reason out unless the intent is unanswerable",
+                )
+            else:
+                self.fail("intent_shape", loc, "only unanswerable takes an unanswerable_reason")
         if intent.entity is None:
             self.fail("intent_shape", "entity", f"{intent.intent_type} needs an entity")
         if intent.intent_type == "row_list":
@@ -838,6 +857,10 @@ class _Validator:
             limit=limit,
         )
         return ValidationResult(plan=plan)
+
+
+def _is_placeholder(reason: str) -> bool:
+    return reason.strip().lower() in _PLACEHOLDER_REASONS
 
 
 def _family(ftype: str) -> str:

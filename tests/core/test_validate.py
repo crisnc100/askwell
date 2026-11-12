@@ -998,3 +998,51 @@ def test_rule_having_type(registry: Registry) -> None:
         group_by=[{"field": "status"}],
         having=[{"metric": "top", "op": "gt", "value": 5}],
     ).ok
+
+
+# --- v0.2: placeholder reasons ---
+
+PLACEHOLDERS = [
+    "",
+    "   ",
+    "none",
+    "None",
+    " NULL ",
+    "n/a",
+    "N/A",
+    "na",
+    "-",
+    "unknown",
+    "No reason",
+]
+
+
+@pytest.mark.parametrize("reason", PLACEHOLDERS)
+def test_rule_placeholder_reason(registry: Registry, reason: str) -> None:
+    refusal = check(registry, intent_type="unanswerable", unanswerable_reason=reason)
+    assert refusal.codes == ["placeholder_reason"]
+    assert refusal.refusal_reason is None
+    answer = check(
+        registry,
+        intent_type="summary",
+        entity="work_orders",
+        metrics=COUNT,
+        unanswerable_reason=reason,
+    )
+    assert answer.codes == ["placeholder_reason"]
+    assert "leave unanswerable_reason out unless the intent is unanswerable" in (
+        answer.issues[0].message
+    )
+
+
+@pytest.mark.parametrize("reason", ["no technician data", "nope", "None of the tables hold it"])
+def test_a_real_reason_is_not_a_placeholder(registry: Registry, reason: str) -> None:
+    assert check(registry, intent_type="unanswerable", unanswerable_reason=reason).ok
+    answer = codes(
+        registry,
+        intent_type="summary",
+        entity="work_orders",
+        metrics=COUNT,
+        unanswerable_reason=reason,
+    )
+    assert answer == ["intent_shape"]
