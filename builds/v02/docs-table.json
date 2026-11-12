@@ -1,38 +1,224 @@
-{"rows":[
-{"behavior":"Grammar v0.2: date_series intent (grain, 1-4 series, period per series date field), conditional metric where, ratio aggregate with NULL on a zero denominator, NULLS LAST on every sort, placeholder_reason issue code","files":["ledgerline/core/intent.py","ledgerline/core/validate.py","ledgerline/core/sqlbuild.py"],"docs":[{"path":"README.md","claims":[
- {"claim":"intent_type includes date_series","at":"ledgerline/core/intent.py:13"},
- {"claim":"a metric can carry its own where conditions","at":"ledgerline/core/intent.py:73"},
- {"claim":"rows that do not match a metric's where are not counted or summed","at":"ledgerline/core/sqlbuild.py:396"},
- {"claim":"ratio is an aggregate","at":"ledgerline/core/intent.py:14"},
- {"claim":"a ratio's numerator and denominator must be other non-ratio metrics of the intent","at":"ledgerline/core/validate.py:932"},
- {"claim":"a zero denominator gives NULL; as_percent multiplies by 100","at":"ledgerline/core/sqlbuild.py:410"},
- {"claim":"date_series takes a grain and series","at":"ledgerline/core/intent.py:128"},
- {"claim":"date_series takes 1 to 4 series","at":"ledgerline/core/validate.py:531"},
- {"claim":"date_series takes no metrics; each metric goes in a series","at":"ledgerline/core/validate.py:537"},
- {"claim":"each series has its own date field and where","at":"ledgerline/core/intent.py:108"},
- {"claim":"date_range applies to each series by its own date field","at":"ledgerline/core/validate.py:832"},
- {"claim":"placeholder_reason rejects a reason such as none","at":"ledgerline/core/validate.py:1129"},
- {"claim":"every sort puts NULLs last","at":"ledgerline/core/sqlbuild.py:562"}]}]},
-{"behavior":"Prompt interpret-v2 describes the new intents and the refuse-first rule","files":["ledgerline/pipeline/prompt.py"],"none":"ADR-007 Decision already describes interpret-v2; no doc claim changed in this pass"},
-{"behavior":"eval --gold scores another gold file for one schema; report rows, misses and wins carry the gold name; floors entries can name schema and gold","files":["ledgerline/cli.py","ledgerline/bench/items.py","ledgerline/bench/run.py","ledgerline/bench/report.py","ledgerline/bench/report_schema.py","evals/report.schema.json","evals/floors.yaml"],"docs":[{"path":"README.md","claims":[
- {"claim":"--gold takes exactly one --schema","at":"ledgerline/bench/run.py:194"},
- {"claim":"--gold is refused for Spider","at":"ledgerline/bench/run.py:128"},
- {"claim":"each report row names its gold file","at":"ledgerline/bench/report.py:285"},
- {"claim":"a floors entry with a gold file is checked only on rows from that file","at":"ledgerline/bench/report.py:66"},
- {"claim":"the held-out floors entry names schema fieldservice and gold holdout-v02.jsonl","at":"evals/floors.yaml:22"}]}]},
-{"behavior":"manifest --promote and gold revision 5 (presentation-only edit to the held-out file)","files":["evals/gold/manifest.py","evals/gold/holdout-v02.jsonl","evals/gold/MANIFEST.json"],"docs":[{"path":"evals/gold/README.md","claims":[
- {"claim":"--promote refuses a file whose hash differs from the pending one","at":"evals/gold/manifest.py:90"},
- {"claim":"CHANGELOG.md lists each revision 5 edit","at":"evals/gold/CHANGELOG.md:25"},
- {"claim":"the 14 revision 5 edits","at":"tests/test_gold_manifest.py:87"},
- {"claim":"a test pins the committed file's SHA-256","at":"tests/test_gold_manifest.py:144"},
- {"claim":"undoing the edits gives the pending hash from before any v0.2 code","at":"tests/test_gold_manifest.py:177"}]}]},
-{"behavior":"Live v0.2 results and spend","files":["evals/triage/fieldservice.yaml","evals/triage/spider_car_1.yaml","evals/triage/spider_dog_kennels.yaml","evals/triage/spider_flight_2.yaml","evals/triage/spider_network_1.yaml","evals/triage/spider_wta_1.yaml"],"docs":[
- {"path":"docs/adr/ADR-007-grammar-v02.md","claims":[{"claim":"total live spend: demo re-record $0.0046, replay re-record $0.0588, five runs $0.6914, $0.7548 in all","at":"builds/v02/log.md:186"}]},
- {"path":"docs/adr/README.md","claims":[
-  {"claim":"ADR-004 measured live: default anthropic:claude-haiku-5-5 (Amendment 3), second google/gemma-4-26b-a4b-it","at":"docs/adr/ADR-004-model-choice.md:7"},
-  {"claim":"ADR-005's result comes from simulated answers","at":"docs/adr/ADR-005-replay-and-budget.md:39"},
-  {"claim":"sim-1 is the simulated run","at":"evals/reports/sim-1.md:3"}]}]},
-{"behavior":"Canned demo questions for the share and two-date cases","files":["config/schemas.yaml"],"none":"example questions only; the README demo text does not list them"},
-{"behavior":"Workspace explain and web trace for the new intents and placeholder_reason","files":["ledgerline/workspace/ask.py","web/src/main.ts","web/src/trace.ts","web/e2e/grammar.spec.ts"],"none":"user-facing text lives in the code; trace.ts has a header comment that matches it"},
-{"behavior":"detect-secrets baseline lists the gold hashes in tests/test_gold_manifest.py","files":[".secrets.baseline"],"none":"tool data, not behavior"}
-]}
+{
+ "rows": [
+  {
+   "behavior": "Grammar v0.2: date_series intent (grain, 1-4 series, period per series date field), conditional metric where, ratio aggregate with NULL on a zero denominator, NULLS LAST on every sort, placeholder_reason issue code",
+   "files": [
+    "ledgerline/core/intent.py",
+    "ledgerline/core/validate.py",
+    "ledgerline/core/sqlbuild.py"
+   ],
+   "docs": [
+    {
+     "path": "README.md",
+     "claims": [
+      {
+       "claim": "intent_type includes date_series",
+       "at": "ledgerline/core/intent.py:13"
+      },
+      {
+       "claim": "a metric can carry its own where conditions",
+       "at": "ledgerline/core/intent.py:73"
+      },
+      {
+       "claim": "rows that do not match a metric's where are not counted or summed",
+       "at": "ledgerline/core/sqlbuild.py:396"
+      },
+      {
+       "claim": "ratio is an aggregate",
+       "at": "ledgerline/core/intent.py:14"
+      },
+      {
+       "claim": "a ratio's numerator and denominator must be other non-ratio metrics of the intent",
+       "at": "ledgerline/core/validate.py:932"
+      },
+      {
+       "claim": "a zero denominator gives NULL; as_percent multiplies by 100",
+       "at": "ledgerline/core/sqlbuild.py:410"
+      },
+      {
+       "claim": "date_series takes a grain and series",
+       "at": "ledgerline/core/intent.py:128"
+      },
+      {
+       "claim": "date_series takes 1 to 4 series",
+       "at": "ledgerline/core/validate.py:531"
+      },
+      {
+       "claim": "date_series takes no metrics; each metric goes in a series",
+       "at": "ledgerline/core/validate.py:537"
+      },
+      {
+       "claim": "each series has its own date field and where",
+       "at": "ledgerline/core/intent.py:108"
+      },
+      {
+       "claim": "date_range applies to each series by its own date field",
+       "at": "ledgerline/core/validate.py:832"
+      },
+      {
+       "claim": "placeholder_reason rejects a reason such as none",
+       "at": "ledgerline/core/validate.py:1129"
+      },
+      {
+       "claim": "every sort puts NULLs last",
+       "at": "ledgerline/core/sqlbuild.py:562"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "behavior": "Prompt interpret-v2 describes the new intents and the refuse-first rule",
+   "files": [
+    "ledgerline/pipeline/prompt.py"
+   ],
+   "none": "ADR-007 Decision already describes interpret-v2; no doc claim changed in this pass"
+  },
+  {
+   "behavior": "eval --gold scores another gold file for one schema; report rows, misses and wins carry the gold name; floors entries can name schema and gold",
+   "files": [
+    "ledgerline/cli.py",
+    "ledgerline/bench/items.py",
+    "ledgerline/bench/run.py",
+    "ledgerline/bench/report.py",
+    "ledgerline/bench/report_schema.py",
+    "evals/report.schema.json",
+    "evals/floors.yaml"
+   ],
+   "docs": [
+    {
+     "path": "README.md",
+     "claims": [
+      {
+       "claim": "--gold takes exactly one --schema",
+       "at": "ledgerline/bench/run.py:194"
+      },
+      {
+       "claim": "--gold is refused for Spider",
+       "at": "ledgerline/bench/run.py:128"
+      },
+      {
+       "claim": "each report row names its gold file",
+       "at": "ledgerline/bench/report.py:285"
+      },
+      {
+       "claim": "a floors entry with a gold file is checked only on rows from that file",
+       "at": "ledgerline/bench/report.py:66"
+      },
+      {
+       "claim": "the held-out floors entry names schema fieldservice and gold holdout-v02.jsonl",
+       "at": "evals/floors.yaml:22"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "behavior": "manifest --promote and gold revision 5 (presentation-only edit to the held-out file)",
+   "files": [
+    "evals/gold/manifest.py",
+    "evals/gold/holdout-v02.jsonl",
+    "evals/gold/MANIFEST.json"
+   ],
+   "docs": [
+    {
+     "path": "evals/gold/README.md",
+     "claims": [
+      {
+       "claim": "--promote refuses a file whose hash differs from the pending one",
+       "at": "evals/gold/manifest.py:90"
+      },
+      {
+       "claim": "CHANGELOG.md lists each revision 5 edit",
+       "at": "evals/gold/CHANGELOG.md:25"
+      },
+      {
+       "claim": "the 14 revision 5 edits",
+       "at": "tests/test_gold_manifest.py:87"
+      },
+      {
+       "claim": "a test pins the committed file's SHA-256",
+       "at": "tests/test_gold_manifest.py:144"
+      },
+      {
+       "claim": "undoing the edits gives the pending hash from before any v0.2 code",
+       "at": "tests/test_gold_manifest.py:177"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "behavior": "Live v0.2 results and spend",
+   "files": [
+    "evals/triage/fieldservice.yaml",
+    "evals/triage/spider_car_1.yaml",
+    "evals/triage/spider_dog_kennels.yaml",
+    "evals/triage/spider_flight_2.yaml",
+    "evals/triage/spider_network_1.yaml",
+    "evals/triage/spider_wta_1.yaml"
+   ],
+   "docs": [
+    {
+     "path": "docs/adr/ADR-007-grammar-v02.md",
+     "claims": [
+      {
+       "claim": "total live spend: demo re-record $0.0046, replay re-record $0.0588, five runs $0.6914, $0.7548 in all",
+       "at": "builds/v02/log.md:186"
+      }
+     ]
+    },
+    {
+     "path": "docs/adr/README.md",
+     "claims": [
+      {
+       "claim": "ADR-004 measured live: default anthropic:claude-haiku-5-5 (Amendment 3), second google/gemma-4-26b-a4b-it",
+       "at": "docs/adr/ADR-004-model-choice.md:7"
+      },
+      {
+       "claim": "ADR-005's result comes from simulated answers",
+       "at": "docs/adr/ADR-005-replay-and-budget.md:39"
+      },
+      {
+       "claim": "sim-1 is the simulated run",
+       "at": "evals/reports/sim-1.md:3"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "behavior": "Canned demo questions for the share and two-date cases",
+   "files": [
+    "config/schemas.yaml"
+   ],
+   "none": "example questions only; the README demo text does not list them"
+  },
+  {
+   "behavior": "Workspace explain and web trace for the new intents and placeholder_reason",
+   "files": [
+    "ledgerline/workspace/ask.py",
+    "web/src/main.ts",
+    "web/src/trace.ts",
+    "web/e2e/grammar.spec.ts"
+   ],
+   "none": "user-facing text lives in the code; trace.ts has a header comment that matches it"
+  },
+  {
+   "behavior": "detect-secrets baseline lists the gold hashes in tests/test_gold_manifest.py",
+   "files": [
+    ".secrets.baseline"
+   ],
+   "none": "tool data, not behavior"
+  },
+  {
+   "behavior": "Re-recorded replay answers for the seen set and the interpret demo under prompt interpret-v2",
+   "files": [
+    "evals/recordings/eval/fieldservice/ledgerline.jsonl",
+    "evals/recordings/eval/fieldservice/oneshot.jsonl",
+    "evals/recordings/interpret.jsonl"
+   ],
+   "none": "Generated recordings; verify.sh replays them and the replay report documents the result."
+  }
+ ]
+}
