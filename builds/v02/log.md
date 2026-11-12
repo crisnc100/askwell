@@ -75,3 +75,41 @@ Deliberate choices made while building, and why. Newest at the bottom of each ph
 - **State of verify.sh:** the same 11 replay API tests and the replay report step miss
   their recordings (see Phase 1). Everything else passes: 987 tests, coverage
   (validate.py 99.7%, sqlbuild.py 97.0% branch) and 12 Playwright tests.
+
+## Phase 3: prompt, eval option, Ask page and trace (before the re-record)
+- **No-tuning test** (`10bd601`, G7). It reads every `evals/gold/*.jsonl`, so the
+  held-out file is checked as soon as it lands in Phase 4. It checks `prompt.py` and every
+  registry's descriptions, entity and field aliases and value aliases. Words are
+  lowercased with punctuation dropped. A planted run shows the checker finds one. It
+  caught a 6-word run in a first draft of one example question, which was reworded.
+- **interpret-v2** (`d983cb7`). It describes a metric's `where`, the ratio metric and
+  `date_series`. It says a reason must name what is missing and must be left out of
+  answerable intents, and it adds the refuse-first rule with the four things still out of
+  reach. Three worked examples use a made-up tickets schema (`tickets`, `agents`,
+  `opened_on`, `closed_on`, `stage`, `minutes`). A test validates each one against a
+  made-up registry with the real validator, and checks that no example names a
+  fieldservice entity or field.
+- **`eval --gold <file>`** (`d4fc91c`). The items of that file replace the schema's
+  default gold. Every record, metrics row, miss and baseline win carries its gold file's
+  name, and the report header lists the gold files. The Markdown table gains a Gold
+  column, added last so existing column checks still hold. Reports and checkpoints from
+  before carry no gold name and are read as the default (`fieldservice.jsonl`, or
+  `spider_ids.json`). Only a second gold file adds `|gold=<name>` to the checkpoint key.
+  `--gold` takes exactly one schema and is refused for Spider. This commit touches only
+  the eval code and applies cleanly to `fc97462`, so it can be the `v02-before` commit.
+  Its Gold column changes the Markdown, so `v02-before`'s own replay report check needs
+  a `--write` there.
+- **Ask page** (`93d239d`, G9). Each of the five new codes has a plain-English message
+  and suggestion, and a test keeps them off the general fallback. The trace gains "How
+  the numbers are built": each ratio's formula and each series' metric and date field.
+  It is read defensively, because the intent is model output.
+- **Browser test** (`web/e2e/grammar.spec.ts`). It asks a ratio question and a two-date
+  series question on the sample workspace through the fake model, and checks the
+  answers, the columns and the trace lines. The real validator and builder run on
+  SQLite. A replay-mode browser test on the demo needs canned ratio and series questions,
+  which need recording first (see the callback).
+- **`/ask`** returns the new intent fields as the model gave them (test in
+  `tests/pipeline/test_api_double.py`).
+- **State of verify.sh:** the same 11 replay API tests and the replay report step miss
+  their recordings. Everything else passes: 1,004 tests, the coverage floors and 13
+  Playwright tests.
