@@ -155,7 +155,8 @@ Ledgerline and wrong more often too.
 10. **Cost per question up at most 30% from $0.000415, total spend under $1.20:** held.
     $0.000488 on held-out (+18%) and $0.000480 on seen (+16%). On Spider, v0.2 cost
     $0.000445 per question against v0.1's $0.000361 on the same run setup (+23%). Total
-    live spend for the re-record ($0.0588) and the five runs ($0.6914) was $0.7502.
+    live spend for the demo re-record ($0.0046), the replay re-record ($0.0588) and the
+    five runs ($0.6914) was $0.7548.
 
 Triage of every miss is in `evals/triage/`. The held-out wrong answers are explained
 in [docs/failures/](../failures/README.md).

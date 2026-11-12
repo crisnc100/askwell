@@ -49,6 +49,13 @@ the fieldservice questions or the grammar change. Only its SHA-256 was committed
 under `pending` (revision 3). `--promote` moved it into the frozen files (revision 4),
 and refuses a file whose hash differs from the pending one.
 
+Revision 5 changed only how 14 answers are presented, before any held-out result: no
+rounding, periods as dates, and ho-003 as a fraction. `CHANGELOG.md` lists each edit.
+No question, filter or join changed. `tests/test_gold_manifest.py` proves it two ways:
+it pins the committed file's SHA-256 byte for byte, and it undoes exactly those 14 edits
+on the raw text and checks that the result has the pending hash from before any v0.2
+code.
+
 ## `spider_ids.json`
 
 The Spider questions the eval uses, as IDs only: an ID is a question's 0-based index in

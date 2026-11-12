@@ -217,26 +217,36 @@ database gives the same file. It warns when the connecting role could write.
 ## Intents, validation and SQL
 
 An intent (`ledgerline/core/intent.py`) has an `intent_type` (`summary`,
-`grouped_summary`, `row_list`, or `unanswerable` with a reason), a base `entity`, and
-optional `select`, `metrics`, `filters`, `having`, `group_by`, `date_range`, `order_by`
-and `limit`. A field is named `entity.field`, or just `field` on the base entity.
+`grouped_summary`, `row_list`, `date_series`, or `unanswerable` with a reason), a base
+`entity`, and optional `select`, `metrics`, `filters`, `having`, `group_by`, `date_range`,
+`order_by` and `limit`. A field is named `entity.field`, or just `field` on the base entity.
 Filters can be grouped one level deep (`any_of`, `all_of`) and can compare two columns.
 A group-by on a date can take a calendar grain (`day`, `iso_week`, `month`, `quarter`,
 `year`). A date range is either a start and end, or a token such as `last_quarter`;
 code turns the token into dates using `LEDGERLINE_NOW`, never the model.
 
+A metric can carry its own `where` conditions; it is then counted or summed only over
+the rows that match. The `ratio` aggregate divides one other metric of the intent by
+another (`numerator`, `denominator`), times 100 with `as_percent`; a zero denominator
+gives NULL. A `date_series` takes a `grain` and 1 to 4 `series` instead of metrics: one
+row per period, one column per series. Each series is a metric counted or summed by its
+own date field, with its own `where`, and a `date_range` applies to each series by that
+field. [ADR-007](docs/adr/ADR-007-grammar-v02.md) explains why.
+
 The validator (`ledgerline/core/validate.py`) checks an intent against the registry. It
 never raises for a bad intent; it returns typed errors such as `unknown_field`,
 `hidden_field`, `ambiguous_path` (two equally short join paths: refused, not guessed),
 `fan_out` (an aggregate across a one-to-many join, which would double count; see
-[ADR-003](docs/adr/ADR-003-fan-out-rule.md)) and `ambiguous_value`. `ErrorCode` in that
-file lists them all.
+[ADR-003](docs/adr/ADR-003-fan-out-rule.md)), `ambiguous_value` and `placeholder_reason`
+(a reason such as "none" in `unanswerable_reason`). `ErrorCode` in that file lists them
+all.
 
 The SQL builder (`ledgerline/core/sqlbuild.py`) writes SQLAlchemy Core. Table and column
 names come only from the registry, and every value is a bound parameter. Joins follow
 many-to-one relationships only, at most 3 hops from the base entity. A join used only
 inside an `any_of` group is a LEFT JOIN, so it does not drop rows that match another
-branch. Postgres and SQLite are supported.
+branch. Every sort puts NULLs last, so Postgres and SQLite return the same order.
+Postgres and SQLite are supported.
 
 The executor (`ledgerline/core/executor.py`) runs the query in a read-only transaction
 with a timeout (5 seconds by default) and a row cap (1000 by default); the result says
@@ -324,6 +334,12 @@ SQL directly from the schema, and that SQL runs read-only. The baseline's SQL mu
 single SELECT, and the database driver refuses a second statement, so it cannot leave
 the read-only transaction. Spider registries come from `registry init` with no edits,
 and the eval stops if one no longer matches its committed hash.
+
+`--gold <file>` scores another gold file, such as the held-out set
+`evals/gold/holdout-v02.jsonl`, in place of fieldservice's default; it takes exactly one
+`--schema` and is refused for Spider. Each report row names its gold file. An entry in
+`evals/floors.yaml` may name a `schema` and a `gold` file, and is then checked only on
+rows from that file, so a held-out run never borrows the seen set's verdict.
 
 The live run `select-2026-11-11` compared four OpenRouter models on fieldservice
 ([report](evals/reports/select-2026-11-11.md)), and `select-haiku-2026-11-11` measured
