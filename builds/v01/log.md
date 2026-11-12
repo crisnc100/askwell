@@ -236,3 +236,4 @@ The tests came first (`51e1231`, plus a test-only setup fix in `a27eec2`), and 2
   - without codes, the container exits with the fail-closed message;
   - with codes, the Haiku default, the kill switch on and no OpenRouter key, `/healthz` returns 200 `live`, `/schemas` without a code returns 401, `/ask` returns the plain 503, and `/invite` sets a hashed HttpOnly, Secure cookie.
 - The review findings file had a two-word phrase the privacy scan rejects in f2; it was reworded to "healthz probe".
+- **Coverage:** the new branches dropped `store.py` and `limits.py` under their floors. `30ed566` (tests only) covers the rollback, the refused-save and own-temp paths, and the limiter window. `./verify.sh` passes: 880 tests, 12 browser tests.
