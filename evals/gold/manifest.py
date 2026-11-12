@@ -2,6 +2,7 @@
 
     uv run python -m evals.gold.manifest --check
     uv run python -m evals.gold.manifest --update --reason "why the gold had to change"
+    uv run python -m evals.gold.manifest --promote <file> --reason "why it is revealed now"
 
 Every revision after the first needs a reason. `--update` bumps the revision, rewrites
 the hashes and appends the reason to CHANGELOG.md; the manifest test fails if a gold
@@ -22,7 +23,7 @@ from typing import Any
 GOLD_DIR = Path(__file__).resolve().parent
 MANIFEST = GOLD_DIR / "MANIFEST.json"
 CHANGELOG = GOLD_DIR / "CHANGELOG.md"
-GOLD_FILES = ("fieldservice.jsonl", "spider_ids.json", "spider_selection.py")
+GOLD_FILES = ("fieldservice.jsonl", "spider_ids.json", "spider_selection.py", "holdout-v02.jsonl")
 REVISION_HEADING = re.compile(r"^## Revision (\d+) — (\d{4}-\d{2}-\d{2})$", re.MULTILINE)
 
 
@@ -76,13 +77,35 @@ def update(reason: str, gold_dir: Path = GOLD_DIR, today: str | None = None) -> 
     return revision
 
 
+def promote(name: str, reason: str, gold_dir: Path = GOLD_DIR, today: str | None = None) -> int:
+    """Move a file from `pending` into the frozen files, as a new revision. Refused
+    unless the file's hash equals the one committed under `pending`: that hash is the
+    proof the file did not change after it was recorded."""
+    manifest: dict[str, Any] = json.loads((gold_dir / "MANIFEST.json").read_text())
+    pending: dict[str, str] = manifest.get("pending", {})
+    if name not in pending:
+        raise ValueError(f"{name} is not pending")
+    actual = hashlib.sha256((gold_dir / name).read_bytes()).hexdigest()
+    if actual != pending[name]:
+        raise ValueError(f"{name}: hash {actual} does not match the pending {pending[name]}")
+    del pending[name]
+    if not pending:
+        manifest.pop("pending", None)
+    (gold_dir / "MANIFEST.json").write_text(json.dumps(manifest, indent=2) + "\n")
+    return update(reason, gold_dir, today)
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Gold manifest check and update.")
     mode = parser.add_mutually_exclusive_group(required=True)
     mode.add_argument("--check", action="store_true")
     mode.add_argument("--update", action="store_true")
+    mode.add_argument("--promote", metavar="FILE", help="move a pending file into the gold")
     parser.add_argument("--reason", default="")
     args = parser.parse_args(argv)
+    if args.promote:
+        print(f"gold revision {promote(args.promote, args.reason)}")
+        return 0
     if args.update:
         print(f"gold revision {update(args.reason)}")
         return 0

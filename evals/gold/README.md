@@ -3,7 +3,7 @@
 The questions and answers the eval scores against. They were frozen before any intent
 code existed, so the eval is not fitted to what the intent can express.
 
-Three files are frozen: `fieldservice.jsonl`, `spider_ids.json` and
+Four files are frozen: `fieldservice.jsonl`, `holdout-v02.jsonl`, `spider_ids.json` and
 `spider_selection.py`. `MANIFEST.json` holds the SHA-256 of each one, and a test fails if
 any hash is off. To change a frozen file, run
 
@@ -39,6 +39,15 @@ One JSON object per line: `id`, `category`, `difficulty`, `features`, `question`
   first", per-month series); every such ORDER BY ends with a unique tiebreaker so the
   result is deterministic.
 - `gold_sql` is Postgres dialect and runs as the read-only role.
+
+## `holdout-v02.jsonl`
+
+The v0.2 held-out set: 40 items in the same format (28 in_schema, 6 out_of_schema,
+6 should_refuse), ids `ho-001` to `ho-040`. A separate writer wrote it before any v0.2
+code, from the schema, the registry descriptions and this README only, without seeing
+the fieldservice questions or the grammar change. Only its SHA-256 was committed then,
+under `pending` (revision 3). `--promote` moved it into the frozen files (revision 4),
+and refuses a file whose hash differs from the pending one.
 
 ## `spider_ids.json`
 

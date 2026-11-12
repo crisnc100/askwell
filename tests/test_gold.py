@@ -85,3 +85,24 @@ def test_gold_sql_executes_non_empty_and_deterministic(item: GoldItem, pg_seeded
     assert first, f"{item.id}: gold result is empty"
     assert any(value is not None for row in first for value in row), f"{item.id}: all NULL"
     assert _canonical(first, item.ordered) == _canonical(second, item.ordered)
+
+
+# --- the v0.2 held-out set (plan v0.2, Phase 0 counts; G2) ---
+
+HOLDOUT = load_gold(GOLD_DIR / "holdout-v02.jsonl")
+HOLDOUT_IN_SCHEMA = [item for item in HOLDOUT if item.category == "in_schema"]
+
+
+def test_holdout_counts_meet_phase_0() -> None:
+    categories = Counter(item.category for item in HOLDOUT)
+    assert len(HOLDOUT) == 40
+    assert categories == {"in_schema": 28, "out_of_schema": 6, "should_refuse": 6}
+    assert [item.id for item in HOLDOUT] == [f"ho-{n:03d}" for n in range(1, 41)]
+    assert not {item.id for item in HOLDOUT} & {item.id for item in GOLD}
+
+
+@pytest.mark.parametrize("item", HOLDOUT_IN_SCHEMA, ids=lambda item: item.id)
+def test_holdout_sql_executes_non_empty_and_deterministic(
+    item: GoldItem, pg_seeded: Engine
+) -> None:
+    test_gold_sql_executes_non_empty_and_deterministic(item, pg_seeded)

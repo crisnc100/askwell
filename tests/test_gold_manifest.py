@@ -73,3 +73,37 @@ def test_changelog_entry_without_reason_is_detected(gold_copy: Path) -> None:
     changelog = gold_copy / "CHANGELOG.md"
     changelog.write_text(changelog.read_text().replace("a reason", ""))
     assert any("has no reason" in p for p in problems(gold_copy))
+
+
+# --- the v0.2 held-out set ---
+
+# Committed under `pending` in f2e6191, before any v0.2 code (G1).
+HOLDOUT_HASH = "09451c630ca1036df761ec9ee08c5357198c4b13308aa1ab0d9128ddb75d4448"
+
+
+def test_the_revealed_holdout_matches_the_hash_committed_before_the_code() -> None:
+    manifest = json.loads((GOLD_DIR / "MANIFEST.json").read_text())
+    assert manifest["files"]["holdout-v02.jsonl"] == HOLDOUT_HASH
+    assert "pending" not in manifest
+
+
+def test_a_pending_file_is_promoted_only_if_its_hash_matches(tmp_path: Path) -> None:
+    from evals.gold.manifest import promote
+
+    for name in (*GOLD_FILES, "MANIFEST.json", "CHANGELOG.md"):
+        shutil.copy(GOLD_DIR / name, tmp_path / name)
+    manifest = json.loads((tmp_path / "MANIFEST.json").read_text())
+    real = manifest["files"].pop("holdout-v02.jsonl")
+    manifest["pending"] = {"holdout-v02.jsonl": real}
+    (tmp_path / "MANIFEST.json").write_text(json.dumps(manifest))
+    tampered = tmp_path / "holdout-v02.jsonl"
+    original = tampered.read_text()
+    tampered.write_text(original.replace("ho-001", "ho-901", 1))
+    with pytest.raises(ValueError, match="does not match"):
+        promote("holdout-v02.jsonl", "reveal", tmp_path, today="2026-12-01")
+    tampered.write_text(original)
+    promote("holdout-v02.jsonl", "reveal", tmp_path, today="2026-12-01")
+    after = json.loads((tmp_path / "MANIFEST.json").read_text())
+    assert after["files"]["holdout-v02.jsonl"] == real
+    assert "pending" not in after
+    assert problems(tmp_path) == []

@@ -17,3 +17,7 @@ fs-032: the gold excluded void invoices, but the question does not say to. That 
 ## Revision 3 — 2026-11-12
 
 Pending held-out set for v0.2 (40 items: 28 in_schema, 6 out_of_schema, 6 should_refuse), written blind by a separate writer that never saw the seen questions, the grammar change or the predictions. Only its SHA-256 is recorded here, under 'pending', before any v0.2 code. The file itself is added in Phase 4, after the grammar and prompt are frozen; its hash must match this one.
+
+## Revision 4 — 2026-11-12
+
+Held-out set for v0.2 revealed in Phase 4, after the grammar and prompt were frozen at 4389ca9. Its SHA-256 equals the pending hash committed in revision 3 (f2e6191) before any v0.2 code, so the questions did not change after the code was written. The file is unchanged; it moves from pending into the frozen files.
