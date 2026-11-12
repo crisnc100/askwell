@@ -42,3 +42,36 @@ Deliberate choices made while building, and why. Newest at the bottom of each ph
   recordings. Everything else in `verify.sh` is green: ruff, pyright, the other 941
   tests, the coverage floors (validate.py 100%, sqlbuild.py 97.3% branch) and the 12
   Playwright tests. The orchestrator has been told.
+
+## Phase 2: the date_series intent
+- **Shape** (`f3f69b3`). `date_series` takes `entity`, `grain`, shared `filters`, an
+  optional `date_range` and 1 to 4 `series`. It takes no `metrics`, `select`,
+  `group_by`, `having`, `order_by` or `limit` (`series_shape`): it is always ordered by
+  period and not capped by a limit. The plan left `order_by` and `limit` open; rejecting
+  them keeps one way to write a series.
+- **The period has no field.** `DateRange.field` became optional. A `date_series` must
+  leave it out (`series_shape`), and every other intent must give it
+  (`invalid_date_range`, "date_range needs a field"). Reusing `date_range` keeps the
+  relative tokens and the start and end rules in one place.
+- **A series' metric is plain:** no ratio, and no `where` or `alias` on the metric
+  itself; those go on the series (`series_shape`). A series needs an alias. Aliases
+  reuse `invalid_alias`, `duplicate_alias` and `alias_collision` (for `period`).
+- **`series_date_field`** fires when a series' date field is not a date or datetime.
+  Reaching it across a one-to-many edge is `fan_out`, checked per series by the existing
+  resolver.
+- **Period refactor.** `check_date_range` was split into the field checks, the period
+  resolution and the predicates, so series reuse them. Its order of checks is unchanged.
+- **SQL.** One grouped CTE per series, `(period, value)`. The plan said subqueries; CTEs
+  are used because each series is read twice (for the union of periods and for its
+  values), and a subquery would be written out, and run, twice. Each series builds its
+  own table aliases and inner-joins only what it uses.
+- **Rows with no date are left out of that series** (`date IS NOT NULL`). A NULL period
+  would otherwise appear as a row that no series can join to.
+- **Shared filter values are bound once per series**, since each CTE applies them. The
+  series sentinel property counts them that way.
+- **Oracle:** 4 cases (v09 to v12): two counts on two dates, a count and a sum, weeks
+  where one series is empty, and a series across a join. The references use
+  `FULL OUTER JOIN` or a correlated count on Postgres, independent of the builder.
+- **State of verify.sh:** the same 11 replay API tests and the replay report step miss
+  their recordings (see Phase 1). Everything else passes: 987 tests, coverage
+  (validate.py 99.7%, sqlbuild.py 97.0% branch) and 12 Playwright tests.
