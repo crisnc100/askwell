@@ -42,5 +42,6 @@ and the gold files, returns only the places below.
   `askwell` and `askwell_app` (local dev and CI only; the beta runs on SQLite).
 - Page titles, the wordmark, README, docs, ADRs, CI. `.secrets.baseline` follows the
   renamed file and the new local-dev credentials, still audited as not secret.
-- No GitHub repo URL and no public address appeared anywhere before the rename. The
-  README's Caddy example uses `askwell.example.com`.
+- No GitHub repo URL appeared anywhere before the rename. The README's hosted-beta
+  section, its Caddy block and its health check name the live address,
+  `https://askwell.cristianortega.dev`.

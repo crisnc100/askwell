@@ -381,9 +381,9 @@ schema's triage file, `evals/triage/<schema>.yaml`, which gives every miss its c
 
 ## Deploy the hosted beta
 
-The hosted beta is one container on one host, behind [Caddy](https://caddyserver.com),
-a web server that handles HTTPS. It answers live questions with Claude Haiku 5.5, through a
-beta-only Anthropic API key. Three controls keep it small and cheap:
+The hosted beta, <https://askwell.cristianortega.dev>, is one container on one host,
+behind [Caddy](https://caddyserver.com), a web server that handles HTTPS. It answers live
+questions with Claude Haiku 5.5, through a beta-only Anthropic API key. Three controls keep it small and cheap:
 
 - **Invite gate.** Every page and API route needs an invite code, except `/healthz`.
   A visitor enters the code once; for 30 days the browser keeps a hash of it in a cookie
@@ -431,7 +431,7 @@ On the host:
 3. Point Caddy at it. Caddy gets the HTTPS certificate on its own:
 
    ```
-   askwell.example.com {
+   askwell.cristianortega.dev {
        request_body {
            max_size 12MB
        }
@@ -442,7 +442,7 @@ On the host:
    `max_size` stops an oversized request at Caddy; the largest real request is one
    10 MB CSV.
 
-4. Check it: `curl https://askwell.example.com/healthz` returns
+4. Check it: `curl https://askwell.cristianortega.dev/healthz` returns
    `{"status": "ok", "mode": "live"}`. It answers 503 if the demo database cannot be read.
 
 To turn live answers off in a hurry, set `ASKWELL_LIVE_ANSWERS_OFF=1` in `.env.beta`
