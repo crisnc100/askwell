@@ -15,9 +15,9 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-from ledgerline.bench import report as report_module
-from ledgerline.bench import run as run_module
-from ledgerline.llm.providers import ANTHROPIC_PREFIX
+from askwell.bench import report as report_module
+from askwell.bench import run as run_module
+from askwell.llm.providers import ANTHROPIC_PREFIX
 
 MAX_UNREADABLE = 0.02
 MIN_REFUSAL_RECALL = 23

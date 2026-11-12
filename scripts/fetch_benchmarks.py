@@ -3,7 +3,7 @@
     uv run python -m scripts.fetch_benchmarks
 
 Spider is licensed CC BY-SA 4.0 (Yu et al., 2018; https://yale-lily.github.io/spider).
-Ledgerline's code is Apache-2.0, so Spider data and question text are never committed:
+Askwell's code is Apache-2.0, so Spider data and question text are never committed:
 this script fetches them, and the repo commits only question IDs (indices into dev.json).
 """
 
@@ -38,7 +38,7 @@ Parsing and Text-to-SQL Task." EMNLP 2018.
 
 Licensed under CC BY-SA 4.0: https://creativecommons.org/licenses/by-sa/4.0/legalcode
 Downloaded unmodified by scripts/fetch_benchmarks.py, archive sha256 {sha256}.
-This data is not part of Ledgerline's Apache-2.0 code and must not be committed.
+This data is not part of Askwell's Apache-2.0 code and must not be committed.
 """
 
 

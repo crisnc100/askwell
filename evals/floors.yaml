@@ -1,4 +1,4 @@
-# The minimum scores v0.1 set out to reach, checked by the eval report for Ledgerline.
+# The minimum scores v0.1 set out to reach, checked by the eval report for Askwell.
 # The report computes met / not met from the numbers. `status_note`, `cause` and `next`
 # are the written explanation for the current release. An entry with a `gold` file
 # checks only runs on that file; one without checks the schema's own gold.

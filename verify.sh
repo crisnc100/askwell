@@ -14,7 +14,7 @@ uv run ruff check .
 step "ruff format --check"
 uv run ruff format --check .
 
-step "pyright (strict on ledgerline/core and ledgerline/workspace)"
+step "pyright (strict on askwell/core and askwell/workspace)"
 uv run pyright
 
 step "detect-secrets (against .secrets.baseline)"
@@ -24,7 +24,7 @@ git ls-files -z --cached --others --exclude-standard \
 
 step "pytest (zero skips, branch coverage)"
 rm -f coverage.json
-uv run pytest --cov=ledgerline --cov-branch --cov-report=json:coverage.json --cov-report=term:skip-covered
+uv run pytest --cov=askwell --cov-branch --cov-report=json:coverage.json --cov-report=term:skip-covered
 
 step "per-module branch coverage floors"
 uv run python -m scripts.check_coverage coverage.json

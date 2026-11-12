@@ -111,7 +111,8 @@ const METRICS: { key: MetricKey; label: string; better: "higher" | "lower"; defi
 ];
 
 const SYSTEMS: Record<string, string> = {
-  ledgerline: "Ledgerline",
+  // Askwell's system id, as recorded in the committed reports.
+  ledgerline: "Askwell",
   oneshot: "One-shot baseline",
   sql_agent: "SQL agent baseline",
 };
@@ -153,7 +154,7 @@ function header(): HTMLElement {
   return h(
     "header",
     {},
-    h("p", { class: "brand" }, "Ledgerline"),
+    h("p", { class: "brand" }, "Askwell"),
     h("p", { class: "tagline" }, "How often it answers, how often it is right, and how often it refuses."),
     h("p", {}, h("a", { attrs: { href: "/" } }, "Ask about your own data")),
   );
@@ -171,7 +172,7 @@ function definitions(): HTMLElement {
   append(
     list,
     h("dt", {}, "Gold answer"),
-    h("dd", {}, "The rows a hand-written, checked SQL query returns for the question. The questions and gold answers were fixed before Ledgerline's code was written."),
+    h("dd", {}, "The rows a hand-written, checked SQL query returns for the question. The questions and gold answers were fixed before Askwell's code was written."),
     h("dt", {}, "Range"),
     h(
       "dd",
@@ -211,7 +212,7 @@ function missList(misses: Miss[]): HTMLElement {
   return h(
     "details",
     { class: "misses" },
-    h("summary", {}, `${misses.length} Ledgerline ${misses.length === 1 ? "miss" : "misses"}, each with its cause`),
+    h("summary", {}, `${misses.length} Askwell ${misses.length === 1 ? "miss" : "misses"}, each with its cause`),
     h("ul", {}, ...tally),
     h(
       "table",
@@ -258,7 +259,7 @@ function schemaSection(report: Report, schema: string): HTMLElement {
     h("h2", {}, schemaTitle(schema)),
     ...report.floors.filter((f) => f.schema === schema).map(floorBox),
     h("div", { class: "scroll" }, table),
-    misses.length ? missList(misses) : h("p", { class: "muted" }, "Ledgerline missed nothing here."),
+    misses.length ? missList(misses) : h("p", { class: "muted" }, "Askwell missed nothing here."),
     report.triage_files.includes(schema)
       ? h("p", {}, h("a", { class: "triage", attrs: { href: `/api/triage/${encodeURIComponent(schema)}` } }, `Triage file for ${schema}`))
       : null,
@@ -325,7 +326,7 @@ async function start(): Promise<void> {
       h(
         "p",
         {},
-        "Each schema is a database with a fixed set of questions. Ledgerline is compared with a one-shot baseline: the same model writes the SQL itself, and it runs read-only with no check in between.",
+        "Each schema is a database with a fixed set of questions. Askwell is compared with a one-shot baseline: the same model writes the SQL itself, and it runs read-only with no check in between.",
       ),
       report.notes.length ? h("ul", { class: "notes" }, ...report.notes.map((n) => h("li", {}, n))) : null,
       definitions(),

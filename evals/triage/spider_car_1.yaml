@@ -1,4 +1,4 @@
-# Triage of every Ledgerline miss by Claude Haiku 5.5 in two runs, one trial each:
+# Triage of every Askwell miss by Claude Haiku 5.5 in two runs, one trial each:
 # v02-spider-before (the v0.1 grammar) and v02-spider (the v0.2 grammar). Each note says
 # how the item went in each run; "right" means only the other run missed it. The triage
 # of the simulated run sim-1 is kept in evals/reports/sim-1.md.

@@ -13,18 +13,18 @@ import sys
 from pathlib import Path
 
 FLOORS: dict[str, float] = {
-    "ledgerline/core/validate.py": 95.0,
-    "ledgerline/core/sqlbuild.py": 95.0,
-    "ledgerline/core/executor.py": 85.0,
-    "ledgerline/core/registry_init.py": 85.0,
-    "ledgerline/workspace/rules.py": 90.0,
-    "ledgerline/workspace/check.py": 95.0,
-    "ledgerline/workspace/load.py": 85.0,
-    "ledgerline/workspace/store.py": 95.0,
-    "ledgerline/workspace/limits.py": 95.0,
-    "ledgerline/workspace/api.py": 90.0,
-    "ledgerline/workspace/fields.py": 90.0,
-    "ledgerline/workspace/ask.py": 90.0,
+    "askwell/core/validate.py": 95.0,
+    "askwell/core/sqlbuild.py": 95.0,
+    "askwell/core/executor.py": 85.0,
+    "askwell/core/registry_init.py": 85.0,
+    "askwell/workspace/rules.py": 90.0,
+    "askwell/workspace/check.py": 95.0,
+    "askwell/workspace/load.py": 85.0,
+    "askwell/workspace/store.py": 95.0,
+    "askwell/workspace/limits.py": 95.0,
+    "askwell/workspace/api.py": 90.0,
+    "askwell/workspace/fields.py": 90.0,
+    "askwell/workspace/ask.py": 90.0,
 }
 
 

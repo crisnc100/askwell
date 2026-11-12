@@ -1,5 +1,5 @@
 """Write evals/spider_forbidden_values.json: SHA-256 hashes of the values in every Spider
-categorical column, normalised by ledgerline.bench.privacy, so a test can prove committed
+categorical column, normalised by askwell.bench.privacy, so a test can prove committed
 files quote none of them without CI needing the Spider data.
 
     uv run python -m scripts.spider_forbidden_values
@@ -15,9 +15,9 @@ import json
 
 import yaml
 
-from ledgerline.bench.items import ROOT, spider_databases
-from ledgerline.bench.privacy import digest, is_checkable, normalise
-from ledgerline.bench.spider import generate
+from askwell.bench.items import ROOT, spider_databases
+from askwell.bench.privacy import digest, is_checkable, normalise
+from askwell.bench.spider import generate
 
 OUT = ROOT / "evals" / "spider_forbidden_values.json"
 

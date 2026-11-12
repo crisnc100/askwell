@@ -1,4 +1,4 @@
-# Triage of every Ledgerline miss on the field service schema. Each note names the model
+# Triage of every Askwell miss on the field service schema. Each note names the model
 # and run it describes:
 # - the held-out questions (ho-*) in v02-holdout-before (v0.1 grammar) and v02-holdout
 #   (v0.2 grammar), Claude Haiku 5.5, 3 trials each;
