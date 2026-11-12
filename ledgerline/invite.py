@@ -49,10 +49,12 @@ def parse_codes(raw: str | None) -> list[bytes]:
     return [c.strip().encode("utf-8") for c in (raw or "").split(",") if c.strip()]
 
 
-def is_valid(candidate: str | None, codes: list[bytes]) -> bool:
-    if not candidate or len(candidate) > MAX_CODE_CHARS:
+def is_valid(candidate: str | bytes | None, codes: list[bytes]) -> bool:
+    if not candidate or len(candidate) > MAX_CODE_CHARS * 4:
         return False
-    given = candidate.encode("utf-8")
+    given = candidate.encode("utf-8") if isinstance(candidate, str) else candidate
+    if len(given.decode("utf-8", errors="replace")) > MAX_CODE_CHARS:
+        return False
     matched = False
     for code in codes:
         # No early exit: every code is compared every time.
@@ -119,7 +121,9 @@ def install(
         if request.url.path in OPEN_PATHS:
             return await call_next(request)
         cookie = request.cookies.get(COOKIE)
-        header = request.headers.get(HEADER)
+        # The raw bytes: Starlette decodes header values as Latin-1, which would garble
+        # a code written in any other script.
+        header = _raw_header(request, HEADER)
         if cookie is None and header is None:
             return _refused(request)
         ip = client_ip(request)
@@ -127,7 +131,7 @@ def install(
             presented = cookie
         elif is_valid(header, codes):
             assert header is not None
-            presented = cookie_value(header.encode("utf-8"))
+            presented = cookie_value(header)
         else:
             presented = None
         if attempts.full(ip):
@@ -137,7 +141,8 @@ def install(
         if presented is not None:
             remember(ip, presented)
             return await call_next(request)
-        attempts.allow(ip)
+        if not attempts.allow(ip):
+            return _too_many(request)
         response = _refused(request)
         if cookie is not None:
             # A stale cookie (its code was removed) would otherwise spend a try on
@@ -152,25 +157,26 @@ def install(
     @app.post("/invite")
     async def invite(request: Request) -> Response:  # pyright: ignore[reportUnusedFunction]
         ip = client_ip(request)
-        # A locked-out address is refused before any of the body is read.
-        if attempts.full(ip):
+        # The try is taken in one step before any of the body is read, and given back
+        # only for a right code. Checking first and counting after the body arrived
+        # would let many slow requests all start before the lockout and all finish
+        # their guesses after it.
+        if not attempts.allow(ip):
             return _too_many(request)
         length = request.headers.get("content-length", "")
         if length.isdigit() and int(length) > MAX_FORM_BYTES:
-            attempts.allow(ip)
             return HTMLResponse(_page("That is too long to be a code."), 413)
         body = b""
         async for chunk in request.stream():
             body += chunk
             if len(body) > MAX_FORM_BYTES:
-                attempts.allow(ip)
                 return HTMLResponse(_page("That is too long to be a code."), 413)
         form = parse_qs(body.decode("utf-8", errors="replace"))
         code = (form.get("code") or [None])[0]
         if not is_valid(code, codes):
-            attempts.allow(ip)
             return HTMLResponse(_page("That code is not valid."), status_code=401)
         assert code is not None
+        attempts.refund(ip)
         hashed = cookie_value(code.encode("utf-8"))
         remember(ip, hashed)
         response = RedirectResponse("/", status_code=303)
@@ -183,6 +189,14 @@ def install(
             samesite="lax",
         )
         return response
+
+
+def _raw_header(request: Request, name: str) -> bytes | None:
+    wanted = name.lower().encode("latin-1")
+    for key, value in request.scope.get("headers", []):
+        if key.lower() == wanted:
+            return bytes(value)
+    return None
 
 
 def _too_many(request: Request) -> Response:

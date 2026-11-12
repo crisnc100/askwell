@@ -61,6 +61,13 @@ class RateLimiter:
                 events.popleft()
             return len(events) >= self.limit
 
+    def refund(self, key: str) -> None:
+        """Give back the most recent event `allow` counted for `key`."""
+        with self._lock:
+            events = self._events.get(key)
+            if events:
+                events.pop()
+
     def allow(self, key: str) -> bool:
         """Count one event for `key`, or refuse it if the window is full."""
         now = self.clock()
