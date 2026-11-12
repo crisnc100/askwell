@@ -54,6 +54,7 @@ class Row(_Strict):
     execution_error_rate: Rate
     mean_cost_usd: float | None
     p50_latency_ms: float | None
+    gold: str | None = None  # absent in reports from before --gold
 
 
 class FloorCheck(_Strict):
@@ -79,6 +80,7 @@ class Miss(_Strict):
     """A Ledgerline item that was not answered correctly, with its triage tag."""
 
     schema_: str = Field(alias="schema")
+    gold: str | None = None
     item_id: str
     trial: int = Field(ge=1)
     model: str
@@ -98,6 +100,7 @@ class BaselineWin(_Strict):
     schema_: str = Field(alias="schema")
     model: str
     trial: int = Field(ge=1)
+    gold: str | None = None
     item_id: str
     system: str
 
@@ -107,6 +110,7 @@ class Report(_Strict):
     which model and for which target."""
 
     run_id: str
+    gold_files: list[str] = Field(default_factory=list[str])
     simulation: str | None
     notes: list[str]
     trials: int = Field(ge=1)

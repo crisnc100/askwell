@@ -14,7 +14,7 @@ from typing import Any
 
 import yaml
 
-from ledgerline.bench.items import ROOT
+from ledgerline.bench.items import ROOT, default_gold
 from ledgerline.bench.metrics import ItemOutcome, summarise
 from ledgerline.bench.run import RunResult
 from ledgerline.config import get_settings
@@ -145,12 +145,18 @@ def run_notes(result: RunResult, simulated: bool) -> list[str]:
     return notes
 
 
+def _gold(record: dict[str, Any]) -> str:
+    """Records from runs before --gold carry no gold name: they used the default."""
+    return str(record.get("gold") or default_gold(str(record["schema_id"])))
+
+
 def build(result: RunResult) -> dict[str, Any]:
-    groups: dict[tuple[str, str, str], list[dict[str, Any]]] = defaultdict(list)
+    groups: dict[tuple[str, str, str, str], list[dict[str, Any]]] = defaultdict(list)
     for record in result.records:
-        groups[(record["schema_id"], record["system"], record["model"])].append(record)
+        key = (record["schema_id"], _gold(record), record["system"], record["model"])
+        groups[key].append(record)
     table = []
-    for (schema_id, system, model), records in sorted(groups.items()):
+    for (schema_id, gold, system, model), records in sorted(groups.items()):
         outcomes = [
             ItemOutcome(r["item_id"], r["category"], r["outcome"], r["cost_usd"], r["latency_ms"])
             for r in records
@@ -163,6 +169,7 @@ def build(result: RunResult) -> dict[str, Any]:
                 "model": model,
                 "trials": len(trials),
                 **summarise(outcomes),
+                "gold": gold,
             }
         )
 
@@ -176,6 +183,7 @@ def build(result: RunResult) -> dict[str, Any]:
         misses.append(
             {
                 "schema": record["schema_id"],
+                "gold": _gold(record),
                 "item_id": record["item_id"],
                 "trial": record["trial"],
                 "model": record["model"],
@@ -188,13 +196,19 @@ def build(result: RunResult) -> dict[str, Any]:
             }
         )
 
-    by_item: dict[tuple[str, str, int, str], dict[str, str]] = defaultdict(dict)
+    by_item: dict[tuple[str, str, str, int, str], dict[str, str]] = defaultdict(dict)
     for record in result.records:
-        key = (record["schema_id"], record["model"], record["trial"], record["item_id"])
+        key = (
+            record["schema_id"],
+            _gold(record),
+            record["model"],
+            record["trial"],
+            record["item_id"],
+        )
         by_item[key][record["system"]] = record["outcome"]
     wins = [
-        {"schema": s, "model": m, "trial": t, "item_id": i, "system": system}
-        for (s, m, t, i), outcomes in sorted(by_item.items())
+        {"schema": s, "gold": g, "model": m, "trial": t, "item_id": i, "system": system}
+        for (s, g, m, t, i), outcomes in sorted(by_item.items())
         for system, outcome in sorted(outcomes.items())
         if system != "ledgerline"
         and outcome == "correct"
@@ -203,6 +217,7 @@ def build(result: RunResult) -> dict[str, Any]:
     simulation = simulation_note(result.records)
     return {
         "run_id": result.run_id,
+        "gold_files": sorted({_gold(r) for r in result.records}),
         "simulation": simulation,
         "notes": run_notes(result, simulation is not None),
         "trials": result.trials,
@@ -239,13 +254,15 @@ def render_markdown(report: dict[str, Any]) -> str:
         lines.append(f"- {note}")
     if report["notes"]:
         lines.append("")
+    if report.get("gold_files"):
+        lines += [f"Gold: {', '.join(f'`{g}`' for g in report['gold_files'])}.", ""]
     lines += [
         f"Status: {report['status']}. Spend: ${report['spent_usd']:.4f}.",
         "Rates show the value, the Wilson 95% interval, and the counts. Trials are pooled.",
         "",
         "| Schema | System | Model | Trials | Coverage | Exec. accuracy | Acc. given attempted "
-        "| False refusals | Wrong given answered | Refusal recall | Exec. errors |",
-        "|---|---|---|---|---|---|---|---|---|---|---|",
+        "| False refusals | Wrong given answered | Refusal recall | Exec. errors | Gold |",
+        "|---|---|---|---|---|---|---|---|---|---|---|---|",
     ]
     for row in report["table"]:
         lines.append(
@@ -253,7 +270,7 @@ def render_markdown(report: dict[str, Any]) -> str:
             f"| {_pct(row['coverage'])} | {_pct(row['execution_accuracy'])} "
             f"| {_pct(row['accuracy_given_attempted'])} | {_pct(row['false_refusal_rate'])} "
             f"| {_pct(row['wrong_answer_rate_given_answered'])} | {_pct(row['refusal_recall'])} "
-            f"| {_pct(row['execution_error_rate'])} |"
+            f"| {_pct(row['execution_error_rate'])} | {row.get('gold', '')} |"
         )
     for floor in report.get("floors", []):
         verdict = "met" if floor["met"] else "not met"
@@ -279,7 +296,8 @@ def render_markdown(report: dict[str, Any]) -> str:
     for miss in report["misses"]:
         why = miss["refusal"] or miss["error"] or ", ".join(miss["issue_codes"]) or "rows differ"
         lines.append(
-            f"- `{miss['item_id']}` ({miss['schema']}, trial {miss['trial']}): {miss['outcome']}"
+            f"- `{miss['item_id']}` ({miss['schema']}, {miss['gold']}, trial {miss['trial']}): "
+            f"{miss['outcome']}"
             f" — {why}. Tag: **{miss['tag']}**{'. ' + miss['note'] if miss['note'] else ''}"
         )
     lines += ["", "## Where a baseline beat Ledgerline", ""]
@@ -287,7 +305,8 @@ def render_markdown(report: dict[str, Any]) -> str:
         lines.append("None.")
     for win in report["baseline_wins"]:
         lines.append(
-            f"- `{win['item_id']}` ({win['schema']}, trial {win['trial']}): {win['system']}"
+            f"- `{win['item_id']}` ({win['schema']}, {win['gold']}, trial {win['trial']}): "
+            f"{win['system']}"
         )
     if report["registry_hashes"]:
         lines += ["", "## Spider registries (generated by `registry init`, unedited, draft)", ""]

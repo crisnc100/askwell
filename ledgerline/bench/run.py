@@ -18,7 +18,13 @@ from typing import Any
 from sqlalchemy import Engine
 
 from ledgerline.bench.compare import results_match
-from ledgerline.bench.items import ROOT, EvalItem, fieldservice_items, spider_items
+from ledgerline.bench.items import (
+    ROOT,
+    EvalItem,
+    default_gold,
+    fieldservice_items,
+    spider_items,
+)
 from ledgerline.bench.spider import schema_for
 from ledgerline.bench.systems import LedgerlineSystem, OneShotSystem, System, raw_sql
 from ledgerline.config import Settings
@@ -59,10 +65,15 @@ class Task:
             [self.item.question, self.item.gold_sql, self.item.category, self.item.ordered]
         )
         item = hashlib.sha256(scored.encode()).hexdigest()
-        return (
+        key = (
             f"{self.schema_id}|{self.model}|t{self.trial}|{self.system}|{self.item.id}"
             f"|{self.prompt_version}|{self.registry_sha[:16]}|{item[:16]}"
         )
+        # Only a second gold file adds its name, so default-gold runs still resume from
+        # checkpoints written before --gold existed.
+        if self.item.gold and self.item.gold != default_gold(self.schema_id):
+            key += f"|gold={self.item.gold}"
+        return key
 
 
 def prompt_version_for(system: str) -> str:
@@ -110,10 +121,16 @@ def _schemas(
     return out, hashes
 
 
-def items_for(schema_id: str) -> list[EvalItem]:
+def items_for(schema_id: str, gold: Path | None = None) -> list[EvalItem]:
+    if schema_id.startswith("spider_"):
+        if gold is not None:
+            raise ValueError(
+                "Spider questions come from the pre-registered IDs; --gold is not used"
+            )
+        return spider_items(schema_id.removeprefix("spider_"))
     if schema_id == "fieldservice":
-        return fieldservice_items()
-    return spider_items(schema_id.removeprefix("spider_"))
+        return fieldservice_items(gold)
+    raise ValueError(f"no gold set for schema {schema_id!r}")
 
 
 def trials_for(schema_id: str, trials: int) -> int:
@@ -169,7 +186,12 @@ def run_eval(
     trials: int,
     budget_usd: float,
     progress: Callable[[str], None] = lambda _m: None,
+    gold: Path | None = None,
 ) -> RunResult:
+    """`gold` scores a second gold file for the one schema given, in place of its
+    default gold set."""
+    if gold is not None and len(schema_ids) != 1:
+        raise ValueError("--gold takes exactly one schema")
     for system in systems:
         if system not in SYSTEMS:
             raise ValueError(f"unknown system {system!r}")
@@ -197,7 +219,7 @@ def run_eval(
         for model in models
         for trial in range(1, trials_for(schema_id, trials) + 1)
         for system in systems
-        for item in items_for(schema_id)
+        for item in (items_for(schema_id) if gold is None else items_for(schema_id, gold))
     ]
     engines: dict[str, Engine] = {}
     golds: dict[str, _Gold] = {}
@@ -270,6 +292,7 @@ def run_eval(
             "trial": task.trial,
             "system": task.system,
             "item_id": task.item.id,
+            "gold": task.item.gold,
             "category": task.item.category,
             "difficulty": task.item.difficulty,
             "outcome": outcome,
@@ -294,6 +317,7 @@ def run_eval(
                 "models": models,
                 "trials": trials,
                 "budget_usd": budget_usd,
+                "gold": str(gold) if gold is not None else None,
                 "registry_hashes": hashes,
             },
             indent=2,

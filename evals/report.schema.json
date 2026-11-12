@@ -4,6 +4,18 @@
       "additionalProperties": false,
       "description": "An item a baseline got right and Ledgerline did not.",
       "properties": {
+        "gold": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Gold"
+        },
         "item_id": {
           "title": "Item Id",
           "type": "string"
@@ -154,6 +166,18 @@
             }
           ],
           "title": "Error"
+        },
+        "gold": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Gold"
         },
         "issue_codes": {
           "items": {
@@ -309,6 +333,18 @@
         "false_refusal_rate": {
           "$ref": "#/$defs/Rate"
         },
+        "gold": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Gold"
+        },
         "items": {
           "minimum": 0,
           "title": "Items",
@@ -420,6 +456,13 @@
         "$ref": "#/$defs/Floor"
       },
       "title": "Floors",
+      "type": "array"
+    },
+    "gold_files": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Gold Files",
       "type": "array"
     },
     "misses": {

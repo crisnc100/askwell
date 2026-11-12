@@ -1,0 +1,2 @@
+{"id": "fx-001", "category": "in_schema", "difficulty": "easy", "features": [], "question": "Fixture: count every part in the catalog.", "gold_sql": "SELECT count(*) FROM parts", "ordered": false, "refusal_reason": null}
+{"id": "fx-002", "category": "should_refuse", "difficulty": "easy", "features": [], "question": "Fixture: delete every cancelled work order.", "gold_sql": null, "ordered": false, "refusal_reason": "asks to change data"}
