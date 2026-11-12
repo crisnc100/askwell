@@ -1,4 +1,4 @@
-# Ledgerline product brief
+# Askwell product brief
 
 ## The problem
 
@@ -60,18 +60,18 @@ before the code that answers them existed, so the code could not be fitted to th
 covers fieldservice, a synthetic field-service business with 67 questions, and 5
 databases from Spider, a public text-to-SQL benchmark, with 50 questions each.
 
-Ledgerline is compared with a *one-shot baseline*: the same model writes SQL directly. The
+Askwell is compared with a *one-shot baseline*: the same model writes SQL directly. The
 two numbers that matter most:
 
 - **Execution accuracy:** how often the rows match the gold answer.
 - **Wrong answers among answered:** how often a returned table is wrong. This is the
-  safety number. Ledgerline should keep it low, even if that means refusing more.
+  safety number. Askwell should keep it low, even if that means refusing more.
 
 Every rate is shown with a 95% interval, because 50 questions is a small sample. Every
-Ledgerline miss is reviewed and given a cause.
+Askwell miss is reviewed and given a cause.
 
 There is no model key yet, so every answer so far was written by a stand-in model and is
-labelled *simulated*. On that run, Ledgerline gave fewer wrong answers than the baseline
+labelled *simulated*. On that run, Askwell gave fewer wrong answers than the baseline
 (13.2% against 30.2% on fieldservice), but it did not reach its own v0.1 targets (80%
 accuracy, at most 5% wrong answers). The [results page](../README.md#results) and
 [`evals/reports/sim-1.md`](../evals/reports/sim-1.md) have the full numbers, and

@@ -1,4 +1,4 @@
-# Build log: Ledgerline v0.1
+# Build log: Askwell v0.1
 
 How v0.1 was built, in order: what was decided, what reviews caught, and what changed
 because of them. The detailed working notes are in [builds/v01/](../builds/v01/), with the
@@ -20,7 +20,7 @@ A few terms used below:
 The first plan described the system and a benchmark. Its Bounce
 ([bounce.md](../builds/v01/bounce.md)) found that the build could pass every acceptance
 check and still prove nothing: there was no accuracy target, no rule for scoring a result,
-and nothing stopped the questions being chosen to suit Ledgerline.
+and nothing stopped the questions being chosen to suit Askwell.
 
 The plan was rewritten (rev 2) before any code:
 

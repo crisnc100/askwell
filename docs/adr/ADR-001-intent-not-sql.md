@@ -7,14 +7,14 @@
 ## Context
 A data analyst that answers with numbers is only useful if a wrong number is rare and
 detectable. LLM-written SQL can be valid, run, and be wrong (a bad join, a missed filter,
-a double count) with nothing to catch it. Ledgerline's claim is governance: every answer
+a double count) with nothing to catch it. Askwell's claim is governance: every answer
 comes from a query the system can explain and audit.
 
 ## Decision
-The model returns a structured intent (`ledgerline/core/intent.py`): an entity, selected
+The model returns a structured intent (`askwell/core/intent.py`): an entity, selected
 fields, metrics, filters, having, group-by, a date range, order and limit, or
 `unanswerable` with a reason. Plain Python validates every field against the registry
-and returns typed errors. Code resolves relative dates: against `LEDGERLINE_NOW` for a
+and returns typed errors. Code resolves relative dates: against `ASKWELL_NOW` for a
 configured schema, so evals reproduce, and against the wall clock in the workspace's time
 zone for uploaded data ([Your data](../../README.md#your-data)). A
 SQLAlchemy Core builder writes parameterized SQL that runs on a read-only connection.
@@ -37,12 +37,12 @@ On the fieldservice gold set (43 in_schema items, default model, mean of 3 trial
    plus some misreads. The floor is predicted to fail unless the grammar grows.
 3. **Accuracy given attempted ≥ 85%** and **wrong-answer rate given answered ≤ 5%.**
 4. **The oneshot baseline answers more but is wrong more:** execution accuracy within
-   ±15 points of Ledgerline, and wrong-answer rate given answered ≥ 15%.
+   ±15 points of Askwell, and wrong-answer rate given answered ≥ 15%.
 5. **Refusal recall ≥ 95%** on the 24 refusal items (13 out_of_schema, 11 should_refuse),
    with zero hidden-field values returned.
 
 ## How it is measured
-`ledgerline eval --schema fieldservice --systems ledgerline,oneshot --trials 3`, metrics
+`askwell eval --schema fieldservice --systems ledgerline,oneshot --trials 3`, metrics
 as defined in `builds/v01/plan.md` (Definitions), Wilson 95% intervals. The sql_agent
 baseline is planned but waits for a live model ([ADR-006](ADR-006-benchmark-methodology.md)). With 43
 items one question is about 2.3 points, so differences under about 10 points are within
@@ -62,7 +62,7 @@ Two things changed between the prediction and the run:
   fs-041 now has a join path but still needs a conditional count, so it stays out of reach.
 - Gold revision 2 fixed fs-032, which contradicted the gold README (`evals/gold/CHANGELOG.md`).
 
-| Metric (fieldservice) | Ledgerline | oneshot |
+| Metric (fieldservice) | Askwell | oneshot |
 |---|---|---|
 | Coverage (in_schema attempted) | 88.4% [76-95], 38/43 | 100%, 43/43 |
 | Execution accuracy | 76.7% [62-87], 33/43 | 69.8% [55-81], 30/43 |
@@ -81,7 +81,7 @@ How the predictions held:
 3. **Accuracy given attempted ≥ 85%:** held (86.8%). **Wrong answers among answered ≤ 5%:**
    failed (13.2%).
 4. **oneshot answers more and is wrong more:** held. Its accuracy is within 7 points of
-   Ledgerline's, and 30.2% of its answers are wrong.
+   Askwell's, and 30.2% of its answers are wrong.
 5. **Refusal recall ≥ 95%:** held (100%). No hidden-field value was returned.
 
 **The v0.1 floor is not met (simulated run).** Execution accuracy is 76.7% against a floor of

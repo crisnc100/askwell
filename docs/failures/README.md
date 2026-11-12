@@ -1,6 +1,6 @@
 # Failures
 
-Four questions Ledgerline got wrong or refused in the simulated run `sim-1`
+Four questions Askwell got wrong or refused in the simulated run `sim-1`
 ([report](../../evals/reports/sim-1.md)). The model answers in that run were written by a
 stand-in model (claude-haiku-5-5) for the target model (`openai/gpt-oss-120b`), so these
 show how the system behaves, not how the target model behaves.
@@ -22,9 +22,9 @@ Each miss has a *category*, given when the run was reviewed (`evals/triage/field
 
 A wrong answer is worse than a refusal. A refusal tells the person to look elsewhere; a
 wrong table of numbers looks just like a right one. The first two are the kind of miss
-Ledgerline exists to prevent: the model filled in a valid intent for a nearby question
+Askwell exists to prevent: the model filled in a valid intent for a nearby question
 instead of refusing. They are 2 of the 5 wrong answers (5 of 38 answered) that put
-Ledgerline over its v0.1 limit of 5% wrong.
+Askwell over its v0.1 limit of 5% wrong.
 
 ## In v0.2
 

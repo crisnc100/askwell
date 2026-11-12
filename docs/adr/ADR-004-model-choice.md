@@ -11,7 +11,7 @@
 There is no OpenRouter key yet, so no real model runs. Until there is, a Claude model
 writes the model's answers instead ("simulated answers"; see [docs/rerecord.md](../rerecord.md)).
 Each simulated answer is recorded as standing in for one target model:
-`openai/gpt-oss-120b`. It is the `LEDGERLINE_DEFAULT_MODEL` default.
+`openai/gpt-oss-120b`. It is the `ASKWELL_DEFAULT_MODEL` default.
 
 Why this one: it is cheap, and OpenRouter lists it as supporting structured output.
 That listing is a claim, not a measurement. The spike below still has to run once a key
@@ -26,18 +26,18 @@ diversity.
 
 ## Context
 All LLM access goes through OpenRouter on a $50/month budget shared across projects, so
-the default must be cheap. Ledgerline depends on json_schema structured output, and
+the default must be cheap. Askwell depends on json_schema structured output, and
 support varies by model and by upstream provider.
 
 ## Decision procedure
 1. Pick 4–6 non-batch candidates that OpenRouter's models endpoint lists with
    `structured_outputs` and a prompt price under $0.50/M tokens.
-2. Run `uv run ledgerline spike --models <ids> --budget 0.50` (five fixed probes per model,
+2. Run `uv run askwell spike --models <ids> --budget 0.50` (five fixed probes per model,
    temperature 0, `provider.require_parameters = true`). The JSON report lands in
    `evals/spike/` and is committed.
 3. Default = cheapest model with 5/5 `honoured` and 5/5 exact; second = the best model
    from a different vendor family that meets the same bar. Ties go to lower p50 latency.
-4. Set them in config (`LEDGERLINE_DEFAULT_MODEL`, `LEDGERLINE_SECOND_MODEL`); model ids
+4. Set them in config (`ASKWELL_DEFAULT_MODEL`, `ASKWELL_SECOND_MODEL`); model ids
    never appear in logic.
 
 ## Prediction (pre-registered)
@@ -106,7 +106,7 @@ score above 35/43 (81.4%). L11 stays as the product floor and is reported as it 
 
 ### New rule
 1. **One live pass** on the fieldservice benchmark in record mode, so it also writes
-   the new recordings: one trial, the `ledgerline` and `oneshot` systems.
+   the new recordings: one trial, the `askwell` and `oneshot` systems.
 2. **Candidates,** cheapest first:
    - `mistralai/mistral-small-24b-instruct-2501`
    - `google/gemma-4-26b-a4b-it`
@@ -139,7 +139,7 @@ The result is added to this ADR as Amendment 2.
 
 ## Amendment 2 (2026-11-11): the selection result
 
-The live pass ran once, as Amendment 1 set out: fieldservice, one trial, the `ledgerline`
+The live pass ran once, as Amendment 1 set out: fieldservice, one trial, the `askwell`
 and `oneshot` systems, record mode, run id `select-2026-11-11`. It spent $0.100 of its $2
 budget. The full report is
 [evals/reports/select-2026-11-11.md](../../evals/reports/select-2026-11-11.md), and the
@@ -167,7 +167,7 @@ included. "Unreadable" counts model calls whose answer did not parse.
 
 ### What the numbers say
 - **gpt-oss-120b's unreadable answers were all cut off.** Each of the 7 stopped at the
-  1,024-token limit (`LEDGERLINE_MAX_TOKENS`), because the model reasons before it
+  1,024-token limit (`ASKWELL_MAX_TOKENS`), because the model reasons before it
   answers and spent the limit doing so. The rule fixes the production settings, so this
   counts against it. The choice is sensitive to that limit: had gpt-oss-120b passed
   the gate, it would be the best (25), mistral would be exactly 4 behind, and the
@@ -191,7 +191,7 @@ Every recording these numbers come from is committed under
 `evals/recordings/eval/fieldservice/`, so this rebuilds the report without a key:
 
 ```sh
-uv run ledgerline eval --schema fieldservice --systems ledgerline,oneshot --mode replay --models mistralai/mistral-small-24b-instruct-2501,google/gemma-4-26b-a4b-it,openai/gpt-oss-120b,openai/gpt-4o-mini --trials 1 --run-id select-2026-11-11
+uv run askwell eval --schema fieldservice --systems ledgerline,oneshot --mode replay --models mistralai/mistral-small-24b-instruct-2501,google/gemma-4-26b-a4b-it,openai/gpt-oss-120b,openai/gpt-4o-mini --trials 1 --run-id select-2026-11-11
 ```
 
 The model list must be given: without it the eval runs only the current default. The
@@ -211,8 +211,8 @@ million output tokens (for prompts up to 100,000 tokens), and spend is still mea
 and capped at that price.
 
 **How it is measured.** The same way as Amendment 1's candidates: one live pass on the
-fieldservice benchmark, record mode, one trial, the `ledgerline` and `oneshot` systems,
-and the production settings (`LEDGERLINE_MAX_TOKENS` 1,024). It is called directly
+fieldservice benchmark, record mode, one trial, the `askwell` and `oneshot` systems,
+and the production settings (`ASKWELL_MAX_TOKENS` 1,024). It is called directly
 through the Anthropic API, with structured output (`output_config.format`, a JSON
 schema), adaptive thinking at effort `low`, and no sampling settings. Its row is reported
 next to the four from Amendment 2.
@@ -282,5 +282,5 @@ Next to Amendment 2's four models (same benchmark, `ledgerline` system, one tria
 This rebuilds the report from the committed recordings, without a key:
 
 ```sh
-uv run ledgerline eval --schema fieldservice --systems ledgerline,oneshot --mode replay --models anthropic:claude-haiku-5-5 --trials 1 --run-id select-haiku-2026-11-11
+uv run askwell eval --schema fieldservice --systems ledgerline,oneshot --mode replay --models anthropic:claude-haiku-5-5 --trials 1 --run-id select-haiku-2026-11-11
 ```

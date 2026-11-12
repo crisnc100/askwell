@@ -121,7 +121,7 @@ file, revision 5.
 
 The one-shot baseline on the same held-out questions was right on 51/84 (60.7%) and wrong
 on 33/84 (39.3%) with v0.2's run, so on held-out questions it is right more often than
-Ledgerline and wrong more often too.
+Askwell and wrong more often too.
 
 1. **Seen, fs-028 and fs-035 right in at least 2 of 3 trials:** held. Both were right in
    all 3.

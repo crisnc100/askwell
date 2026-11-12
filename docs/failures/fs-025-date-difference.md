@@ -5,13 +5,13 @@
 **Expected answer.** About 1.35 days: the average time from `opened_at` to `completed_at`
 for completed urgent work orders.
 
-**What Ledgerline did.** It refused, with this reason from the model: "Average days to
+**What Askwell did.** It refused, with this reason from the model: "Average days to
 complete needs the elapsed time between work_orders.opened_at and work_orders.completed_at,
 and the registry has no way to compute a difference between two date fields."
 
 **Why it refused.** That reason is correct. A metric works on one field; it cannot subtract
 one date from another. This is the trade the design makes on purpose: a clear refusal
-instead of a guess. It still counts against Ledgerline's coverage and accuracy, and the
+instead of a guess. It still counts against Askwell's coverage and accuracy, and the
 one-shot baseline got this one right.
 
 **Category.** `grammar_gap`, scored as a refusal.
