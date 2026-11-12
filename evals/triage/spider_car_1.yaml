@@ -1,68 +1,97 @@
-# Triage of every Ledgerline miss in eval run sim-1 (simulated answers).
+# Triage of every Ledgerline miss by Claude Haiku 5.5 in two runs, one trial each:
+# v02-spider-before (the v0.1 grammar) and v02-spider (the v0.2 grammar). Each note says
+# how the item went in each run; "right" means only the other run missed it. The triage
+# of the simulated run sim-1 is kept in evals/reports/sim-1.md.
 # Tags: grammar_gap | misread | validator_false_reject | builder_bug | gold_issue.
 spider:101:
-  note: 'Needs a subquery for the earliest year. The model returned all cars sorted by year instead of
-    refusing: a wrong answer.'
+  note: 'Needs a subquery for the earliest year. Before: a wrong answer. After: refused.'
   tag: grammar_gap
-spider:111:
-  note: The model looked for the car in the wrong field's allowed values and refused an answerable question.
+spider:103:
+  note: 'Answerable by grouping on the many side. The model kept the base on the one side, hit fan_out
+    twice and gave up. Before: refused. After: right.'
+  tag: misread
+spider:104:
+  note: 'The gold needs DISTINCT rows; row lists in the intent grammar cannot ask for distinct rows. Before:
+    a wrong answer. After: refused.'
+  tag: grammar_gap
+spider:116:
+  note: 'The model filtered on the wrong value of the country field. Before: a wrong answer. After: right.'
   tag: misread
 spider:117:
-  note: The column is declared TEXT but holds numbers. Registry init keeps the declared type, so the validator
-    rejects the arithmetic.
+  note: 'The column is declared TEXT but holds numbers. Registry init keeps the declared type, so the
+    validator rejects the arithmetic. Before and after: refused.'
   tag: validator_false_reject
 spider:126:
-  note: The column is declared TEXT but holds numbers. Registry init keeps the declared type, so the validator
-    rejects the arithmetic.
+  note: 'The column is declared TEXT but holds numbers. Registry init keeps the declared type, so the
+    validator rejects the arithmetic. Before and after: refused.'
+  tag: validator_false_reject
+spider:132:
+  note: 'The column is declared TEXT but holds numbers. Registry init keeps the declared type, so the
+    validator rejects the arithmetic. Before: right. After: refused.'
   tag: validator_false_reject
 spider:135:
-  note: The column is declared TEXT but holds numbers. Registry init keeps the declared type, so the validator
-    rejects the arithmetic.
+  note: 'The column is declared TEXT but holds numbers. Registry init keeps the declared type, so the
+    validator rejects the arithmetic. Before and after: refused.'
   tag: validator_false_reject
 spider:136:
-  note: The column is declared TEXT but holds numbers. Registry init keeps the declared type, so the validator
-    rejects the arithmetic.
+  note: 'The column is declared TEXT but holds numbers. Registry init keeps the declared type, so the
+    validator rejects the arithmetic. Before and after: refused.'
   tag: validator_false_reject
 spider:150:
-  note: The question is answerable by grouping model_list by maker. The model kept the base on car_makers,
-    hit fan_out twice and gave up.
+  note: 'The model returned the maker''s short code column, not the full name the question asks for. Before:
+    a wrong answer. After: right.'
   tag: misread
 spider:152:
-  note: 'Registry gap: car_names.model references model_list.model, which is not a primary key, so registry
-    init skips the link and the tables cannot be joined.'
+  note: 'Registry gap: registry init found no link between these tables, so the needed join does not exist.
+    Before and after: refused.'
   tag: grammar_gap
 spider:159:
-  note: Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none
-    of these.
+  note: 'Needs a subquery, set operation or anti-join. The intent grammar has none of these. Before and
+    after: refused.'
   tag: grammar_gap
 spider:160:
-  note: Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none
-    of these.
+  note: 'Needs a subquery, set operation or anti-join. The intent grammar has none of these. Before and
+    after: refused.'
   tag: grammar_gap
+spider:165:
+  note: 'The column is declared TEXT but holds numbers. Registry init keeps the declared type, so the
+    validator rejects the arithmetic. Before: right. After: refused.'
+  tag: validator_false_reject
 spider:167:
-  note: Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none
-    of these.
+  note: 'Needs a subquery, set operation or anti-join. The intent grammar has none of these. Before and
+    after: refused.'
   tag: grammar_gap
 spider:168:
-  note: Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none
-    of these.
+  note: 'Needs a subquery, set operation or anti-join. The intent grammar has none of these. Before and
+    after: refused.'
   tag: grammar_gap
 spider:170:
-  note: The column is declared TEXT but holds numbers. Registry init keeps the declared type, so the validator
-    rejects the arithmetic.
+  note: 'The column is declared TEXT but holds numbers. Registry init keeps the declared type, so the
+    validator rejects the arithmetic. Before and after: refused.'
   tag: validator_false_reject
 spider:171:
-  note: 'Registry gap: car_names.model references model_list.model, which is not a primary key, so registry
-    init skips the link and the tables cannot be joined.'
+  note: 'Registry gap: registry init found no link between these tables, so the needed join does not exist.
+    Before and after: refused.'
   tag: grammar_gap
 spider:172:
-  note: 'With no join path to the maker, the model filtered on the model name instead of refusing, and
-    added a count column: a wrong answer.'
-  tag: misread
+  note: 'Registry gap: registry init found no link from the car tables to the makers table, so the exclusion
+    cannot be written. Before and after: refused.'
+  tag: grammar_gap
 spider:175:
-  note: 'Needs an INTERSECT of two conditions. The model answered only the first: a wrong answer.'
+  note: 'Needs a set operation. The intent grammar has none. Before: a wrong answer. After: refused.'
   tag: grammar_gap
 spider:178:
-  note: 'Registry gap: car_names.model references model_list.model, which is not a primary key, so registry
-    init skips the link and the tables cannot be joined.'
+  note: 'Needs a subquery, set operation or anti-join. The intent grammar has none of these. Before and
+    after: refused.'
   tag: grammar_gap
+spider:93:
+  note: 'The model used a metric alias as a field reference. Before: right. After: refused.'
+  tag: misread
+spider:95:
+  note: 'The column is declared TEXT but holds numbers. Registry init keeps the declared type, so the
+    validator rejects the arithmetic. Before: right. After: refused.'
+  tag: validator_false_reject
+spider:96:
+  note: 'The column is declared TEXT but holds numbers. Registry init keeps the declared type, so the
+    validator rejects the arithmetic. Before: right. After: refused.'
+  tag: validator_false_reject

@@ -349,11 +349,11 @@
       "issue_codes": [],
       "item_id": "ho-001",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Haiku 5.5 (v02-holdout-before, v0.1 grammar): Needs a percentage, which v0.1 cannot express. Answered a nearby grouped count instead: wrong in 3 of 3 trials. Right in all 3 trials with the v0.2 grammar.",
       "outcome": "wrong",
       "refusal": null,
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "tag": "grammar_gap",
       "trial": 1
     },
     {
@@ -362,11 +362,11 @@
       "issue_codes": [],
       "item_id": "ho-002",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Haiku 5.5 (v02-holdout-before, v0.1 grammar): Needs a percentage of a sum. Answered a nearby grouped sum instead: wrong in 3 of 3 trials. Right in all 3 trials with the v0.2 grammar.",
       "outcome": "wrong",
       "refusal": null,
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "tag": "grammar_gap",
       "trial": 1
     },
     {
@@ -375,11 +375,11 @@
       "issue_codes": [],
       "item_id": "ho-003",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Haiku 5.5 (v02-holdout-before, v0.1 grammar): Needs a fraction of a count. Answered a nearby grouped count instead: wrong in 3 of 3 trials. Right in all 3 trials with the v0.2 grammar.",
       "outcome": "wrong",
       "refusal": null,
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "tag": "grammar_gap",
       "trial": 1
     },
     {
@@ -391,11 +391,11 @@
       ],
       "item_id": "ho-004",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Haiku 5.5 (v02-holdout-before, v0.1 grammar): Needs a share per group. Refused in 2 trials and wrong in 1. Right in all 3 trials with the v0.2 grammar.",
       "outcome": "refused",
       "refusal": "The question needs each work order's customer segment. Reaching customers from work_orders takes two joins (work_orders -> sites -> customers), and the registry only supports joined fields one relationship away, so customers.segment is not reachable from work_orders. The intent format also has no way to compute a share (repair count divided by total count) within each group.",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "tag": "grammar_gap",
       "trial": 1
     },
     {
@@ -404,11 +404,11 @@
       "issue_codes": [],
       "item_id": "ho-005",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Haiku 5.5 (v02-holdout-before, v0.1 grammar): Needs a percentage with a condition that compares two date fields. Refused in 3 of 3 trials. Right in all 3 trials with the v0.2 grammar.",
       "outcome": "refused",
       "refusal": "The registry can't express a percentage. It supports one set of metrics with shared filters, so it can't divide the count of invoices paid on or before the due date by the count of all paid invoices issued in 2025.",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "tag": "grammar_gap",
       "trial": 1
     },
     {
@@ -417,11 +417,11 @@
       "issue_codes": [],
       "item_id": "ho-006",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Haiku 5.5 (v02-holdout-before, v0.1 grammar): Needs a proportion. Answered a nearby grouped count instead: wrong in 3 of 3 trials. Right in all 3 trials with the v0.2 grammar.",
       "outcome": "wrong",
       "refusal": null,
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "tag": "grammar_gap",
       "trial": 1
     },
     {
@@ -430,11 +430,11 @@
       "issue_codes": [],
       "item_id": "ho-007",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Haiku 5.5 (v02-holdout-before, v0.1 grammar): Needs two date fields in one monthly series. Wrong in 2 trials and refused in 1. Right in all 3 trials with the v0.2 grammar.",
       "outcome": "wrong",
       "refusal": null,
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "tag": "grammar_gap",
       "trial": 1
     },
     {
@@ -443,11 +443,11 @@
       "issue_codes": [],
       "item_id": "ho-008",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Haiku 5.5 (v02-holdout-before, v0.1 grammar): Needs two date fields in one monthly series. Wrong in 3 of 3 trials. Right in all 3 trials with the v0.2 grammar.",
       "outcome": "wrong",
       "refusal": null,
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "tag": "grammar_gap",
       "trial": 1
     },
     {
@@ -456,11 +456,11 @@
       "issue_codes": [],
       "item_id": "ho-009",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Haiku 5.5 (v02-holdout-before, v0.1 grammar): Needs two date fields in one quarterly series. Refused in 3 of 3 trials. Right in all 3 trials with the v0.2 grammar.",
       "outcome": "refused",
       "refusal": "The comparison needs two different date bases. Billed amounts are dated by issue date (issued_at), but cash received must be dated by payment date (paid_at). A single query can filter only one date field, so one intent cannot return billed and cash by quarter on consistent terms. Try separate questions: billed by issue quarter for 2025 excluding voids, and paid invoice amounts by payment quarter for 2025.",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "tag": "grammar_gap",
       "trial": 1
     },
     {
@@ -469,11 +469,11 @@
       "issue_codes": [],
       "item_id": "ho-010",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Haiku 5.5 (v02-holdout, v0.2 grammar): Wrong in 2 of 3 trials: the model added a not-cancelled filter to the scheduled series, which the question does not ask for. Haiku 5.5 (v02-holdout-before, v0.1 grammar): Needs two date fields in one series. Wrong in 1 trial and refused in 2.",
       "outcome": "wrong",
       "refusal": null,
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "tag": "misread",
       "trial": 1
     },
     {
@@ -482,11 +482,11 @@
       "issue_codes": [],
       "item_id": "ho-011",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Haiku 5.5 (v02-holdout, v0.2 grammar): Needs the difference between two dates. Refused correctly in 3 of 3 trials, as with v0.1.",
       "outcome": "refused",
       "refusal": "The registry has no duration or elapsed-time field, and metrics can only aggregate a single field. Average days from opened_at to completed_at would need a date difference per row, which this intent format cannot express.",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "tag": "grammar_gap",
       "trial": 1
     },
     {
@@ -495,11 +495,11 @@
       "issue_codes": [],
       "item_id": "ho-012",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Haiku 5.5 (v02-holdout, v0.2 grammar): Needs the difference between two dates. Refused correctly in 3 of 3 trials, as with v0.1.",
       "outcome": "refused",
       "refusal": "The registry has no per-invoice days-to-pay measure, and metrics can only aggregate a single field, so the difference between invoices.issued_at and invoices.paid_at cannot be computed.",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "tag": "grammar_gap",
       "trial": 1
     },
     {
@@ -508,11 +508,11 @@
       "issue_codes": [],
       "item_id": "ho-013",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Haiku 5.5 (v02-holdout, v0.2 grammar): Needs a computed value (quantity times a unit cost). Refused correctly in 3 of 3 trials, as with v0.1.",
       "outcome": "refused",
       "refusal": "Total parts cost needs quantity (work_order_parts) multiplied by unit_cost (parts) per line, and the registry has no extended-cost field or way to compute that product. Summing unit_cost alone would ignore quantities, and summing quantity gives units, not cost.",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "tag": "grammar_gap",
       "trial": 1
     },
     {
@@ -521,11 +521,11 @@
       "issue_codes": [],
       "item_id": "ho-014",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Haiku 5.5 (v02-holdout, v0.2 grammar): Needs a computed value (quantity times a price difference). Refused correctly in 3 of 3 trials, as with v0.1.",
       "outcome": "refused",
       "refusal": "Markup requires computing (unit_price - unit_cost) x quantity per line, and the intent format only supports aggregating a single listed field. No computed or derived field is available in the registry, so this cannot be expressed.",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "tag": "grammar_gap",
       "trial": 1
     },
     {
@@ -536,11 +536,11 @@
       ],
       "item_id": "ho-015",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Haiku 5.5 (v02-holdout, v0.2 grammar): Needs an anti-join (completed jobs with no invoice). Refused correctly in 3 of 3 trials, as with v0.1.",
       "outcome": "refused",
       "refusal": "Finding completed jobs with no invoice requires an anti-join against invoices, which is a one-to-many relationship from work_orders. The registry can only filter on fields of the base entity or on many-to-one joins, so this cannot be expressed. Filtering invoices for null work_order_id would not work either, because invoices always reference a work order.",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "tag": "grammar_gap",
       "trial": 1
     },
     {
@@ -549,11 +549,11 @@
       "issue_codes": [],
       "item_id": "ho-016",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Haiku 5.5 (v02-holdout, v0.2 grammar): Needs an anti-join (customers with no recent job). Refused correctly in 3 of 3 trials, as with v0.1.",
       "outcome": "refused",
       "refusal": "The question needs customers with no job in the last 90 days, which is an absence check across customers, sites, and work orders. The intent format can only filter and aggregate from one base entity along many-to-one joins, so it cannot express 'has no matching work order.'",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "tag": "grammar_gap",
       "trial": 1
     },
     {
@@ -562,11 +562,11 @@
       "issue_codes": [],
       "item_id": "ho-017",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Haiku 5.5 (v02-holdout, v0.2 grammar): Needs a distinct count of months. Refused correctly in 3 of 3 trials. Haiku 5.5 (v02-holdout-before, v0.1 grammar): Wrong in 3 of 3 trials.",
       "outcome": "wrong",
       "refusal": null,
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "tag": "grammar_gap",
       "trial": 1
     },
     {
@@ -575,11 +575,11 @@
       "issue_codes": [],
       "item_id": "ho-018",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Haiku 5.5 (v02-holdout, v0.2 grammar): Needs a computed value (hours times rate). Refused correctly in 3 of 3 trials, as with v0.1.",
       "outcome": "refused",
       "refusal": "The registry has no way to compute a per-job product of labor_hours and hourly_rate. Metrics aggregate a single field, so labour dollars cannot be derived.",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "tag": "grammar_gap",
       "trial": 1
     },
     {
@@ -588,11 +588,11 @@
       "issue_codes": [],
       "item_id": "ho-019",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Haiku 5.5 (v02-holdout, v0.2 grammar): Needs date arithmetic (days open). Refused correctly in 3 of 3 trials. Haiku 5.5 (v02-holdout-before, v0.1 grammar): Wrong in 3 of 3 trials.",
       "outcome": "wrong",
       "refusal": null,
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "tag": "grammar_gap",
       "trial": 1
     },
     {
@@ -601,11 +601,11 @@
       "issue_codes": [],
       "item_id": "ho-020",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Haiku 5.5 (v02-holdout, v0.2 grammar): Right customers, order and totals in 3 of 3 trials. The gold also returns an id column, which the question does not ask for; held-out golds keep that convention, so a names-and-values answer is scored wrong. Haiku 5.5 (v02-holdout-before, v0.1 grammar): Wrong in 3 of 3 trials, the same way.",
       "outcome": "wrong",
       "refusal": null,
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "tag": "gold_issue",
       "trial": 1
     },
     {
@@ -614,11 +614,11 @@
       "issue_codes": [],
       "item_id": "ho-022",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Haiku 5.5 (v02-holdout, v0.2 grammar): Right cities and counts in 3 of 3 trials, in a different order inside ties. The gold breaks ties by city name and the answer does not, so the order-only difference is a tie, not NULL ordering. Haiku 5.5 (v02-holdout-before, v0.1 grammar): The same in 3 of 3 trials.",
       "outcome": "wrong",
       "refusal": null,
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "tag": "gold_issue",
       "trial": 1
     },
     {
@@ -629,11 +629,11 @@
       ],
       "item_id": "ho-024",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Haiku 5.5 (v02-holdout, v0.2 grammar): Right parts, order and units in 3 of 3 trials. The gold also returns an id column, which the question does not ask for; held-out golds keep that convention, so a names-and-values answer is scored wrong. Haiku 5.5 (v02-holdout-before, v0.1 grammar): Wrong in 3 of 3 trials, the same way.",
       "outcome": "wrong",
       "refusal": null,
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "tag": "gold_issue",
       "trial": 1
     },
     {
@@ -642,11 +642,11 @@
       "issue_codes": [],
       "item_id": "ho-025",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Haiku 5.5 (v02-holdout, v0.2 grammar): Needs a subquery (above the average). Refused correctly in 3 of 3 trials, as with v0.1.",
       "outcome": "refused",
       "refusal": "Filtering technicians by hourly_rate above the company-wide average needs a comparison against an aggregate computed over all technicians, and the intent format cannot express that. A fixed threshold would have to be supplied instead.",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "tag": "grammar_gap",
       "trial": 1
     },
     {
@@ -657,11 +657,11 @@
       ],
       "item_id": "ho-028",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Haiku 5.5 (v02-holdout, v0.2 grammar): Wrong in 3 of 3 trials. The gold also returns an id column, which the question does not ask for; held-out golds keep that convention, so a names-and-values answer is scored wrong. The fifth place is also a tie, which the gold breaks by id and the answer does not. Haiku 5.5 (v02-holdout-before, v0.1 grammar): Wrong in 3 of 3 trials, the same way.",
       "outcome": "wrong",
       "refusal": null,
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "tag": "gold_issue",
       "trial": 1
     },
     {
@@ -670,11 +670,11 @@
       "issue_codes": [],
       "item_id": "ho-001",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Haiku 5.5 (v02-holdout-before, v0.1 grammar): Needs a percentage, which v0.1 cannot express. Answered a nearby grouped count instead: wrong in 3 of 3 trials. Right in all 3 trials with the v0.2 grammar.",
       "outcome": "wrong",
       "refusal": null,
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "tag": "grammar_gap",
       "trial": 2
     },
     {
@@ -683,11 +683,11 @@
       "issue_codes": [],
       "item_id": "ho-002",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Haiku 5.5 (v02-holdout-before, v0.1 grammar): Needs a percentage of a sum. Answered a nearby grouped sum instead: wrong in 3 of 3 trials. Right in all 3 trials with the v0.2 grammar.",
       "outcome": "wrong",
       "refusal": null,
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "tag": "grammar_gap",
       "trial": 2
     },
     {
@@ -696,11 +696,11 @@
       "issue_codes": [],
       "item_id": "ho-003",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Haiku 5.5 (v02-holdout-before, v0.1 grammar): Needs a fraction of a count. Answered a nearby grouped count instead: wrong in 3 of 3 trials. Right in all 3 trials with the v0.2 grammar.",
       "outcome": "wrong",
       "refusal": null,
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "tag": "grammar_gap",
       "trial": 2
     },
     {
@@ -712,11 +712,11 @@
       ],
       "item_id": "ho-004",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Haiku 5.5 (v02-holdout-before, v0.1 grammar): Needs a share per group. Refused in 2 trials and wrong in 1. Right in all 3 trials with the v0.2 grammar.",
       "outcome": "wrong",
       "refusal": null,
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "tag": "grammar_gap",
       "trial": 2
     },
     {
@@ -725,11 +725,11 @@
       "issue_codes": [],
       "item_id": "ho-005",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Haiku 5.5 (v02-holdout-before, v0.1 grammar): Needs a percentage with a condition that compares two date fields. Refused in 3 of 3 trials. Right in all 3 trials with the v0.2 grammar.",
       "outcome": "refused",
       "refusal": "The question asks for a percentage, which needs two counts (paid-on-time invoices divided by all paid invoices from 2025). The intent format cannot divide one metric by another. I can answer it as two separate queries: the count of 2025-issued invoices with status paid and paid_at on or before due_at, and the count of 2025-issued paid invoices.",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "tag": "grammar_gap",
       "trial": 2
     },
     {
@@ -738,11 +738,11 @@
       "issue_codes": [],
       "item_id": "ho-006",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Haiku 5.5 (v02-holdout-before, v0.1 grammar): Needs a proportion. Answered a nearby grouped count instead: wrong in 3 of 3 trials. Right in all 3 trials with the v0.2 grammar.",
       "outcome": "wrong",
       "refusal": null,
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "tag": "grammar_gap",
       "trial": 2
     },
     {
@@ -751,11 +751,11 @@
       "issue_codes": [],
       "item_id": "ho-007",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Haiku 5.5 (v02-holdout-before, v0.1 grammar): Needs two date fields in one monthly series. Wrong in 2 trials and refused in 1. Right in all 3 trials with the v0.2 grammar.",
       "outcome": "wrong",
       "refusal": null,
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "tag": "grammar_gap",
       "trial": 2
     },
     {
@@ -764,11 +764,11 @@
       "issue_codes": [],
       "item_id": "ho-008",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Haiku 5.5 (v02-holdout-before, v0.1 grammar): Needs two date fields in one monthly series. Wrong in 3 of 3 trials. Right in all 3 trials with the v0.2 grammar.",
       "outcome": "wrong",
       "refusal": null,
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "tag": "grammar_gap",
       "trial": 2
     },
     {
@@ -777,11 +777,11 @@
       "issue_codes": [],
       "item_id": "ho-009",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Haiku 5.5 (v02-holdout-before, v0.1 grammar): Needs two date fields in one quarterly series. Refused in 3 of 3 trials. Right in all 3 trials with the v0.2 grammar.",
       "outcome": "refused",
       "refusal": "The question needs two different date axes. Billing is measured by invoices.issued_at and cash received by invoices.paid_at. A single grouped query can group by only one date field, so it cannot show both per quarter correctly. Grouping by issue quarter with paid status would measure paid invoices by issue date, not cash received in each quarter.",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "tag": "grammar_gap",
       "trial": 2
     },
     {
@@ -790,11 +790,11 @@
       "issue_codes": [],
       "item_id": "ho-010",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Haiku 5.5 (v02-holdout, v0.2 grammar): Wrong in 2 of 3 trials: the model added a not-cancelled filter to the scheduled series, which the question does not ask for. Haiku 5.5 (v02-holdout-before, v0.1 grammar): Needs two date fields in one series. Wrong in 1 trial and refused in 2.",
       "outcome": "refused",
       "refusal": "This needs two differently filtered counts in one result: scheduled visits (by scheduled_for month) and completed jobs (by completed_at month). Metrics cannot carry their own filters, so a single query cannot return both. Please ask for each count separately, for example scheduled visits by month and completed jobs by month for January through June this year.",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "tag": "misread",
       "trial": 2
     },
     {
@@ -803,11 +803,11 @@
       "issue_codes": [],
       "item_id": "ho-011",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Haiku 5.5 (v02-holdout, v0.2 grammar): Needs the difference between two dates. Refused correctly in 3 of 3 trials, as with v0.1.",
       "outcome": "refused",
       "refusal": "The registry has no way to compute elapsed days between work_orders.opened_at and work_orders.completed_at. Metrics can only aggregate a single existing field, so an average of the difference cannot be expressed.",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "tag": "grammar_gap",
       "trial": 2
     },
     {
@@ -816,11 +816,11 @@
       "issue_codes": [],
       "item_id": "ho-012",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Haiku 5.5 (v02-holdout, v0.2 grammar): Needs the difference between two dates. Refused correctly in 3 of 3 trials, as with v0.1.",
       "outcome": "refused",
       "refusal": "The registry has no way to compute the number of days between an invoice's issue date and its payment date. Metrics can only aggregate a field directly (count, sum, avg, min, max), and averaging the raw date fields would not produce a day count. Payment timing per segment would need a days-to-pay field or a date-difference measure.",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "tag": "grammar_gap",
       "trial": 2
     },
     {
@@ -829,11 +829,11 @@
       "issue_codes": [],
       "item_id": "ho-013",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Haiku 5.5 (v02-holdout, v0.2 grammar): Needs a computed value (quantity times a unit cost). Refused correctly in 3 of 3 trials, as with v0.1.",
       "outcome": "refused",
       "refusal": "Total cost needs each line's quantity multiplied by the part's unit_cost, and the registry only supports aggregating a single field. Summing unit_cost alone would ignore how many units were used, so the answer would be wrong.",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "tag": "grammar_gap",
       "trial": 2
     },
     {
@@ -842,11 +842,11 @@
       "issue_codes": [],
       "item_id": "ho-014",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Haiku 5.5 (v02-holdout, v0.2 grammar): Needs a computed value (quantity times a price difference). Refused correctly in 3 of 3 trials, as with v0.1.",
       "outcome": "refused",
       "refusal": "Markup needs (unit_price - unit_cost) x quantity, a computed per-line expression. Metrics can only aggregate a single listed field, so this cannot be expressed. Sums of unit_price or unit_cost separately would not give the markup.",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "tag": "grammar_gap",
       "trial": 2
     },
     {
@@ -857,11 +857,11 @@
       ],
       "item_id": "ho-015",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Haiku 5.5 (v02-holdout, v0.2 grammar): Needs an anti-join (completed jobs with no invoice). Refused correctly in 3 of 3 trials, as with v0.1.",
       "outcome": "refused",
       "refusal": "Finding completed jobs with no invoice requires an anti-join from work_orders to invoices. Invoices sit on the many side of that relationship, so the registry cannot express it, and the question cannot be re-based onto invoices either.",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "tag": "grammar_gap",
       "trial": 2
     },
     {
@@ -870,11 +870,11 @@
       "issue_codes": [],
       "item_id": "ho-016",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Haiku 5.5 (v02-holdout, v0.2 grammar): Needs an anti-join (customers with no recent job). Refused correctly in 3 of 3 trials, as with v0.1.",
       "outcome": "refused",
       "refusal": "Finding active customers with no jobs in the last 90 days requires an exclusion (anti-join) across customers, sites, and work orders. The intent language has no way to express 'no matching related rows', and customers has no job-count field to filter on.",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "tag": "grammar_gap",
       "trial": 2
     },
     {
@@ -883,11 +883,11 @@
       "issue_codes": [],
       "item_id": "ho-017",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Haiku 5.5 (v02-holdout, v0.2 grammar): Needs a distinct count of months. Refused correctly in 3 of 3 trials. Haiku 5.5 (v02-holdout-before, v0.1 grammar): Wrong in 3 of 3 trials.",
       "outcome": "wrong",
       "refusal": null,
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "tag": "grammar_gap",
       "trial": 2
     },
     {
@@ -896,11 +896,11 @@
       "issue_codes": [],
       "item_id": "ho-018",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Haiku 5.5 (v02-holdout, v0.2 grammar): Needs a computed value (hours times rate). Refused correctly in 3 of 3 trials, as with v0.1.",
       "outcome": "refused",
       "refusal": "Labour dollars would need labor_hours multiplied by technicians.hourly_rate per work order, and the registry has no way to compute a product of two fields inside an aggregate. Summing hours or rates separately would not give the dollar figure.",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "tag": "grammar_gap",
       "trial": 2
     },
     {
@@ -909,11 +909,11 @@
       "issue_codes": [],
       "item_id": "ho-019",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Haiku 5.5 (v02-holdout, v0.2 grammar): Needs date arithmetic (days open). Refused correctly in 3 of 3 trials. Haiku 5.5 (v02-holdout-before, v0.1 grammar): Wrong in 3 of 3 trials.",
       "outcome": "wrong",
       "refusal": null,
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "tag": "grammar_gap",
       "trial": 2
     },
     {
@@ -922,11 +922,11 @@
       "issue_codes": [],
       "item_id": "ho-020",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Haiku 5.5 (v02-holdout, v0.2 grammar): Right customers, order and totals in 3 of 3 trials. The gold also returns an id column, which the question does not ask for; held-out golds keep that convention, so a names-and-values answer is scored wrong. Haiku 5.5 (v02-holdout-before, v0.1 grammar): Wrong in 3 of 3 trials, the same way.",
       "outcome": "wrong",
       "refusal": null,
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "tag": "gold_issue",
       "trial": 2
     },
     {
@@ -935,11 +935,11 @@
       "issue_codes": [],
       "item_id": "ho-022",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Haiku 5.5 (v02-holdout, v0.2 grammar): Right cities and counts in 3 of 3 trials, in a different order inside ties. The gold breaks ties by city name and the answer does not, so the order-only difference is a tie, not NULL ordering. Haiku 5.5 (v02-holdout-before, v0.1 grammar): The same in 3 of 3 trials.",
       "outcome": "wrong",
       "refusal": null,
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "tag": "gold_issue",
       "trial": 2
     },
     {
@@ -948,11 +948,11 @@
       "issue_codes": [],
       "item_id": "ho-024",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Haiku 5.5 (v02-holdout, v0.2 grammar): Right parts, order and units in 3 of 3 trials. The gold also returns an id column, which the question does not ask for; held-out golds keep that convention, so a names-and-values answer is scored wrong. Haiku 5.5 (v02-holdout-before, v0.1 grammar): Wrong in 3 of 3 trials, the same way.",
       "outcome": "wrong",
       "refusal": null,
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "tag": "gold_issue",
       "trial": 2
     },
     {
@@ -961,11 +961,11 @@
       "issue_codes": [],
       "item_id": "ho-025",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Haiku 5.5 (v02-holdout, v0.2 grammar): Needs a subquery (above the average). Refused correctly in 3 of 3 trials, as with v0.1.",
       "outcome": "refused",
       "refusal": "Filtering technicians by hourly_rate above the company-wide average requires comparing each row to an aggregate computed across all technicians. The filter operators can only compare a field to a literal value or to another field, so this cannot be expressed.",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "tag": "grammar_gap",
       "trial": 2
     },
     {
@@ -974,11 +974,11 @@
       "issue_codes": [],
       "item_id": "ho-028",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Haiku 5.5 (v02-holdout, v0.2 grammar): Wrong in 3 of 3 trials. The gold also returns an id column, which the question does not ask for; held-out golds keep that convention, so a names-and-values answer is scored wrong. The fifth place is also a tie, which the gold breaks by id and the answer does not. Haiku 5.5 (v02-holdout-before, v0.1 grammar): Wrong in 3 of 3 trials, the same way.",
       "outcome": "wrong",
       "refusal": null,
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "tag": "gold_issue",
       "trial": 2
     },
     {
@@ -987,11 +987,11 @@
       "issue_codes": [],
       "item_id": "ho-001",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Haiku 5.5 (v02-holdout-before, v0.1 grammar): Needs a percentage, which v0.1 cannot express. Answered a nearby grouped count instead: wrong in 3 of 3 trials. Right in all 3 trials with the v0.2 grammar.",
       "outcome": "wrong",
       "refusal": null,
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "tag": "grammar_gap",
       "trial": 3
     },
     {
@@ -1000,11 +1000,11 @@
       "issue_codes": [],
       "item_id": "ho-002",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Haiku 5.5 (v02-holdout-before, v0.1 grammar): Needs a percentage of a sum. Answered a nearby grouped sum instead: wrong in 3 of 3 trials. Right in all 3 trials with the v0.2 grammar.",
       "outcome": "wrong",
       "refusal": null,
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "tag": "grammar_gap",
       "trial": 3
     },
     {
@@ -1013,11 +1013,11 @@
       "issue_codes": [],
       "item_id": "ho-003",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Haiku 5.5 (v02-holdout-before, v0.1 grammar): Needs a fraction of a count. Answered a nearby grouped count instead: wrong in 3 of 3 trials. Right in all 3 trials with the v0.2 grammar.",
       "outcome": "wrong",
       "refusal": null,
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "tag": "grammar_gap",
       "trial": 3
     },
     {
@@ -1029,11 +1029,11 @@
       ],
       "item_id": "ho-004",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Haiku 5.5 (v02-holdout-before, v0.1 grammar): Needs a share per group. Refused in 2 trials and wrong in 1. Right in all 3 trials with the v0.2 grammar.",
       "outcome": "refused",
       "refusal": "The registry links work_orders to sites and sites to customers, but it does not define a joined path from work orders to customers.segment that the query builder can use. A per-segment share of repair work orders cannot be computed from the listed fields as written.",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "tag": "grammar_gap",
       "trial": 3
     },
     {
@@ -1042,11 +1042,11 @@
       "issue_codes": [],
       "item_id": "ho-005",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Haiku 5.5 (v02-holdout-before, v0.1 grammar): Needs a percentage with a condition that compares two date fields. Refused in 3 of 3 trials. Right in all 3 trials with the v0.2 grammar.",
       "outcome": "refused",
       "refusal": "This needs a percentage, which is a ratio of two counts (on-time paid invoices divided by all paid invoices issued in 2025). The intent format cannot express a ratio or a comparison between paid_at and due_at inside an aggregate. You could instead ask for the count of 2025-issued paid invoices and separately for those paid on or before due date, and divide them yourself.",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "tag": "grammar_gap",
       "trial": 3
     },
     {
@@ -1055,11 +1055,11 @@
       "issue_codes": [],
       "item_id": "ho-006",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Haiku 5.5 (v02-holdout-before, v0.1 grammar): Needs a proportion. Answered a nearby grouped count instead: wrong in 3 of 3 trials. Right in all 3 trials with the v0.2 grammar.",
       "outcome": "wrong",
       "refusal": null,
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "tag": "grammar_gap",
       "trial": 3
     },
     {
@@ -1068,11 +1068,11 @@
       "issue_codes": [],
       "item_id": "ho-007",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Haiku 5.5 (v02-holdout-before, v0.1 grammar): Needs two date fields in one monthly series. Wrong in 2 trials and refused in 1. Right in all 3 trials with the v0.2 grammar.",
       "outcome": "refused",
       "refusal": "The question needs two monthly counts on different date fields in one result: tickets by opened_at (came in) and tickets by completed_at (closed out). A single grouped summary can only group by one date field. Ask for these as two separate monthly counts, one by opened date and one by completion date, for this year.",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "tag": "grammar_gap",
       "trial": 3
     },
     {
@@ -1081,11 +1081,11 @@
       "issue_codes": [],
       "item_id": "ho-008",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Haiku 5.5 (v02-holdout-before, v0.1 grammar): Needs two date fields in one monthly series. Wrong in 3 of 3 trials. Right in all 3 trials with the v0.2 grammar.",
       "outcome": "wrong",
       "refusal": null,
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "tag": "grammar_gap",
       "trial": 3
     },
     {
@@ -1094,11 +1094,11 @@
       "issue_codes": [],
       "item_id": "ho-009",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Haiku 5.5 (v02-holdout-before, v0.1 grammar): Needs two date fields in one quarterly series. Refused in 3 of 3 trials. Right in all 3 trials with the v0.2 grammar.",
       "outcome": "refused",
       "refusal": "This needs two different measures: billed amounts grouped by issue date and cash received grouped by payment date. A single query can only group by one date field and cannot apply separate status conditions to each sum. Ask for billed-by-quarter and cash-received-by-quarter as two separate questions.",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "tag": "grammar_gap",
       "trial": 3
     },
     {
@@ -1107,11 +1107,11 @@
       "issue_codes": [],
       "item_id": "ho-010",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Haiku 5.5 (v02-holdout, v0.2 grammar): Wrong in 2 of 3 trials: the model added a not-cancelled filter to the scheduled series, which the question does not ask for. Haiku 5.5 (v02-holdout-before, v0.1 grammar): Needs two date fields in one series. Wrong in 1 trial and refused in 2.",
       "outcome": "refused",
       "refusal": "The question needs two counts bucketed by different dates in one result: visits by scheduled_for month and completions by completed_at month. A single grouped query can only bucket by one date field, and it cannot count two different date fields side by side. Please ask for scheduled visits per month and completed jobs per month as two separate queries.",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "tag": "misread",
       "trial": 3
     },
     {
@@ -1120,11 +1120,11 @@
       "issue_codes": [],
       "item_id": "ho-011",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Haiku 5.5 (v02-holdout, v0.2 grammar): Needs the difference between two dates. Refused correctly in 3 of 3 trials, as with v0.1.",
       "outcome": "refused",
       "refusal": "The registry has no way to compute the elapsed time between opened_at and completed_at. Metrics only aggregate a single field, so an average duration per job type cannot be expressed.",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "tag": "grammar_gap",
       "trial": 3
     },
     {
@@ -1133,11 +1133,11 @@
       "issue_codes": [],
       "item_id": "ho-012",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Haiku 5.5 (v02-holdout, v0.2 grammar): Needs the difference between two dates. Refused correctly in 3 of 3 trials, as with v0.1.",
       "outcome": "refused",
       "refusal": "The registry has no days-to-pay measure. Metrics can only aggregate a field directly (count, sum, avg, min, max), so the difference between invoices.issued_at and invoices.paid_at cannot be computed.",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "tag": "grammar_gap",
       "trial": 3
     },
     {
@@ -1146,11 +1146,11 @@
       "issue_codes": [],
       "item_id": "ho-013",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Haiku 5.5 (v02-holdout, v0.2 grammar): Needs a computed value (quantity times a unit cost). Refused correctly in 3 of 3 trials, as with v0.1.",
       "outcome": "refused",
       "refusal": "Total parts cost needs each line's quantity multiplied by the part's unit_cost, and the registry can only aggregate a single field. It has no way to express that product, so summing unit_cost would give a wrong total.",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "tag": "grammar_gap",
       "trial": 3
     },
     {
@@ -1159,11 +1159,11 @@
       "issue_codes": [],
       "item_id": "ho-014",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Haiku 5.5 (v02-holdout, v0.2 grammar): Needs a computed value (quantity times a price difference). Refused correctly in 3 of 3 trials, as with v0.1.",
       "outcome": "refused",
       "refusal": "Markup needs a per-line calculation, (unit_price - unit_cost) * quantity. Metrics can only aggregate a single listed field, so this derived expression cannot be expressed in the registry.",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "tag": "grammar_gap",
       "trial": 3
     },
     {
@@ -1174,11 +1174,11 @@
       ],
       "item_id": "ho-015",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Haiku 5.5 (v02-holdout, v0.2 grammar): Needs an anti-join (completed jobs with no invoice). Refused correctly in 3 of 3 trials, as with v0.1.",
       "outcome": "refused",
       "refusal": "Finding completed work orders with no invoice requires an anti-join from work_orders to invoices, which is a one-to-many relationship. The registry only supports filtering on the base entity's own fields or on fields of the many-to-one parents, so this cannot be expressed. A related question that can be answered is how many invoices each completed work order has, or the list of invoices with their work order details.",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "tag": "grammar_gap",
       "trial": 3
     },
     {
@@ -1187,11 +1187,11 @@
       "issue_codes": [],
       "item_id": "ho-016",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Haiku 5.5 (v02-holdout, v0.2 grammar): Needs an anti-join (customers with no recent job). Refused correctly in 3 of 3 trials, as with v0.1.",
       "outcome": "refused",
       "refusal": "Counting active customers with no job opened in the last 90 days needs an anti-join (customers with no matching work order). The registry joins only return customers that have matching rows, and a date filter on work orders would drop the customers we need to count, so this cannot be expressed as a valid intent.",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "tag": "grammar_gap",
       "trial": 3
     },
     {
@@ -1203,11 +1203,11 @@
       ],
       "item_id": "ho-017",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Haiku 5.5 (v02-holdout, v0.2 grammar): Needs a distinct count of months. Refused correctly in 3 of 3 trials. Haiku 5.5 (v02-holdout-before, v0.1 grammar): Wrong in 3 of 3 trials.",
       "outcome": "wrong",
       "refusal": null,
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "tag": "grammar_gap",
       "trial": 3
     },
     {
@@ -1216,11 +1216,11 @@
       "issue_codes": [],
       "item_id": "ho-018",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Haiku 5.5 (v02-holdout, v0.2 grammar): Needs a computed value (hours times rate). Refused correctly in 3 of 3 trials, as with v0.1.",
       "outcome": "refused",
       "refusal": "Labour dollars would need hours billed multiplied by each technician's hourly rate (work_orders.labor_hours * technicians.hourly_rate), and the registry has no way to multiply two fields inside an aggregate. Summing hours or rates separately would not give the requested figure.",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "tag": "grammar_gap",
       "trial": 3
     },
     {
@@ -1229,11 +1229,11 @@
       "issue_codes": [],
       "item_id": "ho-019",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Haiku 5.5 (v02-holdout, v0.2 grammar): Needs date arithmetic (days open). Refused correctly in 3 of 3 trials. Haiku 5.5 (v02-holdout-before, v0.1 grammar): Wrong in 3 of 3 trials.",
       "outcome": "wrong",
       "refusal": null,
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "tag": "grammar_gap",
       "trial": 3
     },
     {
@@ -1242,11 +1242,11 @@
       "issue_codes": [],
       "item_id": "ho-020",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Haiku 5.5 (v02-holdout, v0.2 grammar): Right customers, order and totals in 3 of 3 trials. The gold also returns an id column, which the question does not ask for; held-out golds keep that convention, so a names-and-values answer is scored wrong. Haiku 5.5 (v02-holdout-before, v0.1 grammar): Wrong in 3 of 3 trials, the same way.",
       "outcome": "wrong",
       "refusal": null,
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "tag": "gold_issue",
       "trial": 3
     },
     {
@@ -1257,11 +1257,11 @@
       ],
       "item_id": "ho-022",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Haiku 5.5 (v02-holdout, v0.2 grammar): Right cities and counts in 3 of 3 trials, in a different order inside ties. The gold breaks ties by city name and the answer does not, so the order-only difference is a tie, not NULL ordering. Haiku 5.5 (v02-holdout-before, v0.1 grammar): The same in 3 of 3 trials.",
       "outcome": "wrong",
       "refusal": null,
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "tag": "gold_issue",
       "trial": 3
     },
     {
@@ -1270,11 +1270,11 @@
       "issue_codes": [],
       "item_id": "ho-024",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Haiku 5.5 (v02-holdout, v0.2 grammar): Right parts, order and units in 3 of 3 trials. The gold also returns an id column, which the question does not ask for; held-out golds keep that convention, so a names-and-values answer is scored wrong. Haiku 5.5 (v02-holdout-before, v0.1 grammar): Wrong in 3 of 3 trials, the same way.",
       "outcome": "wrong",
       "refusal": null,
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "tag": "gold_issue",
       "trial": 3
     },
     {
@@ -1283,11 +1283,11 @@
       "issue_codes": [],
       "item_id": "ho-025",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Haiku 5.5 (v02-holdout, v0.2 grammar): Needs a subquery (above the average). Refused correctly in 3 of 3 trials, as with v0.1.",
       "outcome": "refused",
       "refusal": "The registry can filter technicians only against fixed values or other fields on the same row, not against a company-wide average computed across all technicians. Comparing each technician's hourly_rate to that average would need a subquery, which this intent format does not support.",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "tag": "grammar_gap",
       "trial": 3
     },
     {
@@ -1298,11 +1298,11 @@
       ],
       "item_id": "ho-028",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Haiku 5.5 (v02-holdout, v0.2 grammar): Wrong in 3 of 3 trials. The gold also returns an id column, which the question does not ask for; held-out golds keep that convention, so a names-and-values answer is scored wrong. The fifth place is also a tie, which the gold breaks by id and the answer does not. Haiku 5.5 (v02-holdout-before, v0.1 grammar): Wrong in 3 of 3 trials, the same way.",
       "outcome": "wrong",
       "refusal": null,
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "tag": "gold_issue",
       "trial": 3
     }
   ],

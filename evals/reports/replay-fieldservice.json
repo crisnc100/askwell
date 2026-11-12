@@ -85,9 +85,9 @@
       "issue_codes": [],
       "item_id": "fs-025",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "Haiku 5.5 (select-haiku-2026-11-11): Needs the difference between two dates (opened to completed). Refused correctly, naming the missing duration. mistral-small (select-2026-11-11): Needs the difference between two dates (opened to completed). Refused, by failing validation twice.",
+      "note": "Haiku 5.5 (v02-seen, v0.2 grammar): Refused correctly in 3 of 3 trials. Haiku 5.5 (select-haiku-2026-11-11): Needs the difference between two dates (opened to completed). Refused correctly, naming the missing duration. mistral-small (select-2026-11-11): Needs the difference between two dates (opened to completed). Refused, by failing validation twice.",
       "outcome": "refused",
-      "refusal": "it needs a duration between two dates (opened_at to completed_at) in days, which the intent cannot express",
+      "refusal": "it needs a duration between two dates (opened_at to completed_at), which the intent cannot express",
       "schema": "fieldservice",
       "tag": "grammar_gap",
       "trial": 1
@@ -98,9 +98,9 @@
       "issue_codes": [],
       "item_id": "fs-030",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "Haiku 5.5 (select-haiku-2026-11-11): Needs a computed value (quantity times unit price). Refused correctly. mistral-small (select-2026-11-11): Needs a computed value (quantity times unit price). Refused, by failing validation twice.",
+      "note": "Haiku 5.5 (v02-seen, v0.2 grammar): Refused correctly in 3 of 3 trials. Haiku 5.5 (select-haiku-2026-11-11): Needs a computed value (quantity times unit price). Refused correctly. mistral-small (select-2026-11-11): Needs a computed value (quantity times unit price). Refused, by failing validation twice.",
       "outcome": "refused",
-      "refusal": "parts revenue requires multiplying work_order_parts.quantity by parts.unit_price for each line, and the intent cannot express a product of two fields.",
+      "refusal": "parts revenue needs the product of quantity (work_order_parts) and unit_price (parts), and the intent cannot express a product of two fields",
       "schema": "fieldservice",
       "tag": "grammar_gap",
       "trial": 1
@@ -111,9 +111,9 @@
       "issue_codes": [],
       "item_id": "fs-037",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "Haiku 5.5 (select-haiku-2026-11-11): Needs a distinct count of months in HAVING. Refused correctly. mistral-small (select-2026-11-11): Needs a distinct count of months in HAVING. Refused correctly.",
+      "note": "Haiku 5.5 (v02-seen, v0.2 grammar): Refused correctly in 3 of 3 trials. Haiku 5.5 (select-haiku-2026-11-11): Needs a distinct count of months in HAVING. Refused correctly. mistral-small (select-2026-11-11): Needs a distinct count of months in HAVING. Refused correctly.",
       "outcome": "refused",
-      "refusal": "The question needs a distinct count of calendar months per technician (at least one completion in each of the three months of last quarter). The intent cannot count distinct periods, so it cannot test for a completion in every month.",
+      "refusal": "it needs a distinct count of months per technician (or a test that every month has at least one completion), and the intent cannot express a distinct count of periods or a per-period presence check",
       "schema": "fieldservice",
       "tag": "grammar_gap",
       "trial": 1
@@ -124,9 +124,9 @@
       "issue_codes": [],
       "item_id": "fs-039",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "Haiku 5.5 (select-haiku-2026-11-11): Needs date arithmetic and a ratio. Refused correctly. mistral-small (select-2026-11-11): Needs date arithmetic and a ratio. Refused, by failing validation twice.",
+      "note": "Haiku 5.5 (v02-seen, v0.2 grammar): Refused correctly in 3 of 3 trials. Haiku 5.5 (select-haiku-2026-11-11): Needs date arithmetic and a ratio. Refused correctly. mistral-small (select-2026-11-11): Needs date arithmetic and a ratio. Refused, by failing validation twice.",
       "outcome": "refused",
-      "refusal": "it needs a duration between two dates (opened_at to completed_at) compared against a 2-day threshold, which the intent cannot express",
+      "refusal": "it needs the time from opened_at to completed_at compared against 2 days, which is a duration between two dates that the intent cannot express",
       "schema": "fieldservice",
       "tag": "grammar_gap",
       "trial": 1
@@ -137,7 +137,7 @@
       "issue_codes": [],
       "item_id": "fs-042",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "Haiku 5.5 (select-haiku-2026-11-11): Needs an anti-join (sites with no work orders). Refused correctly. mistral-small (select-2026-11-11): Needs an anti-join (sites with no work orders). Refused correctly.",
+      "note": "Haiku 5.5 (v02-seen, v0.2 grammar): Refused correctly in 3 of 3 trials. Haiku 5.5 (select-haiku-2026-11-11): Needs an anti-join (sites with no work orders). Refused correctly. mistral-small (select-2026-11-11): Needs an anti-join (sites with no work orders). Refused correctly.",
       "outcome": "refused",
       "refusal": "the question asks for sites with no related work orders (a 'has none' question), which the intent cannot express",
       "schema": "fieldservice",
@@ -151,7 +151,7 @@
   "registry_hashes": {},
   "run_id": "replay-fieldservice",
   "simulation": null,
-  "spent_usd": 0.05875069999999999,
+  "spent_usd": 0.059149400000000005,
   "status": "complete",
   "table": [
     {
@@ -202,9 +202,9 @@
       },
       "gold": "fieldservice.jsonl",
       "items": 67,
-      "mean_cost_usd": 0.0004681970149253731,
+      "mean_cost_usd": 0.0004750880597014926,
       "model": "anthropic:claude-haiku-5-5",
-      "p50_latency_ms": 16.62349991966039,
+      "p50_latency_ms": 6.0498330276459455,
       "pending": 0,
       "refusal_recall": {
         "ci95": [
@@ -231,12 +231,12 @@
     {
       "accuracy_given_attempted": {
         "ci95": [
-          0.6225547970219101,
-          0.8684632152061551
+          0.5976159650115332,
+          0.8507048287619176
         ],
-        "n": 33,
+        "n": 32,
         "of": 43,
-        "rate": 0.7674418604651163
+        "rate": 0.7441860465116279
       },
       "coverage": {
         "ci95": [
@@ -249,12 +249,12 @@
       },
       "execution_accuracy": {
         "ci95": [
-          0.6225547970219101,
-          0.8684632152061551
+          0.5976159650115332,
+          0.8507048287619176
         ],
-        "n": 33,
+        "n": 32,
         "of": 43,
-        "rate": 0.7674418604651163
+        "rate": 0.7441860465116279
       },
       "execution_error_rate": {
         "ci95": [
@@ -276,9 +276,9 @@
       },
       "gold": "fieldservice.jsonl",
       "items": 67,
-      "mean_cost_usd": 0.00040867910447761195,
+      "mean_cost_usd": 0.0004077388059701493,
       "model": "anthropic:claude-haiku-5-5",
-      "p50_latency_ms": 5.751374992541969,
+      "p50_latency_ms": 2.2102079819887877,
       "pending": 0,
       "refusal_recall": {
         "ci95": [
@@ -294,12 +294,12 @@
       "trials": 1,
       "wrong_answer_rate_given_answered": {
         "ci95": [
-          0.1315367847938448,
-          0.37744520297809003
+          0.14929517123808245,
+          0.40238403498846675
         ],
-        "n": 10,
+        "n": 11,
         "of": 43,
-        "rate": 0.23255813953488372
+        "rate": 0.2558139534883721
       }
     }
   ],
