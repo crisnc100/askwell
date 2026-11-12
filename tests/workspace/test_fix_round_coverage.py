@@ -91,3 +91,12 @@ def test_the_limiter_forgets_attempts_older_than_its_window() -> None:
     assert limiter.full("a")
     now[0] = 61.0
     assert not limiter.full("a")
+
+
+def test_a_refund_gives_back_one_try_and_ignores_unknown_addresses() -> None:
+    limiter = RateLimiter(1, 60.0, clock=lambda: 0.0)
+    limiter.refund("nobody")  # nothing counted yet: no effect, no error
+    assert limiter.allow("a")
+    assert not limiter.allow("a")
+    limiter.refund("a")
+    assert limiter.allow("a")
