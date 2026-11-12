@@ -67,6 +67,8 @@ ErrorCode = Literal[
     "invalid_order_by",
     "limit_out_of_range",
     "placeholder_reason",
+    "ratio_ref",
+    "ratio_shape",
 ]
 
 _ALIAS = re.compile(r"^[a-z][a-z0-9_]{0,62}$")
@@ -138,6 +140,10 @@ class PlanMetric:
     agg: str
     field: ResolvedField | None
     distinct: bool
+    where: tuple[Predicate, ...] = ()
+    numerator: str | None = None  # ratio only: metric labels
+    denominator: str | None = None
+    as_percent: bool = False
 
 
 @dataclass(frozen=True)
@@ -680,7 +686,30 @@ class _Validator:
         for index, metric in enumerate(self.intent.metrics):
             loc = f"metrics[{index}]"
             rfield: ResolvedField | None = None
-            if metric.field is None:
+            if metric.agg == "ratio":
+                if (
+                    metric.field is not None
+                    or metric.distinct
+                    or metric.where
+                    or metric.numerator is None
+                    or metric.denominator is None
+                ):
+                    self.fail(
+                        "ratio_shape",
+                        loc,
+                        "a ratio takes numerator, denominator and as_percent only",
+                    )
+                    continue
+            elif (
+                metric.numerator is not None or metric.denominator is not None or metric.as_percent
+            ):
+                self.fail(
+                    "ratio_shape",
+                    loc,
+                    "numerator, denominator and as_percent belong to agg ratio",
+                )
+                continue
+            elif metric.field is None:
                 if metric.agg != "count":
                     self.fail("value_shape", loc, f"{metric.agg} needs a field")
                     continue
@@ -698,6 +727,13 @@ class _Validator:
                 if metric.agg not in ("count", "count_distinct") and not fdef.aggregatable:
                     self.fail("not_aggregatable", loc, f"{metric.field} is not aggregatable")
                     continue
+            conditions = [
+                self.check_condition(cond, f"{loc}.where[{i}]")
+                for i, cond in enumerate(metric.where)
+            ]
+            where = [c for c in conditions if c is not None]
+            if len(where) != len(conditions):
+                continue
             if metric.alias is not None:
                 if not _ALIAS.match(metric.alias):
                     self.fail("invalid_alias", f"{loc}.alias", f"{metric.alias!r} is not a slug")
@@ -722,7 +758,36 @@ class _Validator:
                 continue
             labels.add(label)
             distinct = metric.distinct or metric.agg == "count_distinct"
-            out.append(PlanMetric(label, metric.agg, rfield, distinct))
+            out.append(
+                PlanMetric(
+                    label,
+                    metric.agg,
+                    rfield,
+                    distinct,
+                    tuple(where),
+                    metric.numerator,
+                    metric.denominator,
+                    metric.as_percent,
+                )
+            )
+        return self._check_ratio_refs(out)
+
+    def _check_ratio_refs(self, metrics: list[PlanMetric]) -> list[PlanMetric]:
+        """Both parts must be other, non-ratio metrics of this intent, so a ratio is
+        always one level deep and is computed over the same rows as its parts."""
+        plain = {m.label for m in metrics if m.agg != "ratio"}
+        out: list[PlanMetric] = []
+        for metric in metrics:
+            if metric.agg == "ratio":
+                bad = [r for r in (metric.numerator, metric.denominator) if r not in plain]
+                if bad:
+                    self.fail(
+                        "ratio_ref",
+                        f"metrics.{metric.label}",
+                        f"{bad[0]!r} is not another non-ratio metric of this intent",
+                    )
+                    continue
+            out.append(metric)
         return out
 
     def check_group_by(self) -> list[PlanGroup]:

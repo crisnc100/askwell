@@ -1046,3 +1046,55 @@ def test_a_real_reason_is_not_a_placeholder(registry: Registry, reason: str) -> 
         unanswerable_reason=reason,
     )
     assert answer == ["intent_shape"]
+
+
+# --- v0.2: ratio metrics ---
+
+TOTAL = {"agg": "count", "alias": "total"}
+DONE = {
+    "agg": "count",
+    "alias": "done",
+    "where": [{"field": "status", "op": "eq", "value": "completed"}],
+}
+
+
+@pytest.mark.parametrize(
+    "ratio",
+    [
+        {"agg": "ratio", "alias": "share", "numerator": "missing", "denominator": "total"},
+        {"agg": "ratio", "alias": "share", "numerator": "done", "denominator": "missing"},
+        {"agg": "ratio", "alias": "share", "numerator": "share", "denominator": "total"},
+        {"agg": "ratio", "alias": "share", "numerator": "done", "denominator": "other"},
+    ],
+)
+def test_rule_ratio_ref(registry: Registry, ratio: dict[str, Any]) -> None:
+    other = {"agg": "ratio", "alias": "other", "numerator": "done", "denominator": "total"}
+    result = check(
+        registry, intent_type="summary", entity="work_orders", metrics=[TOTAL, DONE, other, ratio]
+    )
+    assert result.codes == ["ratio_ref"]
+
+
+@pytest.mark.parametrize(
+    "metric",
+    [
+        {"agg": "ratio", "numerator": "done"},
+        {"agg": "ratio", "denominator": "total"},
+        {"agg": "ratio", "numerator": "done", "denominator": "total", "field": "labor_hours"},
+        {"agg": "ratio", "numerator": "done", "denominator": "total", "distinct": True},
+        {
+            "agg": "ratio",
+            "numerator": "done",
+            "denominator": "total",
+            "where": [{"field": "priority", "op": "eq", "value": "urgent"}],
+        },
+        {"agg": "count", "numerator": "done"},
+        {"agg": "sum", "field": "labor_hours", "denominator": "total"},
+        {"agg": "count", "as_percent": True},
+    ],
+)
+def test_rule_ratio_shape(registry: Registry, metric: dict[str, Any]) -> None:
+    result = check(
+        registry, intent_type="summary", entity="work_orders", metrics=[TOTAL, DONE, metric]
+    )
+    assert result.codes == ["ratio_shape"]

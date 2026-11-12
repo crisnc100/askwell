@@ -151,6 +151,51 @@ def test_every_filter_value_is_bound_never_inlined(
         assert len(params) == sum(len(values) for _, values in conditions), (dialect, params)
 
 
+def _assert_all_bound(stmt: Any, conditions: list[tuple[dict[str, Any], list[Any]]]) -> None:
+    for dialect in ("postgresql", "sqlite"):
+        sql, params = compile_sql(stmt, dialect)
+        bound = list(params.values())
+        for _, values in conditions:
+            for value in values:
+                assert not _sql_mentions(sql, value), (dialect, value, sql)
+                assert any(_is_bound(value, b) for b in bound), (dialect, value, params)
+        assert len(params) == sum(len(values) for _, values in conditions), (dialect, params)
+
+
+@settings(max_examples=200, deadline=None, suppress_health_check=[HealthCheck.too_slow])
+@given(
+    metric_conditions=st.lists(
+        st.lists(condition(), min_size=1, max_size=3), min_size=1, max_size=3
+    ),
+    filters=st.lists(condition(), max_size=2),
+)
+def test_every_metric_where_value_is_bound_never_inlined(
+    metric_conditions: list[list[tuple[dict[str, Any], list[Any]]]],
+    filters: list[tuple[dict[str, Any], list[Any]]],
+) -> None:
+    """Conditional metrics, and a ratio over them, bind every value and nothing else."""
+    registry = load_registry(FIELDSERVICE_REGISTRY)
+    metrics: list[dict[str, Any]] = [
+        {"agg": "count", "alias": f"m{i}", "where": [c for c, _ in conds]}
+        for i, conds in enumerate(metric_conditions)
+    ]
+    metrics.append({"agg": "sum", "field": "amount", "alias": "billed"})
+    metrics.append({"agg": "ratio", "numerator": "m0", "denominator": "billed", "as_percent": True})
+    intent = Intent.model_validate(
+        {
+            "intent_type": "summary",
+            "entity": "invoices",
+            "metrics": metrics,
+            "filters": [c for c, _ in filters],
+        }
+    )
+    result = validate(intent, registry, now=NOW)
+    assert result.plan is not None, result.issues
+    _assert_all_bound(
+        build(result.plan), [c for conds in metric_conditions for c in conds] + filters
+    )
+
+
 # --- compile shape ---
 
 

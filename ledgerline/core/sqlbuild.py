@@ -16,14 +16,18 @@ from sqlalchemy import (
     ColumnElement,
     Date,
     DateTime,
+    Float,
     FromClause,
     Numeric,
     Select,
     String,
     and_,
     bindparam,
+    case,
+    cast,
     column,
     func,
+    literal_column,
     or_,
     select,
     table,
@@ -266,12 +270,13 @@ def _fields(plan: QueryPlan) -> list[ResolvedField]:
     out += [m.field for m in plan.metrics if m.field is not None]
     out += [g.field for g in plan.group_by]
     out += [o.field for o in plan.order_by if o.field is not None]
+    predicates = [p for m in plan.metrics for p in m.where]
     for item in plan.where:
-        predicates = item.predicates if isinstance(item, PredicateGroup) else (item,)
-        for predicate in predicates:
-            out.append(predicate.field)
-            if predicate.other is not None:
-                out.append(predicate.other)
+        predicates += item.predicates if isinstance(item, PredicateGroup) else (item,)
+    for predicate in predicates:
+        out.append(predicate.field)
+        if predicate.other is not None:
+            out.append(predicate.other)
     return out
 
 
@@ -279,7 +284,9 @@ def _required_aliases(plan: QueryPlan) -> set[str]:
     """Table aliases a row must have a match in. A join used only inside `any_of`
     groups is optional: an inner join there would drop rows that satisfy another branch
     of the OR (an urgent work order with no technician). Select, metrics, group_by and
-    AND filters keep inner-join semantics; ORDER BY alone never makes a join required."""
+    AND filters keep inner-join semantics; ORDER BY alone never makes a join required.
+    A metric's own `where` never makes a join required either: it picks rows for that
+    metric only, and an inner join would drop rows from every other metric."""
     used: list[ResolvedField] = list(plan.select)
     used += [m.field for m in plan.metrics if m.field is not None]
     used += [g.field for g in plan.group_by]
@@ -364,13 +371,30 @@ def _predicate(tables: _Tables, predicate: Predicate) -> ColumnElement[bool]:
 
 
 def _metric(tables: _Tables, metric: PlanMetric) -> ColumnElement[Any]:
-    if metric.field is None:
+    if metric.field is None and not metric.where:
         return func.count()
-    col = tables.value(metric.field)
+    # A code constant, not a value: rendered as text so only user values are bound.
+    col: ColumnElement[Any] = (
+        literal_column("1", BigInteger()) if metric.field is None else tables.value(metric.field)
+    )
+    if metric.where:
+        # No FILTER (WHERE …): CASE runs the same on Postgres and SQLite. Rows that do
+        # not match give NULL, which every aggregate skips.
+        col = case((and_(*[_predicate(tables, p) for p in metric.where]), col))
     arg = col.distinct() if metric.distinct else col
     if metric.agg in ("count", "count_distinct"):
         return func.count(arg)
     return getattr(func, metric.agg)(arg)
+
+
+def _ratio(exprs: dict[str, ColumnElement[Any]], metric: PlanMetric) -> ColumnElement[Any]:
+    """numerator * scale / NULLIF(denominator, 0), in floating point: Postgres would
+    divide two counts as integers, and a zero denominator must give NULL, not an error.
+    The constants are rendered as text, so only user values are ever bound."""
+    numerator = cast(exprs[metric.numerator or ""], Float)
+    if metric.as_percent:
+        numerator = numerator * literal_column("100")
+    return numerator / func.nullif(exprs[metric.denominator or ""], literal_column("0"))
 
 
 def _threshold(value: float) -> ColumnElement[Any]:
@@ -427,8 +451,11 @@ def build(plan: QueryPlan) -> Select[Any]:
             group_exprs.append(expr)
             columns.append(expr.label(group.label))
             _label(labelled, group.label, expr)
+        exprs = {m.label: _metric(tables, m) for m in plan.metrics if m.agg != "ratio"}
         for metric in plan.metrics:
-            expr = _metric(tables, metric)
+            expr = exprs.get(metric.label)
+            if expr is None:
+                expr = _ratio(exprs, metric)
             columns.append(expr.label(metric.label))
             _label(labelled, metric.label, expr)
 

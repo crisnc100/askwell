@@ -11,7 +11,7 @@ from typing import Literal
 from pydantic import BaseModel, ConfigDict, Field
 
 IntentType = Literal["summary", "grouped_summary", "row_list", "unanswerable"]
-Aggregate = Literal["count", "count_distinct", "sum", "avg", "min", "max"]
+Aggregate = Literal["count", "count_distinct", "sum", "avg", "min", "max", "ratio"]
 FilterOp = Literal[
     "eq", "neq", "gt", "gte", "lt", "lte", "between", "in", "is_null", "ilike_contains"
 ]
@@ -62,10 +62,18 @@ class FilterGroup(_Strict):
 
 
 class Metric(_Strict):
+    """`where` makes it conditional: counted or summed only over the rows that match.
+    A `ratio` takes only `numerator` and `denominator` (labels of other metrics in the
+    same intent) and `as_percent`."""
+
     agg: Aggregate
-    field: str | None = None  # None only for count (count of rows)
+    field: str | None = None  # None only for count (count of rows) and ratio
     distinct: bool = False
     alias: str | None = None
+    where: list[Condition] = Field(default_factory=list[Condition])
+    numerator: str | None = None
+    denominator: str | None = None
+    as_percent: bool = False
 
 
 class Having(_Strict):
