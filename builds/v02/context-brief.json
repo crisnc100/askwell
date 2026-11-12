@@ -1,0 +1,61 @@
+{
+ "mode": "pr",
+ "purpose": "Ledgerline v0.2 (PR-G): widen the question grammar so share and two-date questions can be answered, then measure it honestly on a blind 40-question held-out set whose hash was committed before any v0.2 code.",
+ "mechanism": "1. Grammar (ledgerline/core/intent.py, validate.py, sqlbuild.py): new date_series intent with grain and series; conditional metrics (a where on a metric); ratio metrics over numeric parts with NULLIF on a zero denominator; explicit NULLS LAST; distinct on a fieldless count rejected; placeholder_reason issue code; every value bound, never inlined; same results on Postgres and SQLite.\n2. Prompt (ledgerline/pipeline/prompt.py): interpret-v2, frozen from 4389ca9 before the held-out run.\n3. Eval (ledgerline/bench, ledgerline/cli.py): `eval --gold <file>` runs any gold file; floors entries can name a gold file so each report gets its own verdict.\n4. Gold (evals/gold): holdout-v02.jsonl promoted with `manifest --promote`, which refuses a file whose hash differs from the pending one; revision 5 is a presentation-only edit (ROUND removed, to_char to date_trunc, ho-003 as a fraction) made before any held-out result; tests pin the raw bytes and undo the 14 edits to recover the pre-code hash.\n5. Results: five live Haiku runs (held-out before/after, seen, Spider before/after), $0.75 total; every miss triaged in evals/triage; ADR-007 Result: 8 of 10 predictions held. README leads with held-out (47.6% right, 25.9% wrong of answered) and labels seen results as seen.\n6. Workspace (ledgerline/workspace/ask.py) and web trace show the new intents and the placeholder_reason text.",
+ "decisions": "Fix the gold's presentation (revision 5) rather than the scorer: changing the scorer after seeing the gold would touch every system and gold set. The grammar and prompt stayed frozen through the live runs (no tuning on held-out). Held-out is the headline even though seen looks better. Rejected: running as-is and reporting format-adjusted numbers.",
+ "readers": "README: people evaluating or running Ledgerline. docs/adr: people judging the method and results. docs/failures and evals/triage: people checking misses. evals/gold/README: people auditing the blind set. Code comments: the next maintainer.",
+ "base": "origin/main",
+ "docMap": [
+  {
+   "behavior": "date_series, conditional and ratio metrics, NULLS LAST, placeholder_reason",
+   "docs": [
+    "README.md",
+    "docs/adr/ADR-007-grammar-v02.md"
+   ]
+  },
+  {
+   "behavior": "eval --gold and gold-aware floors",
+   "docs": [
+    "README.md",
+    "docs/adr/ADR-007-grammar-v02.md"
+   ]
+  },
+  {
+   "behavior": "manifest --promote and gold revision 5",
+   "docs": [
+    "evals/gold/README.md",
+    "evals/gold/CHANGELOG.md",
+    "docs/adr/ADR-007-grammar-v02.md"
+   ]
+  },
+  {
+   "behavior": "Live v0.2 results and spend",
+   "docs": [
+    "README.md",
+    "docs/adr/ADR-007-grammar-v02.md",
+    "docs/adr/README.md",
+    "docs/failures/README.md"
+   ]
+  },
+  {
+   "behavior": "Workspace explain and web trace for new intents",
+   "docs": []
+  }
+ ],
+ "untouchable": [
+  "evals/gold/*.jsonl",
+  "evals/gold/MANIFEST.json",
+  "evals/gold/CHANGELOG.md",
+  "evals/gold/manifest.py",
+  "evals/reports/**",
+  "evals/runs/**",
+  "evals/recordings/**",
+  "evals/triage/**",
+  "evals/floors.yaml",
+  "evals/report.schema.json",
+  "builds/**",
+  "tests/**",
+  "config/**",
+  "web/e2e/**"
+ ]
+}
