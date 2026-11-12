@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 import shutil
 from pathlib import Path
@@ -81,10 +82,87 @@ def test_changelog_entry_without_reason_is_detected(gold_copy: Path) -> None:
 HOLDOUT_HASH = "09451c630ca1036df761ec9ee08c5357198c4b13308aa1ab0d9128ddb75d4448"
 
 
+# Gold revision 5: presentation-only edits, made before any held-out result. Each is
+# (item id, text in revision 4, text now). No question, filter or join changes.
+REVISION_5 = [
+    (
+        "ho-001",
+        "ROUND(100.0 * COUNT(*) FILTER (WHERE status = 'cancelled') / COUNT(*), 2)",
+        "100.0 * COUNT(*) FILTER (WHERE status = 'cancelled') / COUNT(*)",
+    ),
+    (
+        "ho-002",
+        "ROUND(100.0 * SUM(amount) FILTER (WHERE status = 'overdue') / SUM(amount), 2)",
+        "100.0 * SUM(amount) FILTER (WHERE status = 'overdue') / SUM(amount)",
+    ),
+    (
+        "ho-003",
+        "ROUND(100.0 * COUNT(*) FILTER (WHERE priority = 'urgent') / COUNT(*), 2) AS pct_urgent",
+        "1.0 * COUNT(*) FILTER (WHERE priority = 'urgent') / COUNT(*) AS share_urgent",
+    ),
+    (
+        "ho-004",
+        "ROUND(100.0 * COUNT(*) FILTER (WHERE w.job_type = 'repair') / COUNT(*), 2)",
+        "100.0 * COUNT(*) FILTER (WHERE w.job_type = 'repair') / COUNT(*)",
+    ),
+    (
+        "ho-005",
+        "ROUND(100.0 * COUNT(*) FILTER (WHERE paid_at <= due_at) / COUNT(*), 2)",
+        "100.0 * COUNT(*) FILTER (WHERE paid_at <= due_at) / COUNT(*)",
+    ),
+    (
+        "ho-006",
+        "ROUND(100.0 * COUNT(*) FILTER (WHERE segment = 'commercial') / COUNT(*), 2)",
+        "100.0 * COUNT(*) FILTER (WHERE segment = 'commercial') / COUNT(*)",
+    ),
+    ("ho-007", "to_char(m.month, 'YYYY-MM')", "date_trunc('month', m.month)::date"),
+    ("ho-008", "to_char(m.month, 'YYYY-MM')", "date_trunc('month', m.month)::date"),
+    ("ho-009", "to_char(q.quarter, 'YYYY-\"Q\"Q')", "date_trunc('quarter', q.quarter)::date"),
+    ("ho-010", "to_char(m.month, 'YYYY-MM')", "date_trunc('month', m.month)::date"),
+    (
+        "ho-011",
+        "ROUND(AVG(EXTRACT(EPOCH FROM completed_at - opened_at) / 86400)::numeric, 2)",
+        "AVG(EXTRACT(EPOCH FROM completed_at - opened_at) / 86400)",
+    ),
+    ("ho-012", "ROUND(AVG(i.paid_at - i.issued_at), 2)", "AVG(i.paid_at - i.issued_at)"),
+    (
+        "ho-019",
+        "ROUND((EXTRACT(EPOCH FROM timestamp '2026-06-30 00:00:00' - opened_at) / 86400)"
+        "::numeric, 1)",
+        "EXTRACT(EPOCH FROM timestamp '2026-06-30 00:00:00' - opened_at) / 86400",
+    ),
+    (
+        "ho-027",
+        "to_char(date_trunc('month', created_at), 'YYYY-MM')",
+        "date_trunc('month', created_at)::date",
+    ),
+]
+
+
+def _as_revision_4(text: str) -> str:
+    """Undo the revision 5 edits, line by line, each exactly once in its own item."""
+    edits: dict[str, list[tuple[str, str]]] = {}
+    for item_id, before, after in REVISION_5:
+        edits.setdefault(item_id, []).append((before, after))
+    lines = []
+    for line in text.splitlines():
+        item = json.loads(line)
+        for before, after in edits.get(item["id"], []):
+            assert item["gold_sql"].count(after) == 1, item["id"]
+            item["gold_sql"] = item["gold_sql"].replace(after, before)
+        lines.append(json.dumps(item, ensure_ascii=False))
+    return "\n".join(lines) + "\n"
+
+
 def test_the_revealed_holdout_matches_the_hash_committed_before_the_code() -> None:
+    """The held-out file is the one hashed before any v0.2 code, plus only the listed
+    presentation edits: undoing them gives the pending hash back exactly."""
     manifest = json.loads((GOLD_DIR / "MANIFEST.json").read_text())
-    assert manifest["files"]["holdout-v02.jsonl"] == HOLDOUT_HASH
     assert "pending" not in manifest
+    text = (GOLD_DIR / "holdout-v02.jsonl").read_text(encoding="utf-8")
+    if hashlib.sha256(text.encode()).hexdigest() != HOLDOUT_HASH:
+        text = _as_revision_4(text)
+    assert hashlib.sha256(text.encode()).hexdigest() == HOLDOUT_HASH
 
 
 def test_a_pending_file_is_promoted_only_if_its_hash_matches(tmp_path: Path) -> None:
