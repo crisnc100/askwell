@@ -139,30 +139,42 @@ REVISION_5 = [
 ]
 
 
-def _as_revision_4(text: str) -> str:
-    """Undo the revision 5 edits, line by line, each exactly once in its own item."""
+# The committed revision 5 file, byte for byte. Any change to it, even whitespace or
+# key order, needs a new revision and a new hash here.
+REVISION_5_HASH = "7792130d82402cebf7e38dafd5352190afcf04b68c5772460486a40a5d5dc8b2"
+
+
+def _as_revision_4(raw: str) -> str:
+    """Undo the revision 5 edits on the raw text, each exactly once in its own item's
+    line. The JSON is never re-serialised, so no other byte can change unnoticed."""
     edits: dict[str, list[tuple[str, str]]] = {}
     for item_id, before, after in REVISION_5:
         edits.setdefault(item_id, []).append((before, after))
     lines = []
-    for line in text.splitlines():
-        item = json.loads(line)
-        for before, after in edits.get(item["id"], []):
-            assert item["gold_sql"].count(after) == 1, item["id"]
-            item["gold_sql"] = item["gold_sql"].replace(after, before)
-        lines.append(json.dumps(item, ensure_ascii=False))
-    return "\n".join(lines) + "\n"
+    for line in raw.split("\n"):
+        if line:
+            for before, after in edits.get(json.loads(line)["id"], []):
+                encoded_after = json.dumps(after, ensure_ascii=False)[1:-1]
+                encoded_before = json.dumps(before, ensure_ascii=False)[1:-1]
+                assert line.count(encoded_after) == 1, line[:20]
+                line = line.replace(encoded_after, encoded_before)
+        lines.append(line)
+    return "\n".join(lines)
 
 
-def test_the_revealed_holdout_matches_the_hash_committed_before_the_code() -> None:
-    """The held-out file is the one hashed before any v0.2 code, plus only the listed
-    presentation edits: undoing them gives the pending hash back exactly."""
+def test_the_committed_holdout_is_revision_5_byte_for_byte() -> None:
     manifest = json.loads((GOLD_DIR / "MANIFEST.json").read_text())
     assert "pending" not in manifest
-    text = (GOLD_DIR / "holdout-v02.jsonl").read_text(encoding="utf-8")
-    if hashlib.sha256(text.encode()).hexdigest() != HOLDOUT_HASH:
-        text = _as_revision_4(text)
-    assert hashlib.sha256(text.encode()).hexdigest() == HOLDOUT_HASH
+    raw = (GOLD_DIR / "holdout-v02.jsonl").read_bytes()
+    assert hashlib.sha256(raw).hexdigest() == REVISION_5_HASH
+
+
+def test_undoing_the_revision_5_edits_gives_the_hash_committed_before_the_code() -> None:
+    """Revision 5 is the file hashed before any v0.2 code plus only the listed
+    presentation edits: undoing them on the raw text gives the pending hash back."""
+    raw = (GOLD_DIR / "holdout-v02.jsonl").read_bytes().decode("utf-8")
+    assert hashlib.sha256(raw.encode()).hexdigest() != HOLDOUT_HASH
+    assert hashlib.sha256(_as_revision_4(raw).encode()).hexdigest() == HOLDOUT_HASH
 
 
 def test_a_pending_file_is_promoted_only_if_its_hash_matches(tmp_path: Path) -> None:
