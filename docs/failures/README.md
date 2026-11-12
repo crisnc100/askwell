@@ -37,8 +37,10 @@ written before the v0.2 code ([report](../../evals/reports/v02-holdout.md)). The
 - 12 differ from the gold only in form or in how ties are broken: the gold also returns
   an id column (ho-020, ho-024, ho-028), or breaks ties by a column the question does not
   name (ho-022, and fifth place in ho-028).
-- 2 are a misread (ho-010): the model left cancelled jobs out of "visits on the
-  schedule", which the question does not ask for.
+- 2 are misreads of one question (ho-010). In one trial the model left cancelled jobs
+  out of "visits on the schedule", which the question does not ask for. In another it
+  read "January through June" as year to date, which stops at the reference date and
+  cuts the end of June.
 
 The other 30 misses are correct refusals of 10 questions v0.2 still cannot express:
 durations between two dates, products of fields, "has none" questions, distinct counts of

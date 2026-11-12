@@ -132,7 +132,8 @@ Ledgerline and wrong more often too.
    75.5% to 25.9%, but not to 8%. Of the 14 wrong answers, 12 differ from the gold only in
    form or ties: 9 because the gold also returns an id column (ho-020, ho-024, ho-028), 3
    because the gold breaks a tie by city (ho-022). The id-column convention was fixed
-   before the runs and is kept. The other 2 are a misread (ho-010).
+   before the runs and is kept. The other 2 are misreads of ho-010, one per trial: an
+   added not-cancelled filter, and "year to date" read for "January through June".
 5. **Held-out, at least 4 more right than v0.1:** held. 28 more (12 to 40), all from the
    ten share and two-date questions (ho-001 to ho-010), which went from 0 right of 30 in
    v0.1 to 28 of 30.
