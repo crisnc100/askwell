@@ -125,7 +125,7 @@
   "deferred": {},
   "floors": [
     {
-      "cause": "Accuracy is met (35 of 43); wrong answers miss by one (2 of 37 answered, 5.4%). Both wrong answers are questions the intent grammar cannot express (a ratio, two date fields in one series), where the model answered a nearby question instead of refusing. Of its 6 refusals, 5 are correct refusals of such questions; 1 (fs-038) is a misread after one intent failed validation.",
+      "cause": "Seen questions: v0.2 was designed from two of them (fs-028, fs-035), so this is not the headline. In v02-seen (3 trials) accuracy is 111 of 129 (86.0%) and wrong answers are 2 of 113 answered (1.8%). fs-028, fs-035 and fs-041 are right in every trial. Of the misses, 15 are correct refusals of questions v0.2 still cannot express, 2 are misreads and 1 is a question that can be read with either of two dates. v0.1 (select-haiku-2026-11-11, 1 trial) had 2 wrong of 37 answered (5.4%).",
       "checks": [
         {
           "met": true,
@@ -156,11 +156,12 @@
           "rule": "<= 5%"
         }
       ],
+      "gold": null,
       "met": true,
       "model": "anthropic:claude-haiku-5-5",
-      "next": "v0.2 changes the prompt and the grammar, then measures them on a fresh run. The v0.1 prompt is not changed after seeing these results.",
+      "next": "The held-out result (v02-holdout) is the headline. The v0.2 prompt and grammar are not changed after seeing these results.",
       "schema": "fieldservice",
-      "status_note": "in v0.1 (live, default model)"
+      "status_note": "in v0.2 on the seen questions (live, default model)"
     }
   ],
   "gold_files": [

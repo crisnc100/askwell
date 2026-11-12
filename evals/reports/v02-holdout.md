@@ -12,14 +12,14 @@ Rates show the value, the Wilson 95% interval, and the counts. Trials are pooled
 | fieldservice | ledgerline | anthropic:claude-haiku-5-5 | 3 | 64.3% [54-74] (54/84) | 47.6% [37-58] (40/84) | 74.1% [61-84] (40/54) | 35.7% [26-46] (30/84) | 25.9% [16-39] (14/54) | 100.0% [90-100] (36/36) | 0.0% [0-3] (0/120) | holdout-v02.jsonl |
 | fieldservice | oneshot | anthropic:claude-haiku-5-5 | 3 | 100.0% [96-100] (84/84) | 60.7% [50-70] (51/84) | 60.7% [50-70] (51/84) | 0.0% [0-4] (0/84) | 39.3% [30-50] (33/84) | 100.0% [90-100] (36/36) | 0.0% [0-3] (0/120) | holdout-v02.jsonl |
 
-## Floor check: fieldservice, anthropic:claude-haiku-5-5 (v0.1 acceptance floor)
+## Floor check: fieldservice, holdout-v02.jsonl, anthropic:claude-haiku-5-5 (v0.1 acceptance floor)
 
 - Execution accuracy >= 80%: 47.6% [37-58] (40/84), NOT met
 - Wrong answers among answered <= 5%: 25.9% [16-39] (14/54), NOT met
 
-Result: **not met** in v0.1 (live, default model).
-Why: Accuracy is met (35 of 43); wrong answers miss by one (2 of 37 answered, 5.4%). Both wrong answers are questions the intent grammar cannot express (a ratio, two date fields in one series), where the model answered a nearby question instead of refusing. Of its 6 refusals, 5 are correct refusals of such questions; 1 (fs-038) is a misread after one intent failed validation.
-Next: v0.2 changes the prompt and the grammar, then measures them on a fresh run. The v0.1 prompt is not changed after seeing these results.
+Result: **not met** on the held-out questions (live, default model).
+Why: Held-out questions, written before any v0.2 code. v0.2 (v02-holdout, 3 trials) is right on 40 of 84 and wrong on 14 of 54 answered (25.9%); v0.1 (v02-holdout-before) was right on 12 of 84 and wrong on 37 of 49 (75.5%). Of v0.2's 14 wrong answers, 6 give the right names and values but the gold also returns an id column (ho-020, ho-024); 3 do the same and also pick another tied technician for fifth place (ho-028); 3 differ only in the order of tied rows (ho-022); 2 are a misread (ho-010). Most of the shortfall in accuracy is 10 questions v0.2 cannot express (durations, products of fields, "has none", distinct periods, a subquery), refused in every trial.
+Next: The held-out golds keep their id-column convention, fixed before the runs. The v0.2 prompt and grammar are not changed after seeing these results.
 
 ## Ledgerline misses
 
