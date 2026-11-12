@@ -87,3 +87,91 @@ def test_relationships_with_a_hidden_endpoint_are_not_shown() -> None:
     assert "work_order_id" not in view.text.split("Relationships")[1].split("work_order_parts")[0]
     assert "- invoices.work_order_id -> work_orders.id" not in view.text
     assert "- work_orders.site_id -> sites.id" in view.text
+
+
+# --- interpret-v2 ---
+
+
+def test_v2_describes_the_new_grammar_and_refuse_first() -> None:
+    from ledgerline.pipeline.prompt import PROMPT_VERSION
+
+    assert PROMPT_VERSION == "interpret-v2"
+    for phrase in (
+        '"where"',
+        '"agg": "ratio"',
+        '"numerator"',
+        '"denominator"',
+        '"as_percent"',
+        '"date_series"',
+        '"date_field"',
+        '"grain"',
+        "Refuse first",
+        "a duration between two dates",
+        "a product of two fields",
+        '"has none"',
+        "a distinct count of periods",
+    ):
+        assert phrase in SYSTEM_PROMPT, phrase
+
+
+def test_v2_examples_use_made_up_entities() -> None:
+    import re
+
+    registry = load_registry(FIELDSERVICE_REGISTRY)
+    examples = set(re.findall(r'"entity": "([a-z_]+)"', SYSTEM_PROMPT))
+    assert examples
+    assert examples.isdisjoint(registry.entities)
+    fields = {name for entity in registry.entities.values() for name in entity.fields}
+    named = set(re.findall(r'"(?:field|date_field)": "([a-z_.]+)"', SYSTEM_PROMPT))
+    assert named
+    assert {n.split(".")[-1] for n in named}.isdisjoint(fields - {"id", "name", "status"})
+
+
+def test_every_v2_example_validates_against_a_made_up_registry() -> None:
+    from ledgerline.core.intent import Intent
+    from ledgerline.core.registry import EntityDef, Registry, Relationship
+    from ledgerline.core.validate import validate
+    from ledgerline.pipeline.prompt import EXAMPLES
+
+    tickets = EntityDef(
+        table="tickets",
+        fields={
+            "id": FieldDef(column="id", type="integer"),
+            "agent_id": FieldDef(column="agent_id", type="integer"),
+            "opened_on": FieldDef(column="opened_on", type="date"),
+            "closed_on": FieldDef(column="closed_on", type="date"),
+            "stage": FieldDef(
+                column="stage",
+                type="text",
+                categorical=True,
+                allowed_values=["open", "closed", "escalated"],
+            ),
+            "minutes": FieldDef(column="minutes", type="number", aggregatable=True),
+        },
+    )
+    agents = EntityDef(
+        table="agents",
+        fields={
+            "id": FieldDef(column="id", type="integer"),
+            "team": FieldDef(column="team", type="text"),
+        },
+    )
+    registry = Registry(
+        schema_version=1,
+        draft=False,
+        entities={"tickets": tickets, "agents": agents},
+        relationships=[
+            Relationship(
+                from_entity="tickets",
+                from_field="agent_id",
+                to_entity="agents",
+                to_field="id",
+                source="declared",
+            )
+        ],
+    )
+    assert len(EXAMPLES) >= 3
+    for question, example in EXAMPLES:
+        result = validate(Intent.model_validate(example), registry, now=NOW)
+        assert result.ok, (question, result.issues)
+        assert question in SYSTEM_PROMPT

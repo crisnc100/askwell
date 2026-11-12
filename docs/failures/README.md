@@ -25,3 +25,23 @@ wrong table of numbers looks just like a right one. The first two are the kind o
 Ledgerline exists to prevent: the model filled in a valid intent for a nearby question
 instead of refusing. They are 2 of the 5 wrong answers (5 of 38 answered) that put
 Ledgerline over its v0.1 limit of 5% wrong.
+
+## In v0.2
+
+v0.2 added ratios, conditional counts and two-date series, and tells the model to refuse
+first ([ADR-007](../adr/ADR-007-grammar-v02.md)). fs-028 and fs-035 are now right in every
+trial, but they are seen questions, so the headline is a set of 40 held-out questions
+written before the v0.2 code ([report](../../evals/reports/v02-holdout.md)). There, 14 of
+54 answers were wrong over 3 trials:
+
+- 12 differ from the gold only in form or in how ties are broken: the gold also returns
+  an id column (ho-020, ho-024, ho-028), or breaks ties by a column the question does not
+  name (ho-022, and fifth place in ho-028).
+- 2 are misreads of one question (ho-010). In one trial the model left cancelled jobs
+  out of "visits on the schedule", which the question does not ask for. In another it
+  read "January through June" as year to date, which stops at the reference date and
+  cuts the end of June.
+
+The other 30 misses are correct refusals of 10 questions v0.2 still cannot express:
+durations between two dates, products of fields, "has none" questions, distinct counts of
+periods and a comparison with an average.

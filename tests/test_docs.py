@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -65,7 +66,10 @@ def test_each_failure_names_the_question_what_happened_why_category_and_fix() ->
 
 def test_every_adr_has_a_result_and_none_is_left_pending() -> None:
     adrs = sorted((ROOT / "docs" / "adr").glob("ADR-*.md"))
-    assert len(adrs) == 6
+    index = (ROOT / "docs" / "adr" / "README.md").read_text()
+    linked = set(re.findall(r"\]\((ADR-\d{3}-[a-z0-9-]+\.md)\)", index))
+    assert len(adrs) >= 6
+    assert {adr.name for adr in adrs} == linked
     for adr in adrs:
         text = adr.read_text()
         result = text[text.index("\n## Result\n") :]

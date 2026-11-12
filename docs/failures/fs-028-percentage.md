@@ -23,3 +23,7 @@ instead.
 
 The one-shot baseline wrote the right query but rounded the result to two decimals (6.42),
 so it did not match the gold's unrounded 6.4165 either.
+
+**v0.2.** The grammar gained a ratio metric (ADR-007). In the live run `v02-seen` the
+model answered fs-028 with one and was right in all 3 trials. This is a seen question:
+v0.2 was designed from it.

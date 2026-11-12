@@ -998,3 +998,201 @@ def test_rule_having_type(registry: Registry) -> None:
         group_by=[{"field": "status"}],
         having=[{"metric": "top", "op": "gt", "value": 5}],
     ).ok
+
+
+# --- v0.2: placeholder reasons ---
+
+PLACEHOLDERS = [
+    "",
+    "   ",
+    "none",
+    "None",
+    " NULL ",
+    "n/a",
+    "N/A",
+    "na",
+    "-",
+    "unknown",
+    "No reason",
+]
+
+
+@pytest.mark.parametrize("reason", PLACEHOLDERS)
+def test_rule_placeholder_reason(registry: Registry, reason: str) -> None:
+    refusal = check(registry, intent_type="unanswerable", unanswerable_reason=reason)
+    assert refusal.codes == ["placeholder_reason"]
+    assert refusal.refusal_reason is None
+    answer = check(
+        registry,
+        intent_type="summary",
+        entity="work_orders",
+        metrics=COUNT,
+        unanswerable_reason=reason,
+    )
+    assert answer.codes == ["placeholder_reason"]
+    assert "leave unanswerable_reason out unless the intent is unanswerable" in (
+        answer.issues[0].message
+    )
+
+
+@pytest.mark.parametrize("reason", ["no technician data", "nope", "None of the tables hold it"])
+def test_a_real_reason_is_not_a_placeholder(registry: Registry, reason: str) -> None:
+    assert check(registry, intent_type="unanswerable", unanswerable_reason=reason).ok
+    answer = codes(
+        registry,
+        intent_type="summary",
+        entity="work_orders",
+        metrics=COUNT,
+        unanswerable_reason=reason,
+    )
+    assert answer == ["intent_shape"]
+
+
+# --- v0.2: ratio metrics ---
+
+TOTAL = {"agg": "count", "alias": "total"}
+DONE = {
+    "agg": "count",
+    "alias": "done",
+    "where": [{"field": "status", "op": "eq", "value": "completed"}],
+}
+
+
+@pytest.mark.parametrize(
+    "ratio",
+    [
+        {"agg": "ratio", "alias": "share", "numerator": "missing", "denominator": "total"},
+        {"agg": "ratio", "alias": "share", "numerator": "done", "denominator": "missing"},
+        {"agg": "ratio", "alias": "share", "numerator": "share", "denominator": "total"},
+        {"agg": "ratio", "alias": "share", "numerator": "done", "denominator": "other"},
+    ],
+)
+def test_rule_ratio_ref(registry: Registry, ratio: dict[str, Any]) -> None:
+    other = {"agg": "ratio", "alias": "other", "numerator": "done", "denominator": "total"}
+    result = check(
+        registry, intent_type="summary", entity="work_orders", metrics=[TOTAL, DONE, other, ratio]
+    )
+    assert result.codes == ["ratio_ref"]
+
+
+@pytest.mark.parametrize(
+    "metric",
+    [
+        {"agg": "ratio", "numerator": "done"},
+        {"agg": "ratio", "denominator": "total"},
+        {"agg": "ratio", "numerator": "done", "denominator": "total", "field": "labor_hours"},
+        {"agg": "ratio", "numerator": "done", "denominator": "total", "distinct": True},
+        {
+            "agg": "ratio",
+            "numerator": "done",
+            "denominator": "total",
+            "where": [{"field": "priority", "op": "eq", "value": "urgent"}],
+        },
+        {"agg": "count", "numerator": "done"},
+        {"agg": "sum", "field": "labor_hours", "denominator": "total"},
+        {"agg": "count", "as_percent": True},
+    ],
+)
+def test_rule_ratio_shape(registry: Registry, metric: dict[str, Any]) -> None:
+    result = check(
+        registry, intent_type="summary", entity="work_orders", metrics=[TOTAL, DONE, metric]
+    )
+    assert result.codes == ["ratio_shape"]
+
+
+# --- v0.2: date_series ---
+
+OPENED = {"metric": {"agg": "count"}, "date_field": "opened_at", "alias": "opened"}
+COMPLETED = {"metric": {"agg": "count"}, "date_field": "completed_at", "alias": "completed"}
+
+
+def _series(**changes: Any) -> dict[str, Any]:
+    base: dict[str, Any] = {
+        "intent_type": "date_series",
+        "entity": "work_orders",
+        "grain": "month",
+        "series": [OPENED, COMPLETED],
+    }
+    base.update(changes)
+    return base
+
+
+@pytest.mark.parametrize(
+    "intent",
+    [
+        _series(grain=None),
+        _series(series=[]),
+        _series(series=[{**OPENED, "alias": f"s{i}"} for i in range(5)]),
+        _series(metrics=COUNT),
+        _series(select=["id"]),
+        _series(group_by=[{"field": "status"}]),
+        _series(having=[{"metric": "opened", "op": "gt", "value": 1}]),
+        _series(order_by=[{"target": "opened"}]),
+        _series(limit=5),
+        _series(date_range={"field": "opened_at", "relative": "last_year"}),
+        _series(series=[{**OPENED, "alias": None}]),
+        _series(series=[{**OPENED, "metric": {"agg": "count", "alias": "n"}}]),
+        _series(
+            series=[
+                {
+                    **OPENED,
+                    "metric": {
+                        "agg": "count",
+                        "where": [{"field": "status", "op": "eq", "value": "open"}],
+                    },
+                }
+            ]
+        ),
+        _series(
+            series=[{**OPENED, "metric": {"agg": "ratio", "numerator": "a", "denominator": "b"}}]
+        ),
+        {
+            "intent_type": "grouped_summary",
+            "entity": "work_orders",
+            "metrics": COUNT,
+            "group_by": [{"field": "status"}],
+            "series": [OPENED],
+        },
+        {"intent_type": "summary", "entity": "work_orders", "metrics": COUNT, "grain": "month"},
+    ],
+)
+def test_rule_series_shape(registry: Registry, intent: dict[str, Any]) -> None:
+    assert codes(registry, **intent) == ["series_shape"]
+
+
+@pytest.mark.parametrize("date_field", ["labor_hours", "status", "sites.name"])
+def test_rule_series_date_field(registry: Registry, date_field: str) -> None:
+    intent = _series(series=[OPENED, {**COMPLETED, "date_field": date_field}])
+    assert codes(registry, **intent) == ["series_date_field"]
+
+
+@pytest.mark.parametrize(
+    ("series", "code"),
+    [
+        ({**COMPLETED, "alias": "opened"}, "duplicate_alias"),
+        ({**COMPLETED, "alias": "period"}, "alias_collision"),
+        ({**COMPLETED, "alias": "Bad Alias"}, "invalid_alias"),
+        ({**COMPLETED, "date_field": "work_order_parts.quantity"}, "fan_out"),
+        ({**COMPLETED, "date_field": "mileage_at"}, "unknown_field"),
+        ({**COMPLETED, "metric": {"agg": "sum", "field": "status"}}, "aggregate_type"),
+        (
+            {**COMPLETED, "where": [{"field": "status", "op": "eq", "value": "lost"}]},
+            "value_not_allowed",
+        ),
+    ],
+)
+def test_series_reuse_the_existing_rules(
+    registry: Registry, series: dict[str, Any], code: str
+) -> None:
+    assert codes(registry, **_series(series=[OPENED, series])) == [code]
+
+
+def test_a_date_range_outside_date_series_still_needs_a_field(registry: Registry) -> None:
+    result = codes(
+        registry,
+        intent_type="summary",
+        entity="work_orders",
+        metrics=COUNT,
+        date_range={"relative": "last_year"},
+    )
+    assert result == ["invalid_date_range"]

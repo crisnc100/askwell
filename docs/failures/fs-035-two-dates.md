@@ -23,3 +23,7 @@ other. The numbers look reasonable, which is what makes this kind of answer dang
 - Refuse first, as for [fs-028](fs-028-percentage.md).
 - Or let an intent hold two series, each with its own grouping and date field, joined on
   the month.
+
+**v0.2.** The grammar gained a series intent: one row per month, each series counted by
+its own date field (ADR-007). In the live run `v02-seen` the model answered fs-035 with
+one and was right in all 3 trials. This is a seen question: v0.2 was designed from it.

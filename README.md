@@ -11,11 +11,11 @@ reason. A question the intent cannot express can still get a wrong answer, when 
 fills in a valid intent for a nearby question instead of refusing. [docs/product-brief.md](docs/product-brief.md) explains
 who it is for and what it leaves out on purpose.
 
-**Status.** v0.1 runs on your machine, and an invite-only beta answers live questions
-(see [Deploy the hosted beta](#deploy-the-hosted-beta)). The default model is Claude
-Haiku 5.5, measured against the same gates as the others
-([ADR-004](docs/adr/ADR-004-model-choice.md)). It reaches the accuracy target but gives one
-wrong answer too many.
+**Status.** v0.2 runs on your machine, and an invite-only beta answers live questions
+([Deploy the hosted beta](#deploy-the-hosted-beta)). The model is Claude
+Haiku 5.5 ([ADR-004](docs/adr/ADR-004-model-choice.md)). Held-out questions miss both
+targets: 47.6% right (target 80%), 25.9% wrong (target 5%). The seen questions v0.2 was
+built from meet both ([ADR-007](docs/adr/ADR-007-grammar-v02.md)).
 
 ## Try it
 
@@ -53,18 +53,19 @@ model answers; [Results](#results) has its measured accuracy.
 
 ## Results
 
-`http://localhost:8000/results/` shows the benchmark: how often Ledgerline answers, how
-often it is right, and how often it refuses, next to a baseline where the same model writes
-SQL directly. Each number has a plain definition and a 95% range. On fieldservice, the
-made-up business in the demo database, with the default model, live:
+`http://localhost:8000/results/` shows the benchmark: how often Ledgerline is right,
+wrong or refuses, beside a baseline where the model writes SQL. Fieldservice, live, 3 trials:
 
 | Live, fieldservice | Ledgerline | one-shot |
 |---|---|---|
-| Rows match the expected answer | 81.4% (35/43) | 79.1% (34/43) |
-| Wrong answers among answered | 5.4% (2/37) | 20.9% (9/43) |
+| Held-out: rows match | 47.6% (40/84) | 60.7% (51/84) |
+| Held-out: wrong among answered | 25.9% (14/54) | 39.3% (33/84) |
+| Seen: rows match | 86.0% (111/129) | 76.7% (99/129) |
+| Seen: wrong among answered | 1.8% (2/113) | 23.3% (30/129) |
 
-Ledgerline gives a quarter of the baseline's wrong answers, but it misses its v0.1
-target (at least 80% right, at most 5% wrong) by one wrong answer. [docs/failures/](docs/failures/README.md) walks through four misses.
+v0.2 was built from the seen questions; the held-out ones came first. Both miss the
+held-out target (80% right, 5% wrong); 12 of Ledgerline's 14 wrong answers differ
+only by an id column or tie order. [docs/failures/](docs/failures/README.md) has more.
 
 ## Read more
 
@@ -216,26 +217,36 @@ database gives the same file. It warns when the connecting role could write.
 ## Intents, validation and SQL
 
 An intent (`ledgerline/core/intent.py`) has an `intent_type` (`summary`,
-`grouped_summary`, `row_list`, or `unanswerable` with a reason), a base `entity`, and
-optional `select`, `metrics`, `filters`, `having`, `group_by`, `date_range`, `order_by`
-and `limit`. A field is named `entity.field`, or just `field` on the base entity.
+`grouped_summary`, `row_list`, `date_series`, or `unanswerable` with a reason), a base
+`entity`, and optional `select`, `metrics`, `filters`, `having`, `group_by`, `date_range`,
+`order_by` and `limit`. A field is named `entity.field`, or just `field` on the base entity.
 Filters can be grouped one level deep (`any_of`, `all_of`) and can compare two columns.
 A group-by on a date can take a calendar grain (`day`, `iso_week`, `month`, `quarter`,
 `year`). A date range is either a start and end, or a token such as `last_quarter`;
 code turns the token into dates using `LEDGERLINE_NOW`, never the model.
 
+A metric can carry its own `where` conditions; it is then counted or summed only over
+the rows that match. The `ratio` aggregate divides one other metric of the intent by
+another (`numerator`, `denominator`), times 100 with `as_percent`; a zero denominator
+gives NULL. A `date_series` takes a `grain` and 1 to 4 `series` instead of metrics: one
+row per period, one column per series. Each series is a metric counted or summed by its
+own date field, with its own `where`, and a `date_range` applies to each series by that
+field. [ADR-007](docs/adr/ADR-007-grammar-v02.md) explains why.
+
 The validator (`ledgerline/core/validate.py`) checks an intent against the registry. It
 never raises for a bad intent; it returns typed errors such as `unknown_field`,
 `hidden_field`, `ambiguous_path` (two equally short join paths: refused, not guessed),
 `fan_out` (an aggregate across a one-to-many join, which would double count; see
-[ADR-003](docs/adr/ADR-003-fan-out-rule.md)) and `ambiguous_value`. `ErrorCode` in that
-file lists them all.
+[ADR-003](docs/adr/ADR-003-fan-out-rule.md)), `ambiguous_value` and `placeholder_reason`
+(a reason such as "none" in `unanswerable_reason`). `ErrorCode` in that file lists them
+all.
 
 The SQL builder (`ledgerline/core/sqlbuild.py`) writes SQLAlchemy Core. Table and column
 names come only from the registry, and every value is a bound parameter. Joins follow
 many-to-one relationships only, at most 3 hops from the base entity. A join used only
 inside an `any_of` group is a LEFT JOIN, so it does not drop rows that match another
-branch. Postgres and SQLite are supported.
+branch. Every sort puts NULLs last, so Postgres and SQLite return the same order.
+Postgres and SQLite are supported.
 
 The executor (`ledgerline/core/executor.py`) runs the query in a read-only transaction
 with a timeout (5 seconds by default) and a row cap (1000 by default); the result says
@@ -324,10 +335,18 @@ single SELECT, and the database driver refuses a second statement, so it cannot 
 the read-only transaction. Spider registries come from `registry init` with no edits,
 and the eval stops if one no longer matches its committed hash.
 
+`--gold <file>` scores another gold file, such as the held-out set
+`evals/gold/holdout-v02.jsonl`, in place of fieldservice's default; it takes exactly one
+`--schema` and is refused for Spider. Each report row names its gold file. An entry in
+`evals/floors.yaml` may name a `schema` and a `gold` file, and is then checked only on
+rows from that file, so a held-out run never borrows the seen set's verdict.
+
 The live run `select-2026-11-11` compared four OpenRouter models on fieldservice
 ([report](evals/reports/select-2026-11-11.md)), and `select-haiku-2026-11-11` measured
-Claude Haiku 5.5, the default ([report](evals/reports/select-haiku-2026-11-11.md)); its
-numbers are in [Results](#results). Before a key existed, the simulated run
+Claude Haiku 5.5, the default, with v0.1 on the seen questions: 35/43 right and 2 of 37
+answered wrong, 1 trial ([report](evals/reports/select-haiku-2026-11-11.md),
+[ADR-004](docs/adr/ADR-004-model-choice.md)). [Results](#results) shows the v0.2 runs.
+Before a key existed, the simulated run
 `sim-1` ([evals/reports/sim-1.md](evals/reports/sim-1.md)) checked the pipeline and the
 scoring. Every answer in it was written by claude-haiku-5-5 standing in for
 `openai/gpt-oss-120b`, so those are simulated numbers, not a measurement of that model.

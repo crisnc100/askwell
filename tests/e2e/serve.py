@@ -38,6 +38,38 @@ ANSWERS: dict[str, dict[str, Any]] = {
         "entity": "orders",
         "metrics": [{"agg": "count"}],
     },
+    "What share of orders are paid?": {
+        "intent_type": "summary",
+        "entity": "orders",
+        "metrics": [
+            {
+                "agg": "count",
+                "alias": "paid",
+                "where": [{"field": "status", "op": "eq", "value": "paid"}],
+            },
+            {"agg": "count", "alias": "total"},
+            {
+                "agg": "ratio",
+                "alias": "pct_paid",
+                "numerator": "paid",
+                "denominator": "total",
+                "as_percent": True,
+            },
+        ],
+    },
+    "Orders per month by order date and by customer signup date": {
+        "intent_type": "date_series",
+        "entity": "orders",
+        "grain": "month",
+        "series": [
+            {"metric": {"agg": "count"}, "date_field": "order_date", "alias": "placed"},
+            {
+                "metric": {"agg": "count"},
+                "date_field": "customers.signup_date",
+                "alias": "by_signup",
+            },
+        ],
+    },
     "Show the odd table": {
         "intent_type": "row_list",
         "entity": slugify(XSS_FILE.removesuffix(".csv")),

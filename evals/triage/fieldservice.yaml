@@ -1,8 +1,13 @@
-# Triage of every miss by the default model, Claude Haiku 5.5, in the live run
-# select-haiku-2026-11-11, and by the previous default, mistral-small, in
-# select-2026-11-11. Each note names the model it describes. Where both missed an item,
-# the tag is Haiku's. Other models in select-2026-11-11 missed some of the same questions
-# in other ways. The triage of the simulated run sim-1 is kept in evals/reports/sim-1.md.
+# Triage of every Ledgerline miss on the field service schema. Each note names the model
+# and run it describes:
+# - the held-out questions (ho-*) in v02-holdout-before (v0.1 grammar) and v02-holdout
+#   (v0.2 grammar), Claude Haiku 5.5, 3 trials each;
+# - the seen questions (fs-*) in v02-seen (v0.2 grammar), and before that in
+#   select-haiku-2026-11-11 (Claude Haiku 5.5) and select-2026-11-11 (mistral-small, the
+#   previous default). Other models in select-2026-11-11 missed some of the same questions
+#   in other ways.
+# Where several runs missed an item, the tag is the latest run's. The triage of the
+# simulated run sim-1 is kept in evals/reports/sim-1.md.
 # Tags: grammar_gap | misread | validator_false_reject | builder_bug | gold_issue.
 #
 # "Placeholder reason" below means the model put "", "none" or "None" in
@@ -38,13 +43,15 @@ fs-023:
     and neither kept the "at least 25" condition.'
   tag: misread
 fs-024:
-  note: 'mistral-small (select-2026-11-11): Ambiguous date: "did work for last month" was read as completed
+  note: 'Haiku 5.5 (v02-seen, v0.2 grammar): Wrong in 1 of 3 trials on the same ambiguous date as below.
+    mistral-small (select-2026-11-11): Ambiguous date: "did work for last month" was read as completed
     last month; the gold uses opened last month. Both readings are defensible.'
   tag: gold_issue
 fs-025:
-  note: 'Haiku 5.5 (select-haiku-2026-11-11): Needs the difference between two dates (opened to completed).
-    Refused correctly, naming the missing duration. mistral-small (select-2026-11-11): Needs the difference
-    between two dates (opened to completed). Refused, by failing validation twice.'
+  note: 'Haiku 5.5 (v02-seen, v0.2 grammar): Refused correctly in 3 of 3 trials. Haiku 5.5 (select-haiku-2026-11-11):
+    Needs the difference between two dates (opened to completed). Refused correctly, naming the missing
+    duration. mistral-small (select-2026-11-11): Needs the difference between two dates (opened to completed).
+    Refused, by failing validation twice.'
   tag: grammar_gap
 fs-028:
   note: 'Haiku 5.5 (select-haiku-2026-11-11): Needs a ratio of two counts. The model returned work order
@@ -53,9 +60,9 @@ fs-028:
     a wrong answer, not a refusal.'
   tag: grammar_gap
 fs-030:
-  note: 'Haiku 5.5 (select-haiku-2026-11-11): Needs a computed value (quantity times unit price). Refused
-    correctly. mistral-small (select-2026-11-11): Needs a computed value (quantity times unit price).
-    Refused, by failing validation twice.'
+  note: 'Haiku 5.5 (v02-seen, v0.2 grammar): Refused correctly in 3 of 3 trials. Haiku 5.5 (select-haiku-2026-11-11):
+    Needs a computed value (quantity times unit price). Refused correctly. mistral-small (select-2026-11-11):
+    Needs a computed value (quantity times unit price). Refused, by failing validation twice.'
   tag: grammar_gap
 fs-032:
   note: 'mistral-small (select-2026-11-11): Both intents had a placeholder reason and no group_by, and
@@ -68,7 +75,8 @@ fs-033:
     it.'
   tag: misread
 fs-034:
-  note: 'mistral-small (select-2026-11-11): The first intent was a row list from customers with filters
+  note: 'Haiku 5.5 (v02-seen, v0.2 grammar): Wrong in 1 of 3 trials: grouped by customer id, not customer
+    name. mistral-small (select-2026-11-11): The first intent was a row list from customers with filters
     on work orders; the retry grouped by customer with a year grain on an ID and filtered the same date
     twice.'
   tag: misread
@@ -82,32 +90,142 @@ fs-036:
     sorted on a field that does not exist; the "at least 100 invoices" condition was dropped.'
   tag: misread
 fs-037:
-  note: 'Haiku 5.5 (select-haiku-2026-11-11): Needs a distinct count of months in HAVING. Refused correctly.
-    mistral-small (select-2026-11-11): Needs a distinct count of months in HAVING. Refused correctly.'
+  note: 'Haiku 5.5 (v02-seen, v0.2 grammar): Refused correctly in 3 of 3 trials. Haiku 5.5 (select-haiku-2026-11-11):
+    Needs a distinct count of months in HAVING. Refused correctly. mistral-small (select-2026-11-11):
+    Needs a distinct count of months in HAVING. Refused correctly.'
   tag: grammar_gap
 fs-038:
-  note: 'Haiku 5.5 (select-haiku-2026-11-11): The first intent named a field that does not exist; on the
-    retry the model said invoices cannot be grouped by customer. They can: the registry links invoices
-    to customers through work orders and sites. mistral-small (select-2026-11-11): The model left out
-    the "paid" filter and grouped by site and customer ID instead of by customer, with no "more than $20,000"
-    condition.'
+  note: 'Haiku 5.5 (v02-seen, v0.2 grammar): Refused in 1 of 3 trials, saying invoices cannot reach customers.
+    They can, through work orders and sites. Haiku 5.5 (select-haiku-2026-11-11): The first intent named
+    a field that does not exist; on the retry the model said invoices cannot be grouped by customer. They
+    can: the registry links invoices to customers through work orders and sites. mistral-small (select-2026-11-11):
+    The model left out the "paid" filter and grouped by site and customer ID instead of by customer, with
+    no "more than $20,000" condition.'
   tag: misread
 fs-039:
-  note: 'Haiku 5.5 (select-haiku-2026-11-11): Needs date arithmetic and a ratio. Refused correctly. mistral-small
-    (select-2026-11-11): Needs date arithmetic and a ratio. Refused, by failing validation twice.'
+  note: 'Haiku 5.5 (v02-seen, v0.2 grammar): Refused correctly in 3 of 3 trials. Haiku 5.5 (select-haiku-2026-11-11):
+    Needs date arithmetic and a ratio. Refused correctly. mistral-small (select-2026-11-11): Needs date
+    arithmetic and a ratio. Refused, by failing validation twice.'
   tag: grammar_gap
 fs-041:
   note: 'mistral-small (select-2026-11-11): Needs a conditional count beside a sum. Refused correctly.'
   tag: grammar_gap
 fs-042:
-  note: 'Haiku 5.5 (select-haiku-2026-11-11): Needs an anti-join (sites with no work orders). Refused
-    correctly. mistral-small (select-2026-11-11): Needs an anti-join (sites with no work orders). Refused
-    correctly.'
+  note: 'Haiku 5.5 (v02-seen, v0.2 grammar): Refused correctly in 3 of 3 trials. Haiku 5.5 (select-haiku-2026-11-11):
+    Needs an anti-join (sites with no work orders). Refused correctly. mistral-small (select-2026-11-11):
+    Needs an anti-join (sites with no work orders). Refused correctly.'
   tag: grammar_gap
 fs-043:
   note: 'mistral-small (select-2026-11-11): The model dropped the "at least 20 completed jobs" condition
     and sorted by job count instead of average hours.'
   tag: misread
+ho-001:
+  note: 'Haiku 5.5 (v02-holdout-before, v0.1 grammar): Needs a percentage, which v0.1 cannot express.
+    Answered a nearby grouped count instead: wrong in 3 of 3 trials. Right in all 3 trials with the v0.2
+    grammar.'
+  tag: grammar_gap
+ho-002:
+  note: 'Haiku 5.5 (v02-holdout-before, v0.1 grammar): Needs a percentage of a sum. Answered a nearby
+    grouped sum instead: wrong in 3 of 3 trials. Right in all 3 trials with the v0.2 grammar.'
+  tag: grammar_gap
+ho-003:
+  note: 'Haiku 5.5 (v02-holdout-before, v0.1 grammar): Needs a fraction of a count. Answered a nearby
+    grouped count instead: wrong in 3 of 3 trials. Right in all 3 trials with the v0.2 grammar.'
+  tag: grammar_gap
+ho-004:
+  note: 'Haiku 5.5 (v02-holdout-before, v0.1 grammar): Needs a share per group. Refused in 2 trials and
+    wrong in 1. Right in all 3 trials with the v0.2 grammar.'
+  tag: grammar_gap
+ho-005:
+  note: 'Haiku 5.5 (v02-holdout-before, v0.1 grammar): Needs a percentage with a condition that compares
+    two date fields. Refused in 3 of 3 trials. Right in all 3 trials with the v0.2 grammar.'
+  tag: grammar_gap
+ho-006:
+  note: 'Haiku 5.5 (v02-holdout-before, v0.1 grammar): Needs a proportion. Answered a nearby grouped count
+    instead: wrong in 3 of 3 trials. Right in all 3 trials with the v0.2 grammar.'
+  tag: grammar_gap
+ho-007:
+  note: 'Haiku 5.5 (v02-holdout-before, v0.1 grammar): Needs two date fields in one monthly series. Wrong
+    in 2 trials and refused in 1. Right in all 3 trials with the v0.2 grammar.'
+  tag: grammar_gap
+ho-008:
+  note: 'Haiku 5.5 (v02-holdout-before, v0.1 grammar): Needs two date fields in one monthly series. Wrong
+    in 3 of 3 trials. Right in all 3 trials with the v0.2 grammar.'
+  tag: grammar_gap
+ho-009:
+  note: 'Haiku 5.5 (v02-holdout-before, v0.1 grammar): Needs two date fields in one quarterly series.
+    Refused in 3 of 3 trials. Right in all 3 trials with the v0.2 grammar.'
+  tag: grammar_gap
+ho-010:
+  note: 'Haiku 5.5 (v02-holdout, v0.2 grammar): Wrong in 2 of 3 trials, for two different reasons.
+    Trial 1 added a not-cancelled filter, which the question does not ask for, so every month''s scheduled
+    count is low. Trial 3 used "year to date" instead of January through June; it stops at the reference
+    date (30 June), so June''s scheduled count is 237, not 250. Haiku 5.5 (v02-holdout-before,
+    v0.1 grammar): Needs two date fields in one series. Wrong in 1 trial and refused in 2.'
+  tag: misread
+ho-011:
+  note: 'Haiku 5.5 (v02-holdout, v0.2 grammar): Needs the difference between two dates. Refused correctly
+    in 3 of 3 trials, as with v0.1.'
+  tag: grammar_gap
+ho-012:
+  note: 'Haiku 5.5 (v02-holdout, v0.2 grammar): Needs the difference between two dates. Refused correctly
+    in 3 of 3 trials, as with v0.1.'
+  tag: grammar_gap
+ho-013:
+  note: 'Haiku 5.5 (v02-holdout, v0.2 grammar): Needs a computed value (quantity times a unit cost). Refused
+    correctly in 3 of 3 trials, as with v0.1.'
+  tag: grammar_gap
+ho-014:
+  note: 'Haiku 5.5 (v02-holdout, v0.2 grammar): Needs a computed value (quantity times a price difference).
+    Refused correctly in 3 of 3 trials, as with v0.1.'
+  tag: grammar_gap
+ho-015:
+  note: 'Haiku 5.5 (v02-holdout, v0.2 grammar): Needs an anti-join (completed jobs with no invoice). Refused
+    correctly in 3 of 3 trials, as with v0.1.'
+  tag: grammar_gap
+ho-016:
+  note: 'Haiku 5.5 (v02-holdout, v0.2 grammar): Needs an anti-join (customers with no recent job). Refused
+    correctly in 3 of 3 trials, as with v0.1.'
+  tag: grammar_gap
+ho-017:
+  note: 'Haiku 5.5 (v02-holdout, v0.2 grammar): Needs a distinct count of months. Refused correctly in
+    3 of 3 trials. Haiku 5.5 (v02-holdout-before, v0.1 grammar): Wrong in 3 of 3 trials.'
+  tag: grammar_gap
+ho-018:
+  note: 'Haiku 5.5 (v02-holdout, v0.2 grammar): Needs a computed value (hours times rate). Refused correctly
+    in 3 of 3 trials, as with v0.1.'
+  tag: grammar_gap
+ho-019:
+  note: 'Haiku 5.5 (v02-holdout, v0.2 grammar): Needs date arithmetic (days open). Refused correctly in
+    3 of 3 trials. Haiku 5.5 (v02-holdout-before, v0.1 grammar): Wrong in 3 of 3 trials.'
+  tag: grammar_gap
+ho-020:
+  note: 'Haiku 5.5 (v02-holdout, v0.2 grammar): Right customers, order and totals in 3 of 3 trials. The
+    gold also returns an id column, which the question does not ask for; held-out golds keep that convention,
+    so a names-and-values answer is scored wrong. Haiku 5.5 (v02-holdout-before, v0.1 grammar): Wrong
+    in 3 of 3 trials, the same way.'
+  tag: gold_issue
+ho-022:
+  note: 'Haiku 5.5 (v02-holdout, v0.2 grammar): Right cities and counts in 3 of 3 trials, in a different
+    order inside ties. The gold breaks ties by city name and the answer does not, so the order-only difference
+    is a tie, not NULL ordering. Haiku 5.5 (v02-holdout-before, v0.1 grammar): The same in 3 of 3 trials.'
+  tag: gold_issue
+ho-024:
+  note: 'Haiku 5.5 (v02-holdout, v0.2 grammar): Right parts, order and units in 3 of 3 trials. The gold
+    also returns an id column, which the question does not ask for; held-out golds keep that convention,
+    so a names-and-values answer is scored wrong. Haiku 5.5 (v02-holdout-before, v0.1 grammar): Wrong
+    in 3 of 3 trials, the same way.'
+  tag: gold_issue
+ho-025:
+  note: 'Haiku 5.5 (v02-holdout, v0.2 grammar): Needs a subquery (above the average). Refused correctly
+    in 3 of 3 trials, as with v0.1.'
+  tag: grammar_gap
+ho-028:
+  note: 'Haiku 5.5 (v02-holdout, v0.2 grammar): Wrong in 3 of 3 trials. The gold also returns an id column,
+    which the question does not ask for; held-out golds keep that convention, so a names-and-values answer
+    is scored wrong. The fifth place is also a tie, which the gold breaks by id and the answer does not.
+    Haiku 5.5 (v02-holdout-before, v0.1 grammar): Wrong in 3 of 3 trials, the same way.'
+  tag: gold_issue
 # The two demo questions mistral-small missed when the demo was re-recorded. They are
 # not benchmark items; they were dropped from config/schemas.yaml (see builds/v01/log.md).
 demo-top-technicians:

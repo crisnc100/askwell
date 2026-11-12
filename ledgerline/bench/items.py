@@ -26,9 +26,19 @@ class EvalItem:
     gold_sql: str | None
     ordered: bool
     difficulty: str
+    gold: str = ""  # the gold file's name, carried into every record and report row
 
 
-def fieldservice_items() -> list[EvalItem]:
+DEFAULT_GOLD = "fieldservice.jsonl"
+SPIDER_GOLD = "spider_ids.json"
+
+
+def default_gold(schema_id: str) -> str:
+    return SPIDER_GOLD if schema_id.startswith("spider_") else DEFAULT_GOLD
+
+
+def fieldservice_items(path: Path | None = None) -> list[EvalItem]:
+    source = path or GOLD_DIR / DEFAULT_GOLD
     return [
         EvalItem(
             id=item.id,
@@ -38,8 +48,9 @@ def fieldservice_items() -> list[EvalItem]:
             gold_sql=item.gold_sql,
             ordered=item.ordered,
             difficulty=item.difficulty,
+            gold=source.name,
         )
-        for item in load_gold(GOLD_DIR / "fieldservice.jsonl")
+        for item in load_gold(source)
     ]
 
 
@@ -73,6 +84,7 @@ def spider_items(db_id: str) -> list[EvalItem]:
                 gold_sql=query,
                 ordered="order by" in query.lower(),
                 difficulty=spider_hardness(example["sql"]),
+                gold=SPIDER_GOLD,
             )
         )
     return items

@@ -10,6 +10,7 @@ import {
   useWorkspace,
 } from "./api";
 import { append, clear, h, type Child } from "./dom";
+import { formulaLines } from "./trace";
 
 type Step = "prepare" | "upload" | "check" | "confirm" | "ask";
 
@@ -573,6 +574,7 @@ function showAnswer(where: HTMLElement, answer: Answer): void {
   }
   const attempts = answer.validation.attempts;
   const issues = attempts.length ? attempts[attempts.length - 1].issues : [];
+  const formulas = formulaLines(answer.intent);
   append(
     where,
     h(
@@ -581,6 +583,8 @@ function showAnswer(where: HTMLElement, answer: Answer): void {
       h("summary", {}, "How this answer was made"),
       h("h3", {}, "What the model understood"),
       h("pre", {}, JSON.stringify(answer.intent, null, 2)),
+      formulas.length ? h("h3", {}, "How the numbers are built") : null,
+      formulas.length ? h("ul", { class: "formulas" }, ...formulas.map((f) => h("li", {}, f))) : null,
       h("h3", {}, "Safety check"),
       issues.length
         ? h("ul", {}, ...issues.map((i) => h("li", {}, `${i.message} (${i.code})`)))

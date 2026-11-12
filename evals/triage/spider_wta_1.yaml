@@ -1,26 +1,40 @@
-# Triage of every Ledgerline miss in eval run sim-1 (simulated answers).
+# Triage of every Ledgerline miss by Claude Haiku 5.5 in two runs, one trial each:
+# v02-spider-before (the v0.1 grammar) and v02-spider (the v0.2 grammar). Each note says
+# how the item went in each run; "right" means only the other run missed it. The triage
+# of the simulated run sim-1 is kept in evals/reports/sim-1.md.
 # Tags: grammar_gap | misread | validator_false_reject | builder_bug | gold_issue.
-spider:451:
-  note: 'The names and country codes need a join with two equally short paths (winner or loser). The model
-    grouped by winner_id instead of refusing, so it returned ids rather than the requested columns: a
-    wrong answer.'
+spider:449:
+  note: 'The model gave a per-year breakdown where the question asks for one total. Before: a wrong answer.
+    After: right.'
   tag: misread
+spider:451:
+  note: 'Two foreign keys link the same pair of tables. The intent has no way to say which join to use,
+    so it refuses rather than guess. Before and after: refused.'
+  tag: grammar_gap
 spider:452:
-  note: Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none
-    of these.
+  note: 'Needs a subquery, set operation or anti-join. The intent grammar has none of these. Before and
+    after: refused.'
   tag: grammar_gap
 spider:463:
-  note: The gold reads rank points from an unaggregated column in a GROUP BY (SQLite returns an arbitrary
-    row). The answer's maximum is a defined value.
+  note: 'The gold reads rank points from an unaggregated column in a GROUP BY (SQLite returns an arbitrary
+    row). The answer''s maximum is a defined value. Before and after: a wrong answer.'
   tag: gold_issue
 spider:464:
-  note: 'Same gold pattern as spider:463: rank points from an unaggregated column.'
+  note: 'Same gold pattern as spider:463: rank points from an unaggregated column. Before and after: a
+    wrong answer.'
+  tag: gold_issue
+spider:470:
+  note: 'The gold''s rows are cut by the row cap, and the answer''s sort keeps a different set at the
+    cut. Before: a wrong answer. After: right.'
   tag: gold_issue
 spider:472:
-  note: The gold groups by first name, which merges different players who share one; the answer totals
-    per player.
+  note: 'The gold groups by first name, which merges different players who share one; the answer totals
+    per player. Before and after: a wrong answer.'
   tag: gold_issue
+spider:486:
+  note: 'The model counted matches, not distinct winners. Before: a wrong answer. After: right.'
+  tag: misread
 spider:488:
-  note: Two foreign keys link the same pair of tables. The intent has no way to say which join to use,
-    so the validator refuses rather than guess.
+  note: 'Two foreign keys link the same pair of tables. The intent has no way to say which join to use,
+    so it refuses rather than guess. Before and after: refused.'
   tag: grammar_gap

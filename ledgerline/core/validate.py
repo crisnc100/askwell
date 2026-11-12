@@ -19,6 +19,7 @@ from ledgerline.core.intent import (
     Condition,
     FilterGroup,
     Intent,
+    Metric,
     Scalar,
 )
 from ledgerline.core.registry import (
@@ -32,6 +33,8 @@ from ledgerline.core.registry import (
 
 MAX_HOPS = 3
 DEFAULT_ROW_CAP = 1000
+MAX_SERIES = 4
+PERIOD_LABEL = "period"
 
 ErrorCode = Literal[
     "draft_registry",
@@ -66,11 +69,19 @@ ErrorCode = Literal[
     "alias_collision",
     "invalid_order_by",
     "limit_out_of_range",
+    "placeholder_reason",
+    "ratio_ref",
+    "ratio_shape",
+    "series_shape",
+    "series_date_field",
 ]
 
 _ALIAS = re.compile(r"^[a-z][a-z0-9_]{0,62}$")
 _ORDERABLE: frozenset[str] = NUMERIC_TYPES | TEMPORAL_TYPES
 _RANGE_OPS: frozenset[str] = frozenset({"gt", "gte", "lt", "lte", "between"})
+_PLACEHOLDER_REASONS: frozenset[str] = frozenset(
+    {"", "none", "null", "n/a", "na", "-", "unknown", "no reason"}
+)
 
 Value = int | float | str | bool | date | datetime
 
@@ -134,6 +145,10 @@ class PlanMetric:
     agg: str
     field: ResolvedField | None
     distinct: bool
+    where: tuple[Predicate, ...] = ()
+    numerator: str | None = None  # ratio only: metric labels
+    denominator: str | None = None
+    as_percent: bool = False
 
 
 @dataclass(frozen=True)
@@ -158,6 +173,14 @@ class PlanOrder:
 
 
 @dataclass(frozen=True)
+class PlanSeries:
+    label: str
+    metric: PlanMetric
+    date_field: ResolvedField
+    where: tuple[Predicate, ...]  # its own conditions, then the period on its date field
+
+
+@dataclass(frozen=True)
 class QueryPlan:
     intent_type: str
     base_entity: str
@@ -172,6 +195,8 @@ class QueryPlan:
     having: tuple[PlanHaving, ...]
     order_by: tuple[PlanOrder, ...]
     limit: int | None
+    grain: str | None = None  # date_series only
+    series: tuple[PlanSeries, ...] = ()
 
 
 @dataclass
@@ -260,7 +285,7 @@ class _Validator:
         self.now = now
         self.row_cap = row_cap
         self.issues: list[Issue] = []
-        self.aggregated = bool(intent.metrics)
+        self.aggregated = bool(intent.metrics) or intent.intent_type == "date_series"
         self.base = ""
         self.base_def: EntityDef | None = None
         self.paths: dict[str, _PathInfo] = {}
@@ -446,16 +471,40 @@ class _Validator:
                 or intent.date_range
                 or intent.order_by
                 or intent.limit is not None
+                or intent.grain
+                or intent.series
             )
-            if not intent.unanswerable_reason:
+            if intent.unanswerable_reason is None:
                 self.fail("intent_shape", loc, "unanswerable needs an unanswerable_reason")
+            elif _is_placeholder(intent.unanswerable_reason):
+                self.fail(
+                    "placeholder_reason",
+                    "unanswerable_reason",
+                    "say what the question needs that the data does not have",
+                )
             if populated:
                 self.fail("intent_shape", loc, "unanswerable takes no query fields")
             return False
         if intent.unanswerable_reason is not None:
-            self.fail("intent_shape", loc, "only unanswerable takes an unanswerable_reason")
+            if _is_placeholder(intent.unanswerable_reason):
+                # Models fill the field with "none" on ordinary questions; telling them to
+                # drop it lets the retry succeed.
+                self.fail(
+                    "placeholder_reason",
+                    "unanswerable_reason",
+                    "leave unanswerable_reason out unless the intent is unanswerable",
+                )
+            else:
+                self.fail("intent_shape", loc, "only unanswerable takes an unanswerable_reason")
         if intent.entity is None:
             self.fail("intent_shape", "entity", f"{intent.intent_type} needs an entity")
+        if intent.intent_type == "date_series":
+            self.check_series_shape()
+            return intent.entity is not None
+        if intent.grain is not None or intent.series:
+            self.fail("series_shape", loc, "only date_series takes grain and series")
+        if intent.date_range is not None and intent.date_range.field is None:
+            self.fail("invalid_date_range", "date_range", "date_range needs a field")
         if intent.intent_type == "row_list":
             if not intent.select:
                 self.fail("intent_shape", loc, "row_list needs select")
@@ -473,6 +522,46 @@ class _Validator:
         if intent.having and not intent.group_by:
             self.fail("having_without_group_by", "having", "having needs a group_by")
         return intent.entity is not None
+
+    def check_series_shape(self) -> None:
+        intent = self.intent
+        loc = "intent_type"
+        if intent.grain is None:
+            self.fail("series_shape", "grain", "date_series needs a grain")
+        if not 1 <= len(intent.series) <= MAX_SERIES:
+            self.fail("series_shape", "series", f"date_series takes 1 to {MAX_SERIES} series")
+        if intent.metrics or intent.select or intent.group_by or intent.having:
+            self.fail(
+                "series_shape",
+                loc,
+                "date_series takes no metrics, select, group_by or having; put each "
+                "metric in a series",
+            )
+        if intent.order_by or intent.limit is not None:
+            self.fail("series_shape", loc, "date_series is always ordered by period, uncapped")
+        if intent.date_range is not None and intent.date_range.field is not None:
+            self.fail(
+                "series_shape",
+                "date_range.field",
+                "leave date_range.field out: each series uses its own date_field",
+            )
+        for index, series in enumerate(intent.series):
+            metric = series.metric
+            if (
+                metric.agg == "ratio"
+                or metric.where
+                or metric.alias is not None
+                or metric.numerator is not None
+                or metric.denominator is not None
+                or metric.as_percent
+            ):
+                self.fail(
+                    "series_shape",
+                    f"series[{index}].metric",
+                    "a series metric is a plain aggregate; put where and alias on the series",
+                )
+            if series.alias is None:
+                self.fail("series_shape", f"series[{index}].alias", "each series needs an alias")
 
     def check_condition(self, cond: Condition, loc: str) -> Predicate | None:
         resolved = self.resolve(cond.field, f"{loc}.field")
@@ -602,7 +691,7 @@ class _Validator:
 
     def check_date_range(self, where: list[Predicate | PredicateGroup]) -> list[Predicate]:
         dr = self.intent.date_range
-        if dr is None:
+        if dr is None or dr.field is None:
             return []
         loc = "date_range"
         resolved = self.resolve(dr.field, f"{loc}.field")
@@ -612,46 +701,140 @@ class _Validator:
         if rfield.type not in TEMPORAL_TYPES:
             self.fail("date_range_field_type", loc, f"{dr.field} is {rfield.type}, not a date")
             return []
-        if not fdef.filterable:
-            self.fail("not_filterable", f"{loc}.field", f"{dr.field} is not filterable")
+        if not self.period_field_ok(rfield, fdef, dr.field, where, loc):
             return []
-        filtered = {p.field.key for p in _flatten(where)}
-        if rfield.key in filtered:
-            self.fail(
-                "date_range_duplicate",
-                loc,
-                f"{dr.field} is filtered twice; use date_range or a filter, not both",
-            )
+        period = self.resolve_period()
+        if period is None:
             return []
+        return _period_predicates(rfield, period)
+
+    def resolve_period(self) -> tuple[datetime, datetime] | None:
+        dr = self.intent.date_range
+        assert dr is not None
+        loc = "date_range"
         absolute = dr.start is not None or dr.end is not None
         if (dr.relative is None) == (not absolute):
             self.fail("invalid_date_range", loc, "give either relative or start+end")
-            return []
+            return None
         if dr.relative is not None:
             try:
-                start, end = resolve_relative(dr.relative, dr.n, self.now)
+                return resolve_relative(dr.relative, dr.n, self.now)
             except ValueError as exc:
                 self.fail("invalid_date_range", loc, str(exc))
-                return []
-        else:
-            if dr.n is not None or dr.start is None or dr.end is None:
-                self.fail("invalid_date_range", loc, "absolute ranges need start and end")
-                return []
-            try:
-                start = naive_utc(datetime.fromisoformat(dr.start))
-                end = naive_utc(datetime.fromisoformat(dr.end))
-            except ValueError:
-                self.fail("invalid_date_range", loc, "start/end must be ISO dates")
-                return []
-            if start >= end:
-                self.fail("reversed_between", loc, f"start {dr.start} is not before end {dr.end}")
-                return []
-        low: Value = start.date() if rfield.type == "date" else start
-        high: Value = end.date() if rfield.type == "date" else end
-        if rfield.type == "date" and end != datetime.combine(end.date(), datetime.min.time()):
-            # A date column and a mid-day end: include that day.
-            high = date.fromordinal(end.date().toordinal() + 1)
-        return [Predicate(rfield, "gte", (low,)), Predicate(rfield, "lt", (high,))]
+                return None
+        if dr.n is not None or dr.start is None or dr.end is None:
+            self.fail("invalid_date_range", loc, "absolute ranges need start and end")
+            return None
+        try:
+            start = naive_utc(datetime.fromisoformat(dr.start))
+            end = naive_utc(datetime.fromisoformat(dr.end))
+        except ValueError:
+            self.fail("invalid_date_range", loc, "start/end must be ISO dates")
+            return None
+        if start >= end:
+            self.fail("reversed_between", loc, f"start {dr.start} is not before end {dr.end}")
+            return None
+        return start, end
+
+    def period_field_ok(
+        self,
+        rfield: ResolvedField,
+        fdef: FieldDef,
+        ref: str,
+        where: list[Predicate | PredicateGroup],
+        loc: str,
+    ) -> bool:
+        if not fdef.filterable:
+            self.fail("not_filterable", f"{loc}.field", f"{ref} is not filterable")
+            return False
+        if rfield.key in {p.field.key for p in _flatten(where)}:
+            self.fail(
+                "date_range_duplicate",
+                loc,
+                f"{ref} is filtered twice; use date_range or a filter, not both",
+            )
+            return False
+        return True
+
+    def metric_field(self, metric: Metric, loc: str) -> tuple[bool, ResolvedField | None]:
+        """Checks a plain metric's field. Returns (ok, the resolved field or None for a
+        count of rows)."""
+        if metric.field is None and metric.distinct:
+            # Rows have no value to be distinct on: a conditional count would collapse
+            # to 0 or 1.
+            self.fail("value_shape", loc, "distinct needs a field to count distinct values of")
+            return False, None
+        if metric.field is None:
+            if metric.agg != "count":
+                self.fail("value_shape", loc, f"{metric.agg} needs a field")
+                return False, None
+            return True, None
+        resolved = self.resolve(metric.field, f"{loc}.field")
+        if resolved is None:
+            return False, None
+        rfield, fdef = resolved
+        if metric.agg in ("sum", "avg") and rfield.type not in NUMERIC_TYPES:
+            self.fail("aggregate_type", loc, f"{metric.agg} needs a numeric field")
+            return False, None
+        if metric.agg in ("min", "max") and rfield.type not in _ORDERABLE:
+            self.fail("aggregate_type", loc, f"{metric.agg} needs a number or date")
+            return False, None
+        if metric.agg not in ("count", "count_distinct") and not fdef.aggregatable:
+            self.fail("not_aggregatable", loc, f"{metric.field} is not aggregatable")
+            return False, None
+        return True, rfield
+
+    def check_series(self, where: list[Predicate | PredicateGroup]) -> list[PlanSeries]:
+        """Each series is checked on its own: its metric, its date field (fan-out
+        included) and its conditions. The period, when given, is resolved once and
+        applied to each series by its own date field."""
+        dr = self.intent.date_range
+        period = self.resolve_period() if dr is not None else None
+        out: list[PlanSeries] = []
+        labels: set[str] = set()
+        for index, series in enumerate(self.intent.series):
+            loc = f"series[{index}]"
+            if series.metric.agg == "ratio" or series.alias is None:
+                continue  # series_shape already says why
+            ok, rfield = self.metric_field(series.metric, f"{loc}.metric")
+            resolved = self.resolve(series.date_field, f"{loc}.date_field")
+            conditions = [
+                self.check_condition(cond, f"{loc}.where[{i}]")
+                for i, cond in enumerate(series.where)
+            ]
+            own = [c for c in conditions if c is not None]
+            label = series.alias
+            if not _ALIAS.match(label):
+                self.fail("invalid_alias", f"{loc}.alias", f"{label!r} is not a slug")
+                ok = False
+            elif label == PERIOD_LABEL:
+                self.fail("alias_collision", f"{loc}.alias", f"{label!r} is the period column")
+                ok = False
+            elif label in labels:
+                self.fail("duplicate_alias", f"{loc}.alias", f"{label!r} is used twice")
+                ok = False
+            labels.add(label)
+            if resolved is None or len(own) != len(conditions) or not ok:
+                continue
+            date_field, fdef = resolved
+            if date_field.type not in TEMPORAL_TYPES:
+                self.fail(
+                    "series_date_field",
+                    f"{loc}.date_field",
+                    f"{series.date_field} is {date_field.type}, not a date",
+                )
+                continue
+            if period is not None:
+                if not self.period_field_ok(
+                    date_field, fdef, series.date_field, [*where, *own], f"{loc}.date_field"
+                ):
+                    continue
+                own += _period_predicates(date_field, period)
+            metric = series.metric
+            distinct = metric.distinct or metric.agg == "count_distinct"
+            plan_metric = PlanMetric(label, metric.agg, rfield, distinct)
+            out.append(PlanSeries(label, plan_metric, date_field, tuple(own)))
+        return out
 
     def check_metrics(self, group_labels: set[str]) -> list[PlanMetric]:
         """Metric labels must be unique and must not reuse a group_by label: a metric
@@ -661,24 +844,40 @@ class _Validator:
         for index, metric in enumerate(self.intent.metrics):
             loc = f"metrics[{index}]"
             rfield: ResolvedField | None = None
-            if metric.field is None:
-                if metric.agg != "count":
-                    self.fail("value_shape", loc, f"{metric.agg} needs a field")
+            if metric.agg == "ratio":
+                if (
+                    metric.field is not None
+                    or metric.distinct
+                    or metric.where
+                    or metric.numerator is None
+                    or metric.denominator is None
+                ):
+                    self.fail(
+                        "ratio_shape",
+                        loc,
+                        "a ratio takes numerator, denominator and as_percent only",
+                    )
                     continue
+            elif (
+                metric.numerator is not None or metric.denominator is not None or metric.as_percent
+            ):
+                self.fail(
+                    "ratio_shape",
+                    loc,
+                    "numerator, denominator and as_percent belong to agg ratio",
+                )
+                continue
             else:
-                resolved = self.resolve(metric.field, f"{loc}.field")
-                if resolved is None:
+                ok, rfield = self.metric_field(metric, loc)
+                if not ok:
                     continue
-                rfield, fdef = resolved
-                if metric.agg in ("sum", "avg") and rfield.type not in NUMERIC_TYPES:
-                    self.fail("aggregate_type", loc, f"{metric.agg} needs a numeric field")
-                    continue
-                if metric.agg in ("min", "max") and rfield.type not in _ORDERABLE:
-                    self.fail("aggregate_type", loc, f"{metric.agg} needs a number or date")
-                    continue
-                if metric.agg not in ("count", "count_distinct") and not fdef.aggregatable:
-                    self.fail("not_aggregatable", loc, f"{metric.field} is not aggregatable")
-                    continue
+            conditions = [
+                self.check_condition(cond, f"{loc}.where[{i}]")
+                for i, cond in enumerate(metric.where)
+            ]
+            where = [c for c in conditions if c is not None]
+            if len(where) != len(conditions):
+                continue
             if metric.alias is not None:
                 if not _ALIAS.match(metric.alias):
                     self.fail("invalid_alias", f"{loc}.alias", f"{metric.alias!r} is not a slug")
@@ -703,7 +902,47 @@ class _Validator:
                 continue
             labels.add(label)
             distinct = metric.distinct or metric.agg == "count_distinct"
-            out.append(PlanMetric(label, metric.agg, rfield, distinct))
+            out.append(
+                PlanMetric(
+                    label,
+                    metric.agg,
+                    rfield,
+                    distinct,
+                    tuple(where),
+                    metric.numerator,
+                    metric.denominator,
+                    metric.as_percent,
+                )
+            )
+        return self._check_ratio_refs(out)
+
+    def _check_ratio_refs(self, metrics: list[PlanMetric]) -> list[PlanMetric]:
+        """Both parts must be other, non-ratio metrics of this intent, so a ratio is
+        always one level deep and is computed over the same rows as its parts."""
+        plain = {m.label: m for m in metrics if m.agg != "ratio"}
+        out: list[PlanMetric] = []
+        for metric in metrics:
+            if metric.agg == "ratio":
+                parts = (metric.numerator, metric.denominator)
+                bad = [r for r in parts if r not in plain]
+                if bad:
+                    self.fail(
+                        "ratio_ref",
+                        f"metrics.{metric.label}",
+                        f"{bad[0]!r} is not another non-ratio metric of this intent",
+                    )
+                    continue
+                # min or max of a date is a date: dividing it errors on Postgres and
+                # gives a meaningless number on SQLite.
+                dated = [r for r in parts if _is_temporal(plain[r or ""])]
+                if dated:
+                    self.fail(
+                        "ratio_ref",
+                        f"metrics.{metric.label}",
+                        f"{dated[0]!r} is a date, and a ratio's parts must be numeric",
+                    )
+                    continue
+            out.append(metric)
         return out
 
     def check_group_by(self) -> list[PlanGroup]:
@@ -808,6 +1047,9 @@ class _Validator:
         self.base_def = self.registry.entities[base]
         self.paths = _shortest_paths(self.registry, base)
 
+        if self.intent.intent_type == "date_series":
+            return self.run_series(base)
+
         select: list[ResolvedField] = []
         for index, ref in enumerate(self.intent.select):
             resolved = self.resolve(ref, f"select[{index}]")
@@ -838,6 +1080,53 @@ class _Validator:
             limit=limit,
         )
         return ValidationResult(plan=plan)
+
+    def run_series(self, base: str) -> ValidationResult:
+        assert self.base_def is not None
+        where = self.check_filters()
+        series = self.check_series(where)
+        if self.issues:
+            return ValidationResult(self.issues)
+        plan = QueryPlan(
+            intent_type="date_series",
+            base_entity=base,
+            base_table=self.base_def.table,
+            base_schema=self.base_def.db_schema,
+            base_alias="t0",
+            joins=tuple(self.joins),
+            select=(),
+            metrics=(),
+            where=tuple(where),
+            group_by=(),
+            having=(),
+            order_by=(),
+            limit=None,
+            grain=self.intent.grain,
+            series=tuple(series),
+        )
+        return ValidationResult(plan=plan)
+
+
+def _period_predicates(rfield: ResolvedField, period: tuple[datetime, datetime]) -> list[Predicate]:
+    start, end = period
+    low: Value = start.date() if rfield.type == "date" else start
+    high: Value = end.date() if rfield.type == "date" else end
+    if rfield.type == "date" and end != datetime.combine(end.date(), datetime.min.time()):
+        # A date column and a mid-day end: include that day.
+        high = date.fromordinal(end.date().toordinal() + 1)
+    return [Predicate(rfield, "gte", (low,)), Predicate(rfield, "lt", (high,))]
+
+
+def _is_temporal(metric: PlanMetric) -> bool:
+    return (
+        metric.agg in ("min", "max")
+        and metric.field is not None
+        and metric.field.type in TEMPORAL_TYPES
+    )
+
+
+def _is_placeholder(reason: str) -> bool:
+    return reason.strip().lower() in _PLACEHOLDER_REASONS
 
 
 def _family(ftype: str) -> str:

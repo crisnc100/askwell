@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Annotated
 
 import typer
@@ -297,6 +298,10 @@ def eval_command(
     trials: Annotated[int, typer.Option(help="Trials on fieldservice (Spider runs 1).")] = 1,
     budget: Annotated[float, typer.Option(help="Hard budget for the whole run, USD.")] = 1.0,
     run_id: Annotated[str | None, typer.Option(help="Resume or name a run.")] = None,
+    gold: Annotated[
+        Path | None,
+        typer.Option(help="A second gold file for the one --schema given, e.g. a held-out set."),
+    ] = None,
 ) -> None:
     """Run the benchmark and write evals/reports/<run id>.md and .json.
 
@@ -340,6 +345,7 @@ def eval_command(
         models=model_ids,
         trials=trials,
         budget_usd=budget,
+        gold=gold,
     )
     if result.deferred:
         typer.echo("exported for simulated answers (pending requests per schema/system):")
