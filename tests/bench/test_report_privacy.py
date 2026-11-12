@@ -9,9 +9,9 @@ import hashlib
 import json
 from pathlib import Path
 
-from ledgerline.bench import report as report_module
-from ledgerline.bench.privacy import ngrams
-from ledgerline.bench.run import RunResult
+from askwell.bench import report as report_module
+from askwell.bench.privacy import ngrams
+from askwell.bench.run import RunResult
 
 ROOT = Path(__file__).resolve().parents[2]
 HASHES = ROOT / "evals" / "spider_forbidden_values.json"
@@ -163,7 +163,7 @@ def test_quoted_and_bracketed_values_are_caught() -> None:
 
 
 def test_generator_and_scanner_normalise_alike() -> None:
-    from ledgerline.bench.privacy import digest, normalise
+    from askwell.bench.privacy import digest, normalise
 
     assert normalise("'Mercedes-Benz'") == "mercedes benz"
     assert normalise("  Daily   Accommodation ") == "daily accommodation"

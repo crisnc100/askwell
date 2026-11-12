@@ -9,17 +9,17 @@ from pathlib import Path
 import pytest
 from pydantic import BaseModel
 
-from ledgerline.llm.errors import ParseError
-from ledgerline.llm.gateway import Gateway
-from ledgerline.llm.replay import ReplayStore
-from ledgerline.llm.simulate import (
+from askwell.llm.errors import ParseError
+from askwell.llm.gateway import Gateway
+from askwell.llm.replay import ReplayStore
+from askwell.llm.simulate import (
     AnswerImportError,
     PendingRequestError,
     answer_path,
     import_answers,
     pending_requests,
 )
-from ledgerline.llm.types import ChatMessage
+from askwell.llm.types import ChatMessage
 
 
 class Pick(BaseModel):
@@ -137,7 +137,7 @@ def test_export_mode_needs_a_pending_dir(tmp_path: Path) -> None:
 
 
 def test_an_answer_that_breaks_the_response_schema_is_rejected_and_kept(tmp_path: Path) -> None:
-    from ledgerline.llm.simulate import import_answers_report
+    from askwell.llm.simulate import import_answers_report
 
     with pytest.raises(PendingRequestError) as info:
         _complete(_gateway("export", tmp_path))
@@ -161,7 +161,7 @@ class Limited(BaseModel):
 def test_import_validates_strictly_without_coercion(tmp_path: Path) -> None:
     """A string "5" for an integer field would be coerced by default validation; the
     stored answer must match the exported schema exactly, so it is rejected."""
-    from ledgerline.llm.simulate import import_answers_report
+    from askwell.llm.simulate import import_answers_report
 
     gw = _gateway("export", tmp_path)
     with pytest.raises(PendingRequestError) as info:

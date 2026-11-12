@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from typer.testing import CliRunner
 
-from ledgerline import __version__
-from ledgerline.cli import app
+from askwell import __version__
+from askwell.cli import app
 
 
 def test_version_command_prints_version() -> None:

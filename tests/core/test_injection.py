@@ -10,12 +10,12 @@ from typing import Any
 import pytest
 from sqlalchemy import Engine, create_engine, text
 
-from ledgerline.core.executor import readonly_engine, run
-from ledgerline.core.intent import Intent
-from ledgerline.core.registry import EntityDef, FieldDef, Registry
-from ledgerline.core.sqlbuild import build, compile_sql
-from ledgerline.core.validate import validate
-from ledgerline.fieldservice.seed import content_hash
+from askwell.core.executor import readonly_engine, run
+from askwell.core.intent import Intent
+from askwell.core.registry import EntityDef, FieldDef, Registry
+from askwell.core.sqlbuild import build, compile_sql
+from askwell.core.validate import validate
+from askwell.fieldservice.seed import content_hash
 from tests.core.conftest import NOW
 
 PAYLOADS = [

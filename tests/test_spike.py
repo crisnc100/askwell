@@ -10,16 +10,16 @@ from typing import Any
 import pytest
 from typer.testing import CliRunner
 
-from ledgerline.cli import app
-from ledgerline.llm.pricing import ModelPrice
-from ledgerline.llm.spike import (
+from askwell.cli import app
+from askwell.llm.pricing import ModelPrice
+from askwell.llm.spike import (
     PROBES,
     advertised_support,
     make_live_gateway,
     run_spike,
     write_report,
 )
-from ledgerline.llm.types import RawResponse
+from askwell.llm.types import RawResponse
 
 PRICE = ModelPrice(1e-7, 4e-7)
 
@@ -93,8 +93,8 @@ def test_advertised_support_reads_supported_parameters() -> None:
 
 
 def test_spike_command_refuses_without_a_key(monkeypatch: pytest.MonkeyPatch) -> None:
-    import ledgerline.cli as cli
-    from ledgerline.config import Settings
+    import askwell.cli as cli
+    from askwell.config import Settings
 
     no_key = Settings(OPENROUTER_API_KEY=None)  # type: ignore[call-arg]
     monkeypatch.setattr(cli, "get_settings", lambda: no_key)

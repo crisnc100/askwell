@@ -16,10 +16,10 @@ from typing import Any
 from hypothesis import given, settings
 from hypothesis import strategies as st
 
-from ledgerline.core.registry import slugify
-from ledgerline.workspace.check import UploadedFile, check_files
-from ledgerline.workspace.load import load_tables
-from ledgerline.workspace.rules import ColumnType, convert, is_null
+from askwell.core.registry import slugify
+from askwell.workspace.check import UploadedFile, check_files
+from askwell.workspace.load import load_tables
+from askwell.workspace.rules import ColumnType, convert, is_null
 from tests.workspace.conftest import SAMPLE
 
 NULLS = ["", "NULL", "null", "NA", "n/a", "N/A", "-", "  "]

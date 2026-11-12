@@ -16,15 +16,15 @@ import httpx2
 import pytest
 from pydantic import BaseModel, SecretStr
 
-from ledgerline.config import Settings
-from ledgerline.llm.anthropic_transport import JSON_ONLY, AnthropicTransport
-from ledgerline.llm.budget import BudgetGuard
-from ledgerline.llm.daily import DailySpend
-from ledgerline.llm.errors import ParseError, ProviderUnavailableError
-from ledgerline.llm.gateway import Gateway
-from ledgerline.llm.providers import ProviderRouter, split_model
-from ledgerline.llm.replay import ReplayStore
-from ledgerline.llm.types import ChatMessage
+from askwell.config import Settings
+from askwell.llm.anthropic_transport import JSON_ONLY, AnthropicTransport
+from askwell.llm.budget import BudgetGuard
+from askwell.llm.daily import DailySpend
+from askwell.llm.errors import ParseError, ProviderUnavailableError
+from askwell.llm.gateway import Gateway
+from askwell.llm.providers import ProviderRouter, split_model
+from askwell.llm.replay import ReplayStore
+from askwell.llm.types import ChatMessage
 
 MODEL = "anthropic:claude-haiku-5-5"
 MESSAGES = [
@@ -294,7 +294,7 @@ def test_the_transport_refuses_without_a_key() -> None:
 
 
 def test_the_kill_switch_stops_anthropic_calls_too(tmp_path: Path) -> None:
-    from ledgerline.llm.errors import LiveAnswersOffError
+    from askwell.llm.errors import LiveAnswersOffError
 
     server = Server([ok()])
     gw = _gateway(server, tmp=tmp_path)
@@ -307,7 +307,7 @@ def test_the_kill_switch_stops_anthropic_calls_too(tmp_path: Path) -> None:
 def test_build_gateway_routes_by_provider_without_an_openrouter_key(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    from ledgerline.pipeline import service as service_module
+    from askwell.pipeline import service as service_module
 
     monkeypatch.setattr(
         service_module.PriceBook, "fetch", lambda *_a, **_k: service_module.PriceBook({})

@@ -13,10 +13,10 @@ from typing import Any
 
 import pytest
 
-from ledgerline.workspace import fields
-from ledgerline.workspace.fields import Edits
-from ledgerline.workspace.limits import Limits
-from ledgerline.workspace.store import DiskFullError, UploadTooSlowError, WorkspaceStore
+from askwell.workspace import fields
+from askwell.workspace.fields import Edits
+from askwell.workspace.limits import Limits
+from askwell.workspace.store import DiskFullError, UploadTooSlowError, WorkspaceStore
 from tests.workspace.conftest import FakeClock, sample_files
 
 

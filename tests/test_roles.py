@@ -12,8 +12,8 @@ from sqlalchemy import Engine, text
 from sqlalchemy.engine import make_url
 from sqlalchemy.exc import ProgrammingError
 
-from ledgerline.config import get_settings
-from ledgerline.fieldservice.schema import RO_DENIED_COLUMNS
+from askwell.config import get_settings
+from askwell.fieldservice.schema import RO_DENIED_COLUMNS
 
 ROLES_SQL = Path(__file__).resolve().parent.parent / "infra" / "postgres" / "roles.sql"
 
@@ -82,7 +82,7 @@ def test_roles_sql_is_atomic_when_interrupted_after_the_table_wide_grant(
             "-v",
             f"ro_password={ro_password}",
             "-v",
-            "ledgerline_test_fail_after_grant=1",
+            "askwell_test_fail_after_grant=1",
             "-f",
             str(ROLES_SQL),
         ],

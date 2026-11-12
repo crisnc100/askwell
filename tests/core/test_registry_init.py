@@ -10,9 +10,9 @@ from pathlib import Path
 import pytest
 from sqlalchemy import Engine, create_engine, text
 
-from ledgerline.core.executor import readonly_engine
-from ledgerline.core.registry import Registry, dump_registry, load_registry
-from ledgerline.core.registry_init import field_type, init_registry, write_privilege_warning
+from askwell.core.executor import readonly_engine
+from askwell.core.registry import Registry, dump_registry, load_registry
+from askwell.core.registry_init import field_type, init_registry, write_privilege_warning
 from tests.core.conftest import FIELDSERVICE_REGISTRY, ROOT
 
 SPIDER_DB_DIR = ROOT / "data" / "spider" / "spider_data" / "database"
@@ -266,8 +266,8 @@ def test_every_sampled_spider_db(db_id: str, tmp_path: Path) -> None:
 def test_date_columns_holding_integers_are_typed_integer(tmp_path: Path) -> None:
     """A DATE column storing YYYYMMDD integers is not a date to SQLite's date functions;
     typed as integer, a calendar grain on it is refused at validation (grain_type)."""
-    from ledgerline.core.intent import Intent
-    from ledgerline.core.validate import validate
+    from askwell.core.intent import Intent
+    from askwell.core.validate import validate
     from tests.core.conftest import NOW
 
     engine = _sqlite(

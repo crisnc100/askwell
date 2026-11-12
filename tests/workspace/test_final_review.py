@@ -8,9 +8,9 @@ from pathlib import Path
 
 import pytest
 
-from ledgerline.workspace import rules
-from ledgerline.workspace.check import UploadedFile
-from ledgerline.workspace.rules import date_fix, kind
+from askwell.workspace import rules
+from askwell.workspace.check import UploadedFile
+from askwell.workspace.rules import date_fix, kind
 from tests.workspace.conftest import check, csv_file
 from tests.workspace.test_roundtrip import assert_round_trip
 

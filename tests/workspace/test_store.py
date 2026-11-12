@@ -9,8 +9,8 @@ import pytest
 from fastapi.testclient import TestClient
 from typer.testing import CliRunner
 
-from ledgerline.workspace.api import FILE_HEADER, HEADER
-from ledgerline.workspace.store import (
+from askwell.workspace.api import FILE_HEADER, HEADER
+from askwell.workspace.store import (
     WorkspaceStore,
     WrongStateError,
     check_file_name,
@@ -258,10 +258,10 @@ def test_sweep_judges_a_folder_without_metadata_by_its_age(
 
 
 def test_cli_sweep(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-    from ledgerline.cli import app
-    from ledgerline.config import get_settings
+    from askwell.cli import app
+    from askwell.config import get_settings
 
-    monkeypatch.setenv("LEDGERLINE_WORKSPACE_DIR", str(tmp_path / "ws"))
+    monkeypatch.setenv("ASKWELL_WORKSPACE_DIR", str(tmp_path / "ws"))
     get_settings.cache_clear()
     try:
         result = CliRunner().invoke(app, ["sweep"])

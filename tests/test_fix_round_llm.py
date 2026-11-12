@@ -14,16 +14,16 @@ import pytest
 from pydantic import BaseModel, SecretStr
 from typer.testing import CliRunner
 
-from ledgerline.config import Settings
-from ledgerline.llm.anthropic_transport import AnthropicTransport
-from ledgerline.llm.budget import BudgetGuard
-from ledgerline.llm.daily import DailySpend
-from ledgerline.llm.errors import ParseError
-from ledgerline.llm.gateway import Gateway
-from ledgerline.llm.pricing import worst_case_cost
-from ledgerline.llm.providers import ProviderRouter
-from ledgerline.llm.replay import ReplayStore, canonical_json
-from ledgerline.llm.types import ChatMessage
+from askwell.config import Settings
+from askwell.llm.anthropic_transport import AnthropicTransport
+from askwell.llm.budget import BudgetGuard
+from askwell.llm.daily import DailySpend
+from askwell.llm.errors import ParseError
+from askwell.llm.gateway import Gateway
+from askwell.llm.pricing import worst_case_cost
+from askwell.llm.providers import ProviderRouter
+from askwell.llm.replay import ReplayStore, canonical_json
+from askwell.llm.types import ChatMessage
 
 MODEL = "anthropic:claude-haiku-5-5"
 MESSAGES = [ChatMessage(role="user", content="label it")]
@@ -138,7 +138,7 @@ def test_a_refused_connection_was_never_sent_so_it_is_retried_and_free(tmp_path:
 def test_an_anthropic_default_starts_while_openrouter_is_down(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    from ledgerline.pipeline import service as service_module
+    from askwell.pipeline import service as service_module
 
     calls: list[str] = []
 
@@ -163,9 +163,9 @@ def test_an_anthropic_default_starts_while_openrouter_is_down(
 def test_the_spike_command_honours_the_beta_controls(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path, control: dict[str, Any]
 ) -> None:
-    import ledgerline.cli as cli
-    import ledgerline.llm.gateway as gateway_module
-    import ledgerline.llm.spike as spike_module
+    import askwell.cli as cli
+    import askwell.llm.gateway as gateway_module
+    import askwell.llm.spike as spike_module
 
     calls: list[str] = []
 
@@ -195,7 +195,7 @@ def test_the_spike_command_honours_the_beta_controls(
 
 
 def test_the_spike_gateway_takes_the_daily_cap(tmp_path: Path) -> None:
-    from ledgerline.llm.spike import make_live_gateway
+    from askwell.llm.spike import make_live_gateway
 
     daily = DailySpend(tmp_path / "spend.sqlite", cap_usd=0.0)
     options: dict[str, Any] = {"daily": daily, "live_answers_off": True}

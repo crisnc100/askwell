@@ -1,4 +1,4 @@
-from ledgerline.workspace import rules
+from askwell.workspace import rules
 
 
 def test_a_year_before_1000_is_stored_with_four_digits():

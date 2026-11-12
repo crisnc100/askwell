@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from ledgerline.bench.metrics import ItemOutcome, summarise, wilson
+from askwell.bench.metrics import ItemOutcome, summarise, wilson
 
 
 def test_wilson_known_values() -> None:

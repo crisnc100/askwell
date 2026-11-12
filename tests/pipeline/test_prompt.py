@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
-from ledgerline.core.registry import FieldDef, load_registry
-from ledgerline.core.validate import Issue
-from ledgerline.llm.types import ChatMessage
-from ledgerline.pipeline.prompt import (
+from askwell.core.registry import FieldDef, load_registry
+from askwell.core.validate import Issue
+from askwell.llm.types import ChatMessage
+from askwell.pipeline.prompt import (
     MAX_VALUES,
     SYSTEM_PROMPT,
     first_messages,
@@ -93,7 +93,7 @@ def test_relationships_with_a_hidden_endpoint_are_not_shown() -> None:
 
 
 def test_v2_describes_the_new_grammar_and_refuse_first() -> None:
-    from ledgerline.pipeline.prompt import PROMPT_VERSION
+    from askwell.pipeline.prompt import PROMPT_VERSION
 
     assert PROMPT_VERSION == "interpret-v2"
     for phrase in (
@@ -128,10 +128,10 @@ def test_v2_examples_use_made_up_entities() -> None:
 
 
 def test_every_v2_example_validates_against_a_made_up_registry() -> None:
-    from ledgerline.core.intent import Intent
-    from ledgerline.core.registry import EntityDef, Registry, Relationship
-    from ledgerline.core.validate import validate
-    from ledgerline.pipeline.prompt import EXAMPLES
+    from askwell.core.intent import Intent
+    from askwell.core.registry import EntityDef, Registry, Relationship
+    from askwell.core.validate import validate
+    from askwell.pipeline.prompt import EXAMPLES
 
     tickets = EntityDef(
         table="tickets",

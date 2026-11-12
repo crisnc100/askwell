@@ -7,14 +7,14 @@ import pytest
 from sqlalchemy import Engine, create_engine, text
 from sqlalchemy.exc import OperationalError
 
-from ledgerline.config import get_settings
-from ledgerline.fieldservice.seed import Dataset, content_hash, generate, load
+from askwell.config import get_settings
+from askwell.fieldservice.seed import Dataset, content_hash, generate, load
 
 pytest_plugins = ["pytester", "tests.plugins.zero_skips"]
 
 NOT_SEEDED = (
     "Postgres is not reachable or not seeded. Run `docker compose up -d db` and "
-    "`uv run ledgerline seed`. (Tests never skip: a missing DB is a failure.)"
+    "`uv run askwell seed`. (Tests never skip: a missing DB is a failure.)"
 )
 
 

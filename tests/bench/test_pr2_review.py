@@ -10,19 +10,19 @@ from typing import Any
 import pytest
 from sqlalchemy import Engine, create_engine, text
 
-from ledgerline.bench import report as report_module
-from ledgerline.bench import run as run_module
-from ledgerline.bench.items import EvalItem
-from ledgerline.bench.systems import OneShotSystem
-from ledgerline.config import get_settings
-from ledgerline.core.executor import readonly_engine
-from ledgerline.core.registry import load_registry
-from ledgerline.fieldservice.seed import content_hash
-from ledgerline.llm.budget import BudgetGuard
-from ledgerline.llm.gateway import Gateway
-from ledgerline.llm.pricing import ModelPrice
-from ledgerline.llm.replay import ReplayStore
-from ledgerline.llm.types import RawResponse
+from askwell.bench import report as report_module
+from askwell.bench import run as run_module
+from askwell.bench.items import EvalItem
+from askwell.bench.systems import OneShotSystem
+from askwell.config import get_settings
+from askwell.core.executor import readonly_engine
+from askwell.core.registry import load_registry
+from askwell.fieldservice.seed import content_hash
+from askwell.llm.budget import BudgetGuard
+from askwell.llm.gateway import Gateway
+from askwell.llm.pricing import ModelPrice
+from askwell.llm.replay import ReplayStore
+from askwell.llm.types import RawResponse
 from tests.core.conftest import FIELDSERVICE_REGISTRY
 
 ITEM = EvalItem("fs-x", "fieldservice", "in_schema", "q", "SELECT 1", False, "easy")
@@ -128,7 +128,7 @@ def test_comment_only_sql_is_an_execution_error(
 def test_concurrent_asks_do_not_share_a_budget_guard(
     sqlite_fieldservice: Engine, tmp_path: Path
 ) -> None:
-    from ledgerline.pipeline.service import AskService, SchemaConfig
+    from askwell.pipeline.service import AskService, SchemaConfig
 
     valid = '{"intent_type": "summary", "entity": "invoices", "metrics": [{"agg": "count"}]}'
     b_waiting = threading.Event()
@@ -216,7 +216,7 @@ def test_a_changed_gold_item_is_scored_again(
         {},
         {"sql": "SELECT 1", "refusal_reason": None},
     )
-    from ledgerline.llm.simulate import import_answers
+    from askwell.llm.simulate import import_answers
 
     import_answers(
         tmp_path / "pending" / "fieldservice" / "oneshot",
@@ -262,7 +262,7 @@ def test_floor_checks_use_the_default_model(tmp_path: Path) -> None:
 def test_configured_spider_schema_is_regenerated_and_checked(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
-    from ledgerline.pipeline.service import SchemaConfig
+    from askwell.pipeline.service import SchemaConfig
 
     stale = tmp_path / "car_1.yaml"
     stale.write_text("not the generated registry")
@@ -282,7 +282,7 @@ def test_configured_spider_schema_is_regenerated_and_checked(
 def test_postgres_driver_refuses_a_batch_without_single_select(
     pg_seeded: Engine, pg_owner: Engine
 ) -> None:
-    from ledgerline.core.executor import ExecutionError, run
+    from askwell.core.executor import ExecutionError, run
 
     before = content_hash(pg_owner)
     # The server refuses it before anything runs: as a cursor it is not one valid query.
@@ -300,7 +300,7 @@ def test_postgres_driver_refuses_a_batch_without_single_select(
 
 
 def test_sqlite_driver_refuses_a_batch(sqlite_fieldservice: Engine) -> None:
-    from ledgerline.core.executor import ExecutionError, run
+    from askwell.core.executor import ExecutionError, run
 
     engine = readonly_engine(str(sqlite_fieldservice.url))
     try:
@@ -316,7 +316,7 @@ def test_sqlite_driver_refuses_a_batch(sqlite_fieldservice: Engine) -> None:
 def test_a_trailing_comment_after_the_semicolon_is_allowed(
     pg_seeded: Engine, tmp_path: Path
 ) -> None:
-    from ledgerline.bench.systems import single_select
+    from askwell.bench.systems import single_select
 
     assert single_select("SELECT 1; -- done") == "SELECT 1"
     assert single_select("SELECT ';' ; /* end */ ") == "SELECT ';'"
@@ -331,7 +331,7 @@ def test_a_trailing_comment_after_the_semicolon_is_allowed(
 
 
 def test_checkpoint_key_covers_category_and_ordering() -> None:
-    from ledgerline.bench.run import Task
+    from askwell.bench.run import Task
 
     base = Task("fieldservice", "m", 1, "oneshot", ITEM, "p", "r")
     keys = {

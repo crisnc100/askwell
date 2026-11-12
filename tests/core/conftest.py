@@ -8,17 +8,17 @@ from typing import Any
 import pytest
 from sqlalchemy import Engine
 
-from ledgerline.config import get_settings
-from ledgerline.core.executor import readonly_engine
-from ledgerline.core.intent import Intent
-from ledgerline.core.registry import (
+from askwell.config import get_settings
+from askwell.core.executor import readonly_engine
+from askwell.core.intent import Intent
+from askwell.core.registry import (
     EntityDef,
     FieldDef,
     Registry,
     Relationship,
     load_registry,
 )
-from ledgerline.core.validate import ValidationResult, validate
+from askwell.core.validate import ValidationResult, validate
 
 ROOT = Path(__file__).resolve().parents[2]
 FIELDSERVICE_REGISTRY = ROOT / "registries" / "fieldservice.yaml"

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from ledgerline.workspace.rules import (
+from askwell.workspace.rules import (
     column_type,
     convert,
     date_fix,

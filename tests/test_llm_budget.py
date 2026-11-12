@@ -6,8 +6,8 @@ from pathlib import Path
 
 import pytest
 
-from ledgerline.llm.budget import BudgetGuard, Checkpoint, ItemResult, run_checkpointed
-from ledgerline.llm.errors import BudgetExceededError
+from askwell.llm.budget import BudgetGuard, Checkpoint, ItemResult, run_checkpointed
+from askwell.llm.errors import BudgetExceededError
 
 ITEMS = [f"q{i}" for i in range(10)]
 
@@ -181,7 +181,7 @@ def test_a_complete_last_line_missing_its_newline_is_kept(tmp_path: Path) -> Non
 
 
 def test_deferred_items_are_not_checkpointed_and_run_later(tmp_path: Path) -> None:
-    from ledgerline.llm.budget import ItemDeferred
+    from askwell.llm.budget import ItemDeferred
 
     checkpoint = Checkpoint(tmp_path / "run.jsonl")
     ready = {"q0", "q2"}

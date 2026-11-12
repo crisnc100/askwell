@@ -14,11 +14,11 @@ from sqlalchemy import Date, DateTime, Engine, literal, select
 from sqlalchemy.dialects import mysql
 from sqlalchemy.exc import CompileError
 
-from ledgerline.core.executor import run
-from ledgerline.core.intent import Intent
-from ledgerline.core.registry import Registry, load_registry
-from ledgerline.core.sqlbuild import GRAINS, build, compile_sql, dialect_for
-from ledgerline.core.validate import validate
+from askwell.core.executor import run
+from askwell.core.intent import Intent
+from askwell.core.registry import Registry, load_registry
+from askwell.core.sqlbuild import GRAINS, build, compile_sql, dialect_for
+from askwell.core.validate import validate
 from tests.core.conftest import FIELDSERVICE_REGISTRY, NOW
 
 # --- sentinel property ---
@@ -236,7 +236,7 @@ def test_every_series_filter_value_is_bound_never_inlined(
 
 
 def test_identifiers_come_from_the_registry_and_are_quoted() -> None:
-    from ledgerline.core.registry import EntityDef, FieldDef
+    from askwell.core.registry import EntityDef, FieldDef
 
     reg = Registry(
         schema_version=1,
@@ -373,7 +373,7 @@ def test_builder_refuses_duplicate_output_labels(registry: Registry) -> None:
 
 
 def test_datetime_normalisation_refuses_other_dialects() -> None:
-    from ledgerline.core.sqlbuild import AsDatetime
+    from askwell.core.sqlbuild import AsDatetime
 
     stmt = select(AsDatetime(literal(date(2026, 1, 1), Date)))
     with pytest.raises(CompileError, match="not implemented"):

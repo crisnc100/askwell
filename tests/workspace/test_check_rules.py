@@ -3,8 +3,8 @@ the file, the row and column where there is one, what is wrong and the fix."""
 
 from __future__ import annotations
 
-from ledgerline.workspace.check import CheckResult, Problem, UploadedFile
-from ledgerline.workspace.limits import Limits
+from askwell.workspace.check import CheckResult, Problem, UploadedFile
+from askwell.workspace.limits import Limits
 from tests.workspace.conftest import check, csv_file
 
 

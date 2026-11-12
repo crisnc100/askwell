@@ -6,7 +6,7 @@ from datetime import UTC, datetime
 
 import pytest
 
-from ledgerline.core.dates import add_months, naive_utc, resolve_relative
+from askwell.core.dates import add_months, naive_utc, resolve_relative
 
 NOW = datetime(2026, 6, 30, tzinfo=UTC)
 D = datetime

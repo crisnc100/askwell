@@ -7,9 +7,9 @@ from typing import Any
 
 from sqlalchemy import Engine, select
 
-from ledgerline.config import Settings
-from ledgerline.core.audit import ask_log
-from ledgerline.pipeline.service import SchemaConfig
+from askwell.config import Settings
+from askwell.core.audit import ask_log
+from askwell.pipeline.service import SchemaConfig
 from tests.pipeline.conftest import scripted_service
 
 UNPAID = {
@@ -137,8 +137,8 @@ def test_rows_are_never_sent_to_the_model(
 def test_each_attempt_keeps_its_own_provenance(
     settings: Settings, fieldservice_config: dict[str, SchemaConfig], audit_engine: Engine
 ) -> None:
-    from ledgerline.core.intent import Intent
-    from ledgerline.llm.types import LLMResult, RawResponse
+    from askwell.core.intent import Intent
+    from askwell.llm.types import LLMResult, RawResponse
 
     bad = {**UNPAID, "filters": [{"field": "status", "op": "eq", "value": "outstanding"}]}
     service, gateway = scripted_service(settings, fieldservice_config, [bad, UNPAID], audit_engine)
