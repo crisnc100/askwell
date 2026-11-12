@@ -1,0 +1,137 @@
+# Eval report `v02-holdout-before`
+
+- sql_agent baseline not run: needs a live model (multi-step tool calls can't be honestly simulated in one pass).
+
+Gold: `holdout-v02.jsonl`.
+
+Status: complete. Spend: $0.1131.
+Rates show the value, the Wilson 95% interval, and the counts. Trials are pooled.
+
+| Schema | System | Model | Trials | Coverage | Exec. accuracy | Acc. given attempted | False refusals | Wrong given answered | Refusal recall | Exec. errors | Gold |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| fieldservice | ledgerline | anthropic:claude-haiku-5-5 | 3 | 58.3% [48-68] (49/84) | 14.3% [8-23] (12/84) | 24.5% [15-38] (12/49) | 41.7% [32-52] (35/84) | 75.5% [62-85] (37/49) | 100.0% [90-100] (36/36) | 0.0% [0-3] (0/120) | holdout-v02.jsonl |
+| fieldservice | oneshot | anthropic:claude-haiku-5-5 | 3 | 100.0% [96-100] (84/84) | 54.8% [44-65] (46/84) | 54.8% [44-65] (46/84) | 0.0% [0-4] (0/84) | 44.6% [34-55] (37/83) | 100.0% [90-100] (36/36) | 0.8% [0-5] (1/120) | holdout-v02.jsonl |
+
+## Floor check: fieldservice, anthropic:claude-haiku-5-5 (v0.1 acceptance floor)
+
+- Execution accuracy >= 80%: 14.3% [8-23] (12/84), NOT met
+- Wrong answers among answered <= 5%: 75.5% [62-85] (37/49), NOT met
+
+Result: **not met** in v0.1 (live, default model).
+Why: Accuracy is met (35 of 43); wrong answers miss by one (2 of 37 answered, 5.4%). Both wrong answers are questions the intent grammar cannot express (a ratio, two date fields in one series), where the model answered a nearby question instead of refusing. Of its 6 refusals, 5 are correct refusals of such questions; 1 (fs-038) is a misread after one intent failed validation.
+Next: v0.2 changes the prompt and the grammar, then measures them on a fresh run. The v0.1 prompt is not changed after seeing these results.
+
+## Ledgerline misses
+
+- `ho-001` (fieldservice, holdout-v02.jsonl, trial 1): wrong — rows differ. Tag: **untriaged**
+- `ho-002` (fieldservice, holdout-v02.jsonl, trial 1): wrong — rows differ. Tag: **untriaged**
+- `ho-003` (fieldservice, holdout-v02.jsonl, trial 1): wrong — rows differ. Tag: **untriaged**
+- `ho-004` (fieldservice, holdout-v02.jsonl, trial 1): refused — The question needs each work order's customer segment. Reaching customers from work_orders takes two joins (work_orders -> sites -> customers), and the registry only supports joined fields one relationship away, so customers.segment is not reachable from work_orders. The intent format also has no way to compute a share (repair count divided by total count) within each group.. Tag: **untriaged**
+- `ho-005` (fieldservice, holdout-v02.jsonl, trial 1): refused — The registry can't express a percentage. It supports one set of metrics with shared filters, so it can't divide the count of invoices paid on or before the due date by the count of all paid invoices issued in 2025.. Tag: **untriaged**
+- `ho-006` (fieldservice, holdout-v02.jsonl, trial 1): wrong — rows differ. Tag: **untriaged**
+- `ho-007` (fieldservice, holdout-v02.jsonl, trial 1): wrong — rows differ. Tag: **untriaged**
+- `ho-008` (fieldservice, holdout-v02.jsonl, trial 1): wrong — rows differ. Tag: **untriaged**
+- `ho-009` (fieldservice, holdout-v02.jsonl, trial 1): refused — The comparison needs two different date bases. Billed amounts are dated by issue date (issued_at), but cash received must be dated by payment date (paid_at). A single query can filter only one date field, so one intent cannot return billed and cash by quarter on consistent terms. Try separate questions: billed by issue quarter for 2025 excluding voids, and paid invoice amounts by payment quarter for 2025.. Tag: **untriaged**
+- `ho-010` (fieldservice, holdout-v02.jsonl, trial 1): wrong — rows differ. Tag: **untriaged**
+- `ho-011` (fieldservice, holdout-v02.jsonl, trial 1): refused — The registry has no duration or elapsed-time field, and metrics can only aggregate a single field. Average days from opened_at to completed_at would need a date difference per row, which this intent format cannot express.. Tag: **untriaged**
+- `ho-012` (fieldservice, holdout-v02.jsonl, trial 1): refused — The registry has no per-invoice days-to-pay measure, and metrics can only aggregate a single field, so the difference between invoices.issued_at and invoices.paid_at cannot be computed.. Tag: **untriaged**
+- `ho-013` (fieldservice, holdout-v02.jsonl, trial 1): refused — Total parts cost needs quantity (work_order_parts) multiplied by unit_cost (parts) per line, and the registry has no extended-cost field or way to compute that product. Summing unit_cost alone would ignore quantities, and summing quantity gives units, not cost.. Tag: **untriaged**
+- `ho-014` (fieldservice, holdout-v02.jsonl, trial 1): refused — Markup requires computing (unit_price - unit_cost) x quantity per line, and the intent format only supports aggregating a single listed field. No computed or derived field is available in the registry, so this cannot be expressed.. Tag: **untriaged**
+- `ho-015` (fieldservice, holdout-v02.jsonl, trial 1): refused — Finding completed jobs with no invoice requires an anti-join against invoices, which is a one-to-many relationship from work_orders. The registry can only filter on fields of the base entity or on many-to-one joins, so this cannot be expressed. Filtering invoices for null work_order_id would not work either, because invoices always reference a work order.. Tag: **untriaged**
+- `ho-016` (fieldservice, holdout-v02.jsonl, trial 1): refused — The question needs customers with no job in the last 90 days, which is an absence check across customers, sites, and work orders. The intent format can only filter and aggregate from one base entity along many-to-one joins, so it cannot express 'has no matching work order.'. Tag: **untriaged**
+- `ho-017` (fieldservice, holdout-v02.jsonl, trial 1): wrong — rows differ. Tag: **untriaged**
+- `ho-018` (fieldservice, holdout-v02.jsonl, trial 1): refused — The registry has no way to compute a per-job product of labor_hours and hourly_rate. Metrics aggregate a single field, so labour dollars cannot be derived.. Tag: **untriaged**
+- `ho-019` (fieldservice, holdout-v02.jsonl, trial 1): wrong — rows differ. Tag: **untriaged**
+- `ho-020` (fieldservice, holdout-v02.jsonl, trial 1): wrong — rows differ. Tag: **untriaged**
+- `ho-022` (fieldservice, holdout-v02.jsonl, trial 1): wrong — rows differ. Tag: **untriaged**
+- `ho-024` (fieldservice, holdout-v02.jsonl, trial 1): wrong — unknown_field. Tag: **untriaged**
+- `ho-025` (fieldservice, holdout-v02.jsonl, trial 1): refused — Filtering technicians by hourly_rate above the company-wide average needs a comparison against an aggregate computed over all technicians, and the intent format cannot express that. A fixed threshold would have to be supplied instead.. Tag: **untriaged**
+- `ho-028` (fieldservice, holdout-v02.jsonl, trial 1): wrong — unknown_field. Tag: **untriaged**
+- `ho-001` (fieldservice, holdout-v02.jsonl, trial 2): wrong — rows differ. Tag: **untriaged**
+- `ho-002` (fieldservice, holdout-v02.jsonl, trial 2): wrong — rows differ. Tag: **untriaged**
+- `ho-003` (fieldservice, holdout-v02.jsonl, trial 2): wrong — rows differ. Tag: **untriaged**
+- `ho-004` (fieldservice, holdout-v02.jsonl, trial 2): wrong — invalid_order_by, unknown_field. Tag: **untriaged**
+- `ho-005` (fieldservice, holdout-v02.jsonl, trial 2): refused — The question asks for a percentage, which needs two counts (paid-on-time invoices divided by all paid invoices from 2025). The intent format cannot divide one metric by another. I can answer it as two separate queries: the count of 2025-issued invoices with status paid and paid_at on or before due_at, and the count of 2025-issued paid invoices.. Tag: **untriaged**
+- `ho-006` (fieldservice, holdout-v02.jsonl, trial 2): wrong — rows differ. Tag: **untriaged**
+- `ho-007` (fieldservice, holdout-v02.jsonl, trial 2): wrong — rows differ. Tag: **untriaged**
+- `ho-008` (fieldservice, holdout-v02.jsonl, trial 2): wrong — rows differ. Tag: **untriaged**
+- `ho-009` (fieldservice, holdout-v02.jsonl, trial 2): refused — The question needs two different date axes. Billing is measured by invoices.issued_at and cash received by invoices.paid_at. A single grouped query can group by only one date field, so it cannot show both per quarter correctly. Grouping by issue quarter with paid status would measure paid invoices by issue date, not cash received in each quarter.. Tag: **untriaged**
+- `ho-010` (fieldservice, holdout-v02.jsonl, trial 2): refused — This needs two differently filtered counts in one result: scheduled visits (by scheduled_for month) and completed jobs (by completed_at month). Metrics cannot carry their own filters, so a single query cannot return both. Please ask for each count separately, for example scheduled visits by month and completed jobs by month for January through June this year.. Tag: **untriaged**
+- `ho-011` (fieldservice, holdout-v02.jsonl, trial 2): refused — The registry has no way to compute elapsed days between work_orders.opened_at and work_orders.completed_at. Metrics can only aggregate a single existing field, so an average of the difference cannot be expressed.. Tag: **untriaged**
+- `ho-012` (fieldservice, holdout-v02.jsonl, trial 2): refused — The registry has no way to compute the number of days between an invoice's issue date and its payment date. Metrics can only aggregate a field directly (count, sum, avg, min, max), and averaging the raw date fields would not produce a day count. Payment timing per segment would need a days-to-pay field or a date-difference measure.. Tag: **untriaged**
+- `ho-013` (fieldservice, holdout-v02.jsonl, trial 2): refused — Total cost needs each line's quantity multiplied by the part's unit_cost, and the registry only supports aggregating a single field. Summing unit_cost alone would ignore how many units were used, so the answer would be wrong.. Tag: **untriaged**
+- `ho-014` (fieldservice, holdout-v02.jsonl, trial 2): refused — Markup needs (unit_price - unit_cost) x quantity, a computed per-line expression. Metrics can only aggregate a single listed field, so this cannot be expressed. Sums of unit_price or unit_cost separately would not give the markup.. Tag: **untriaged**
+- `ho-015` (fieldservice, holdout-v02.jsonl, trial 2): refused — Finding completed jobs with no invoice requires an anti-join from work_orders to invoices. Invoices sit on the many side of that relationship, so the registry cannot express it, and the question cannot be re-based onto invoices either.. Tag: **untriaged**
+- `ho-016` (fieldservice, holdout-v02.jsonl, trial 2): refused — Finding active customers with no jobs in the last 90 days requires an exclusion (anti-join) across customers, sites, and work orders. The intent language has no way to express 'no matching related rows', and customers has no job-count field to filter on.. Tag: **untriaged**
+- `ho-017` (fieldservice, holdout-v02.jsonl, trial 2): wrong — rows differ. Tag: **untriaged**
+- `ho-018` (fieldservice, holdout-v02.jsonl, trial 2): refused — Labour dollars would need labor_hours multiplied by technicians.hourly_rate per work order, and the registry has no way to compute a product of two fields inside an aggregate. Summing hours or rates separately would not give the dollar figure.. Tag: **untriaged**
+- `ho-019` (fieldservice, holdout-v02.jsonl, trial 2): wrong — rows differ. Tag: **untriaged**
+- `ho-020` (fieldservice, holdout-v02.jsonl, trial 2): wrong — rows differ. Tag: **untriaged**
+- `ho-022` (fieldservice, holdout-v02.jsonl, trial 2): wrong — rows differ. Tag: **untriaged**
+- `ho-024` (fieldservice, holdout-v02.jsonl, trial 2): wrong — rows differ. Tag: **untriaged**
+- `ho-025` (fieldservice, holdout-v02.jsonl, trial 2): refused — Filtering technicians by hourly_rate above the company-wide average requires comparing each row to an aggregate computed across all technicians. The filter operators can only compare a field to a literal value or to another field, so this cannot be expressed.. Tag: **untriaged**
+- `ho-028` (fieldservice, holdout-v02.jsonl, trial 2): wrong — rows differ. Tag: **untriaged**
+- `ho-001` (fieldservice, holdout-v02.jsonl, trial 3): wrong — rows differ. Tag: **untriaged**
+- `ho-002` (fieldservice, holdout-v02.jsonl, trial 3): wrong — rows differ. Tag: **untriaged**
+- `ho-003` (fieldservice, holdout-v02.jsonl, trial 3): wrong — rows differ. Tag: **untriaged**
+- `ho-004` (fieldservice, holdout-v02.jsonl, trial 3): refused — The registry links work_orders to sites and sites to customers, but it does not define a joined path from work orders to customers.segment that the query builder can use. A per-segment share of repair work orders cannot be computed from the listed fields as written.. Tag: **untriaged**
+- `ho-005` (fieldservice, holdout-v02.jsonl, trial 3): refused — This needs a percentage, which is a ratio of two counts (on-time paid invoices divided by all paid invoices issued in 2025). The intent format cannot express a ratio or a comparison between paid_at and due_at inside an aggregate. You could instead ask for the count of 2025-issued paid invoices and separately for those paid on or before due date, and divide them yourself.. Tag: **untriaged**
+- `ho-006` (fieldservice, holdout-v02.jsonl, trial 3): wrong — rows differ. Tag: **untriaged**
+- `ho-007` (fieldservice, holdout-v02.jsonl, trial 3): refused — The question needs two monthly counts on different date fields in one result: tickets by opened_at (came in) and tickets by completed_at (closed out). A single grouped summary can only group by one date field. Ask for these as two separate monthly counts, one by opened date and one by completion date, for this year.. Tag: **untriaged**
+- `ho-008` (fieldservice, holdout-v02.jsonl, trial 3): wrong — rows differ. Tag: **untriaged**
+- `ho-009` (fieldservice, holdout-v02.jsonl, trial 3): refused — This needs two different measures: billed amounts grouped by issue date and cash received grouped by payment date. A single query can only group by one date field and cannot apply separate status conditions to each sum. Ask for billed-by-quarter and cash-received-by-quarter as two separate questions.. Tag: **untriaged**
+- `ho-010` (fieldservice, holdout-v02.jsonl, trial 3): refused — The question needs two counts bucketed by different dates in one result: visits by scheduled_for month and completions by completed_at month. A single grouped query can only bucket by one date field, and it cannot count two different date fields side by side. Please ask for scheduled visits per month and completed jobs per month as two separate queries.. Tag: **untriaged**
+- `ho-011` (fieldservice, holdout-v02.jsonl, trial 3): refused — The registry has no way to compute the elapsed time between opened_at and completed_at. Metrics only aggregate a single field, so an average duration per job type cannot be expressed.. Tag: **untriaged**
+- `ho-012` (fieldservice, holdout-v02.jsonl, trial 3): refused — The registry has no days-to-pay measure. Metrics can only aggregate a field directly (count, sum, avg, min, max), so the difference between invoices.issued_at and invoices.paid_at cannot be computed.. Tag: **untriaged**
+- `ho-013` (fieldservice, holdout-v02.jsonl, trial 3): refused — Total parts cost needs each line's quantity multiplied by the part's unit_cost, and the registry can only aggregate a single field. It has no way to express that product, so summing unit_cost would give a wrong total.. Tag: **untriaged**
+- `ho-014` (fieldservice, holdout-v02.jsonl, trial 3): refused — Markup needs a per-line calculation, (unit_price - unit_cost) * quantity. Metrics can only aggregate a single listed field, so this derived expression cannot be expressed in the registry.. Tag: **untriaged**
+- `ho-015` (fieldservice, holdout-v02.jsonl, trial 3): refused — Finding completed work orders with no invoice requires an anti-join from work_orders to invoices, which is a one-to-many relationship. The registry only supports filtering on the base entity's own fields or on fields of the many-to-one parents, so this cannot be expressed. A related question that can be answered is how many invoices each completed work order has, or the list of invoices with their work order details.. Tag: **untriaged**
+- `ho-016` (fieldservice, holdout-v02.jsonl, trial 3): refused — Counting active customers with no job opened in the last 90 days needs an anti-join (customers with no matching work order). The registry joins only return customers that have matching rows, and a date filter on work orders would drop the customers we need to count, so this cannot be expressed as a valid intent.. Tag: **untriaged**
+- `ho-017` (fieldservice, holdout-v02.jsonl, trial 3): wrong — invalid_order_by, unknown_field. Tag: **untriaged**
+- `ho-018` (fieldservice, holdout-v02.jsonl, trial 3): refused — Labour dollars would need hours billed multiplied by each technician's hourly rate (work_orders.labor_hours * technicians.hourly_rate), and the registry has no way to multiply two fields inside an aggregate. Summing hours or rates separately would not give the requested figure.. Tag: **untriaged**
+- `ho-019` (fieldservice, holdout-v02.jsonl, trial 3): wrong — rows differ. Tag: **untriaged**
+- `ho-020` (fieldservice, holdout-v02.jsonl, trial 3): wrong — rows differ. Tag: **untriaged**
+- `ho-022` (fieldservice, holdout-v02.jsonl, trial 3): wrong — unknown_field. Tag: **untriaged**
+- `ho-024` (fieldservice, holdout-v02.jsonl, trial 3): wrong — rows differ. Tag: **untriaged**
+- `ho-025` (fieldservice, holdout-v02.jsonl, trial 3): refused — The registry can filter technicians only against fixed values or other fields on the same row, not against a company-wide average computed across all technicians. Comparing each technician's hourly_rate to that average would need a subquery, which this intent format does not support.. Tag: **untriaged**
+- `ho-028` (fieldservice, holdout-v02.jsonl, trial 3): wrong — unknown_field. Tag: **untriaged**
+
+## Where a baseline beat Ledgerline
+
+- `ho-001` (fieldservice, holdout-v02.jsonl, trial 1): oneshot
+- `ho-003` (fieldservice, holdout-v02.jsonl, trial 1): oneshot
+- `ho-009` (fieldservice, holdout-v02.jsonl, trial 1): oneshot
+- `ho-014` (fieldservice, holdout-v02.jsonl, trial 1): oneshot
+- `ho-015` (fieldservice, holdout-v02.jsonl, trial 1): oneshot
+- `ho-017` (fieldservice, holdout-v02.jsonl, trial 1): oneshot
+- `ho-020` (fieldservice, holdout-v02.jsonl, trial 1): oneshot
+- `ho-024` (fieldservice, holdout-v02.jsonl, trial 1): oneshot
+- `ho-025` (fieldservice, holdout-v02.jsonl, trial 1): oneshot
+- `ho-001` (fieldservice, holdout-v02.jsonl, trial 2): oneshot
+- `ho-003` (fieldservice, holdout-v02.jsonl, trial 2): oneshot
+- `ho-007` (fieldservice, holdout-v02.jsonl, trial 2): oneshot
+- `ho-009` (fieldservice, holdout-v02.jsonl, trial 2): oneshot
+- `ho-011` (fieldservice, holdout-v02.jsonl, trial 2): oneshot
+- `ho-014` (fieldservice, holdout-v02.jsonl, trial 2): oneshot
+- `ho-015` (fieldservice, holdout-v02.jsonl, trial 2): oneshot
+- `ho-016` (fieldservice, holdout-v02.jsonl, trial 2): oneshot
+- `ho-017` (fieldservice, holdout-v02.jsonl, trial 2): oneshot
+- `ho-020` (fieldservice, holdout-v02.jsonl, trial 2): oneshot
+- `ho-024` (fieldservice, holdout-v02.jsonl, trial 2): oneshot
+- `ho-025` (fieldservice, holdout-v02.jsonl, trial 2): oneshot
+- `ho-003` (fieldservice, holdout-v02.jsonl, trial 3): oneshot
+- `ho-005` (fieldservice, holdout-v02.jsonl, trial 3): oneshot
+- `ho-007` (fieldservice, holdout-v02.jsonl, trial 3): oneshot
+- `ho-009` (fieldservice, holdout-v02.jsonl, trial 3): oneshot
+- `ho-010` (fieldservice, holdout-v02.jsonl, trial 3): oneshot
+- `ho-011` (fieldservice, holdout-v02.jsonl, trial 3): oneshot
+- `ho-013` (fieldservice, holdout-v02.jsonl, trial 3): oneshot
+- `ho-014` (fieldservice, holdout-v02.jsonl, trial 3): oneshot
+- `ho-015` (fieldservice, holdout-v02.jsonl, trial 3): oneshot
+- `ho-016` (fieldservice, holdout-v02.jsonl, trial 3): oneshot
+- `ho-017` (fieldservice, holdout-v02.jsonl, trial 3): oneshot
+- `ho-018` (fieldservice, holdout-v02.jsonl, trial 3): oneshot
+- `ho-020` (fieldservice, holdout-v02.jsonl, trial 3): oneshot
+- `ho-022` (fieldservice, holdout-v02.jsonl, trial 3): oneshot
+- `ho-024` (fieldservice, holdout-v02.jsonl, trial 3): oneshot
+- `ho-025` (fieldservice, holdout-v02.jsonl, trial 3): oneshot

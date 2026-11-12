@@ -1,0 +1,1008 @@
+{
+  "abort_reason": null,
+  "baseline_wins": [
+    {
+      "gold": "holdout-v02.jsonl",
+      "item_id": "ho-011",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "fieldservice",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "gold": "holdout-v02.jsonl",
+      "item_id": "ho-014",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "fieldservice",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "gold": "holdout-v02.jsonl",
+      "item_id": "ho-015",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "fieldservice",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "gold": "holdout-v02.jsonl",
+      "item_id": "ho-016",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "fieldservice",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "gold": "holdout-v02.jsonl",
+      "item_id": "ho-017",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "fieldservice",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "gold": "holdout-v02.jsonl",
+      "item_id": "ho-018",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "fieldservice",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "gold": "holdout-v02.jsonl",
+      "item_id": "ho-020",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "fieldservice",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "gold": "holdout-v02.jsonl",
+      "item_id": "ho-024",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "fieldservice",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "gold": "holdout-v02.jsonl",
+      "item_id": "ho-025",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "fieldservice",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "gold": "holdout-v02.jsonl",
+      "item_id": "ho-011",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "fieldservice",
+      "system": "oneshot",
+      "trial": 2
+    },
+    {
+      "gold": "holdout-v02.jsonl",
+      "item_id": "ho-013",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "fieldservice",
+      "system": "oneshot",
+      "trial": 2
+    },
+    {
+      "gold": "holdout-v02.jsonl",
+      "item_id": "ho-014",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "fieldservice",
+      "system": "oneshot",
+      "trial": 2
+    },
+    {
+      "gold": "holdout-v02.jsonl",
+      "item_id": "ho-015",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "fieldservice",
+      "system": "oneshot",
+      "trial": 2
+    },
+    {
+      "gold": "holdout-v02.jsonl",
+      "item_id": "ho-016",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "fieldservice",
+      "system": "oneshot",
+      "trial": 2
+    },
+    {
+      "gold": "holdout-v02.jsonl",
+      "item_id": "ho-017",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "fieldservice",
+      "system": "oneshot",
+      "trial": 2
+    },
+    {
+      "gold": "holdout-v02.jsonl",
+      "item_id": "ho-018",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "fieldservice",
+      "system": "oneshot",
+      "trial": 2
+    },
+    {
+      "gold": "holdout-v02.jsonl",
+      "item_id": "ho-020",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "fieldservice",
+      "system": "oneshot",
+      "trial": 2
+    },
+    {
+      "gold": "holdout-v02.jsonl",
+      "item_id": "ho-024",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "fieldservice",
+      "system": "oneshot",
+      "trial": 2
+    },
+    {
+      "gold": "holdout-v02.jsonl",
+      "item_id": "ho-025",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "fieldservice",
+      "system": "oneshot",
+      "trial": 2
+    },
+    {
+      "gold": "holdout-v02.jsonl",
+      "item_id": "ho-010",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "fieldservice",
+      "system": "oneshot",
+      "trial": 3
+    },
+    {
+      "gold": "holdout-v02.jsonl",
+      "item_id": "ho-011",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "fieldservice",
+      "system": "oneshot",
+      "trial": 3
+    },
+    {
+      "gold": "holdout-v02.jsonl",
+      "item_id": "ho-014",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "fieldservice",
+      "system": "oneshot",
+      "trial": 3
+    },
+    {
+      "gold": "holdout-v02.jsonl",
+      "item_id": "ho-015",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "fieldservice",
+      "system": "oneshot",
+      "trial": 3
+    },
+    {
+      "gold": "holdout-v02.jsonl",
+      "item_id": "ho-016",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "fieldservice",
+      "system": "oneshot",
+      "trial": 3
+    },
+    {
+      "gold": "holdout-v02.jsonl",
+      "item_id": "ho-017",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "fieldservice",
+      "system": "oneshot",
+      "trial": 3
+    },
+    {
+      "gold": "holdout-v02.jsonl",
+      "item_id": "ho-020",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "fieldservice",
+      "system": "oneshot",
+      "trial": 3
+    },
+    {
+      "gold": "holdout-v02.jsonl",
+      "item_id": "ho-024",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "fieldservice",
+      "system": "oneshot",
+      "trial": 3
+    },
+    {
+      "gold": "holdout-v02.jsonl",
+      "item_id": "ho-025",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "fieldservice",
+      "system": "oneshot",
+      "trial": 3
+    }
+  ],
+  "deferred": {},
+  "floors": [
+    {
+      "cause": "Accuracy is met (35 of 43); wrong answers miss by one (2 of 37 answered, 5.4%). Both wrong answers are questions the intent grammar cannot express (a ratio, two date fields in one series), where the model answered a nearby question instead of refusing. Of its 6 refusals, 5 are correct refusals of such questions; 1 (fs-038) is a misread after one intent failed validation.",
+      "checks": [
+        {
+          "met": false,
+          "metric": "execution_accuracy",
+          "rate": {
+            "ci95": [
+              0.3727844721560723,
+              0.5816789434827211
+            ],
+            "n": 40,
+            "of": 84,
+            "rate": 0.47619047619047616
+          },
+          "rule": ">= 80%"
+        },
+        {
+          "met": false,
+          "metric": "wrong_answer_rate_given_answered",
+          "rate": {
+            "ci95": [
+              0.16118652626020738,
+              0.3893089050428169
+            ],
+            "n": 14,
+            "of": 54,
+            "rate": 0.25925925925925924
+          },
+          "rule": "<= 5%"
+        }
+      ],
+      "met": false,
+      "model": "anthropic:claude-haiku-5-5",
+      "next": "v0.2 changes the prompt and the grammar, then measures them on a fresh run. The v0.1 prompt is not changed after seeing these results.",
+      "schema": "fieldservice",
+      "status_note": "in v0.1 (live, default model)"
+    }
+  ],
+  "gold_files": [
+    "holdout-v02.jsonl"
+  ],
+  "misses": [
+    {
+      "error": null,
+      "gold": "holdout-v02.jsonl",
+      "issue_codes": [],
+      "item_id": "ho-010",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "wrong",
+      "refusal": null,
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "holdout-v02.jsonl",
+      "issue_codes": [],
+      "item_id": "ho-011",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "it needs a duration between two dates (opened_at to completed_at) per job, which the intent cannot express",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "holdout-v02.jsonl",
+      "issue_codes": [],
+      "item_id": "ho-012",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "it needs a duration between two dates (invoices.issued_at to invoices.paid_at, in days), which the intent cannot express",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "holdout-v02.jsonl",
+      "issue_codes": [],
+      "item_id": "ho-013",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "The total cost of parts needs quantity times unit_cost (work_order_parts.quantity multiplied by parts.unit_cost), and the intent cannot express a product of two fields.",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "holdout-v02.jsonl",
+      "issue_codes": [],
+      "item_id": "ho-014",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "The markup needs (unit_price - unit_cost) times quantity per line, which requires a difference between two fields multiplied by another field. The intent cannot express a product of fields or a computed difference, so it cannot be summed per category.",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "holdout-v02.jsonl",
+      "issue_codes": [],
+      "item_id": "ho-015",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "it asks for work orders with no related invoice rows (a 'has none' question), which the intent cannot express",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "holdout-v02.jsonl",
+      "issue_codes": [],
+      "item_id": "ho-016",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "it asks for customers with no related jobs (a 'has none' question: active customers with zero work orders opened at their sites in the last 90 days), which the intent cannot express",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "holdout-v02.jsonl",
+      "issue_codes": [],
+      "item_id": "ho-017",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "it asks for a distinct count of months per customer region, and the intent cannot express a distinct count of periods",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "holdout-v02.jsonl",
+      "issue_codes": [],
+      "item_id": "ho-018",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "labour dollars would be labor_hours multiplied by technicians.hourly_rate, and the intent cannot express a product of two fields",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "holdout-v02.jsonl",
+      "issue_codes": [],
+      "item_id": "ho-019",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "the question asks for how many days each open job has been open, which is a duration between opened_at and the current date. The intent cannot express a duration between two dates.",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "holdout-v02.jsonl",
+      "issue_codes": [],
+      "item_id": "ho-020",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "wrong",
+      "refusal": null,
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "holdout-v02.jsonl",
+      "issue_codes": [],
+      "item_id": "ho-022",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "wrong",
+      "refusal": null,
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "holdout-v02.jsonl",
+      "issue_codes": [
+        "unknown_field"
+      ],
+      "item_id": "ho-024",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "wrong",
+      "refusal": null,
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "holdout-v02.jsonl",
+      "issue_codes": [],
+      "item_id": "ho-025",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "the question compares each technician's hourly rate with a company-wide average, which is a value computed across all rows. The intent can filter only against fixed values or other fields on the same row, not against an aggregate calculated over the table.",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "holdout-v02.jsonl",
+      "issue_codes": [],
+      "item_id": "ho-028",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "wrong",
+      "refusal": null,
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "holdout-v02.jsonl",
+      "issue_codes": [],
+      "item_id": "ho-011",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "it needs a duration between two dates (work_orders.opened_at to work_orders.completed_at), which the intent cannot express",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 2
+    },
+    {
+      "error": null,
+      "gold": "holdout-v02.jsonl",
+      "issue_codes": [],
+      "item_id": "ho-012",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "it needs a duration between two dates (issued_at to paid_at) per invoice, which the intent cannot express",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 2
+    },
+    {
+      "error": null,
+      "gold": "holdout-v02.jsonl",
+      "issue_codes": [],
+      "item_id": "ho-013",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "the total cost needs quantity multiplied by unit_cost for each part line, and the intent cannot express a product of two fields",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 2
+    },
+    {
+      "error": null,
+      "gold": "holdout-v02.jsonl",
+      "issue_codes": [],
+      "item_id": "ho-014",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "Markup needs (unit_price - unit_cost) multiplied by quantity for each part line. The intent cannot express a product of two fields (quantity times price or cost), so the dollar markup cannot be computed.",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 2
+    },
+    {
+      "error": null,
+      "gold": "holdout-v02.jsonl",
+      "issue_codes": [],
+      "item_id": "ho-015",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "finding completed jobs with no invoice is a 'has none' question (work orders with no related invoice rows), which this intent cannot express",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 2
+    },
+    {
+      "error": null,
+      "gold": "holdout-v02.jsonl",
+      "issue_codes": [],
+      "item_id": "ho-016",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "The question asks for customers with no related work orders in the last 90 days. That is a 'has none' question (customers with no matching jobs), which this intent cannot express.",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 2
+    },
+    {
+      "error": null,
+      "gold": "holdout-v02.jsonl",
+      "issue_codes": [],
+      "item_id": "ho-017",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "it asks for a distinct count of calendar months per customer region, and the intent cannot express a distinct count of periods",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 2
+    },
+    {
+      "error": null,
+      "gold": "holdout-v02.jsonl",
+      "issue_codes": [],
+      "item_id": "ho-018",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "labour dollars would be labor_hours times technicians.hourly_rate, which is a product of two fields, and the intent cannot express a product of fields",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 2
+    },
+    {
+      "error": null,
+      "gold": "holdout-v02.jsonl",
+      "issue_codes": [],
+      "item_id": "ho-019",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "the question asks for how many days each job has been open, which is a duration between two dates (opened_at to today). The intent cannot compute a duration, so it cannot return the day counts. It could list the ten oldest unfinished jobs by opened_at, but not the days open.",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 2
+    },
+    {
+      "error": null,
+      "gold": "holdout-v02.jsonl",
+      "issue_codes": [],
+      "item_id": "ho-020",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "wrong",
+      "refusal": null,
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 2
+    },
+    {
+      "error": null,
+      "gold": "holdout-v02.jsonl",
+      "issue_codes": [],
+      "item_id": "ho-022",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "wrong",
+      "refusal": null,
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 2
+    },
+    {
+      "error": null,
+      "gold": "holdout-v02.jsonl",
+      "issue_codes": [],
+      "item_id": "ho-024",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "wrong",
+      "refusal": null,
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 2
+    },
+    {
+      "error": null,
+      "gold": "holdout-v02.jsonl",
+      "issue_codes": [],
+      "item_id": "ho-025",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "it needs the company-wide average hourly rate as a threshold, and filters can only compare a field to a constant or another field, not to an aggregate computed over all technicians",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 2
+    },
+    {
+      "error": null,
+      "gold": "holdout-v02.jsonl",
+      "issue_codes": [],
+      "item_id": "ho-028",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "wrong",
+      "refusal": null,
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 2
+    },
+    {
+      "error": null,
+      "gold": "holdout-v02.jsonl",
+      "issue_codes": [],
+      "item_id": "ho-010",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "wrong",
+      "refusal": null,
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 3
+    },
+    {
+      "error": null,
+      "gold": "holdout-v02.jsonl",
+      "issue_codes": [],
+      "item_id": "ho-011",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "it needs a duration between two dates (work_orders.opened_at to work_orders.completed_at), which the intent cannot express",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 3
+    },
+    {
+      "error": null,
+      "gold": "holdout-v02.jsonl",
+      "issue_codes": [],
+      "item_id": "ho-012",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "it needs a duration between two dates (invoices.issued_at to invoices.paid_at), which the intent cannot express",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 3
+    },
+    {
+      "error": null,
+      "gold": "holdout-v02.jsonl",
+      "issue_codes": [],
+      "item_id": "ho-013",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "the total cost needs the product of quantity (work_order_parts) and unit_cost (parts) for each line, and the intent cannot express a product of two fields",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 3
+    },
+    {
+      "error": null,
+      "gold": "holdout-v02.jsonl",
+      "issue_codes": [],
+      "item_id": "ho-014",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "the markup needs a product of two fields (unit_price minus unit_cost, multiplied by quantity), and the intent cannot express a product of two fields",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 3
+    },
+    {
+      "error": null,
+      "gold": "holdout-v02.jsonl",
+      "issue_codes": [],
+      "item_id": "ho-015",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "finding completed jobs with no invoice is a 'has none' question (work orders with no related invoice rows), which this intent cannot express",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 3
+    },
+    {
+      "error": null,
+      "gold": "holdout-v02.jsonl",
+      "issue_codes": [],
+      "item_id": "ho-016",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "it asks for customers with no related job in the last 90 days, which is a 'has none' question (customers with no work orders through their sites). The intent cannot express items that have no related rows.",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 3
+    },
+    {
+      "error": null,
+      "gold": "holdout-v02.jsonl",
+      "issue_codes": [],
+      "item_id": "ho-017",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "it asks for a distinct count of calendar months per customer region, and the intent cannot express a distinct count of periods",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 3
+    },
+    {
+      "error": null,
+      "gold": "holdout-v02.jsonl",
+      "issue_codes": [],
+      "item_id": "ho-018",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "it needs a product of two fields (labor_hours times hourly_rate per technician), which the intent cannot express",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 3
+    },
+    {
+      "error": null,
+      "gold": "holdout-v02.jsonl",
+      "issue_codes": [],
+      "item_id": "ho-019",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "the question asks for the number of days each job has been open, which is a duration between opened_at and today; the intent cannot express a duration between two dates",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 3
+    },
+    {
+      "error": null,
+      "gold": "holdout-v02.jsonl",
+      "issue_codes": [],
+      "item_id": "ho-020",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "wrong",
+      "refusal": null,
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 3
+    },
+    {
+      "error": null,
+      "gold": "holdout-v02.jsonl",
+      "issue_codes": [],
+      "item_id": "ho-022",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "wrong",
+      "refusal": null,
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 3
+    },
+    {
+      "error": null,
+      "gold": "holdout-v02.jsonl",
+      "issue_codes": [],
+      "item_id": "ho-024",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "wrong",
+      "refusal": null,
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 3
+    },
+    {
+      "error": null,
+      "gold": "holdout-v02.jsonl",
+      "issue_codes": [],
+      "item_id": "ho-025",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "the filter would need to compare each technician's hourly_rate with the company-wide average of hourly_rate, and filters can only compare a field to a literal value or another field, not to an aggregate computed over the table",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 3
+    },
+    {
+      "error": null,
+      "gold": "holdout-v02.jsonl",
+      "issue_codes": [],
+      "item_id": "ho-028",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "wrong",
+      "refusal": null,
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 3
+    }
+  ],
+  "notes": [
+    "sql_agent baseline not run: needs a live model (multi-step tool calls can't be honestly simulated in one pass)."
+  ],
+  "registry_hashes": {},
+  "run_id": "v02-holdout",
+  "simulation": null,
+  "spent_usd": 0.11364760000000004,
+  "status": "complete",
+  "table": [
+    {
+      "accuracy_given_attempted": {
+        "ci95": [
+          0.6106910949571832,
+          0.8388134737397926
+        ],
+        "n": 40,
+        "of": 54,
+        "rate": 0.7407407407407407
+      },
+      "coverage": {
+        "ci95": [
+          0.5362131509036315,
+          0.7370063552636087
+        ],
+        "n": 54,
+        "of": 84,
+        "rate": 0.6428571428571429
+      },
+      "execution_accuracy": {
+        "ci95": [
+          0.3727844721560723,
+          0.5816789434827211
+        ],
+        "n": 40,
+        "of": 84,
+        "rate": 0.47619047619047616
+      },
+      "execution_error_rate": {
+        "ci95": [
+          0.0,
+          0.031019166418703486
+        ],
+        "n": 0,
+        "of": 120,
+        "rate": 0.0
+      },
+      "false_refusal_rate": {
+        "ci95": [
+          0.2629936447363914,
+          0.4637868490963686
+        ],
+        "n": 30,
+        "of": 84,
+        "rate": 0.35714285714285715
+      },
+      "gold": "holdout-v02.jsonl",
+      "items": 120,
+      "mean_cost_usd": 0.00048823583333333333,
+      "model": "anthropic:claude-haiku-5-5",
+      "p50_latency_ms": 1485.9359160182066,
+      "pending": 0,
+      "refusal_recall": {
+        "ci95": [
+          0.9035813714055363,
+          1.0
+        ],
+        "n": 36,
+        "of": 36,
+        "rate": 1.0
+      },
+      "schema": "fieldservice",
+      "system": "ledgerline",
+      "trials": 3,
+      "wrong_answer_rate_given_answered": {
+        "ci95": [
+          0.16118652626020738,
+          0.3893089050428169
+        ],
+        "n": 14,
+        "of": 54,
+        "rate": 0.25925925925925924
+      }
+    },
+    {
+      "accuracy_given_attempted": {
+        "ci95": [
+          0.5002180659007766,
+          0.7046965637246533
+        ],
+        "n": 51,
+        "of": 84,
+        "rate": 0.6071428571428571
+      },
+      "coverage": {
+        "ci95": [
+          0.95626827158534,
+          0.9999999999999999
+        ],
+        "n": 84,
+        "of": 84,
+        "rate": 1.0
+      },
+      "execution_accuracy": {
+        "ci95": [
+          0.5002180659007766,
+          0.7046965637246533
+        ],
+        "n": 51,
+        "of": 84,
+        "rate": 0.6071428571428571
+      },
+      "execution_error_rate": {
+        "ci95": [
+          0.0,
+          0.031019166418703486
+        ],
+        "n": 0,
+        "of": 120,
+        "rate": 0.0
+      },
+      "false_refusal_rate": {
+        "ci95": [
+          0.0,
+          0.04373172841465989
+        ],
+        "n": 0,
+        "of": 84,
+        "rate": 0.0
+      },
+      "gold": "holdout-v02.jsonl",
+      "items": 120,
+      "mean_cost_usd": 0.0004588275,
+      "model": "anthropic:claude-haiku-5-5",
+      "p50_latency_ms": 1755.724708433263,
+      "pending": 0,
+      "refusal_recall": {
+        "ci95": [
+          0.9035813714055363,
+          1.0
+        ],
+        "n": 36,
+        "of": 36,
+        "rate": 1.0
+      },
+      "schema": "fieldservice",
+      "system": "oneshot",
+      "trials": 3,
+      "wrong_answer_rate_given_answered": {
+        "ci95": [
+          0.2953034362753466,
+          0.49978193409922334
+        ],
+        "n": 33,
+        "of": 84,
+        "rate": 0.39285714285714285
+      }
+    }
+  ],
+  "trials": 3
+}

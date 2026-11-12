@@ -1,0 +1,2797 @@
+{
+  "abort_reason": null,
+  "baseline_wins": [
+    {
+      "gold": "spider_ids.json",
+      "item_id": "spider:101",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "spider_car_1",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "gold": "spider_ids.json",
+      "item_id": "spider:104",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "spider_car_1",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "gold": "spider_ids.json",
+      "item_id": "spider:117",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "spider_car_1",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "gold": "spider_ids.json",
+      "item_id": "spider:152",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "spider_car_1",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "gold": "spider_ids.json",
+      "item_id": "spider:171",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "spider_car_1",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "gold": "spider_ids.json",
+      "item_id": "spider:172",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "spider_car_1",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "gold": "spider_ids.json",
+      "item_id": "spider:175",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "spider_car_1",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "gold": "spider_ids.json",
+      "item_id": "spider:178",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "spider_car_1",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "gold": "spider_ids.json",
+      "item_id": "spider:93",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "spider_car_1",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "gold": "spider_ids.json",
+      "item_id": "spider:919",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "spider_dog_kennels",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "gold": "spider_ids.json",
+      "item_id": "spider:920",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "spider_dog_kennels",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "gold": "spider_ids.json",
+      "item_id": "spider:922",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "spider_dog_kennels",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "gold": "spider_ids.json",
+      "item_id": "spider:923",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "spider_dog_kennels",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "gold": "spider_ids.json",
+      "item_id": "spider:924",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "spider_dog_kennels",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "gold": "spider_ids.json",
+      "item_id": "spider:927",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "spider_dog_kennels",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "gold": "spider_ids.json",
+      "item_id": "spider:928",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "spider_dog_kennels",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "gold": "spider_ids.json",
+      "item_id": "spider:929",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "spider_dog_kennels",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "gold": "spider_ids.json",
+      "item_id": "spider:972",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "spider_dog_kennels",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "gold": "spider_ids.json",
+      "item_id": "spider:973",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "spider_dog_kennels",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "gold": "spider_ids.json",
+      "item_id": "spider:974",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "spider_dog_kennels",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "gold": "spider_ids.json",
+      "item_id": "spider:978",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "spider_dog_kennels",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "gold": "spider_ids.json",
+      "item_id": "spider:987",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "spider_dog_kennels",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "gold": "spider_ids.json",
+      "item_id": "spider:994",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "spider_dog_kennels",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "gold": "spider_ids.json",
+      "item_id": "spider:995",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "spider_dog_kennels",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "gold": "spider_ids.json",
+      "item_id": "spider:999",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "spider_dog_kennels",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "gold": "spider_ids.json",
+      "item_id": "spider:207",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "spider_flight_2",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "gold": "spider_ids.json",
+      "item_id": "spider:208",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "spider_flight_2",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "gold": "spider_ids.json",
+      "item_id": "spider:209",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "spider_flight_2",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "gold": "spider_ids.json",
+      "item_id": "spider:215",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "spider_flight_2",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "gold": "spider_ids.json",
+      "item_id": "spider:216",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "spider_flight_2",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "gold": "spider_ids.json",
+      "item_id": "spider:217",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "spider_flight_2",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "gold": "spider_ids.json",
+      "item_id": "spider:218",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "spider_flight_2",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "gold": "spider_ids.json",
+      "item_id": "spider:219",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "spider_flight_2",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "gold": "spider_ids.json",
+      "item_id": "spider:220",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "spider_flight_2",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "gold": "spider_ids.json",
+      "item_id": "spider:224",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "spider_flight_2",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "gold": "spider_ids.json",
+      "item_id": "spider:233",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "spider_flight_2",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "gold": "spider_ids.json",
+      "item_id": "spider:238",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "spider_flight_2",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "gold": "spider_ids.json",
+      "item_id": "spider:240",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "spider_flight_2",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "gold": "spider_ids.json",
+      "item_id": "spider:245",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "spider_flight_2",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "gold": "spider_ids.json",
+      "item_id": "spider:246",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "spider_flight_2",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "gold": "spider_ids.json",
+      "item_id": "spider:251",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "spider_flight_2",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "gold": "spider_ids.json",
+      "item_id": "spider:252",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "spider_flight_2",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "gold": "spider_ids.json",
+      "item_id": "spider:255",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "spider_flight_2",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "gold": "spider_ids.json",
+      "item_id": "spider:257",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "spider_flight_2",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "gold": "spider_ids.json",
+      "item_id": "spider:258",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "spider_flight_2",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "gold": "spider_ids.json",
+      "item_id": "spider:886",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "spider_network_1",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "gold": "spider_ids.json",
+      "item_id": "spider:887",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "spider_network_1",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "gold": "spider_ids.json",
+      "item_id": "spider:889",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "spider_network_1",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "gold": "spider_ids.json",
+      "item_id": "spider:890",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "spider_network_1",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "gold": "spider_ids.json",
+      "item_id": "spider:891",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "spider_network_1",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "gold": "spider_ids.json",
+      "item_id": "spider:892",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "spider_network_1",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "gold": "spider_ids.json",
+      "item_id": "spider:893",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "spider_network_1",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "gold": "spider_ids.json",
+      "item_id": "spider:894",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "spider_network_1",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "gold": "spider_ids.json",
+      "item_id": "spider:896",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "spider_network_1",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "gold": "spider_ids.json",
+      "item_id": "spider:897",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "spider_network_1",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "gold": "spider_ids.json",
+      "item_id": "spider:898",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "spider_network_1",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "gold": "spider_ids.json",
+      "item_id": "spider:899",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "spider_network_1",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "gold": "spider_ids.json",
+      "item_id": "spider:900",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "spider_network_1",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "gold": "spider_ids.json",
+      "item_id": "spider:904",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "spider_network_1",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "gold": "spider_ids.json",
+      "item_id": "spider:905",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "spider_network_1",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "gold": "spider_ids.json",
+      "item_id": "spider:908",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "spider_network_1",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "gold": "spider_ids.json",
+      "item_id": "spider:909",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "spider_network_1",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "gold": "spider_ids.json",
+      "item_id": "spider:910",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "spider_network_1",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "gold": "spider_ids.json",
+      "item_id": "spider:911",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "spider_network_1",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "gold": "spider_ids.json",
+      "item_id": "spider:912",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "spider_network_1",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "gold": "spider_ids.json",
+      "item_id": "spider:913",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "spider_network_1",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "gold": "spider_ids.json",
+      "item_id": "spider:914",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "spider_network_1",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "gold": "spider_ids.json",
+      "item_id": "spider:915",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "spider_network_1",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "gold": "spider_ids.json",
+      "item_id": "spider:917",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "spider_network_1",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "gold": "spider_ids.json",
+      "item_id": "spider:451",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "spider_wta_1",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "gold": "spider_ids.json",
+      "item_id": "spider:463",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "spider_wta_1",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "gold": "spider_ids.json",
+      "item_id": "spider:488",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "spider_wta_1",
+      "system": "oneshot",
+      "trial": 1
+    }
+  ],
+  "deferred": {},
+  "floors": [],
+  "gold_files": [
+    "spider_ids.json"
+  ],
+  "misses": [
+    {
+      "error": null,
+      "gold": "spider_ids.json",
+      "issue_codes": [],
+      "item_id": "spider:919",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none of these.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_dog_kennels",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "spider_ids.json",
+      "issue_codes": [],
+      "item_id": "spider:920",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none of these.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_dog_kennels",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "spider_ids.json",
+      "issue_codes": [],
+      "item_id": "spider:922",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none of these.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_dog_kennels",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "spider_ids.json",
+      "issue_codes": [],
+      "item_id": "spider:923",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none of these.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_dog_kennels",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "spider_ids.json",
+      "issue_codes": [],
+      "item_id": "spider:924",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none of these.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_dog_kennels",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "spider_ids.json",
+      "issue_codes": [],
+      "item_id": "spider:925",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none of these.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_dog_kennels",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "spider_ids.json",
+      "issue_codes": [],
+      "item_id": "spider:927",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none of these.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_dog_kennels",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "spider_ids.json",
+      "issue_codes": [],
+      "item_id": "spider:928",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "By design: registry init hides email and phone-like fields, so the question cannot be answered. Spider's gold returns them.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_dog_kennels",
+      "tag": "validator_false_reject",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "spider_ids.json",
+      "issue_codes": [],
+      "item_id": "spider:929",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "By design: registry init hides email and phone-like fields, so the question cannot be answered. Spider's gold returns them.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_dog_kennels",
+      "tag": "validator_false_reject",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "spider_ids.json",
+      "issue_codes": [],
+      "item_id": "spider:937",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "The gold ranks owners by number of treatments; the question asks who spent the most. The answer sums cost.",
+      "outcome": "wrong",
+      "refusal": null,
+      "schema": "spider_dog_kennels",
+      "tag": "gold_issue",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "spider_ids.json",
+      "issue_codes": [],
+      "item_id": "spider:942",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "The gold counts treatments; the question asks for at least two types of treatment. The answer counts distinct types.",
+      "outcome": "wrong",
+      "refusal": null,
+      "schema": "spider_dog_kennels",
+      "tag": "gold_issue",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "spider_ids.json",
+      "issue_codes": [],
+      "item_id": "spider:944",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none of these.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_dog_kennels",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "spider_ids.json",
+      "issue_codes": [],
+      "item_id": "spider:945",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none of these.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_dog_kennels",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "spider_ids.json",
+      "issue_codes": [],
+      "item_id": "spider:951",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "The answer returns the size description column; the gold returns the size code column. Both answer the question.",
+      "outcome": "wrong",
+      "refusal": null,
+      "schema": "spider_dog_kennels",
+      "tag": "gold_issue",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "spider_ids.json",
+      "issue_codes": [],
+      "item_id": "spider:954",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none of these.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_dog_kennels",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "spider_ids.json",
+      "issue_codes": [],
+      "item_id": "spider:955",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none of these.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_dog_kennels",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "spider_ids.json",
+      "issue_codes": [],
+      "item_id": "spider:961",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "Ambiguous: youngest by the age column (gold) or by date of birth (the answer). The two columns disagree in this data.",
+      "outcome": "wrong",
+      "refusal": null,
+      "schema": "spider_dog_kennels",
+      "tag": "gold_issue",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "spider_ids.json",
+      "issue_codes": [],
+      "item_id": "spider:972",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "By design: registry init hides email and phone-like fields, so the question cannot be answered. Spider's gold returns them.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_dog_kennels",
+      "tag": "validator_false_reject",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "spider_ids.json",
+      "issue_codes": [],
+      "item_id": "spider:973",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "By design: registry init hides email and phone-like fields, so the question cannot be answered. Spider's gold returns them.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_dog_kennels",
+      "tag": "validator_false_reject",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "spider_ids.json",
+      "issue_codes": [],
+      "item_id": "spider:974",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none of these.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_dog_kennels",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "spider_ids.json",
+      "issue_codes": [],
+      "item_id": "spider:978",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none of these.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_dog_kennels",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "spider_ids.json",
+      "issue_codes": [
+        "aggregate_type"
+      ],
+      "item_id": "spider:987",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "The column is declared TEXT but holds numbers. Registry init keeps the declared type, so the validator rejects the arithmetic.",
+      "outcome": "refused",
+      "refusal": "refused (aggregate_type)",
+      "schema": "spider_dog_kennels",
+      "tag": "validator_false_reject",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "spider_ids.json",
+      "issue_codes": [],
+      "item_id": "spider:994",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "By design: registry init hides email and phone-like fields, so the question cannot be answered. Spider's gold returns them.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_dog_kennels",
+      "tag": "validator_false_reject",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "spider_ids.json",
+      "issue_codes": [],
+      "item_id": "spider:995",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "By design: registry init hides email and phone-like fields, so the question cannot be answered. Spider's gold returns them.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_dog_kennels",
+      "tag": "validator_false_reject",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "spider_ids.json",
+      "issue_codes": [],
+      "item_id": "spider:996",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "wrong",
+      "refusal": null,
+      "schema": "spider_dog_kennels",
+      "tag": "untriaged",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "spider_ids.json",
+      "issue_codes": [],
+      "item_id": "spider:998",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "The gold needs DISTINCT rows; row lists in the intent grammar cannot ask for distinct rows.",
+      "outcome": "wrong",
+      "refusal": null,
+      "schema": "spider_dog_kennels",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "spider_ids.json",
+      "issue_codes": [],
+      "item_id": "spider:999",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "Same as spider:998: needs DISTINCT rows.",
+      "outcome": "wrong",
+      "refusal": null,
+      "schema": "spider_dog_kennels",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "spider_ids.json",
+      "issue_codes": [
+        "fan_out",
+        "invalid_order_by",
+        "unknown_field"
+      ],
+      "item_id": "spider:93",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "refused (fan_out, invalid_order_by, unknown_field)",
+      "schema": "spider_car_1",
+      "tag": "untriaged",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "spider_ids.json",
+      "issue_codes": [],
+      "item_id": "spider:95",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_car_1",
+      "tag": "untriaged",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "spider_ids.json",
+      "issue_codes": [],
+      "item_id": "spider:96",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_car_1",
+      "tag": "untriaged",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "spider_ids.json",
+      "issue_codes": [],
+      "item_id": "spider:101",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "Needs a subquery for the earliest year. The model returned all cars sorted by year instead of refusing: a wrong answer.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_car_1",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "spider_ids.json",
+      "issue_codes": [
+        "fan_out",
+        "one_to_many_join"
+      ],
+      "item_id": "spider:104",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "refused (fan_out, one_to_many_join)",
+      "schema": "spider_car_1",
+      "tag": "untriaged",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "spider_ids.json",
+      "issue_codes": [],
+      "item_id": "spider:117",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "The column is declared TEXT but holds numbers. Registry init keeps the declared type, so the validator rejects the arithmetic.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_car_1",
+      "tag": "validator_false_reject",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "spider_ids.json",
+      "issue_codes": [],
+      "item_id": "spider:126",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "The column is declared TEXT but holds numbers. Registry init keeps the declared type, so the validator rejects the arithmetic.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_car_1",
+      "tag": "validator_false_reject",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "spider_ids.json",
+      "issue_codes": [],
+      "item_id": "spider:132",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_car_1",
+      "tag": "untriaged",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "spider_ids.json",
+      "issue_codes": [],
+      "item_id": "spider:135",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "The column is declared TEXT but holds numbers. Registry init keeps the declared type, so the validator rejects the arithmetic.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_car_1",
+      "tag": "validator_false_reject",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "spider_ids.json",
+      "issue_codes": [],
+      "item_id": "spider:136",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "The column is declared TEXT but holds numbers. Registry init keeps the declared type, so the validator rejects the arithmetic.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_car_1",
+      "tag": "validator_false_reject",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "spider_ids.json",
+      "issue_codes": [],
+      "item_id": "spider:152",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "Registry gap: car_names.model references model_list.model, which is not a primary key, so registry init skips the link and the tables cannot be joined.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_car_1",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "spider_ids.json",
+      "issue_codes": [],
+      "item_id": "spider:159",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none of these.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_car_1",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "spider_ids.json",
+      "issue_codes": [],
+      "item_id": "spider:160",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none of these.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_car_1",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "spider_ids.json",
+      "issue_codes": [],
+      "item_id": "spider:165",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_car_1",
+      "tag": "untriaged",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "spider_ids.json",
+      "issue_codes": [],
+      "item_id": "spider:167",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none of these.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_car_1",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "spider_ids.json",
+      "issue_codes": [],
+      "item_id": "spider:168",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none of these.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_car_1",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "spider_ids.json",
+      "issue_codes": [],
+      "item_id": "spider:170",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "The column is declared TEXT but holds numbers. Registry init keeps the declared type, so the validator rejects the arithmetic.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_car_1",
+      "tag": "validator_false_reject",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "spider_ids.json",
+      "issue_codes": [],
+      "item_id": "spider:171",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "Registry gap: car_names.model references model_list.model, which is not a primary key, so registry init skips the link and the tables cannot be joined.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_car_1",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "spider_ids.json",
+      "issue_codes": [],
+      "item_id": "spider:172",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "With no join path to the maker, the model filtered on the model name instead of refusing, and added a count column: a wrong answer.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_car_1",
+      "tag": "misread",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "spider_ids.json",
+      "issue_codes": [
+        "fan_out",
+        "invalid_order_by",
+        "unknown_field",
+        "unknown_metric"
+      ],
+      "item_id": "spider:175",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "Needs an INTERSECT of two conditions. The model answered only the first: a wrong answer.",
+      "outcome": "refused",
+      "refusal": "refused (fan_out, invalid_order_by, unknown_field, unknown_metric)",
+      "schema": "spider_car_1",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "spider_ids.json",
+      "issue_codes": [],
+      "item_id": "spider:178",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "Registry gap: car_names.model references model_list.model, which is not a primary key, so registry init skips the link and the tables cannot be joined.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_car_1",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "spider_ids.json",
+      "issue_codes": [],
+      "item_id": "spider:198",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "The gold returns no rows: airport codes and cities are stored with trailing spaces, so the gold's equality joins and filters match nothing.",
+      "outcome": "wrong",
+      "refusal": null,
+      "schema": "spider_flight_2",
+      "tag": "gold_issue",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "spider_ids.json",
+      "issue_codes": [
+        "unknown_entity"
+      ],
+      "item_id": "spider:207",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so the validator refuses rather than guess.",
+      "outcome": "refused",
+      "refusal": "refused (unknown_entity)",
+      "schema": "spider_flight_2",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "spider_ids.json",
+      "issue_codes": [],
+      "item_id": "spider:208",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so the validator refuses rather than guess.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_flight_2",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "spider_ids.json",
+      "issue_codes": [],
+      "item_id": "spider:209",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so the validator refuses rather than guess.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_flight_2",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "spider_ids.json",
+      "issue_codes": [],
+      "item_id": "spider:210",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so the validator refuses rather than guess.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_flight_2",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "spider_ids.json",
+      "issue_codes": [],
+      "item_id": "spider:214",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "Registry gap: flights.airline has no declared or inferred link to airlines (the column is not named like airlines' key), so airline names cannot be reached.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_flight_2",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "spider_ids.json",
+      "issue_codes": [],
+      "item_id": "spider:215",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "Registry gap: flights.airline has no declared or inferred link to airlines (the column is not named like airlines' key), so airline names cannot be reached.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_flight_2",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "spider_ids.json",
+      "issue_codes": [],
+      "item_id": "spider:216",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "Registry gap: flights.airline has no declared or inferred link to airlines (the column is not named like airlines' key), so airline names cannot be reached.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_flight_2",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "spider_ids.json",
+      "issue_codes": [],
+      "item_id": "spider:217",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "Registry gap: flights.airline has no declared or inferred link to airlines (the column is not named like airlines' key), so airline names cannot be reached.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_flight_2",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "spider_ids.json",
+      "issue_codes": [],
+      "item_id": "spider:218",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "Registry gap: flights.airline has no declared or inferred link to airlines (the column is not named like airlines' key), so airline names cannot be reached.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_flight_2",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "spider_ids.json",
+      "issue_codes": [],
+      "item_id": "spider:219",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "Registry gap: flights.airline has no declared or inferred link to airlines (the column is not named like airlines' key), so airline names cannot be reached.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_flight_2",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "spider_ids.json",
+      "issue_codes": [],
+      "item_id": "spider:220",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "Registry gap: flights.airline has no declared or inferred link to airlines (the column is not named like airlines' key), so airline names cannot be reached.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_flight_2",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "spider_ids.json",
+      "issue_codes": [
+        "ambiguous_path"
+      ],
+      "item_id": "spider:224",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "The gold returns no rows: airport codes and cities are stored with trailing spaces, so the gold's equality joins and filters match nothing.",
+      "outcome": "refused",
+      "refusal": "refused (ambiguous_path)",
+      "schema": "spider_flight_2",
+      "tag": "gold_issue",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "spider_ids.json",
+      "issue_codes": [],
+      "item_id": "spider:226",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "The gold returns no rows: airport codes and cities are stored with trailing spaces, so the gold's equality joins and filters match nothing.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_flight_2",
+      "tag": "gold_issue",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "spider_ids.json",
+      "issue_codes": [],
+      "item_id": "spider:228",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "The gold returns no rows: airport codes and cities are stored with trailing spaces, so the gold's equality joins and filters match nothing.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_flight_2",
+      "tag": "gold_issue",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "spider_ids.json",
+      "issue_codes": [],
+      "item_id": "spider:229",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "With no link to airlines, the model returned an airline id and count instead of refusing: a wrong answer.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_flight_2",
+      "tag": "misread",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "spider_ids.json",
+      "issue_codes": [],
+      "item_id": "spider:230",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "Registry gap: flights.airline has no declared or inferred link to airlines (the column is not named like airlines' key), so airline names cannot be reached.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_flight_2",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "spider_ids.json",
+      "issue_codes": [],
+      "item_id": "spider:231",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "Registry gap: flights.airline has no declared or inferred link to airlines (the column is not named like airlines' key), so airline names cannot be reached.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_flight_2",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "spider_ids.json",
+      "issue_codes": [],
+      "item_id": "spider:233",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "Registry gap: flights.airline has no declared or inferred link to airlines (the column is not named like airlines' key), so airline names cannot be reached.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_flight_2",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "spider_ids.json",
+      "issue_codes": [],
+      "item_id": "spider:238",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_flight_2",
+      "tag": "untriaged",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "spider_ids.json",
+      "issue_codes": [],
+      "item_id": "spider:240",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none of these.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_flight_2",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "spider_ids.json",
+      "issue_codes": [],
+      "item_id": "spider:245",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "Registry gap: flights.airline has no declared or inferred link to airlines (the column is not named like airlines' key), so airline names cannot be reached.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_flight_2",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "spider_ids.json",
+      "issue_codes": [],
+      "item_id": "spider:246",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "Registry gap: flights.airline has no declared or inferred link to airlines (the column is not named like airlines' key), so airline names cannot be reached.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_flight_2",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "spider_ids.json",
+      "issue_codes": [
+        "ambiguous_path"
+      ],
+      "item_id": "spider:251",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so the validator refuses rather than guess.",
+      "outcome": "refused",
+      "refusal": "refused (ambiguous_path)",
+      "schema": "spider_flight_2",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "spider_ids.json",
+      "issue_codes": [
+        "ambiguous_path"
+      ],
+      "item_id": "spider:252",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so the validator refuses rather than guess.",
+      "outcome": "refused",
+      "refusal": "refused (ambiguous_path)",
+      "schema": "spider_flight_2",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "spider_ids.json",
+      "issue_codes": [
+        "unknown_entity"
+      ],
+      "item_id": "spider:254",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so the validator refuses rather than guess.",
+      "outcome": "refused",
+      "refusal": "refused (unknown_entity)",
+      "schema": "spider_flight_2",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "spider_ids.json",
+      "issue_codes": [],
+      "item_id": "spider:255",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so the validator refuses rather than guess.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_flight_2",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "spider_ids.json",
+      "issue_codes": [],
+      "item_id": "spider:257",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none of these.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_flight_2",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "spider_ids.json",
+      "issue_codes": [],
+      "item_id": "spider:258",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none of these.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_flight_2",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "spider_ids.json",
+      "issue_codes": [],
+      "item_id": "spider:451",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "The names and country codes need a join with two equally short paths (winner or loser). The model grouped by winner_id instead of refusing, so it returned ids rather than the requested columns: a wrong answer.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_wta_1",
+      "tag": "misread",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "spider_ids.json",
+      "issue_codes": [],
+      "item_id": "spider:452",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none of these.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_wta_1",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "spider_ids.json",
+      "issue_codes": [],
+      "item_id": "spider:463",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "The gold reads rank points from an unaggregated column in a GROUP BY (SQLite returns an arbitrary row). The answer's maximum is a defined value.",
+      "outcome": "wrong",
+      "refusal": null,
+      "schema": "spider_wta_1",
+      "tag": "gold_issue",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "spider_ids.json",
+      "issue_codes": [],
+      "item_id": "spider:464",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "Same gold pattern as spider:463: rank points from an unaggregated column.",
+      "outcome": "wrong",
+      "refusal": null,
+      "schema": "spider_wta_1",
+      "tag": "gold_issue",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "spider_ids.json",
+      "issue_codes": [],
+      "item_id": "spider:472",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "The gold groups by first name, which merges different players who share one; the answer totals per player.",
+      "outcome": "wrong",
+      "refusal": null,
+      "schema": "spider_wta_1",
+      "tag": "gold_issue",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "spider_ids.json",
+      "issue_codes": [],
+      "item_id": "spider:488",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so the validator refuses rather than guess.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_wta_1",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "spider_ids.json",
+      "issue_codes": [
+        "ambiguous_path",
+        "invalid_order_by"
+      ],
+      "item_id": "spider:885",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so the validator refuses rather than guess.",
+      "outcome": "refused",
+      "refusal": "refused (ambiguous_path, invalid_order_by)",
+      "schema": "spider_network_1",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "spider_ids.json",
+      "issue_codes": [
+        "ambiguous_path"
+      ],
+      "item_id": "spider:886",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so the validator refuses rather than guess.",
+      "outcome": "refused",
+      "refusal": "refused (ambiguous_path)",
+      "schema": "spider_network_1",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "spider_ids.json",
+      "issue_codes": [
+        "ambiguous_path"
+      ],
+      "item_id": "spider:887",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "After the validator refused the ambiguous join, the model answered with student ids instead of names: a wrong answer.",
+      "outcome": "refused",
+      "refusal": "refused (ambiguous_path)",
+      "schema": "spider_network_1",
+      "tag": "misread",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "spider_ids.json",
+      "issue_codes": [
+        "ambiguous_path"
+      ],
+      "item_id": "spider:889",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so the validator refuses rather than guess.",
+      "outcome": "refused",
+      "refusal": "refused (ambiguous_path)",
+      "schema": "spider_network_1",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "spider_ids.json",
+      "issue_codes": [],
+      "item_id": "spider:890",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none of these.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_network_1",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "spider_ids.json",
+      "issue_codes": [],
+      "item_id": "spider:891",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none of these.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_network_1",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "spider_ids.json",
+      "issue_codes": [
+        "ambiguous_path"
+      ],
+      "item_id": "spider:892",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so the validator refuses rather than guess.",
+      "outcome": "refused",
+      "refusal": "refused (ambiguous_path)",
+      "schema": "spider_network_1",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "spider_ids.json",
+      "issue_codes": [
+        "ambiguous_path"
+      ],
+      "item_id": "spider:893",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so the validator refuses rather than guess.",
+      "outcome": "refused",
+      "refusal": "refused (ambiguous_path)",
+      "schema": "spider_network_1",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "spider_ids.json",
+      "issue_codes": [],
+      "item_id": "spider:894",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so the validator refuses rather than guess.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_network_1",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "spider_ids.json",
+      "issue_codes": [],
+      "item_id": "spider:896",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so the validator refuses rather than guess.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_network_1",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "spider_ids.json",
+      "issue_codes": [],
+      "item_id": "spider:897",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so the validator refuses rather than guess.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_network_1",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "spider_ids.json",
+      "issue_codes": [],
+      "item_id": "spider:898",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none of these.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_network_1",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "spider_ids.json",
+      "issue_codes": [],
+      "item_id": "spider:899",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none of these.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_network_1",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "spider_ids.json",
+      "issue_codes": [],
+      "item_id": "spider:900",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none of these.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_network_1",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "spider_ids.json",
+      "issue_codes": [
+        "ambiguous_path"
+      ],
+      "item_id": "spider:904",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so the validator refuses rather than guess.",
+      "outcome": "refused",
+      "refusal": "refused (ambiguous_path)",
+      "schema": "spider_network_1",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "spider_ids.json",
+      "issue_codes": [
+        "ambiguous_path"
+      ],
+      "item_id": "spider:905",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so the validator refuses rather than guess.",
+      "outcome": "refused",
+      "refusal": "refused (ambiguous_path)",
+      "schema": "spider_network_1",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "spider_ids.json",
+      "issue_codes": [],
+      "item_id": "spider:906",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so the validator refuses rather than guess.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_network_1",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "spider_ids.json",
+      "issue_codes": [],
+      "item_id": "spider:907",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so the validator refuses rather than guess.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_network_1",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "spider_ids.json",
+      "issue_codes": [
+        "ambiguous_path",
+        "invalid_order_by"
+      ],
+      "item_id": "spider:908",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so the validator refuses rather than guess.",
+      "outcome": "refused",
+      "refusal": "refused (ambiguous_path, invalid_order_by)",
+      "schema": "spider_network_1",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "spider_ids.json",
+      "issue_codes": [
+        "ambiguous_path"
+      ],
+      "item_id": "spider:909",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so the validator refuses rather than guess.",
+      "outcome": "refused",
+      "refusal": "refused (ambiguous_path)",
+      "schema": "spider_network_1",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "spider_ids.json",
+      "issue_codes": [
+        "ambiguous_path"
+      ],
+      "item_id": "spider:910",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so the validator refuses rather than guess.",
+      "outcome": "refused",
+      "refusal": "refused (ambiguous_path)",
+      "schema": "spider_network_1",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "spider_ids.json",
+      "issue_codes": [
+        "ambiguous_path"
+      ],
+      "item_id": "spider:911",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so the validator refuses rather than guess.",
+      "outcome": "refused",
+      "refusal": "refused (ambiguous_path)",
+      "schema": "spider_network_1",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "spider_ids.json",
+      "issue_codes": [],
+      "item_id": "spider:912",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so the validator refuses rather than guess.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_network_1",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "spider_ids.json",
+      "issue_codes": [
+        "ambiguous_path"
+      ],
+      "item_id": "spider:913",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so the validator refuses rather than guess.",
+      "outcome": "refused",
+      "refusal": "refused (ambiguous_path)",
+      "schema": "spider_network_1",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "spider_ids.json",
+      "issue_codes": [],
+      "item_id": "spider:914",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so the validator refuses rather than guess.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_network_1",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "spider_ids.json",
+      "issue_codes": [],
+      "item_id": "spider:915",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none of these.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_network_1",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "spider_ids.json",
+      "issue_codes": [],
+      "item_id": "spider:917",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "Needs a subquery, set operation, anti-join or OR across an aggregate. The intent grammar has none of these.",
+      "outcome": "refused",
+      "refusal": "refused (unanswerable)",
+      "schema": "spider_network_1",
+      "tag": "grammar_gap",
+      "trial": 1
+    }
+  ],
+  "notes": [
+    "sql_agent baseline not run: needs a live model (multi-step tool calls can't be honestly simulated in one pass)."
+  ],
+  "registry_hashes": {
+    "spider_car_1": "bfafa604590eb78ac55d142c41ebbbdf52308f2b0b98baded2aa8868d7309ca2",
+    "spider_dog_kennels": "ba7277f7739fd820d7ec8f4cfda282af060e5d4aa09828dcca20d512683bde78",
+    "spider_flight_2": "e69b8206b5403470249e458ce75b56ba6e3421c53b73d982f53e2fbe1646c940",
+    "spider_network_1": "b9991de76b27c3ecc644274d209d7c543c7c27dcd2ec7298e7ab729212639d4b",
+    "spider_wta_1": "807a938123c3f5467290fcab18b29cc9d79c341a9dab73eff6d096b5cb43345a"
+  },
+  "run_id": "v02-spider",
+  "simulation": null,
+  "spent_usd": 0.1540411000000001,
+  "status": "complete",
+  "table": [
+    {
+      "accuracy_given_attempted": {
+        "ci95": [
+          0.8830302015002593,
+          1.0
+        ],
+        "n": 29,
+        "of": 29,
+        "rate": 1.0
+      },
+      "coverage": {
+        "ci95": [
+          0.4423344176857823,
+          0.7062499664528802
+        ],
+        "n": 29,
+        "of": 50,
+        "rate": 0.58
+      },
+      "execution_accuracy": {
+        "ci95": [
+          0.4423344176857823,
+          0.7062499664528802
+        ],
+        "n": 29,
+        "of": 50,
+        "rate": 0.58
+      },
+      "execution_error_rate": {
+        "ci95": [
+          6.938893903907228e-18,
+          0.07134759913335872
+        ],
+        "n": 0,
+        "of": 50,
+        "rate": 0.0
+      },
+      "false_refusal_rate": {
+        "ci95": [
+          0.2937500335471198,
+          0.5576655823142176
+        ],
+        "n": 21,
+        "of": 50,
+        "rate": 0.42
+      },
+      "gold": "spider_ids.json",
+      "items": 50,
+      "mean_cost_usd": 0.00053165,
+      "model": "anthropic:claude-haiku-5-5",
+      "p50_latency_ms": 2999.0050835185684,
+      "pending": 0,
+      "refusal_recall": {
+        "ci95": null,
+        "n": 0,
+        "of": 0,
+        "rate": null
+      },
+      "schema": "spider_car_1",
+      "system": "ledgerline",
+      "trials": 1,
+      "wrong_answer_rate_given_answered": {
+        "ci95": [
+          0.0,
+          0.11696979849974075
+        ],
+        "n": 0,
+        "of": 29,
+        "rate": 0.0
+      }
+    },
+    {
+      "accuracy_given_attempted": {
+        "ci95": [
+          0.5418970269185592,
+          0.7924178373934316
+        ],
+        "n": 34,
+        "of": 50,
+        "rate": 0.68
+      },
+      "coverage": {
+        "ci95": [
+          0.9286524008666414,
+          1.0
+        ],
+        "n": 50,
+        "of": 50,
+        "rate": 1.0
+      },
+      "execution_accuracy": {
+        "ci95": [
+          0.5418970269185592,
+          0.7924178373934316
+        ],
+        "n": 34,
+        "of": 50,
+        "rate": 0.68
+      },
+      "execution_error_rate": {
+        "ci95": [
+          0.003539259271646236,
+          0.10495443589637815
+        ],
+        "n": 1,
+        "of": 50,
+        "rate": 0.02
+      },
+      "false_refusal_rate": {
+        "ci95": [
+          6.938893903907228e-18,
+          0.07134759913335872
+        ],
+        "n": 0,
+        "of": 50,
+        "rate": 0.0
+      },
+      "gold": "spider_ids.json",
+      "items": 50,
+      "mean_cost_usd": 0.000227816,
+      "model": "anthropic:claude-haiku-5-5",
+      "p50_latency_ms": 1570.8780835266225,
+      "pending": 0,
+      "refusal_recall": {
+        "ci95": null,
+        "n": 0,
+        "of": 0,
+        "rate": null
+      },
+      "schema": "spider_car_1",
+      "system": "oneshot",
+      "trials": 1,
+      "wrong_answer_rate_given_answered": {
+        "ci95": [
+          0.19515491268006566,
+          0.44527893558910636
+        ],
+        "n": 15,
+        "of": 49,
+        "rate": 0.30612244897959184
+      }
+    },
+    {
+      "accuracy_given_attempted": {
+        "ci95": [
+          0.5907167384187784,
+          0.8820761185551049
+        ],
+        "n": 23,
+        "of": 30,
+        "rate": 0.7666666666666667
+      },
+      "coverage": {
+        "ci95": [
+          0.4618143774758936,
+          0.7239161026974346
+        ],
+        "n": 30,
+        "of": 50,
+        "rate": 0.6
+      },
+      "execution_accuracy": {
+        "ci95": [
+          0.3296965219222435,
+          0.5960112860084253
+        ],
+        "n": 23,
+        "of": 50,
+        "rate": 0.46
+      },
+      "execution_error_rate": {
+        "ci95": [
+          6.938893903907228e-18,
+          0.07134759913335872
+        ],
+        "n": 0,
+        "of": 50,
+        "rate": 0.0
+      },
+      "false_refusal_rate": {
+        "ci95": [
+          0.27608389730256544,
+          0.5381856225241064
+        ],
+        "n": 20,
+        "of": 50,
+        "rate": 0.4
+      },
+      "gold": "spider_ids.json",
+      "items": 50,
+      "mean_cost_usd": 0.000420872,
+      "model": "anthropic:claude-haiku-5-5",
+      "p50_latency_ms": 1714.9040835211053,
+      "pending": 0,
+      "refusal_recall": {
+        "ci95": null,
+        "n": 0,
+        "of": 0,
+        "rate": null
+      },
+      "schema": "spider_dog_kennels",
+      "system": "ledgerline",
+      "trials": 1,
+      "wrong_answer_rate_given_answered": {
+        "ci95": [
+          0.11792388144489496,
+          0.40928326158122164
+        ],
+        "n": 7,
+        "of": 30,
+        "rate": 0.23333333333333334
+      }
+    },
+    {
+      "accuracy_given_attempted": {
+        "ci95": [
+          0.6044684273515117,
+          0.8412847250644762
+        ],
+        "n": 37,
+        "of": 50,
+        "rate": 0.74
+      },
+      "coverage": {
+        "ci95": [
+          0.9286524008666414,
+          1.0
+        ],
+        "n": 50,
+        "of": 50,
+        "rate": 1.0
+      },
+      "execution_accuracy": {
+        "ci95": [
+          0.6044684273515117,
+          0.8412847250644762
+        ],
+        "n": 37,
+        "of": 50,
+        "rate": 0.74
+      },
+      "execution_error_rate": {
+        "ci95": [
+          6.938893903907228e-18,
+          0.07134759913335872
+        ],
+        "n": 0,
+        "of": 50,
+        "rate": 0.0
+      },
+      "false_refusal_rate": {
+        "ci95": [
+          6.938893903907228e-18,
+          0.07134759913335872
+        ],
+        "n": 0,
+        "of": 50,
+        "rate": 0.0
+      },
+      "gold": "spider_ids.json",
+      "items": 50,
+      "mean_cost_usd": 0.000229156,
+      "model": "anthropic:claude-haiku-5-5",
+      "p50_latency_ms": 1025.8941460051574,
+      "pending": 0,
+      "refusal_recall": {
+        "ci95": null,
+        "n": 0,
+        "of": 0,
+        "rate": null
+      },
+      "schema": "spider_dog_kennels",
+      "system": "oneshot",
+      "trials": 1,
+      "wrong_answer_rate_given_answered": {
+        "ci95": [
+          0.15871527493552393,
+          0.39553157264848837
+        ],
+        "n": 13,
+        "of": 50,
+        "rate": 0.26
+      }
+    },
+    {
+      "accuracy_given_attempted": {
+        "ci95": [
+          0.7820195416134267,
+          0.991930572378736
+        ],
+        "n": 21,
+        "of": 22,
+        "rate": 0.9545454545454546
+      },
+      "coverage": {
+        "ci95": [
+          0.3116219921125717,
+          0.5769397197834315
+        ],
+        "n": 22,
+        "of": 50,
+        "rate": 0.44
+      },
+      "execution_accuracy": {
+        "ci95": [
+          0.2937500335471198,
+          0.5576655823142176
+        ],
+        "n": 21,
+        "of": 50,
+        "rate": 0.42
+      },
+      "execution_error_rate": {
+        "ci95": [
+          6.938893903907228e-18,
+          0.07134759913335872
+        ],
+        "n": 0,
+        "of": 50,
+        "rate": 0.0
+      },
+      "false_refusal_rate": {
+        "ci95": [
+          0.4230602802165686,
+          0.6883780078874284
+        ],
+        "n": 28,
+        "of": 50,
+        "rate": 0.56
+      },
+      "gold": "spider_ids.json",
+      "items": 50,
+      "mean_cost_usd": 0.000393458,
+      "model": "anthropic:claude-haiku-5-5",
+      "p50_latency_ms": 2146.9112705090083,
+      "pending": 0,
+      "refusal_recall": {
+        "ci95": null,
+        "n": 0,
+        "of": 0,
+        "rate": null
+      },
+      "schema": "spider_flight_2",
+      "system": "ledgerline",
+      "trials": 1,
+      "wrong_answer_rate_given_answered": {
+        "ci95": [
+          0.00806942762126385,
+          0.21798045838657332
+        ],
+        "n": 1,
+        "of": 22,
+        "rate": 0.045454545454545456
+      }
+    },
+    {
+      "accuracy_given_attempted": {
+        "ci95": [
+          0.6920394632569922,
+          0.9022980732976582
+        ],
+        "n": 41,
+        "of": 50,
+        "rate": 0.82
+      },
+      "coverage": {
+        "ci95": [
+          0.9286524008666414,
+          1.0
+        ],
+        "n": 50,
+        "of": 50,
+        "rate": 1.0
+      },
+      "execution_accuracy": {
+        "ci95": [
+          0.6920394632569922,
+          0.9022980732976582
+        ],
+        "n": 41,
+        "of": 50,
+        "rate": 0.82
+      },
+      "execution_error_rate": {
+        "ci95": [
+          0.02061497034897397,
+          0.16217091688838173
+        ],
+        "n": 3,
+        "of": 50,
+        "rate": 0.06
+      },
+      "false_refusal_rate": {
+        "ci95": [
+          6.938893903907228e-18,
+          0.07134759913335872
+        ],
+        "n": 0,
+        "of": 50,
+        "rate": 0.0
+      },
+      "gold": "spider_ids.json",
+      "items": 50,
+      "mean_cost_usd": 0.000136756,
+      "model": "anthropic:claude-haiku-5-5",
+      "p50_latency_ms": 1122.5362704717554,
+      "pending": 0,
+      "refusal_recall": {
+        "ci95": null,
+        "n": 0,
+        "of": 0,
+        "rate": null
+      },
+      "schema": "spider_flight_2",
+      "system": "oneshot",
+      "trials": 1,
+      "wrong_answer_rate_given_answered": {
+        "ci95": [
+          0.05984604198143388,
+          0.25173940792792504
+        ],
+        "n": 6,
+        "of": 47,
+        "rate": 0.1276595744680851
+      }
+    },
+    {
+      "accuracy_given_attempted": {
+        "ci95": [
+          0.8568833815495731,
+          1.0
+        ],
+        "n": 23,
+        "of": 23,
+        "rate": 1.0
+      },
+      "coverage": {
+        "ci95": [
+          0.3296965219222435,
+          0.5960112860084253
+        ],
+        "n": 23,
+        "of": 50,
+        "rate": 0.46
+      },
+      "execution_accuracy": {
+        "ci95": [
+          0.3296965219222435,
+          0.5960112860084253
+        ],
+        "n": 23,
+        "of": 50,
+        "rate": 0.46
+      },
+      "execution_error_rate": {
+        "ci95": [
+          6.938893903907228e-18,
+          0.07134759913335872
+        ],
+        "n": 0,
+        "of": 50,
+        "rate": 0.0
+      },
+      "false_refusal_rate": {
+        "ci95": [
+          0.40398871399157477,
+          0.6703034780777566
+        ],
+        "n": 27,
+        "of": 50,
+        "rate": 0.54
+      },
+      "gold": "spider_ids.json",
+      "items": 50,
+      "mean_cost_usd": 0.000489438,
+      "model": "anthropic:claude-haiku-5-5",
+      "p50_latency_ms": 1738.9223125064746,
+      "pending": 0,
+      "refusal_recall": {
+        "ci95": null,
+        "n": 0,
+        "of": 0,
+        "rate": null
+      },
+      "schema": "spider_network_1",
+      "system": "ledgerline",
+      "trials": 1,
+      "wrong_answer_rate_given_answered": {
+        "ci95": [
+          0.0,
+          0.14311661845042686
+        ],
+        "n": 0,
+        "of": 23,
+        "rate": 0.0
+      }
+    },
+    {
+      "accuracy_given_attempted": {
+        "ci95": [
+          0.8116175308165717,
+          0.968450485911407
+        ],
+        "n": 46,
+        "of": 50,
+        "rate": 0.92
+      },
+      "coverage": {
+        "ci95": [
+          0.9286524008666414,
+          1.0
+        ],
+        "n": 50,
+        "of": 50,
+        "rate": 1.0
+      },
+      "execution_accuracy": {
+        "ci95": [
+          0.8116175308165717,
+          0.968450485911407
+        ],
+        "n": 46,
+        "of": 50,
+        "rate": 0.92
+      },
+      "execution_error_rate": {
+        "ci95": [
+          6.938893903907228e-18,
+          0.07134759913335872
+        ],
+        "n": 0,
+        "of": 50,
+        "rate": 0.0
+      },
+      "false_refusal_rate": {
+        "ci95": [
+          6.938893903907228e-18,
+          0.07134759913335872
+        ],
+        "n": 0,
+        "of": 50,
+        "rate": 0.0
+      },
+      "gold": "spider_ids.json",
+      "items": 50,
+      "mean_cost_usd": 0.00010233,
+      "model": "anthropic:claude-haiku-5-5",
+      "p50_latency_ms": 904.382208478637,
+      "pending": 0,
+      "refusal_recall": {
+        "ci95": null,
+        "n": 0,
+        "of": 0,
+        "rate": null
+      },
+      "schema": "spider_network_1",
+      "system": "oneshot",
+      "trials": 1,
+      "wrong_answer_rate_given_answered": {
+        "ci95": [
+          0.03154951408859298,
+          0.18838246918342838
+        ],
+        "n": 4,
+        "of": 50,
+        "rate": 0.08
+      }
+    },
+    {
+      "accuracy_given_attempted": {
+        "ci95": [
+          0.8283738581687556,
+          0.9780546147945668
+        ],
+        "n": 44,
+        "of": 47,
+        "rate": 0.9361702127659575
+      },
+      "coverage": {
+        "ci95": [
+          0.8378290831116182,
+          0.979385029651026
+        ],
+        "n": 47,
+        "of": 50,
+        "rate": 0.94
+      },
+      "execution_accuracy": {
+        "ci95": [
+          0.7619518261679701,
+          0.9438239984906773
+        ],
+        "n": 44,
+        "of": 50,
+        "rate": 0.88
+      },
+      "execution_error_rate": {
+        "ci95": [
+          6.938893903907228e-18,
+          0.07134759913335872
+        ],
+        "n": 0,
+        "of": 50,
+        "rate": 0.0
+      },
+      "false_refusal_rate": {
+        "ci95": [
+          0.02061497034897397,
+          0.16217091688838173
+        ],
+        "n": 3,
+        "of": 50,
+        "rate": 0.06
+      },
+      "gold": "spider_ids.json",
+      "items": 50,
+      "mean_cost_usd": 0.000387638,
+      "model": "anthropic:claude-haiku-5-5",
+      "p50_latency_ms": 1434.223042044323,
+      "pending": 0,
+      "refusal_recall": {
+        "ci95": null,
+        "n": 0,
+        "of": 0,
+        "rate": null
+      },
+      "schema": "spider_wta_1",
+      "system": "ledgerline",
+      "trials": 1,
+      "wrong_answer_rate_given_answered": {
+        "ci95": [
+          0.021945385205433238,
+          0.17162614183124436
+        ],
+        "n": 3,
+        "of": 47,
+        "rate": 0.06382978723404255
+      }
+    },
+    {
+      "accuracy_given_attempted": {
+        "ci95": [
+          0.7381380628941446,
+          0.9304916657298371
+        ],
+        "n": 43,
+        "of": 50,
+        "rate": 0.86
+      },
+      "coverage": {
+        "ci95": [
+          0.9286524008666414,
+          1.0
+        ],
+        "n": 50,
+        "of": 50,
+        "rate": 1.0
+      },
+      "execution_accuracy": {
+        "ci95": [
+          0.7381380628941446,
+          0.9304916657298371
+        ],
+        "n": 43,
+        "of": 50,
+        "rate": 0.86
+      },
+      "execution_error_rate": {
+        "ci95": [
+          0.003539259271646236,
+          0.10495443589637815
+        ],
+        "n": 1,
+        "of": 50,
+        "rate": 0.02
+      },
+      "false_refusal_rate": {
+        "ci95": [
+          6.938893903907228e-18,
+          0.07134759913335872
+        ],
+        "n": 0,
+        "of": 50,
+        "rate": 0.0
+      },
+      "gold": "spider_ids.json",
+      "items": 50,
+      "mean_cost_usd": 0.000161708,
+      "model": "anthropic:claude-haiku-5-5",
+      "p50_latency_ms": 993.6902080080472,
+      "pending": 0,
+      "refusal_recall": {
+        "ci95": null,
+        "n": 0,
+        "of": 0,
+        "rate": null
+      },
+      "schema": "spider_wta_1",
+      "system": "oneshot",
+      "trials": 1,
+      "wrong_answer_rate_given_answered": {
+        "ci95": [
+          0.05734825790240154,
+          0.2424439729375651
+        ],
+        "n": 6,
+        "of": 49,
+        "rate": 0.12244897959183673
+      }
+    }
+  ],
+  "trials": 1
+}

@@ -1,0 +1,100 @@
+# Eval report `v02-holdout`
+
+- sql_agent baseline not run: needs a live model (multi-step tool calls can't be honestly simulated in one pass).
+
+Gold: `holdout-v02.jsonl`.
+
+Status: complete. Spend: $0.1136.
+Rates show the value, the Wilson 95% interval, and the counts. Trials are pooled.
+
+| Schema | System | Model | Trials | Coverage | Exec. accuracy | Acc. given attempted | False refusals | Wrong given answered | Refusal recall | Exec. errors | Gold |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| fieldservice | ledgerline | anthropic:claude-haiku-5-5 | 3 | 64.3% [54-74] (54/84) | 47.6% [37-58] (40/84) | 74.1% [61-84] (40/54) | 35.7% [26-46] (30/84) | 25.9% [16-39] (14/54) | 100.0% [90-100] (36/36) | 0.0% [0-3] (0/120) | holdout-v02.jsonl |
+| fieldservice | oneshot | anthropic:claude-haiku-5-5 | 3 | 100.0% [96-100] (84/84) | 60.7% [50-70] (51/84) | 60.7% [50-70] (51/84) | 0.0% [0-4] (0/84) | 39.3% [30-50] (33/84) | 100.0% [90-100] (36/36) | 0.0% [0-3] (0/120) | holdout-v02.jsonl |
+
+## Floor check: fieldservice, anthropic:claude-haiku-5-5 (v0.1 acceptance floor)
+
+- Execution accuracy >= 80%: 47.6% [37-58] (40/84), NOT met
+- Wrong answers among answered <= 5%: 25.9% [16-39] (14/54), NOT met
+
+Result: **not met** in v0.1 (live, default model).
+Why: Accuracy is met (35 of 43); wrong answers miss by one (2 of 37 answered, 5.4%). Both wrong answers are questions the intent grammar cannot express (a ratio, two date fields in one series), where the model answered a nearby question instead of refusing. Of its 6 refusals, 5 are correct refusals of such questions; 1 (fs-038) is a misread after one intent failed validation.
+Next: v0.2 changes the prompt and the grammar, then measures them on a fresh run. The v0.1 prompt is not changed after seeing these results.
+
+## Ledgerline misses
+
+- `ho-010` (fieldservice, holdout-v02.jsonl, trial 1): wrong — rows differ. Tag: **untriaged**
+- `ho-011` (fieldservice, holdout-v02.jsonl, trial 1): refused — it needs a duration between two dates (opened_at to completed_at) per job, which the intent cannot express. Tag: **untriaged**
+- `ho-012` (fieldservice, holdout-v02.jsonl, trial 1): refused — it needs a duration between two dates (invoices.issued_at to invoices.paid_at, in days), which the intent cannot express. Tag: **untriaged**
+- `ho-013` (fieldservice, holdout-v02.jsonl, trial 1): refused — The total cost of parts needs quantity times unit_cost (work_order_parts.quantity multiplied by parts.unit_cost), and the intent cannot express a product of two fields.. Tag: **untriaged**
+- `ho-014` (fieldservice, holdout-v02.jsonl, trial 1): refused — The markup needs (unit_price - unit_cost) times quantity per line, which requires a difference between two fields multiplied by another field. The intent cannot express a product of fields or a computed difference, so it cannot be summed per category.. Tag: **untriaged**
+- `ho-015` (fieldservice, holdout-v02.jsonl, trial 1): refused — it asks for work orders with no related invoice rows (a 'has none' question), which the intent cannot express. Tag: **untriaged**
+- `ho-016` (fieldservice, holdout-v02.jsonl, trial 1): refused — it asks for customers with no related jobs (a 'has none' question: active customers with zero work orders opened at their sites in the last 90 days), which the intent cannot express. Tag: **untriaged**
+- `ho-017` (fieldservice, holdout-v02.jsonl, trial 1): refused — it asks for a distinct count of months per customer region, and the intent cannot express a distinct count of periods. Tag: **untriaged**
+- `ho-018` (fieldservice, holdout-v02.jsonl, trial 1): refused — labour dollars would be labor_hours multiplied by technicians.hourly_rate, and the intent cannot express a product of two fields. Tag: **untriaged**
+- `ho-019` (fieldservice, holdout-v02.jsonl, trial 1): refused — the question asks for how many days each open job has been open, which is a duration between opened_at and the current date. The intent cannot express a duration between two dates.. Tag: **untriaged**
+- `ho-020` (fieldservice, holdout-v02.jsonl, trial 1): wrong — rows differ. Tag: **untriaged**
+- `ho-022` (fieldservice, holdout-v02.jsonl, trial 1): wrong — rows differ. Tag: **untriaged**
+- `ho-024` (fieldservice, holdout-v02.jsonl, trial 1): wrong — unknown_field. Tag: **untriaged**
+- `ho-025` (fieldservice, holdout-v02.jsonl, trial 1): refused — the question compares each technician's hourly rate with a company-wide average, which is a value computed across all rows. The intent can filter only against fixed values or other fields on the same row, not against an aggregate calculated over the table.. Tag: **untriaged**
+- `ho-028` (fieldservice, holdout-v02.jsonl, trial 1): wrong — rows differ. Tag: **untriaged**
+- `ho-011` (fieldservice, holdout-v02.jsonl, trial 2): refused — it needs a duration between two dates (work_orders.opened_at to work_orders.completed_at), which the intent cannot express. Tag: **untriaged**
+- `ho-012` (fieldservice, holdout-v02.jsonl, trial 2): refused — it needs a duration between two dates (issued_at to paid_at) per invoice, which the intent cannot express. Tag: **untriaged**
+- `ho-013` (fieldservice, holdout-v02.jsonl, trial 2): refused — the total cost needs quantity multiplied by unit_cost for each part line, and the intent cannot express a product of two fields. Tag: **untriaged**
+- `ho-014` (fieldservice, holdout-v02.jsonl, trial 2): refused — Markup needs (unit_price - unit_cost) multiplied by quantity for each part line. The intent cannot express a product of two fields (quantity times price or cost), so the dollar markup cannot be computed.. Tag: **untriaged**
+- `ho-015` (fieldservice, holdout-v02.jsonl, trial 2): refused — finding completed jobs with no invoice is a 'has none' question (work orders with no related invoice rows), which this intent cannot express. Tag: **untriaged**
+- `ho-016` (fieldservice, holdout-v02.jsonl, trial 2): refused — The question asks for customers with no related work orders in the last 90 days. That is a 'has none' question (customers with no matching jobs), which this intent cannot express.. Tag: **untriaged**
+- `ho-017` (fieldservice, holdout-v02.jsonl, trial 2): refused — it asks for a distinct count of calendar months per customer region, and the intent cannot express a distinct count of periods. Tag: **untriaged**
+- `ho-018` (fieldservice, holdout-v02.jsonl, trial 2): refused — labour dollars would be labor_hours times technicians.hourly_rate, which is a product of two fields, and the intent cannot express a product of fields. Tag: **untriaged**
+- `ho-019` (fieldservice, holdout-v02.jsonl, trial 2): refused — the question asks for how many days each job has been open, which is a duration between two dates (opened_at to today). The intent cannot compute a duration, so it cannot return the day counts. It could list the ten oldest unfinished jobs by opened_at, but not the days open.. Tag: **untriaged**
+- `ho-020` (fieldservice, holdout-v02.jsonl, trial 2): wrong — rows differ. Tag: **untriaged**
+- `ho-022` (fieldservice, holdout-v02.jsonl, trial 2): wrong — rows differ. Tag: **untriaged**
+- `ho-024` (fieldservice, holdout-v02.jsonl, trial 2): wrong — rows differ. Tag: **untriaged**
+- `ho-025` (fieldservice, holdout-v02.jsonl, trial 2): refused — it needs the company-wide average hourly rate as a threshold, and filters can only compare a field to a constant or another field, not to an aggregate computed over all technicians. Tag: **untriaged**
+- `ho-028` (fieldservice, holdout-v02.jsonl, trial 2): wrong — rows differ. Tag: **untriaged**
+- `ho-010` (fieldservice, holdout-v02.jsonl, trial 3): wrong — rows differ. Tag: **untriaged**
+- `ho-011` (fieldservice, holdout-v02.jsonl, trial 3): refused — it needs a duration between two dates (work_orders.opened_at to work_orders.completed_at), which the intent cannot express. Tag: **untriaged**
+- `ho-012` (fieldservice, holdout-v02.jsonl, trial 3): refused — it needs a duration between two dates (invoices.issued_at to invoices.paid_at), which the intent cannot express. Tag: **untriaged**
+- `ho-013` (fieldservice, holdout-v02.jsonl, trial 3): refused — the total cost needs the product of quantity (work_order_parts) and unit_cost (parts) for each line, and the intent cannot express a product of two fields. Tag: **untriaged**
+- `ho-014` (fieldservice, holdout-v02.jsonl, trial 3): refused — the markup needs a product of two fields (unit_price minus unit_cost, multiplied by quantity), and the intent cannot express a product of two fields. Tag: **untriaged**
+- `ho-015` (fieldservice, holdout-v02.jsonl, trial 3): refused — finding completed jobs with no invoice is a 'has none' question (work orders with no related invoice rows), which this intent cannot express. Tag: **untriaged**
+- `ho-016` (fieldservice, holdout-v02.jsonl, trial 3): refused — it asks for customers with no related job in the last 90 days, which is a 'has none' question (customers with no work orders through their sites). The intent cannot express items that have no related rows.. Tag: **untriaged**
+- `ho-017` (fieldservice, holdout-v02.jsonl, trial 3): refused — it asks for a distinct count of calendar months per customer region, and the intent cannot express a distinct count of periods. Tag: **untriaged**
+- `ho-018` (fieldservice, holdout-v02.jsonl, trial 3): refused — it needs a product of two fields (labor_hours times hourly_rate per technician), which the intent cannot express. Tag: **untriaged**
+- `ho-019` (fieldservice, holdout-v02.jsonl, trial 3): refused — the question asks for the number of days each job has been open, which is a duration between opened_at and today; the intent cannot express a duration between two dates. Tag: **untriaged**
+- `ho-020` (fieldservice, holdout-v02.jsonl, trial 3): wrong — rows differ. Tag: **untriaged**
+- `ho-022` (fieldservice, holdout-v02.jsonl, trial 3): wrong — rows differ. Tag: **untriaged**
+- `ho-024` (fieldservice, holdout-v02.jsonl, trial 3): wrong — rows differ. Tag: **untriaged**
+- `ho-025` (fieldservice, holdout-v02.jsonl, trial 3): refused — the filter would need to compare each technician's hourly_rate with the company-wide average of hourly_rate, and filters can only compare a field to a literal value or another field, not to an aggregate computed over the table. Tag: **untriaged**
+- `ho-028` (fieldservice, holdout-v02.jsonl, trial 3): wrong — rows differ. Tag: **untriaged**
+
+## Where a baseline beat Ledgerline
+
+- `ho-011` (fieldservice, holdout-v02.jsonl, trial 1): oneshot
+- `ho-014` (fieldservice, holdout-v02.jsonl, trial 1): oneshot
+- `ho-015` (fieldservice, holdout-v02.jsonl, trial 1): oneshot
+- `ho-016` (fieldservice, holdout-v02.jsonl, trial 1): oneshot
+- `ho-017` (fieldservice, holdout-v02.jsonl, trial 1): oneshot
+- `ho-018` (fieldservice, holdout-v02.jsonl, trial 1): oneshot
+- `ho-020` (fieldservice, holdout-v02.jsonl, trial 1): oneshot
+- `ho-024` (fieldservice, holdout-v02.jsonl, trial 1): oneshot
+- `ho-025` (fieldservice, holdout-v02.jsonl, trial 1): oneshot
+- `ho-011` (fieldservice, holdout-v02.jsonl, trial 2): oneshot
+- `ho-013` (fieldservice, holdout-v02.jsonl, trial 2): oneshot
+- `ho-014` (fieldservice, holdout-v02.jsonl, trial 2): oneshot
+- `ho-015` (fieldservice, holdout-v02.jsonl, trial 2): oneshot
+- `ho-016` (fieldservice, holdout-v02.jsonl, trial 2): oneshot
+- `ho-017` (fieldservice, holdout-v02.jsonl, trial 2): oneshot
+- `ho-018` (fieldservice, holdout-v02.jsonl, trial 2): oneshot
+- `ho-020` (fieldservice, holdout-v02.jsonl, trial 2): oneshot
+- `ho-024` (fieldservice, holdout-v02.jsonl, trial 2): oneshot
+- `ho-025` (fieldservice, holdout-v02.jsonl, trial 2): oneshot
+- `ho-010` (fieldservice, holdout-v02.jsonl, trial 3): oneshot
+- `ho-011` (fieldservice, holdout-v02.jsonl, trial 3): oneshot
+- `ho-014` (fieldservice, holdout-v02.jsonl, trial 3): oneshot
+- `ho-015` (fieldservice, holdout-v02.jsonl, trial 3): oneshot
+- `ho-016` (fieldservice, holdout-v02.jsonl, trial 3): oneshot
+- `ho-017` (fieldservice, holdout-v02.jsonl, trial 3): oneshot
+- `ho-020` (fieldservice, holdout-v02.jsonl, trial 3): oneshot
+- `ho-024` (fieldservice, holdout-v02.jsonl, trial 3): oneshot
+- `ho-025` (fieldservice, holdout-v02.jsonl, trial 3): oneshot
