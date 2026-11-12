@@ -160,7 +160,7 @@ def test_a_removed_code_no_longer_opens_the_app(
     )
     app = create_app(service, web_dir=tmp_path / "none", invite_codes=[b"beta-456"])
     with TestClient(app) as client:
-        client.cookies.set(invite.COOKIE, "alpha-123")
+        client.cookies.set(invite.COOKIE, invite.cookie_value(b"alpha-123"))
         assert client.get("/schemas").status_code == 401
 
 
