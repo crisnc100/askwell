@@ -14,6 +14,7 @@ interface Row {
   system: string;
   model: string;
   mean_cost_usd: number;
+  p50_latency_ms: number | null;
   coverage: Rate;
   wrong_answer_rate_given_answered: Rate;
 }
@@ -34,6 +35,7 @@ interface Figures {
   wrongRate: number;
   wrongInterval: [number, number];
   wrong: Rate;
+  p50LatencyMs: number | null;
 }
 
 const app = document.getElementById("app") as HTMLElement;
@@ -83,6 +85,7 @@ function figures(report: Report): Figures {
     wrongRate: wrong.rate,
     wrongInterval: wrong.ci95,
     wrong,
+    p50LatencyMs: Number.isFinite(row.p50_latency_ms) ? row.p50_latency_ms : null,
   };
 }
 
@@ -118,6 +121,14 @@ function measuredSection(seen: Figures, holdout: Figures): HTMLElement {
       from("span", "seen-run-date", seen, SOURCE.date),
       ".",
     ),
+    holdout.p50LatencyMs === null
+      ? null
+      : h(
+          "p",
+          { attrs: { id: "answer-time", "data-source": holdout.reportId } },
+          `Answer time: about ${(holdout.p50LatencyMs / 1000).toFixed(1)} seconds, compared with hours or days in someone's queue.`,
+          h("span", { class: "muted" }, ` (median over ${holdout.reportId})`),
+        ),
     h("h3", {}, "Answered share (of answerable questions), used below"),
     h(
       "dl",
@@ -180,6 +191,7 @@ function inputControl(spec: InputSpec, state: ReaderInputs, onChange: () => void
     "div",
     { class: "value-input" },
     h("label", { attrs: { for: sliderId } }, `${spec.label}${unit}`),
+    spec.note ? h("p", { class: "muted example" }, spec.note) : null,
     h("p", { class: "muted example" }, `Example, replace with your own: ${example}. From ${spec.min} to ${spec.max}.`),
     h("div", { class: "value-controls" }, slider, box),
   );
@@ -197,7 +209,8 @@ function formulaSection(): HTMLElement {
       h("li", {}, "Answered: the questions Askwell answers instead of refusing."),
       h("li", {}, "Time saved: for each answered question, the time to answer it by hand minus the time to check Askwell's answer."),
       h("li", {}, "Value of time: the time saved at the person's cost per hour."),
-      h("li", {}, "Net value a month: value of time, minus running cost."),
+      h("li", {}, "Findings: what you estimate you save each month from things you find and act on. It adds straight to net value; at $0 it changes nothing."),
+      h("li", {}, "Net value a month: value of time, plus findings, minus running cost."),
       h("li", {}, "A wrong answer has no separate cost here. Every answer shows its query; the check time is counted."),
       h("li", {}, "A refused question goes back to a person, so it saves nothing. Its model cost is already in cost per question."),
     ),
@@ -209,7 +222,7 @@ function formulaSection(): HTMLElement {
         "answered      = questions × answered share",
         "time saved    = answered × (minutes by hand − minutes to check) ÷ 60",
         "value of time = time saved × cost per hour",
-        "net value     = value of time − running cost",
+        "net value     = value of time + findings − running cost",
       ].join("\n"),
     ),
   );
@@ -246,6 +259,7 @@ function render(seen: Figures, holdout: Figures): void {
           line("Questions answered", "out-answered", number(out.answered)),
           line("Hours saved", "out-hours-saved", number(out.hoursSaved)),
           line("Value of the time saved", "out-value-of-time", money(out.valueOfTime)),
+          line("Savings from findings (your estimate)", "out-findings", money(out.findings)),
           line("Net value", "out-net", money(out.net)),
         ),
       ),

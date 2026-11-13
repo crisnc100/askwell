@@ -297,11 +297,16 @@ pages, so no Python changes.
 
 **Set by the reader** (sliders with a number box beside each; defaults labelled
 "example, replace with your own"):
-- questions a month (example: 500);
+- data questions your team asks each month (example: 500), with an example question under
+  it: "e.g. 'How many deals closed last month?'";
 - minutes a person takes to answer one question by hand (example: 20);
 - minutes to check an answer Ledgerline gives (example: 2);
 - that person's cost per hour (example: $60);
-- hosting per month (example: $10).
+- hosting per month (example: $10);
+- savings from findings you'd act on each month, the reader's estimate (example: $0;
+  owner's decision, 2026-11-13), with one line under it: "Messy data hides costs no one
+  has time to look for. When asking takes seconds, people ask the questions they used to
+  skip."
 
 **The formula** (owner's decision, 2026-11-13: the page shows the value of a tool like
 this, the hours saved against the running cost; shown on the page, in words and as math):
@@ -309,7 +314,8 @@ this, the hours saved against the running cost; shown on the page, in words and 
 - answered = questions × answered share;
 - time saved = answered × (minutes by hand − minutes to check) ÷ 60, in hours;
 - value of time = time saved × cost per hour;
-- net value a month = value of time − running cost.
+- net value a month = value of time + findings − running cost (findings added by the
+  owner's decision, 2026-11-13; at $0 every figure is as before).
 
 A refused question goes back to a person, so it saves nothing. Its model cost is already
 in cost per question. A wrong answer has no separate dollar cost: every answer shows its
@@ -319,6 +325,10 @@ query, and checking it is how a wrong one gets caught, so the check time is coun
 held-out answered share. Net value is also shown at the seen answered share, so the
 range runs from "on questions it never saw" to "on questions it was tuned on". Cost per
 question comes from `v02-seen`.
+
+**Answer time** (owner's decision, 2026-11-13), not in dollars: "Answer time: about N
+seconds, compared with hours or days in someone's queue." N is the median latency
+(`p50_latency_ms`) of `v02-holdout`'s Askwell row, with its source named.
 
 **Plain words on the page:** model cost is the provider's list price. The measured rates
 come from one benchmark schema, not the reader's data.
