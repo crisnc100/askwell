@@ -63,3 +63,16 @@ and about $7,873 on questions it was tuned on.
   had about 5 words to spare.
 - `./verify.sh` green (1105 pytest, 24 Playwright, after the framing change), using this worktree's own compose db
   and seed on 56432, with Spider data copied from a sibling worktree's gitignored `data/spider`.
+
+## Follow-up: findings, question example, answer time (owner's decision, 2026-11-13)
+- New optional input, "Savings from findings you'd act on each month (your estimate)":
+  $0 to $100,000, step $50, default $0, clamped like the others. Net value = value of
+  time + findings − running cost. The range ends move by the same amount. A test pins the
+  example figures from before ($5,775.47 and $7,873.48) at $0 findings.
+- The questions input reads "Data questions your team asks each month", with
+  "e.g. 'How many deals closed last month?'" under it.
+- Answer time comes from `v02-holdout`'s Askwell row, `p50_latency_ms` = 1485.9 ms. The
+  page shows "about 1.5 seconds", names the source, and never shows it in dollars.
+  `v02-seen` has 1256.4 ms; the page uses held-out, the same report as the headline.
+- Existing tests changed in their own commit (7856476): the reader fixture gains
+  `findings: 0`, and the formula text gains "+ findings".
