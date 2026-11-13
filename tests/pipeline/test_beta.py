@@ -81,7 +81,7 @@ def _complete(gw: Gateway) -> None:
     )
 
 
-# --- health check ---
+# --- /healthz ---
 
 
 def test_healthz_answers_with_no_code(
