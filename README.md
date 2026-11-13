@@ -11,7 +11,7 @@ reason. A question the intent cannot express can still get a wrong answer, when 
 fills in a valid intent for a nearby question instead of refusing. [docs/product-brief.md](docs/product-brief.md) explains
 who it is for and what it leaves out on purpose.
 
-**Status.** v0.2 runs on your machine, and an invite-only beta answers live questions
+**Status.** v0.2 runs on your machine, and a public beta answers live questions
 ([Deploy the hosted beta](#deploy-the-hosted-beta)). The model is Claude
 Haiku 5.5 ([ADR-004](docs/adr/ADR-004-model-choice.md)). Held-out questions miss both
 targets: 47.6% right (target 80%), 25.9% wrong (target 5%). The seen questions v0.2 was
@@ -129,6 +129,10 @@ any other (the spike always uses OpenRouter).
 - **Check.** Up to 20 problems are listed per file.
 - **Confirm.** Fields with names that look sensitive (email, phone and similar) start
   hidden.
+- **Ask.** The page offers three to five starter questions made from your own tables and
+  columns: a count by a category, a monthly total, a top five and similar. Templates
+  write them, not a model, and each is offered only if the validator and SQL builder
+  accept its intent.
 
 What stays private:
 
@@ -148,7 +152,9 @@ and 10,000 characters per value. Each address gets 3 workspaces at a time, 20 up
 30 questions an hour (questions to `/ask` count too), and at most 2 uploads running at
 once. An upload must finish within 2 minutes. The hourly counts live in the
 server process and start again when it restarts; the workspace count does not. All
-workspaces together share 2 GB of disk. Behind a proxy that sets `X-Forwarded-For`, set `ASKWELL_TRUST_PROXY=1` so the limits
+workspaces together share 2 GB of disk. The pages show no counts. A limit shows only
+when it is hit, as one plain message that says when to try again, and then nothing runs:
+no model call, and no file stored. Behind a proxy that sets `X-Forwarded-For`, set `ASKWELL_TRUST_PROXY=1` so the limits
 see the real address. Leave it off otherwise, or any client could claim any address.
 
 Answers on your own data need a live model, because no answers are recorded for your
@@ -405,23 +411,20 @@ checking each answer is counted instead. The rates come from one benchmark schem
 
 The hosted beta, <https://askwell.cristianortega.dev>, is one container on one host,
 behind [Caddy](https://caddyserver.com), a web server that handles HTTPS. It answers live
-questions with Claude Haiku 5.5, through a beta-only Anthropic API key. Three controls keep it small and cheap:
+questions with Claude Haiku 5.5, through a beta-only Anthropic API key. It is open to
+anyone, with no invite code. These controls keep it small and cheap:
 
-- **Invite gate.** Every page and API route needs an invite code, except `/healthz`.
-  A visitor enters the code once; for 30 days the browser keeps a hash of it in a cookie
-  scripts cannot read. Scripts can send the code in the `X-Invite-Code` header instead.
-  Only wrong codes count against an address, by any route; a right code never does.
-  After ten wrong codes within an hour, that address gets no new login until the oldest
-  of them is an hour old. People already signed in from it keep working, so one guesser
-  cannot lock out a whole office. The image sets `ASKWELL_ENV=beta`, which refuses to
-  start without codes.
+- **Per-address limits.** The workspace, upload, check and question limits in
+  [Your data](#your-data), the upload size limits, and the 7-day cleanup.
 - **Daily cap.** All live answers together may spend at most a set amount per UTC day.
   Each model call reserves its worst-case cost before it is sent, so the cap holds even
   when requests overlap. When the answer arrives, the real cost replaces the reservation.
   If the answer is lost after the request went out, the provider may still bill it, so
   the worst case stays charged and the call is not retried. The day's total is kept on
-  disk, so a restart does not reset it. Once the cap is reached, asks get a 503 until
-  the next UTC day.
+  disk, so a restart does not reset it. An ask starts only if the rest of the day's
+  allowance covers its whole budget (`ASKWELL_ASK_BUDGET_USD`), so the cap never stops
+  one halfway. Once the cap is reached, asks get a 503, "Askwell has hit today's limit.
+  Try again tomorrow.", until the next UTC day, and no model is called.
 - **Kill switch.** One setting turns live answers off. Asks then get a 503, "Live answers
   are turned off right now.", and no model is called.
 
@@ -441,12 +444,13 @@ On the host:
    |---|---|
    | `ANTHROPIC_API_KEY` | The key for the default model, `anthropic:claude-haiku-5-5`. Set a spend limit on it in the Anthropic console too. |
    | `OPENROUTER_API_KEY` | Only if `ASKWELL_DEFAULT_MODEL` names an OpenRouter model. Give that key a credit limit on OpenRouter too. |
-   | `ASKWELL_INVITE_CODES` | The invite codes, comma-separated. Make each one long and random, for example from `python -c "import secrets; print(secrets.token_urlsafe(16))"`. The app will not start without them. |
    | `ASKWELL_DAILY_SPEND_CAP_USD` | The most live answers may cost per UTC day, for example `1.00`. |
    | `ASKWELL_LIVE_ANSWERS_OFF` | `1` turns live answers off. Restart the app after changing it. |
 
    `compose.prod.yaml` also sets `ASKWELL_TRUST_PROXY=1`, because Caddy is the only
    client and it writes `X-Forwarded-For`. The image sets the database and data paths.
+   `ASKWELL_INVITE_CODES` is no longer read. If an old `.env.beta` still sets it, the
+   app starts and logs that it is ignored; delete the line.
 2. If this host ran the beta as Ledgerline, move its data first. Compose names a
    project after its folder unless `-p` names it, and a volume is named
    `<project>_<volume>`, so find the real names before copying:
