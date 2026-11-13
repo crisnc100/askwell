@@ -97,66 +97,52 @@ function header(): HTMLElement {
 }
 
 function measuredSection(seen: Figures, holdout: Figures): HTMLElement {
-  const cell = (id: string, source: string, ...children: (string | HTMLElement)[]) =>
-    h("td", { attrs: { id, "data-source": source } }, ...children);
-  const rateCell = (id: string, f: Figures, rate: Rate, value: number, interval?: [number, number]) =>
-    cell(
-      id,
-      f.reportId,
-      h("strong", {}, pct(value)),
-      h("div", { class: "muted" }, `${rate.n} of ${rate.of}`),
-      interval ? h("div", { class: "muted" }, `95% range ${pct(interval[0])} to ${pct(interval[1])}`) : "",
-    );
+  const from = (tag: "span" | "dd", id: string, f: Figures, ...children: (string | HTMLElement)[]) =>
+    h(tag, { attrs: { id, "data-source": f.reportId } }, ...children);
+  const rate = (r: Rate, value: number) => `${pct(value)} (${r.n} of ${r.of})`;
+  const interval = (f: Figures) => `95% range ${pct(f.wrongInterval[0])} to ${pct(f.wrongInterval[1])}`;
   return h(
     "section",
     { attrs: { id: "measured" } },
-    h("h2", {}, "Measured, from a committed report"),
+    h("h2", {}, "Measured, from committed reports"),
     h(
       "p",
       {},
-      `Model ${seen.model}. The main figures are measured on the seen questions (report ${seen.reportId}, run date ${SOURCE.date}). `,
-      `The held-out questions (report ${holdout.reportId}) were written blind and never seen while Askwell was built, so their rates are the stricter figure.`,
+      "Model ",
+      from("span", "seen-model", seen, seen.model),
+      ". Model cost per question: ",
+      h("strong", {}, from("span", "cost-per-question", seen, `$${seen.costPerQuestion.toFixed(6)}`)),
+      ", from report ",
+      from("span", "seen-run-id", seen, seen.reportId),
+      ", run date ",
+      from("span", "seen-run-date", seen, SOURCE.date),
+      ".",
     ),
     h(
-      "div",
-      { class: "scroll" },
-      h(
-        "table",
-        {},
-        h(
-          "thead",
-          {},
-          h("tr", {}, h("th", {}, ""), h("th", { attrs: { scope: "col" } }, "Seen questions"), h("th", { attrs: { scope: "col" } }, "Held-out questions (stricter)")),
-        ),
-        h(
-          "tbody",
-          {},
-          h("tr", {}, h("th", { attrs: { scope: "row" } }, "Report"), cell("seen-run-id", seen.reportId, seen.reportId), cell("holdout-run-id", holdout.reportId, holdout.reportId)),
-          h("tr", {}, h("th", { attrs: { scope: "row" } }, "Model"), cell("seen-model", seen.reportId, seen.model), cell("holdout-model", holdout.reportId, holdout.model)),
-          h("tr", {}, h("th", { attrs: { scope: "row" } }, "Run date"), cell("seen-run-date", seen.reportId, SOURCE.date), cell("holdout-run-date", holdout.reportId, SOURCE.date)),
-          h(
-            "tr",
-            {},
-            h("th", { attrs: { scope: "row" } }, "Model cost per question"),
-            cell("cost-per-question", seen.reportId, `$${seen.costPerQuestion.toFixed(6)}`),
-            cell("holdout-cost-per-question", holdout.reportId, `$${holdout.costPerQuestion.toFixed(6)}`, h("div", { class: "muted" }, "shown only; the calculator uses the seen cost")),
-          ),
-          h(
-            "tr",
-            {},
-            h("th", { attrs: { scope: "row" } }, "Answered share (of answerable questions)"),
-            rateCell("seen-answered", seen, seen.answered, seen.answeredShare),
-            rateCell("holdout-answered", holdout, holdout.answered, holdout.answeredShare),
-          ),
-          h(
-            "tr",
-            {},
-            h("th", { attrs: { scope: "row" } }, "Wrong answers among answered"),
-            rateCell("seen-wrong", seen, seen.wrong, seen.wrongRate, seen.wrongInterval),
-            rateCell("holdout-wrong", holdout, holdout.wrong, holdout.wrongRate, holdout.wrongInterval),
-          ),
-        ),
-      ),
+      "p",
+      {},
+      "The rates below feed the calculator. They are measured on the held-out questions (report ",
+      from("span", "holdout-run-id", holdout, holdout.reportId),
+      "), which were written blind and never seen while Askwell was built.",
+    ),
+    h(
+      "dl",
+      { class: "definitions" },
+      h("dt", {}, "Answered share (of answerable questions)"),
+      from("dd", "holdout-answered", holdout, rate(holdout.answered, holdout.answeredShare)),
+      h("dt", {}, "Wrong answers among answered"),
+      from("dd", "holdout-wrong", holdout, `${rate(holdout.wrong, holdout.wrongRate)}, ${interval(holdout)}`),
+    ),
+    h(
+      "p",
+      { class: "muted", attrs: { id: "seen-line" } },
+      "On the questions it was tuned on (measured on the seen questions, report ",
+      seen.reportId,
+      "): answered ",
+      from("span", "seen-answered", seen, rate(seen.answered, seen.answeredShare)),
+      ", wrong ",
+      from("span", "seen-wrong", seen, `${rate(seen.wrong, seen.wrongRate)}, ${interval(seen)}`),
+      ". Shown only; these do not feed the net value.",
     ),
     h(
       "ul",
@@ -238,7 +224,7 @@ function render(seen: Figures, holdout: Figures): void {
   const results = h("section", { attrs: { id: "results", "aria-live": "polite" } });
 
   const update = () => {
-    const out = monthly(state, seen);
+    const out = monthly(state, { costPerQuestion: seen.costPerQuestion, answeredShare: holdout.answeredShare, wrongRate: holdout.wrongRate });
     const [atLow, atHigh] = range(state, {
       costPerQuestion: seen.costPerQuestion,
       answeredShare: holdout.answeredShare,
@@ -250,7 +236,11 @@ function render(seen: Figures, holdout: Figures): void {
     append(
       results,
       h("h2", {}, "Each month"),
-      h("p", { class: "muted" }, `At the rates measured on the seen questions (${seen.reportId}).`),
+      h(
+        "p",
+        { class: "muted" },
+        `At the held-out rates (${holdout.reportId}): answered ${pct(holdout.answeredShare)}, wrong ${pct(holdout.wrongRate)}. Model cost from ${seen.reportId}.`,
+      ),
       h(
         "table",
         {},
@@ -265,20 +255,14 @@ function render(seen: Figures, holdout: Figures): void {
           line("Net value", "out-net", money(out.net)),
         ),
       ),
-      h("h2", {}, "On the held-out questions"),
       h(
         "p",
         { attrs: { id: "out-range" } },
-        `With the held-out answered share (${pct(holdout.answeredShare)}) and its wrong-answer rate anywhere in its 95% range, net value a month is between `,
+        `The wrong-answer rate is still uncertain. Anywhere in its 95% range, net value a month is between `,
         h("strong", { attrs: { id: "out-range-high" } }, money(atHigh)),
         ` (wrong-answer rate ${pct(holdout.wrongInterval[1])}) and `,
         h("strong", { attrs: { id: "out-range-low" } }, money(atLow)),
         ` (${pct(holdout.wrongInterval[0])}).`,
-      ),
-      h(
-        "p",
-        { class: "muted" },
-        "This is the stricter figure. Askwell answers fewer of the held-out questions and gets more of them wrong, so it can sit well below the seen figure above.",
       ),
     );
   };

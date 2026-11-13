@@ -36,7 +36,9 @@ test("V1, V2: the page shows the model, run and cost from the committed reports"
   await expect(page.locator("#seen-run-id")).toHaveText(SOURCE.seen);
   await expect(page.locator("#seen-run-date")).toHaveText(SOURCE.date);
   await expect(page.locator("#holdout-run-id")).toHaveText(SOURCE.holdout);
-  await expect(page.locator("#measured")).toContainText("measured on the seen questions");
+  await expect(page.locator("#seen-line")).toContainText("On the questions it was tuned on");
+  await expect(page.locator("#seen-line")).toContainText("measured on the seen questions");
+  await expect(page.locator("#seen-line")).toContainText("do not feed the net value");
 
   await expect(page.locator("#cost-per-question")).toHaveText(`$${seen.mean_cost_usd.toFixed(6)}`);
   await expect(page.locator("#seen-answered")).toContainText(`${(seen.coverage.rate * 100).toFixed(1)}%`);
@@ -61,8 +63,8 @@ test("V4: inputs are examples, measured figures name their source, and results f
   const reader = Object.fromEntries(INPUTS.map((s) => [s.key, s.example])) as unknown as Parameters<typeof monthly>[0];
   const measured = {
     costPerQuestion: seen.mean_cost_usd,
-    answeredShare: seen.coverage.rate,
-    wrongRate: seen.wrong_answer_rate_given_answered.rate,
+    answeredShare: holdout.coverage.rate,
+    wrongRate: holdout.wrong_answer_rate_given_answered.rate,
   };
   await expect(page.locator("#out-net")).toHaveText(money(monthly(reader, measured).net));
 
@@ -109,6 +111,33 @@ test("V4: inputs are examples, measured figures name their source, and results f
   await noBadNumbers(page);
 });
 
+test("V3: the headline is the formula at the held-out rates, inside its own range", async ({ page }) => {
+  await open(page);
+  const reader = Object.fromEntries(INPUTS.map((s) => [s.key, s.example])) as unknown as Parameters<typeof monthly>[0];
+  const wrong = holdout.wrong_answer_rate_given_answered;
+  const out = monthly(reader, { costPerQuestion: seen.mean_cost_usd, answeredShare: holdout.coverage.rate, wrongRate: wrong.rate });
+  // Not the seen rates: they are shown, but must not move the net value.
+  const atSeen = monthly(reader, {
+    costPerQuestion: seen.mean_cost_usd,
+    answeredShare: seen.coverage.rate,
+    wrongRate: seen.wrong_answer_rate_given_answered.rate,
+  });
+  expect(money(atSeen.net)).not.toBe(money(out.net));
+  await expect(page.locator("#out-net")).toHaveText(money(out.net));
+  await expect(page.locator("#out-risk")).toHaveText(money(out.risk));
+  await expect(page.locator("#out-running-cost")).toHaveText(money(out.runningCost));
+
+  const [atLow, atHigh] = range(reader, {
+    costPerQuestion: seen.mean_cost_usd,
+    answeredShare: holdout.coverage.rate,
+    wrongInterval: wrong.ci95,
+  });
+  expect(out.net).toBeLessThanOrEqual(atLow);
+  expect(out.net).toBeGreaterThanOrEqual(atHigh);
+  await expect(page.locator("#out-range-low")).toHaveText(money(atLow));
+  await expect(page.locator("#out-range-high")).toHaveText(money(atHigh));
+});
+
 test("V3: the page shows the formula", async ({ page }) => {
   await open(page);
   const formula = page.locator("#formula");
@@ -145,7 +174,7 @@ test("V6: keyboard alone, labelled inputs, reduced motion, no sideways scroll at
   await expect(page.locator("#questions-slider")).toHaveValue("800");
 
   expect(await page.evaluate(() => document.getAnimations().length)).toBe(0);
-  const table = page.locator("#measured .scroll");
+  const table = page.locator("#measured");
   expect(await table.evaluate((el) => el.scrollWidth - el.clientWidth)).toBeLessThanOrEqual(0);
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
   expect(overflow).toBeLessThanOrEqual(0);

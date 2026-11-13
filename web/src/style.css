@@ -65,6 +65,5 @@ pre { background: var(--panel); border: 1px solid var(--line); padding: 10px; ov
 .value-controls input[type="range"] { flex: 1; min-width: 0; }
 .value-controls input[type="number"] { font: inherit; width: 7.5em; padding: 6px 8px; border: 1px solid var(--line); border-radius: 4px; box-sizing: border-box; }
 #results #out-net { font-weight: 700; }
-#measured table { table-layout: fixed; }
-#measured th, #measured td { overflow-wrap: anywhere; }
+#measured { overflow-wrap: anywhere; }
 #out-range strong { white-space: nowrap; }
