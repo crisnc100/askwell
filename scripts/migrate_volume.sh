@@ -28,7 +28,7 @@ if ! docker volume inspect "$src" >/dev/null 2>&1; then
 fi
 if [ -n "$(docker ps -aq --filter "volume=$src")" ]; then
   echo "refusing: a container still uses $src; stop the old app first:" >&2
-  echo "  (cd /opt/ledgerline && docker compose -f compose.prod.yaml down)" >&2
+  echo "  docker compose -f compose.prod.yaml down   (in the old app's folder)" >&2
   exit 1
 fi
 
