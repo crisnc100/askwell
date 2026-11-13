@@ -50,8 +50,8 @@ which fields the model may see.
   connection, not only by the code.
 - **It does not write prose about the answer.** The answer is the table and the SQL. A
   model summary could restate a number wrongly.
-- **It does not yet run online.** v0.1 runs on your machine. A hosted beta with an invite
-  code and a daily spending cap comes next.
+- **It is not open to the public.** It runs on your machine, and a hosted beta runs at
+  <https://askwell.cristianortega.dev> behind invite codes and a daily spending cap.
 
 ## How it is measured
 

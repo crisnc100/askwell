@@ -92,10 +92,23 @@ defaults in `askwell/config.py` match them. To change them, copy `.env.example` 
 
 Askwell was called Ledgerline before 0.2.0. For this release, a `LEDGERLINE_` setting
 still works when its `ASKWELL_` name is not set: in the environment, `.env` and
-`.env.beta`, and in the compose files' port and password variables. The app logs a
-warning naming each old name it reads. The next release drops the old names. A Postgres volume created before the rename still has the old role
-names: run `docker compose down -v` and `docker compose up -d` to recreate it with the
-new ones.
+`.env.beta`, and in the compose files' port and password variables. A `LEDGERLINE_`
+name in the environment beats `.env`, as an `ASKWELL_` name would. The app logs a
+warning naming each old name it reads. The next release drops the old names.
+
+A checkout from before the rename has a `.env` and a Postgres volume with the old role
+and database names (`ledgerline_owner`, `ledgerline_ro`, `ledgerline`,
+`ledgerline_app`). To move to the new ones:
+
+1. Copy `.env.example` to `.env` again, or in your `.env` rename every `LEDGERLINE_` to
+   `ASKWELL_` and every `ledgerline` in the URLs and passwords to `askwell`. Do this
+   first: the old URLs still apply through the fallback and would point at roles the
+   new volume does not have.
+2. `docker compose down -v`, then `docker compose up -d`. This recreates the volume with
+   the new roles and seeds it.
+
+Until then, the old `.env` keeps the app and `askwell` commands on the old volume, but the
+compose `seed` service and `./verify.sh` expect the new names.
 
 Model calls default to replay mode, which answers only from recorded responses. A model is
 called live only with `--mode record` or `--mode live`, with `ASKWELL_LLM_MODE=record`
@@ -425,10 +438,18 @@ On the host:
 
    `compose.prod.yaml` also sets `ASKWELL_TRUST_PROXY=1`, because Caddy is the only
    client and it writes `X-Forwarded-For`. The image sets the database and data paths.
-2. Start it: `docker compose -f compose.prod.yaml up -d --build`. It starts two
+2. If this host ran the beta as Ledgerline, move its data first. Stop the old app
+   (`docker compose -f compose.prod.yaml down` in its folder), then run
+   `scripts/migrate_volume.sh ledgerline askwell`, naming the old and new compose
+   projects (by default, their folder names). It copies `ledgerline_ledgerline-data`
+   into `askwell_askwell-data` once, keeping owners and modes, and refuses if the new
+   volume is not empty. Skip it and the app starts on an empty `/data`: old uploads are
+   then out of reach of the hourly sweep and "Delete my data", the audit log starts
+   empty, and the daily spend cap starts again from zero.
+3. Start it: `docker compose -f compose.prod.yaml up -d --build`. It starts two
    services: `app`, on `127.0.0.1:8000` so only the host can reach it, and `sweep`,
    which deletes expired workspaces once an hour.
-3. Point Caddy at it. Caddy gets the HTTPS certificate on its own:
+4. Point Caddy at it. Caddy gets the HTTPS certificate on its own:
 
    ```
    askwell.cristianortega.dev {
@@ -442,7 +463,7 @@ On the host:
    `max_size` stops an oversized request at Caddy; the largest real request is one
    10 MB CSV.
 
-4. Check it: `curl https://askwell.cristianortega.dev/healthz` returns
+5. Check it: `curl https://askwell.cristianortega.dev/healthz` returns
    `{"status": "ok", "mode": "live"}`. It answers 503 if the demo database cannot be read.
 
 To turn live answers off in a hurry, set `ASKWELL_LIVE_ANSWERS_OFF=1` in `.env.beta`
