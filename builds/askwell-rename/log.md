@@ -26,6 +26,9 @@ and the gold files, returns only the places below.
 - **`evals/gold/spider_selection.py`** line 12, "Ledgerline can express". The file is
   a selection rule hash-pinned in `evals/gold/MANIFEST.json`
   (`test_committed_gold_matches_manifest`). It cannot hold a comment either.
+- **`registries/fieldservice.yaml`** line 1, "drafted with `ledgerline registry init`".
+  `askwell/bench/run.py` hashes the registry file's bytes into every task key, so even
+  a comment edit would invalidate existing run checkpoints.
 - **`builds/v01/` and `builds/v02/`**: the plans, logs, review findings and prompts of
   past builds, kept as written.
 - **Frozen evidence**: evals/runs, evals/recordings, evals/reports, evals/gold/*.jsonl,

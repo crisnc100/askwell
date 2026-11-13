@@ -1,4 +1,4 @@
-# Fieldservice registry: drafted with `askwell registry init --values`, then curated
+# Fieldservice registry: drafted with `ledgerline registry init --values`, then curated
 # (descriptions, aliases, value aliases; draft: false). Spider registries are never edited.
 schema_version: 1
 draft: false
