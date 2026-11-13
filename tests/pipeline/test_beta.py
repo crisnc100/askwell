@@ -180,6 +180,55 @@ def test_an_ask_past_the_cap_gets_a_plain_503(
     assert transport.calls == 0
 
 
+class Blocking:
+    """Answers with a valid intent costing $0.01, holding the first call open until
+    released, so a second ask can arrive while the first is mid-flight."""
+
+    def __init__(self) -> None:
+        self.calls = 0
+        self.entered = threading.Event()
+        self.release = threading.Event()
+
+    def __call__(self, **_: Any) -> RawResponse:
+        self.calls += 1
+        self.entered.set()
+        assert self.release.wait(10)
+        intent = '{"intent_type": "summary", "entity": "invoices", "metrics": [{"agg": "count"}]}'
+        return RawResponse(content=intent, usage={"cost": 0.01}, model="m")
+
+
+def test_two_overlapping_asks_cannot_both_hold_the_last_of_the_allowance(
+    settings: Settings,
+    fieldservice_config: dict[str, SchemaConfig],
+    tmp_path: Path,
+    audit_engine: Engine,
+) -> None:
+    assert settings.ask_budget_usd == pytest.approx(0.05)
+    daily = DailySpend(tmp_path / "spend.sqlite", cap_usd=0.06, clock=Clock())
+    transport = Blocking()
+    gateway = _gateway(tmp_path, transport, daily=daily)  # type: ignore[arg-type]
+    service = AskService(settings, fieldservice_config, gateway, AuditLog(audit_engine), "m")
+    results: list[Any] = []
+    first = threading.Thread(
+        target=lambda: results.append(service.ask("fieldservice", "How many invoices?"))
+    )
+    first.start()
+    try:
+        assert transport.entered.wait(10)
+        # The first ask holds $0.05 of the $0.06; the second is refused before any call.
+        with pytest.raises(DailyCapReachedError):
+            service.ask("fieldservice", "How many invoices are there?")
+        assert transport.calls == 1
+    finally:
+        transport.release.set()
+        first.join(10)
+    assert len(results) == 1
+    assert results[0].refusal is None
+    assert results[0].rows
+    # The first ask gives back what it did not spend.
+    assert daily.spent_today() == pytest.approx(0.01)
+
+
 # --- kill switch ---
 
 

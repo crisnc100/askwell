@@ -8,6 +8,7 @@ import importlib.util
 import logging
 import re
 from collections.abc import Iterator
+from contextlib import contextmanager
 from pathlib import Path
 from typing import Any
 
@@ -16,7 +17,11 @@ from fastapi.testclient import TestClient
 
 from askwell.api import create_app
 from askwell.config import get_settings
+from askwell.llm.budget import BudgetGuard
 from askwell.llm.daily import CAP_REACHED, DailyCapReachedError, DailySpend
+from askwell.llm.gateway import Gateway
+from askwell.llm.pricing import ModelPrice
+from askwell.llm.replay import ReplayStore
 from askwell.workspace.api import HEADER, WorkspaceApp
 from askwell.workspace.limits import Limits, RateLimiter, wait_words
 from askwell.workspace.store import WorkspaceStore
@@ -72,6 +77,21 @@ def test_an_invite_codes_setting_is_ignored_with_a_warning(
         assert client.get("/api/limits").status_code == 200
 
 
+def test_a_live_site_with_no_daily_cap_refuses_to_start(
+    fresh_settings: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    fresh_settings.chdir(tmp_path)  # away from the repository's .env
+    fresh_settings.setenv("ASKWELL_LLM_MODE", "live")
+    fresh_settings.delenv("ASKWELL_DAILY_SPEND_CAP_USD", raising=False)
+    fresh_settings.delenv("LEDGERLINE_DAILY_SPEND_CAP_USD", raising=False)
+    with pytest.raises(RuntimeError, match="ASKWELL_DAILY_SPEND_CAP_USD"):
+        _app(tmp_path)
+    fresh_settings.setenv("ASKWELL_DAILY_SPEND_CAP_USD", "1.00")
+    get_settings.cache_clear()
+    with TestClient(_app(tmp_path)) as client:
+        assert client.get("/api/limits").status_code == 200
+
+
 def test_a_beta_deployment_starts_without_codes(
     fresh_settings: pytest.MonkeyPatch, tmp_path: Path, caplog: pytest.LogCaptureFixture
 ) -> None:
@@ -92,19 +112,58 @@ def test_the_daily_cap_message() -> None:
     assert str(DailyCapReachedError(1, 1, 1)) == CAP_REACHED
 
 
+def _live_gateway(tmp_path: Path, daily: DailySpend) -> Gateway:
+    return Gateway(
+        mode="live",
+        store=ReplayStore(tmp_path / "s.jsonl"),
+        transport=lambda **_: None,  # type: ignore[arg-type,return-value]
+        price_lookup=lambda _m: ModelPrice(0.0, 0.00002),
+        guard=BudgetGuard(10.0),
+        max_tokens=1000,
+        daily=daily,
+    )
+
+
+def test_an_ask_holds_its_whole_budget_and_gives_back_what_it_did_not_spend(
+    tmp_path: Path,
+) -> None:
+    daily = DailySpend(tmp_path / "spend.sqlite", cap_usd=1.0)
+    gateway = _live_gateway(tmp_path, daily)
+    guard = BudgetGuard(0.05)
+    with gateway.reserve_ask(guard):
+        assert daily.spent_today() == pytest.approx(0.05)
+        guard.charge(0.01)
+    assert daily.spent_today() == pytest.approx(0.01)
+
+    failing = BudgetGuard(0.05)
+
+    def fail_partway() -> None:
+        with gateway.reserve_ask(failing):
+            failing.charge(0.02)
+            raise RuntimeError("the ask failed")
+
+    with pytest.raises(RuntimeError):
+        fail_partway()
+    assert daily.spent_today() == pytest.approx(0.03)
+
+
 def test_an_ask_the_cap_could_not_finish_is_refused_before_any_call(tmp_path: Path) -> None:
     daily = DailySpend(tmp_path / "spend.sqlite", cap_usd=1.0)
     day = daily.reserve(0.97)
     daily.settle(day, 0.97, 0.97)
-    with pytest.raises(DailyCapReachedError):
-        daily.precheck(0.05)
-    daily.precheck(0.03)  # exactly to the cap still fits
-    assert daily.spent_today() == pytest.approx(0.97)  # a precheck spends nothing
+    gateway = _live_gateway(tmp_path, daily)
+    with pytest.raises(DailyCapReachedError), gateway.reserve_ask(BudgetGuard(0.05)):
+        pytest.fail("the ask must not start")
+    with gateway.reserve_ask(BudgetGuard(0.03)):  # exactly to the cap still fits
+        pass
+    assert daily.spent_today() == pytest.approx(0.97)  # nothing was spent
 
 
 class _CapReached(FakeModel):
-    def precheck_ask(self, budget_usd: float) -> None:
-        raise DailyCapReachedError(1.0, budget_usd, 1.0)
+    @contextmanager
+    def reserve_ask(self, guard: BudgetGuard) -> Iterator[None]:
+        raise DailyCapReachedError(1.0, guard.limit_usd, 1.0)
+        yield
 
 
 def test_a_workspace_ask_past_the_cap_makes_no_call(tmp_path: Path) -> None:
