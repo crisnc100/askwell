@@ -1,8 +1,7 @@
-"""L26: the hosted beta's invite gate, global daily spending cap and kill switch."""
+"""L26: the public site's global daily spending cap and kill switch."""
 
 from __future__ import annotations
 
-import hmac
 import threading
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
@@ -13,7 +12,6 @@ from fastapi.testclient import TestClient
 from pydantic import BaseModel, SecretStr
 from sqlalchemy import Engine
 
-from askwell import invite
 from askwell.api import create_app
 from askwell.config import Settings
 from askwell.core.audit import AuditLog
@@ -26,8 +24,6 @@ from askwell.llm.replay import ReplayStore
 from askwell.llm.types import ChatMessage, RawResponse
 from askwell.pipeline import service as service_module
 from askwell.pipeline.service import AskService, SchemaConfig, build_gateway
-
-CODES = [b"alpha-123", b"beta-456"]
 
 
 class Clock:
@@ -83,129 +79,6 @@ def _complete(gw: Gateway) -> None:
         messages=[ChatMessage(role="user", content="q")],
         schema=Answer,
     )
-
-
-# --- invite gate ---
-
-
-@pytest.fixture
-def gated(
-    settings: Settings,
-    fieldservice_config: dict[str, SchemaConfig],
-    tmp_path: Path,
-    audit_engine: Engine,
-) -> TestClient:
-    web = tmp_path / "web"
-    web.mkdir()
-    (web / "index.html").write_text("<p>the app</p>", encoding="utf-8")
-    gateway = _gateway(tmp_path, Counting())
-    service = AskService(settings, fieldservice_config, gateway, AuditLog(audit_engine), "m")
-    app = create_app(service, web_dir=web, invite_codes=CODES)
-    return TestClient(app, base_url="https://testserver")
-
-
-def test_every_page_and_api_route_needs_a_code(gated: TestClient) -> None:
-    with gated as client:
-        page = client.get("/", headers={"accept": "text/html"})
-        assert page.status_code == 401
-        assert 'action="/invite"' in page.text
-        assert "the app" not in page.text
-        for method, path in [
-            ("GET", "/schemas"),
-            ("GET", "/api/limits"),
-            ("GET", "/api/results"),
-            ("POST", "/api/workspaces"),
-            ("POST", "/ask"),
-        ]:
-            response = client.request(method, path, json={})
-            assert response.status_code == 401, path
-            assert response.json() == {"detail": invite.NEEDS_CODE}
-
-
-def test_healthz_answers_without_a_code(gated: TestClient) -> None:
-    with gated as client:
-        response = client.get("/healthz")
-    assert response.status_code == 200
-    assert response.json()["status"] == "ok"
-
-
-def test_a_valid_code_sets_a_cookie_that_opens_the_app(gated: TestClient) -> None:
-    with gated as client:
-        wrong = client.post("/invite", data={"code": "nope"}, follow_redirects=False)
-        assert wrong.status_code == 401
-        assert invite.COOKIE not in client.cookies
-        ok = client.post("/invite", data={"code": "beta-456"}, follow_redirects=False)
-        assert ok.status_code == 303
-        cookie = ok.headers["set-cookie"]
-        for flag in ("HttpOnly", "Secure", "SameSite=lax"):
-            assert flag.lower() in cookie.lower()
-        assert client.get("/", headers={"accept": "text/html"}).text == "<p>the app</p>"
-        assert client.get("/schemas").status_code == 200
-
-
-def test_scripts_can_send_the_code_in_a_header(gated: TestClient) -> None:
-    with gated as client:
-        assert client.get("/schemas", headers={invite.HEADER: "alpha-123"}).status_code == 200
-        assert client.get("/schemas", headers={invite.HEADER: "alpha-12"}).status_code == 401
-
-
-def test_a_removed_code_no_longer_opens_the_app(
-    settings: Settings,
-    fieldservice_config: dict[str, SchemaConfig],
-    tmp_path: Path,
-    audit_engine: Engine,
-) -> None:
-    service = AskService(
-        settings, fieldservice_config, _gateway(tmp_path, Counting()), AuditLog(audit_engine), "m"
-    )
-    app = create_app(service, web_dir=tmp_path / "none", invite_codes=[b"beta-456"])
-    with TestClient(app) as client:
-        client.cookies.set(invite.COOKIE, invite.cookie_value(b"alpha-123"))
-        assert client.get("/schemas").status_code == 401
-
-
-def test_codes_are_compared_in_constant_time_against_every_code(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    calls: list[tuple[bytes, bytes]] = []
-    real = hmac.compare_digest
-
-    def spy(a: bytes, b: bytes) -> bool:
-        calls.append((a, b))
-        return real(a, b)
-
-    monkeypatch.setattr(invite.hmac, "compare_digest", spy)
-    assert invite.is_valid("alpha-123", CODES)
-    assert len(calls) == len(CODES)  # no early exit on the first match
-    calls.clear()
-    assert not invite.is_valid("x" * (invite.MAX_CODE_CHARS + 1), CODES)
-    assert not invite.is_valid(None, CODES)
-
-
-def test_codes_come_from_a_comma_separated_setting() -> None:
-    assert invite.parse_codes(" alpha-123 , ,beta-456 ") == CODES
-    assert invite.parse_codes(None) == []
-
-
-def test_no_codes_means_no_gate(
-    settings: Settings,
-    fieldservice_config: dict[str, SchemaConfig],
-    tmp_path: Path,
-    audit_engine: Engine,
-) -> None:
-    service = AskService(
-        settings, fieldservice_config, _gateway(tmp_path, Counting()), AuditLog(audit_engine), "m"
-    )
-    with TestClient(create_app(service, web_dir=tmp_path / "none", invite_codes=[])) as client:
-        assert client.get("/schemas").status_code == 200
-
-
-def test_wrong_codes_are_rate_limited(gated: TestClient) -> None:
-    with gated as client:
-        for _ in range(invite.ATTEMPTS_PER_HOUR):
-            assert client.post("/invite", data={"code": "guess"}).status_code == 401
-        blocked = client.post("/invite", data={"code": "alpha-123"}, follow_redirects=False)
-    assert blocked.status_code == 429
 
 
 # --- daily spending cap ---
@@ -282,7 +155,7 @@ def test_an_ask_past_the_cap_gets_a_plain_503(
     transport = Counting()
     gateway = _gateway(tmp_path, transport, daily=daily)
     service = AskService(settings, fieldservice_config, gateway, AuditLog(audit_engine), "m")
-    with TestClient(create_app(service, web_dir=tmp_path / "none", invite_codes=[])) as client:
+    with TestClient(create_app(service, web_dir=tmp_path / "none")) as client:
         response = client.post("/ask", json={"schema_id": "fieldservice", "question": "q"})
     assert response.status_code == 503
     assert response.json() == {"detail": CAP_REACHED}
@@ -308,7 +181,7 @@ def test_the_kill_switch_answers_with_a_plain_message(
     transport = Counting()
     gateway = _gateway(tmp_path, transport, off=True)
     service = AskService(settings, fieldservice_config, gateway, AuditLog(audit_engine), "m")
-    with TestClient(create_app(service, web_dir=tmp_path / "none", invite_codes=[])) as client:
+    with TestClient(create_app(service, web_dir=tmp_path / "none")) as client:
         response = client.post("/ask", json={"schema_id": "fieldservice", "question": "q"})
     assert response.status_code == 503
     assert response.json() == {"detail": LIVE_ANSWERS_OFF}

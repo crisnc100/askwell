@@ -46,6 +46,10 @@ class FakeModel:
             value=value, raw=raw, cost_usd=0.0, cost_source="replay", replayed=False, key="fake"
         )
 
+    def precheck_ask(self, budget_usd: float) -> None:
+        """The real gateway refuses an ask the daily cap could not finish; this one has
+        no cap."""
+
     @property
     def system_prompts(self) -> list[str]:
         return [call[0].content for call in self.calls]
