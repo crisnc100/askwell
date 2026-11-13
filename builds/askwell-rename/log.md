@@ -46,5 +46,5 @@ and the gold files, returns only the places below.
 - Page titles, the wordmark, README, docs, ADRs, CI. `.secrets.baseline` follows the
   renamed file and the new local-dev credentials, still audited as not secret.
 - No GitHub repo URL appeared anywhere before the rename. The README's hosted-beta
-  section, its Caddy block and its health check name the live address,
+  section, its Caddy block and its `/healthz` example name the live address,
   `https://askwell.cristianortega.dev`.
