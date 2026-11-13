@@ -158,8 +158,9 @@ no model call, and no file stored. Behind a proxy that sets `X-Forwarded-For`, s
 see the real address. Leave it off otherwise, or any client could claim any address.
 
 Answers on your own data need a live model, because no answers are recorded for your
-files. Set `ANTHROPIC_API_KEY` (for the default model) and `ASKWELL_LLM_MODE=live` (see
-[.env.example](.env.example)). Without them, Ask replies "Live answers need a model key;
+files. Set `ANTHROPIC_API_KEY` (for the default model), `ASKWELL_LLM_MODE=live` and
+`ASKWELL_DAILY_SPEND_CAP_USD` (see [.env.example](.env.example)). In live mode the app
+refuses to start without a daily cap. Without a key, Ask replies "Live answers need a model key;
 see the README." Questions like "last month" use today's date in your workspace's time
 zone.
 
@@ -417,13 +418,13 @@ anyone, with no invite code. These controls keep it small and cheap:
 - **Per-address limits.** The workspace, upload, check and question limits in
   [Your data](#your-data), the upload size limits, and the 7-day cleanup.
 - **Daily cap.** All live answers together may spend at most a set amount per UTC day.
-  Each model call reserves its worst-case cost before it is sent, so the cap holds even
-  when requests overlap. When the answer arrives, the real cost replaces the reservation.
-  If the answer is lost after the request went out, the provider may still bill it, so
-  the worst case stays charged and the call is not retried. The day's total is kept on
-  disk, so a restart does not reset it. An ask starts only if the rest of the day's
-  allowance covers its whole budget (`ASKWELL_ASK_BUDGET_USD`), so the cap never stops
-  one halfway. Once the cap is reached, asks get a 503, "Askwell has hit today's limit.
+  The app refuses to start in live mode without one. Before its first model call, an
+  ask reserves its whole budget (`ASKWELL_ASK_BUDGET_USD`) in one step, so overlapping
+  asks can never both count on the last of the allowance and one be cut off halfway.
+  When the ask ends, even on an error, the reservation becomes what its calls really
+  cost. If an answer is lost after the request went out, the provider may still bill
+  it, so the worst case stays charged and the call is not retried. The day's total is
+  kept on disk, so a restart does not reset it. Once the cap is reached, asks get a 503, "Askwell has hit today's limit.
   Try again tomorrow.", until the next UTC day, and no model is called.
 - **Kill switch.** One setting turns live answers off. Asks then get a 503, "Live answers
   are turned off right now.", and no model is called.
