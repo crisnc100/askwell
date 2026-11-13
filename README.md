@@ -92,9 +92,9 @@ defaults in `askwell/config.py` match them. To change them, copy `.env.example` 
 
 Askwell was called Ledgerline before 0.2.0. For this release, a `LEDGERLINE_` setting
 still works when its `ASKWELL_` name is not set: in the environment, `.env` and
-`.env.beta`, and in the compose files' port and password variables. A `LEDGERLINE_`
-name in the environment beats `.env`, as an `ASKWELL_` name would. The app logs a
-warning naming each old name it reads. The next release drops the old names.
+`.env.beta`, and in the compose files' port and password variables. Within one place
+an `ASKWELL_` name beats its `LEDGERLINE_` twin, and the environment beats `.env`
+whatever the prefix. The app logs a warning naming each old name it reads. The next release drops the old names.
 
 A checkout from before the rename has a `.env` and a Postgres volume with the old role
 and database names (`ledgerline_owner`, `ledgerline_ro`, `ledgerline`,
