@@ -1,0 +1,46 @@
+{
+ "rows": [
+  {
+   "behavior": "Public access with hidden limits, whole-question spend reservation, start-up cap check, starter questions",
+   "files": [
+    ".env.beta.example",
+    ".env.example",
+    ".secrets.baseline",
+    "Dockerfile",
+    "askwell/api.py",
+    "askwell/config.py",
+    "askwell/invite.py",
+    "askwell/llm/budget.py",
+    "askwell/llm/daily.py",
+    "askwell/llm/gateway.py",
+    "askwell/pipeline/service.py",
+    "askwell/workspace/api.py",
+    "askwell/workspace/limits.py",
+    "askwell/workspace/starters.py",
+    "askwell/workspace/store.py",
+    "web/src/api.ts",
+    "web/src/main.ts",
+    "web/src/style.css"
+   ],
+   "docs": [
+    {
+     "path": "README.md",
+     "claims": [
+      {
+       "claim": "A reached limit shows a plain try-again message",
+       "at": "askwell/llm/daily.py:20"
+      },
+      {
+       "claim": "A question reserves its whole budget before its first call",
+       "at": "askwell/llm/gateway.py:140"
+      },
+      {
+       "claim": "Live mode refuses to start without a daily cap",
+       "at": "askwell/api.py:63"
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}
