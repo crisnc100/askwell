@@ -90,11 +90,12 @@ Postgres listens on `localhost:56432`. On first start it creates two roles:
 defaults in `askwell/config.py` match them. To change them, copy `.env.example` to
 `.env`.
 
-Askwell was called Ledgerline before 0.2.0. For this release, a `LEDGERLINE_` setting
-still works when its `ASKWELL_` name is not set: in the environment, `.env` and
-`.env.beta`, and in the compose files' port and password variables. Within one place
+Askwell was called Ledgerline before 0.2.0. For this release, the old `LEDGERLINE_`
+names still work in the environment, `.env` and `.env.beta`, and in the compose files'
+port and password variables. Within one place
 an `ASKWELL_` name beats its `LEDGERLINE_` twin, and the environment beats `.env`
-whatever the prefix. The app logs a warning naming each old name it reads. The next release drops the old names.
+whatever the prefix. The app logs a warning naming each old name it reads. The next
+release drops the old names.
 
 A checkout from before the rename has a `.env` and a Postgres volume with the old role
 and database names (`ledgerline_owner`, `ledgerline_ro`, `ledgerline`,

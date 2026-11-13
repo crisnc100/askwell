@@ -70,9 +70,8 @@ two numbers that matter most:
 Every rate is shown with a 95% interval, because 50 questions is a small sample. Every
 Askwell miss is reviewed and given a cause.
 
-There is no model key yet, so every answer so far was written by a stand-in model and is
-labelled *simulated*. On that run, Askwell gave fewer wrong answers than the baseline
-(13.2% against 30.2% on fieldservice), but it did not reach its own v0.1 targets (80%
-accuracy, at most 5% wrong answers). The [results page](../README.md#results) and
-[`evals/reports/sim-1.md`](../evals/reports/sim-1.md) have the full numbers, and
-[`docs/failures/`](failures/README.md) walks through four of the misses.
+Askwell answers live with Claude Haiku 5.5. On questions held out from its design it
+gives fewer wrong answers than the baseline, but misses both of its targets (80% accuracy,
+at most 5% wrong answers). The [results page](../README.md#results) has the numbers.
+[`docs/failures/`](failures/README.md) walks through four misses from `sim-1`, an earlier
+run whose answers came from a stand-in model.

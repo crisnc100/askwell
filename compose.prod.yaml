@@ -1,7 +1,7 @@
 # The hosted beta on one host, behind Caddy. See "Deploy the hosted beta" in the README.
 #   docker compose -f compose.prod.yaml up -d --build
 # Settings come from .env.beta next to this file (never committed; see .env.beta.example).
-# The ${LEDGERLINE_PORT} fallback keeps a pre-0.2.0 .env.beta working for one release.
+# The ${LEDGERLINE_PORT} fallback keeps a pre-0.2.0 port setting working for one release.
 services:
   app:
     build: .
