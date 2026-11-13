@@ -58,3 +58,13 @@ pre { background: var(--panel); border: 1px solid var(--line); padding: 10px; ov
 .floor ul { margin: 6px 0; }
 .misses { margin: 8px 0; }
 .misses td { font-size: 0.88rem; }
+.value-input { margin: 16px 0; }
+.value-input label { margin-bottom: 0; font-weight: 600; }
+.value-input .example { margin: 0 0 4px; }
+.value-controls { display: flex; gap: 12px; align-items: center; }
+.value-controls input[type="range"] { flex: 1; min-width: 0; }
+.value-controls input[type="number"] { font: inherit; width: 7.5em; padding: 6px 8px; border: 1px solid var(--line); border-radius: 4px; box-sizing: border-box; }
+#results #out-net { font-weight: 700; }
+#measured table { table-layout: fixed; }
+#measured th, #measured td { overflow-wrap: anywhere; }
+#out-range strong { white-space: nowrap; }
