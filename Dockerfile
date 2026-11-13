@@ -34,15 +34,18 @@ RUN mkdir -p demo \
 # Everything the app writes (workspaces, the audit log, today's spend) lives in /data.
 RUN useradd --system --uid 10001 --home-dir /nonexistent askwell \
     && mkdir /data && chown askwell /data && chmod 0700 /data
-USER askwell
-VOLUME ["/data"]
-
-ENV ASKWELL_ENV=beta \
+# The image's settings go in /app/.env, not ENV: the environment (.env.beta) beats
+# .env, so a deployed .env.beta still using LEDGERLINE_ names overrides them.
+RUN printf '%s\n' \
+    ASKWELL_ENV=beta \
     ASKWELL_LLM_MODE=live \
     ASKWELL_DATABASE_RO_URL=sqlite:////app/demo/fieldservice.sqlite \
     ASKWELL_APP_DATABASE_URL=sqlite:////data/app.sqlite \
     ASKWELL_WORKSPACE_DIR=/data/workspaces \
-    ASKWELL_SPEND_DB=/data/spend.sqlite
+    ASKWELL_SPEND_DB=/data/spend.sqlite \
+    > /app/.env && chmod 0444 /app/.env
+USER askwell
+VOLUME ["/data"]
 
 EXPOSE 8000
 # umask 077: files the app or SQLite creates are readable by this account only.

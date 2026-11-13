@@ -135,12 +135,15 @@ class Settings(BaseSettings):
         dotenv_settings: PydanticBaseSettingsSource,
         file_secret_settings: PydanticBaseSettingsSource,
     ) -> tuple[PydanticBaseSettingsSource, ...]:
-        # Earlier sources win, so an ASKWELL_ name always beats its LEDGERLINE_ twin.
+        # Earlier sources win. The environment beats `.env`, whatever the prefix: the
+        # image keeps its defaults in /app/.env, so a deployed .env.beta that still uses
+        # LEDGERLINE_ names overrides them, as it did before the rename.
         return (
             init_settings,
             env_settings,
+            LegacyNamesSource(settings_cls, from_env_file=False),
             dotenv_settings,
-            LegacyNamesSource(settings_cls),
+            LegacyNamesSource(settings_cls, from_env_file=True),
             file_secret_settings,
         )
 
@@ -153,8 +156,12 @@ class Settings(BaseSettings):
 
 
 class LegacyNamesSource(PydanticBaseSettingsSource):
-    """Values set under the old LEDGERLINE_ names, from the environment or `.env`, with a
-    warning naming each one to rename."""
+    """Values set under the old LEDGERLINE_ names, from the environment or from `.env`,
+    with a warning naming each one to rename."""
+
+    def __init__(self, settings_cls: type[BaseSettings], *, from_env_file: bool) -> None:
+        super().__init__(settings_cls)
+        self.from_env_file = from_env_file
 
     def get_field_value(self, field: FieldInfo, field_name: str) -> tuple[Any, str, bool]:
         # Unused: __call__ reads every name at once.
@@ -162,21 +169,26 @@ class LegacyNamesSource(PydanticBaseSettingsSource):
 
     def __call__(self) -> dict[str, Any]:
         found: dict[str, str] = {}
-        env_file = self.config.get("env_file")
-        if isinstance(env_file, str) and Path(env_file).is_file():
-            for key, value in dotenv_values(env_file).items():
-                if value is not None:
-                    found[key.upper()] = value
-        found.update({key.upper(): value for key, value in os.environ.items()})
+        if self.from_env_file:
+            env_file = self.config.get("env_file")
+            if isinstance(env_file, str) and Path(env_file).is_file():
+                for key, value in dotenv_values(env_file).items():
+                    if value is not None:
+                        found[key.upper()] = value
+        else:
+            found = {key.upper(): value for key, value in os.environ.items()}
 
         values: dict[str, Any] = {}
         used: list[str] = []
         for field_name, field in self.settings_cls.model_fields.items():
             # A field with aliases is read under each ASKWELL_ alias; others under the prefix.
+            # Aliased values go under the first alias, the key the other sources use, so
+            # source priority decides between them.
             alias = field.validation_alias
             if isinstance(alias, AliasChoices):
+                first = str(alias.choices[0])
                 names = [
-                    (str(choice), str(choice))
+                    (str(choice), first)
                     for choice in alias.choices
                     if str(choice).startswith(PREFIX)
                 ]
