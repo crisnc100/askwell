@@ -7,6 +7,7 @@ export interface ReaderInputs {
   minutesToCheck: number;
   costPerHour: number;
   hosting: number;
+  findings: number;
 }
 
 export interface Measured {
@@ -19,6 +20,7 @@ export interface Monthly {
   answered: number;
   hoursSaved: number;
   valueOfTime: number;
+  findings: number;
   net: number;
 }
 
@@ -30,14 +32,34 @@ export interface InputSpec {
   max: number;
   step: number;
   example: number;
+  note?: string;
 }
 
 export const INPUTS: InputSpec[] = [
-  { key: "questions", label: "Questions a month", unit: "count", min: 0, max: 10000, step: 10, example: 500 },
+  {
+    key: "questions",
+    label: "Data questions your team asks each month",
+    unit: "count",
+    min: 0,
+    max: 10000,
+    step: 10,
+    example: 500,
+    note: "e.g. 'How many deals closed last month?'",
+  },
   { key: "minutesByHand", label: "Minutes a person takes to answer one question by hand", unit: "minutes", min: 0, max: 240, step: 1, example: 20 },
   { key: "minutesToCheck", label: "Minutes to check an answer Askwell gives", unit: "minutes", min: 0, max: 240, step: 1, example: 2 },
   { key: "costPerHour", label: "That person's cost per hour", unit: "usd", min: 0, max: 500, step: 1, example: 60 },
   { key: "hosting", label: "Hosting per month", unit: "usd", min: 0, max: 1000, step: 1, example: 10 },
+  {
+    key: "findings",
+    label: "Savings from findings you'd act on each month (your estimate)",
+    unit: "usd",
+    min: 0,
+    max: 100000,
+    step: 50,
+    example: 0,
+    note: "Messy data hides costs no one has time to look for. When asking takes seconds, people ask the questions they used to skip.",
+  },
 ];
 
 // Infinity clamps to a bound like any other out-of-range number; the caller rejects NaN.
@@ -53,7 +75,14 @@ export function monthly(reader: ReaderInputs, measured: Measured): Monthly {
   const answered = reader.questions * measured.answeredShare;
   const hoursSaved = (answered * (reader.minutesByHand - reader.minutesToCheck)) / 60;
   const valueOfTime = hoursSaved * reader.costPerHour;
-  return { runningCost, answered, hoursSaved, valueOfTime, net: valueOfTime - runningCost };
+  return {
+    runningCost,
+    answered,
+    hoursSaved,
+    valueOfTime,
+    findings: reader.findings,
+    net: valueOfTime + reader.findings - runningCost,
+  };
 }
 
 // Net value at each of two answered shares, in the order given: the page passes the share

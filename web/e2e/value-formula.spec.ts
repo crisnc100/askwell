@@ -90,3 +90,23 @@ test("V2: the report constant names committed live reports with an Askwell row f
     expect(typeof rows[0].mean_cost_usd).toBe("number");
   }
 });
+
+test("findings add straight to net value, and at $0 change nothing", () => {
+  const measured = { costPerQuestion: 0.001, answeredShare: 0.8 };
+  const base = monthly(READER, measured);
+  // The figures before the findings input existed, pinned.
+  expect(base.net).toBeCloseTo(7200 - 10.5, 10);
+  const withFindings = monthly({ ...READER, findings: 1234 }, measured);
+  expect(withFindings.net).toBeCloseTo(base.net + 1234, 10);
+  expect(withFindings.runningCost).toBe(base.runningCost);
+  expect(withFindings.valueOfTime).toBe(base.valueOfTime);
+  const [a, b] = range({ ...READER, findings: 1234 }, { costPerQuestion: 0.001, answeredShares: [0.5, 0.8] });
+  const [a0, b0] = range(READER, { costPerQuestion: 0.001, answeredShares: [0.5, 0.8] });
+  expect(a).toBeCloseTo(a0 + 1234, 10);
+  expect(b).toBeCloseTo(b0 + 1234, 10);
+
+  const spec = INPUTS.find((s) => s.key === "findings");
+  expect(spec?.example).toBe(0);
+  expect(spec?.min).toBe(0);
+  expect(spec?.label).toBe("Savings from findings you'd act on each month (your estimate)");
+});

@@ -137,6 +137,55 @@ test("V3: the headline is the formula at the held-out answered share, and the ra
   await expect(page.locator("#app")).not.toContainText("credits");
 });
 
+test("at $0 findings every figure is unchanged; findings add to net value and clamp", async ({ page }) => {
+  await open(page);
+  await expect(page.locator("#findings-number")).toHaveValue("0");
+  // The example figures before the findings input existed, pinned.
+  await expect(page.locator("#out-net")).toHaveText("$5,775.47");
+  await expect(page.locator("#out-range-unseen")).toHaveText("$5,775.47");
+  await expect(page.locator("#out-range-tuned")).toHaveText("$7,873.48");
+  await expect(page.locator("#out-running-cost")).toHaveText("$10.24");
+
+  const box = page.locator("#findings-number");
+  await box.fill("1000");
+  await expect(page.locator("#out-findings")).toHaveText("$1,000.00");
+  await expect(page.locator("#out-net")).toHaveText("$6,775.47");
+  await expect(page.locator("#out-range-tuned")).toHaveText("$8,873.48");
+
+  const spec = INPUTS.find((s) => s.key === "findings")!;
+  await box.fill(String(spec.max * 10));
+  await box.press("Tab");
+  await expect(box).toHaveValue(String(spec.max));
+  await box.fill("-5");
+  await box.press("Tab");
+  await expect(box).toHaveValue("0");
+  await expect(page.locator("#out-net")).toHaveText("$5,775.47");
+  await noBadNumbers(page);
+});
+
+test("the new lines: findings note, question example, and a measured answer time", async ({ page }) => {
+  await open(page);
+  const findings = page.locator(".value-input").filter({ has: page.locator("#findings-slider") });
+  await expect(findings).toContainText("Savings from findings you'd act on each month (your estimate)");
+  await expect(findings).toContainText(
+    "Messy data hides costs no one has time to look for. When asking takes seconds, people ask the questions they used to skip.",
+  );
+  await expect(findings).toContainText("Example, replace with your own");
+
+  const questions = page.locator(".value-input").filter({ has: page.locator("#questions-slider") });
+  await expect(questions).toContainText("Data questions your team asks each month");
+  await expect(questions).toContainText("e.g. 'How many deals closed last month?'");
+
+  const seconds = (holdout.p50_latency_ms / 1000).toFixed(1);
+  const answerTime = page.locator("#answer-time");
+  await expect(answerTime).toHaveAttribute("data-source", SOURCE.holdout);
+  await expect(answerTime).toContainText(
+    `Answer time: about ${seconds} seconds, compared with hours or days in someone's queue.`,
+  );
+  await expect(answerTime).toContainText(`median over ${SOURCE.holdout}`);
+  await expect(answerTime).not.toContainText("$");
+});
+
 test("V3: the page shows the formula", async ({ page }) => {
   await open(page);
   const formula = page.locator("#formula");
