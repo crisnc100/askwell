@@ -81,6 +81,24 @@ def _complete(gw: Gateway) -> None:
     )
 
 
+# --- health check ---
+
+
+def test_healthz_answers_with_no_code(
+    settings: Settings,
+    fieldservice_config: dict[str, SchemaConfig],
+    tmp_path: Path,
+    audit_engine: Engine,
+) -> None:
+    service = AskService(
+        settings, fieldservice_config, _gateway(tmp_path, Counting()), AuditLog(audit_engine), "m"
+    )
+    with TestClient(create_app(service, web_dir=tmp_path / "none")) as client:
+        response = client.get("/healthz")
+    assert response.status_code == 200
+    assert response.json()["status"] == "ok"
+
+
 # --- daily spending cap ---
 
 
