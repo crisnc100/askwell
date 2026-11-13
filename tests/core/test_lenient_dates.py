@@ -9,11 +9,11 @@ from pathlib import Path
 
 from sqlalchemy import create_engine, text
 
-from ledgerline.core.executor import readonly_engine, run
-from ledgerline.core.intent import Intent
-from ledgerline.core.registry import EntityDef, FieldDef, Registry
-from ledgerline.core.sqlbuild import build
-from ledgerline.core.validate import validate
+from askwell.core.executor import readonly_engine, run
+from askwell.core.intent import Intent
+from askwell.core.registry import EntityDef, FieldDef, Registry
+from askwell.core.sqlbuild import build
+from askwell.core.validate import validate
 from tests.core.conftest import NOW
 
 

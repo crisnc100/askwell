@@ -1,0 +1,1 @@
+{"f1":{"status":"fixed","response":"real"},"s1":{"status":"fixed","response":"real"},"x1":{"status":"deferred","reason":"LOW: the digest's source is not recorded. It was read with docker buildx imagetools inspect alpine:3.20 and pulled and run successfully against real Docker on throwaway volumes.","fix":"Record the digest's source and date in the script header."}}

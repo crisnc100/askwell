@@ -3,11 +3,11 @@
 `uv run python -m evals.replay_cases record` asks each one of the default model, live,
 and appends its answers to the replay store. It needs the key for the default model's
 provider (`ANTHROPIC_API_KEY` for the default); each ask has its own budget
-(`LEDGERLINE_ASK_BUDGET_USD`).
+(`ASKWELL_ASK_BUDGET_USD`).
 
 `uv run python -m evals.replay_cases export` is the way without a key: it writes every
 unrecorded model request to evals/pending/ for a simulated answer. After the answers
-are imported (`ledgerline replay import`), run it again: a question whose first answer
+are imported (`askwell replay import`), run it again: a question whose first answer
 failed validation then exports its retry request.
 """
 
@@ -16,12 +16,12 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
-from ledgerline.config import Settings, get_settings
-from ledgerline.core.executor import readonly_engine
-from ledgerline.core.registry import dump_registry
-from ledgerline.core.registry_init import init_registry
-from ledgerline.llm.simulate import PendingRequestError
-from ledgerline.pipeline.service import AskService, SchemaConfig, build_gateway, load_schemas
+from askwell.config import Settings, get_settings
+from askwell.core.executor import readonly_engine
+from askwell.core.registry import dump_registry
+from askwell.core.registry_init import init_registry
+from askwell.llm.simulate import PendingRequestError
+from askwell.pipeline.service import AskService, SchemaConfig, build_gateway, load_schemas
 
 ROOT = Path(__file__).resolve().parent.parent
 SPIDER_DB = "dog_kennels"

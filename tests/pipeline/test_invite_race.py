@@ -15,12 +15,12 @@ import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import Engine
 
-from ledgerline import invite
-from ledgerline.api import create_app
-from ledgerline.config import Settings
-from ledgerline.core.audit import AuditLog
-from ledgerline.llm.gateway import Gateway
-from ledgerline.pipeline.service import AskService, SchemaConfig
+from askwell import invite
+from askwell.api import create_app
+from askwell.config import Settings
+from askwell.core.audit import AuditLog
+from askwell.llm.gateway import Gateway
+from askwell.pipeline.service import AskService, SchemaConfig
 from tests.pipeline.conftest import ScriptedGateway
 
 CODES = ["alpha-123", "招待コード-7"]

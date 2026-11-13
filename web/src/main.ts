@@ -89,7 +89,7 @@ function header(): HTMLElement {
   return h(
     "header",
     {},
-    h("p", { class: "brand" }, "Ledgerline"),
+    h("p", { class: "brand" }, "Askwell"),
     h("p", { class: "tagline" }, "Ask questions about your own data. See the SQL behind every answer."),
     h("p", {}, h("a", { attrs: { href: "/results/" } }, "Benchmark results")),
   );
@@ -165,7 +165,7 @@ async function preparePage(main: HTMLElement): Promise<void> {
     h(
       "p",
       {},
-      "Ledgerline reads CSV files, one table per file. Check runs every rule below and tells you the row, the column and the fix for anything it cannot read.",
+      "Askwell reads CSV files, one table per file. Check runs every rule below and tells you the row, the column and the fix for anything it cannot read.",
     ),
     h(
       "ul",
@@ -430,7 +430,7 @@ async function confirmPage(main: HTMLElement): Promise<void> {
     h(
       "p",
       {},
-      "Ledgerline drafted this from your files. The model sees table and column names, their types, links and your descriptions. It never sees your rows. Hidden fields are never shown to it.",
+      "Askwell drafted this from your files. The model sees table and column names, their types, links and your descriptions. It never sees your rows. Hidden fields are never shown to it.",
     ),
     notice(
       "info",

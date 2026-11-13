@@ -10,12 +10,12 @@ from typing import Any
 import pytest
 from fastapi.testclient import TestClient
 
-from ledgerline.api import create_app
-from ledgerline.config import Settings, get_settings
-from ledgerline.llm.daily import CAP_REACHED, DailyCapReachedError
-from ledgerline.llm.errors import LIVE_ANSWERS_OFF, LiveAnswersOffError
-from ledgerline.workspace.api import WorkspaceApp
-from ledgerline.workspace.store import WorkspaceStore
+from askwell.api import create_app
+from askwell.config import Settings, get_settings
+from askwell.llm.daily import CAP_REACHED, DailyCapReachedError
+from askwell.llm.errors import LIVE_ANSWERS_OFF, LiveAnswersOffError
+from askwell.workspace.api import WorkspaceApp
+from askwell.workspace.store import WorkspaceStore
 from tests.workspace.fake_model import FakeModel, fake_service
 from tests.workspace.test_confirm_ask import checked, confirm
 

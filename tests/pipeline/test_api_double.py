@@ -5,9 +5,9 @@ from __future__ import annotations
 from fastapi.testclient import TestClient
 from sqlalchemy import Engine
 
-from ledgerline.api import create_app
-from ledgerline.config import Settings
-from ledgerline.pipeline.service import SchemaConfig
+from askwell.api import create_app
+from askwell.config import Settings
+from askwell.pipeline.service import SchemaConfig
 from tests.pipeline.conftest import scripted_service
 from tests.pipeline.test_graph import UNPAID
 

@@ -14,10 +14,10 @@ from pathlib import Path
 
 import pytest
 
-from ledgerline.workspace import fields
-from ledgerline.workspace.fields import Edits
-from ledgerline.workspace.limits import Limits
-from ledgerline.workspace.store import (
+from askwell.workspace import fields
+from askwell.workspace.fields import Edits
+from askwell.workspace.limits import Limits
+from askwell.workspace.store import (
     DiskFullError,
     WorkspaceNotFoundError,
     WorkspaceStore,

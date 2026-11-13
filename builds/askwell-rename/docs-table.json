@@ -1,0 +1,301 @@
+{
+ "rows": [
+  {
+   "behavior": "Product, package and CLI renamed to Askwell, version 0.2.0",
+   "files": [
+    "askwell/__init__.py",
+    "ledgerline/__init__.py",
+    "askwell/cli.py",
+    "pyproject.toml",
+    "uv.lock",
+    "web/index.html",
+    "web/results/index.html",
+    "web/src/main.ts",
+    "web/src/api.ts",
+    "web/vite.config.ts",
+    "web/package.json",
+    "web/package-lock.json"
+   ],
+   "docs": [
+    {
+     "path": "README.md",
+     "claims": [
+      {
+       "claim": "The app starts as askwell.api:create_app",
+       "at": "pyproject.toml:37"
+      },
+      {
+       "claim": "Product name is Askwell, version 0.2.0",
+       "at": "askwell/__init__.py:1"
+      }
+     ]
+    },
+    {
+     "path": "docs/product-brief.md",
+     "claims": [
+      {
+       "claim": "Askwell answers live with Claude Haiku 5.5 by default",
+       "at": "askwell/config.py:75"
+      },
+      {
+       "claim": "The hosted beta runs at askwell.cristianortega.dev",
+       "at": "README.md:466"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "behavior": "Old LEDGERLINE_ setting names read for one release, with a warning; ASKWELL_ beats LEDGERLINE_ within one place, the environment beats .env",
+   "files": [
+    "askwell/config.py",
+    "ledgerline/config.py",
+    ".env.example",
+    ".env.beta.example"
+   ],
+   "docs": [
+    {
+     "path": "README.md",
+     "claims": [
+      {
+       "claim": "Old LEDGERLINE_ names still work in the environment and .env",
+       "at": "askwell/config.py:144"
+      },
+      {
+       "claim": "Within one place an ASKWELL_ name beats its LEDGERLINE_ twin, and the environment beats .env whatever the prefix",
+       "at": "askwell/config.py:141"
+      },
+      {
+       "claim": "The app logs a warning naming each old name it reads",
+       "at": "askwell/config.py:204"
+      },
+      {
+       "claim": "The compose port and password variables fall back to LEDGERLINE_ names",
+       "at": "docker-compose.yml:12"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "behavior": "Compose, image and local Postgres roles renamed (askwell:beta, askwell-data, askwell_owner, askwell_ro, askwell_app); image defaults in /app/.env",
+   "files": [
+    "docker-compose.yml",
+    "compose.prod.yaml",
+    "Dockerfile",
+    "infra/postgres/roles.sql",
+    "infra/postgres/init/10-roles.sh",
+    "verify.sh",
+    ".github/workflows/verify.yml",
+    ".secrets.baseline"
+   ],
+   "docs": [
+    {
+     "path": "README.md",
+     "claims": [
+      {
+       "claim": "Local Postgres creates askwell_owner and askwell_ro",
+       "at": "docker-compose.yml:11"
+      },
+      {
+       "claim": "The beta's data lives in the askwell-data volume",
+       "at": "compose.prod.yaml:20"
+      },
+      {
+       "claim": "The pre-0.2.0 port setting still works through the LEDGERLINE_PORT fallback",
+       "at": "compose.prod.yaml:18"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "behavior": "scripts/migrate_volume.sh copies <old>_ledgerline-data into <new>_askwell-data once and prints the rm command for the old volume",
+   "files": [
+    "scripts/migrate_volume.sh"
+   ],
+   "docs": [
+    {
+     "path": "README.md",
+     "claims": [
+      {
+       "claim": "It copies the old volume into the new one keeping owners and modes",
+       "at": "scripts/migrate_volume.sh:57"
+      },
+      {
+       "claim": "It refuses if the old volume is still in use",
+       "at": "scripts/migrate_volume.sh:39"
+      },
+      {
+       "claim": "It refuses if the new volume is not empty",
+       "at": "scripts/migrate_volume.sh:54"
+      },
+      {
+       "claim": "It prints the docker volume rm command for the old volume",
+       "at": "scripts/migrate_volume.sh:63"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "behavior": "Bench system id kept as 'ledgerline', labelled Askwell; report headings kept for the byte-for-byte replay check",
+   "files": [
+    "askwell/bench/run.py",
+    "askwell/bench/report.py",
+    "askwell/bench/systems.py",
+    "web/src/results.ts",
+    "scripts/check_replay_report.py",
+    "scripts/select_model.py"
+   ],
+   "docs": [
+    {
+     "path": "README.md",
+     "claims": [
+      {
+       "claim": "Askwell's system id in --systems and reports is ledgerline",
+       "at": "askwell/bench/run.py:43"
+      },
+      {
+       "claim": "The Results page labels the ledgerline system Askwell",
+       "at": "web/src/results.ts:115"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "behavior": "Invite cookie name kept as ledgerline_invite",
+   "files": [
+    "askwell/invite.py"
+   ],
+   "none": "Deliberate leftover, recorded in builds/askwell-rename/log.md; nothing user-facing changed."
+  },
+  {
+   "behavior": "Import paths and names in the rest of the package, eval config and helper scripts follow the rename",
+   "files": [
+    "askwell/api.py",
+    "askwell/bench/__init__.py",
+    "askwell/bench/compare.py",
+    "askwell/bench/items.py",
+    "askwell/bench/metrics.py",
+    "askwell/bench/privacy.py",
+    "askwell/bench/report_schema.py",
+    "askwell/bench/results.py",
+    "askwell/bench/spider.py",
+    "askwell/core/__init__.py",
+    "askwell/core/audit.py",
+    "askwell/core/dates.py",
+    "askwell/core/executor.py",
+    "askwell/core/intent.py",
+    "askwell/core/registry.py",
+    "askwell/core/registry_init.py",
+    "askwell/core/sqlbuild.py",
+    "askwell/core/validate.py",
+    "askwell/fieldservice/__init__.py",
+    "askwell/fieldservice/schema.py",
+    "askwell/fieldservice/seed.py",
+    "askwell/gold.py",
+    "askwell/llm/__init__.py",
+    "askwell/llm/anthropic_transport.py",
+    "askwell/llm/budget.py",
+    "askwell/llm/daily.py",
+    "askwell/llm/errors.py",
+    "askwell/llm/gateway.py",
+    "askwell/llm/pricing.py",
+    "askwell/llm/providers.py",
+    "askwell/llm/replay.py",
+    "askwell/llm/simulate.py",
+    "askwell/llm/spike.py",
+    "askwell/llm/types.py",
+    "askwell/pipeline/__init__.py",
+    "askwell/pipeline/graph.py",
+    "askwell/pipeline/prompt.py",
+    "askwell/pipeline/service.py",
+    "askwell/workspace/__init__.py",
+    "askwell/workspace/api.py",
+    "askwell/workspace/ask.py",
+    "askwell/workspace/check.py",
+    "askwell/workspace/fields.py",
+    "askwell/workspace/limits.py",
+    "askwell/workspace/load.py",
+    "askwell/workspace/rules.py",
+    "askwell/workspace/store.py",
+    "config/schemas.yaml",
+    "evals/floors.yaml",
+    "evals/replay_cases.py",
+    "evals/report.schema.json",
+    "evals/triage/fieldservice.yaml",
+    "evals/triage/spider_car_1.yaml",
+    "evals/triage/spider_dog_kennels.yaml",
+    "evals/triage/spider_flight_2.yaml",
+    "evals/triage/spider_network_1.yaml",
+    "evals/triage/spider_wta_1.yaml",
+    "scripts/check_coverage.py",
+    "scripts/fetch_benchmarks.py",
+    "scripts/spider_forbidden_values.py"
+   ],
+   "none": "Mechanical rename (git mv and imports); no behavior changed."
+  },
+  {
+   "behavior": "Old package paths removed by the rename (moved to askwell/)",
+   "files": [
+    "ledgerline/__init__.py",
+    "ledgerline/api.py",
+    "ledgerline/bench/__init__.py",
+    "ledgerline/bench/compare.py",
+    "ledgerline/bench/items.py",
+    "ledgerline/bench/metrics.py",
+    "ledgerline/bench/privacy.py",
+    "ledgerline/bench/report.py",
+    "ledgerline/bench/report_schema.py",
+    "ledgerline/bench/results.py",
+    "ledgerline/bench/run.py",
+    "ledgerline/bench/spider.py",
+    "ledgerline/bench/systems.py",
+    "ledgerline/cli.py",
+    "ledgerline/config.py",
+    "ledgerline/core/__init__.py",
+    "ledgerline/core/audit.py",
+    "ledgerline/core/dates.py",
+    "ledgerline/core/executor.py",
+    "ledgerline/core/intent.py",
+    "ledgerline/core/registry.py",
+    "ledgerline/core/registry_init.py",
+    "ledgerline/core/sqlbuild.py",
+    "ledgerline/core/validate.py",
+    "ledgerline/fieldservice/__init__.py",
+    "ledgerline/fieldservice/schema.py",
+    "ledgerline/fieldservice/seed.py",
+    "ledgerline/gold.py",
+    "ledgerline/invite.py",
+    "ledgerline/llm/__init__.py",
+    "ledgerline/llm/anthropic_transport.py",
+    "ledgerline/llm/budget.py",
+    "ledgerline/llm/daily.py",
+    "ledgerline/llm/errors.py",
+    "ledgerline/llm/gateway.py",
+    "ledgerline/llm/pricing.py",
+    "ledgerline/llm/providers.py",
+    "ledgerline/llm/replay.py",
+    "ledgerline/llm/simulate.py",
+    "ledgerline/llm/spike.py",
+    "ledgerline/llm/types.py",
+    "ledgerline/pipeline/__init__.py",
+    "ledgerline/pipeline/graph.py",
+    "ledgerline/pipeline/prompt.py",
+    "ledgerline/pipeline/service.py",
+    "ledgerline/workspace/__init__.py",
+    "ledgerline/workspace/api.py",
+    "ledgerline/workspace/ask.py",
+    "ledgerline/workspace/check.py",
+    "ledgerline/workspace/fields.py",
+    "ledgerline/workspace/limits.py",
+    "ledgerline/workspace/load.py",
+    "ledgerline/workspace/rules.py",
+    "ledgerline/workspace/store.py"
+   ],
+   "none": "Pure moves; each file's new home is covered by the askwell/ rows."
+  }
+ ]
+}

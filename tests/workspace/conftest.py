@@ -8,11 +8,11 @@ from urllib.parse import quote
 import pytest
 from fastapi.testclient import TestClient
 
-from ledgerline.api import create_app
-from ledgerline.workspace.api import FILE_HEADER, HEADER, WorkspaceApp
-from ledgerline.workspace.check import CheckResult, UploadedFile, check_files
-from ledgerline.workspace.limits import Limits
-from ledgerline.workspace.store import WorkspaceStore
+from askwell.api import create_app
+from askwell.workspace.api import FILE_HEADER, HEADER, WorkspaceApp
+from askwell.workspace.check import CheckResult, UploadedFile, check_files
+from askwell.workspace.limits import Limits
+from askwell.workspace.store import WorkspaceStore
 
 ROOT = Path(__file__).resolve().parents[2]
 SAMPLE = ROOT / "web" / "public" / "sample"

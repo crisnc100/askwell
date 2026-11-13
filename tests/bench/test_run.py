@@ -10,11 +10,11 @@ from pathlib import Path
 import pytest
 from sqlalchemy import Engine
 
-from ledgerline.bench import report as report_module
-from ledgerline.bench import run as run_module
-from ledgerline.config import get_settings
-from ledgerline.llm.replay import ReplayStore
-from ledgerline.llm.simulate import answer_path, import_answers, pending_requests
+from askwell.bench import report as report_module
+from askwell.bench import run as run_module
+from askwell.config import get_settings
+from askwell.llm.replay import ReplayStore
+from askwell.llm.simulate import answer_path, import_answers, pending_requests
 
 
 @pytest.fixture
@@ -39,10 +39,10 @@ def _run(mode: str):
     )
 
 
-def _answer_all(pending: Path, ledgerline: dict[str, object], oneshot: dict[str, object]) -> None:
+def _answer_all(pending: Path, askwell: dict[str, object], oneshot: dict[str, object]) -> None:
     for request_file in pending_requests(pending):
         request = json.loads(request_file.read_text())
-        body = ledgerline if request["response_schema_name"] == "Intent" else oneshot
+        body = askwell if request["response_schema_name"] == "Intent" else oneshot
         answer_path(pending, request["key"]).write_text(
             json.dumps({"key": request["key"], "simulated_by": "fixture", "response": body})
         )
@@ -57,7 +57,7 @@ def test_export_import_replay_score_report(isolated: Path, pg_seeded: Engine) ->
         "fieldservice/oneshot": 67,
     }
 
-    # Every question answered the same way: ledgerline refuses, oneshot counts invoices.
+    # Every question answered the same way: askwell refuses, oneshot counts invoices.
     _answer_all(
         isolated / "pending" / "fieldservice" / "ledgerline",
         {"intent_type": "unanswerable", "unanswerable_reason": "fixture"},
@@ -155,7 +155,7 @@ def test_changing_the_prompt_or_registry_never_resumes_old_results(
 ) -> None:
     """A checkpoint record is only reused for the same prompt version and registry; any
     change makes those tasks run again (here: exported again)."""
-    from ledgerline.pipeline import service as service_module
+    from askwell.pipeline import service as service_module
 
     _run("export")
     _answer_all(

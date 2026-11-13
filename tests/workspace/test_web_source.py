@@ -9,9 +9,9 @@ from pathlib import Path
 
 from fastapi.testclient import TestClient
 
-from ledgerline.api import create_app
-from ledgerline.workspace.api import WorkspaceApp
-from ledgerline.workspace.store import WorkspaceStore
+from askwell.api import create_app
+from askwell.workspace.api import WorkspaceApp
+from askwell.workspace.store import WorkspaceStore
 from tests.workspace.conftest import _NoService
 
 WEB = Path(__file__).resolve().parents[2] / "web"

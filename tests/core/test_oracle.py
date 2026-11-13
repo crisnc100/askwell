@@ -8,11 +8,11 @@ from typing import Any
 import pytest
 from sqlalchemy import Engine, text
 
-from ledgerline.core.executor import run
-from ledgerline.core.intent import Intent
-from ledgerline.core.registry import Registry
-from ledgerline.core.sqlbuild import build
-from ledgerline.core.validate import validate
+from askwell.core.executor import run
+from askwell.core.intent import Intent
+from askwell.core.registry import Registry
+from askwell.core.sqlbuild import build
+from askwell.core.validate import validate
 from tests.core.conftest import NOW
 from tests.core.oracle_cases import CASES
 from tests.core.rows import normalise, same_rows

@@ -13,11 +13,11 @@ import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import Engine, create_engine, select, text
 
+from askwell.api import create_app
+from askwell.config import get_settings
+from askwell.core.audit import AuditLog, ask_log
+from askwell.pipeline.service import AskService, build_gateway
 from evals.replay_cases import SPIDER_QUESTION, cases
-from ledgerline.api import create_app
-from ledgerline.config import get_settings
-from ledgerline.core.audit import AuditLog, ask_log
-from ledgerline.pipeline.service import AskService, build_gateway
 
 EXAMPLES = {
     "unpaid": "How many invoices are still unpaid?",
@@ -128,7 +128,7 @@ def test_cli_ask_replays_an_example(pg_seeded: Engine) -> None:
 
     from typer.testing import CliRunner
 
-    from ledgerline.cli import app
+    from askwell.cli import app
 
     runner = CliRunner()
     result = runner.invoke(app, ["ask", EXAMPLES["unpaid"], "--mode", "replay"])

@@ -1,5 +1,5 @@
 # The hosted beta's image: the API, the built pages, and the fieldservice demo on SQLite.
-# Build: docker build -t ledgerline .   Run: docker compose -f compose.prod.yaml up -d
+# Build: docker build -t askwell .   Run: docker compose -f compose.prod.yaml up -d
 
 FROM node:22.21.1-bookworm-slim@sha256:25b3eb23a00590b7499f2a2ce939322727fcce1b15fdd69754fcd09536a3ae2c AS web
 WORKDIR /web
@@ -19,7 +19,7 @@ WORKDIR /app
 # Dependencies first, so a code change does not reinstall them.
 COPY pyproject.toml uv.lock README.md LICENSE ./
 RUN uv sync --locked --no-dev --no-install-project
-COPY ledgerline/ ledgerline/
+COPY askwell/ askwell/
 COPY config/ config/
 COPY registries/ registries/
 COPY evals/ evals/
@@ -28,23 +28,26 @@ RUN uv sync --locked --no-dev
 
 # The demo database is built once here and only ever opened read-only.
 RUN mkdir -p demo \
-    && ledgerline seed --db-url sqlite:////app/demo/fieldservice.sqlite \
+    && askwell seed --db-url sqlite:////app/demo/fieldservice.sqlite \
     && chmod 0444 demo/fieldservice.sqlite
 
 # Everything the app writes (workspaces, the audit log, today's spend) lives in /data.
-RUN useradd --system --uid 10001 --home-dir /nonexistent ledgerline \
-    && mkdir /data && chown ledgerline /data && chmod 0700 /data
-USER ledgerline
+RUN useradd --system --uid 10001 --home-dir /nonexistent askwell \
+    && mkdir /data && chown askwell /data && chmod 0700 /data
+# The image's settings go in /app/.env, not ENV: the environment (.env.beta) beats
+# .env, so a deployed .env.beta still using LEDGERLINE_ names overrides them.
+RUN printf '%s\n' \
+    ASKWELL_ENV=beta \
+    ASKWELL_LLM_MODE=live \
+    ASKWELL_DATABASE_RO_URL=sqlite:////app/demo/fieldservice.sqlite \
+    ASKWELL_APP_DATABASE_URL=sqlite:////data/app.sqlite \
+    ASKWELL_WORKSPACE_DIR=/data/workspaces \
+    ASKWELL_SPEND_DB=/data/spend.sqlite \
+    > /app/.env && chmod 0444 /app/.env
+USER askwell
 VOLUME ["/data"]
-
-ENV LEDGERLINE_ENV=beta \
-    LEDGERLINE_LLM_MODE=live \
-    LEDGERLINE_DATABASE_RO_URL=sqlite:////app/demo/fieldservice.sqlite \
-    LEDGERLINE_APP_DATABASE_URL=sqlite:////data/app.sqlite \
-    LEDGERLINE_WORKSPACE_DIR=/data/workspaces \
-    LEDGERLINE_SPEND_DB=/data/spend.sqlite
 
 EXPOSE 8000
 # umask 077: files the app or SQLite creates are readable by this account only.
-# --no-proxy-headers: Ledgerline reads X-Forwarded-For itself (LEDGERLINE_TRUST_PROXY).
-CMD ["sh", "-c", "umask 077 && exec uvicorn ledgerline.api:create_app --factory --host 0.0.0.0 --port 8000 --no-proxy-headers"]
+# --no-proxy-headers: Askwell reads X-Forwarded-For itself (ASKWELL_TRUST_PROXY).
+CMD ["sh", "-c", "umask 077 && exec uvicorn askwell.api:create_app --factory --host 0.0.0.0 --port 8000 --no-proxy-headers"]

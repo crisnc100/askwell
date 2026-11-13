@@ -12,9 +12,9 @@ from typing import Any
 
 import pytest
 
-from ledgerline.workspace import store as store_module
-from ledgerline.workspace.limits import Limits, RateLimiter
-from ledgerline.workspace.store import STALE_TEMP_S, DiskFullError, WorkspaceStore
+from askwell.workspace import store as store_module
+from askwell.workspace.limits import Limits, RateLimiter
+from askwell.workspace.store import STALE_TEMP_S, DiskFullError, WorkspaceStore
 from tests.workspace.conftest import FakeClock
 
 

@@ -68,7 +68,7 @@ def test_if_nothing_passes_the_best_rung_ships_and_says_so() -> None:
     assert "No candidate passed" in choice.note
 
 
-def test_records_are_scored_from_the_ledgerline_system_only() -> None:
+def test_records_are_scored_from_the_askwell_system_only() -> None:
     def rec(system: str, category: str, outcome: str, parse_errors: int = 0) -> dict[str, Any]:
         return {
             "system": system,

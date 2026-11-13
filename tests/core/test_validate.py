@@ -9,9 +9,9 @@ from typing import Any, get_args
 
 import pytest
 
-from ledgerline.core.intent import Intent
-from ledgerline.core.registry import Registry
-from ledgerline.core.validate import (
+from askwell.core.intent import Intent
+from askwell.core.registry import Registry
+from askwell.core.validate import (
     ErrorCode,
     Predicate,
     PredicateGroup,
@@ -922,7 +922,7 @@ def test_default_metric_labels_step_around_group_labels() -> None:
 def test_rule_ambiguous_value() -> None:
     """Two allowed values differ only by case: an exact match wins, anything else is
     ambiguous rather than silently picking one (PR1 review f6)."""
-    from ledgerline.core.registry import EntityDef, FieldDef
+    from askwell.core.registry import EntityDef, FieldDef
 
     reg = Registry(
         schema_version=1,

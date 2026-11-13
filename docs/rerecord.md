@@ -1,6 +1,6 @@
 # Re-recording model answers
 
-Ledgerline's tests, CI and demo never call a model. They replay **recordings**: saved model
+Askwell's tests, CI and demo never call a model. They replay **recordings**: saved model
 answers, each stored under a key built from the model id, the prompt version, the exact
 messages and the response schema. This page explains when the recordings go stale and how
 to make new ones.
@@ -10,10 +10,10 @@ to make new ones.
 A recording is found only if the request is byte-for-byte the same. Re-record after any
 change that alters what the model is sent:
 
-- the prompt text or `PROMPT_VERSION` (`ledgerline/pipeline/prompt.py`, `ledgerline/bench/systems.py`)
+- the prompt text or `PROMPT_VERSION` (`askwell/pipeline/prompt.py`, `askwell/bench/systems.py`)
 - a registry (`registries/fieldservice.yaml`) or the registry view in the prompt
 - the `Intent` or `OneShotAnswer` model, because its JSON schema is part of the request
-- the target model (`LEDGERLINE_DEFAULT_MODEL`)
+- the target model (`ASKWELL_DEFAULT_MODEL`)
 - a canned example question (`config/schemas.yaml`) or a gold question
 
 You will know: replay mode stops with `ReplayMissError`, and `./verify.sh` fails the step
@@ -31,7 +31,7 @@ its first line.
 1. **Export** every request that has no recording:
 
    ```sh
-   uv run ledgerline eval --all --systems ledgerline,oneshot --mode export --trials 1 --run-id sim-1
+   uv run askwell eval --all --systems ledgerline,oneshot --mode export --trials 1 --run-id sim-1
    ```
 
    Each request lands in `evals/pending/eval/<schema>/<system>/<key>.json`. The command
@@ -51,20 +51,20 @@ its first line.
 3. **Import** the answers:
 
    ```sh
-   uv run ledgerline eval --mode import
+   uv run askwell eval --mode import
    ```
 
    An answer that breaks the response schema is rejected, kept on disk and listed, so it
    can be fixed and imported again.
 
-4. **Export again.** A Ledgerline answer that failed validation gets one retry, which is a
+4. **Export again.** An Askwell answer that failed validation gets one retry, which is a
    new request. Repeat steps 2–3 until the export reports nothing pending. There is never a
    third round: the pipeline retries once.
 
 5. **Replay** and write the report:
 
    ```sh
-   uv run ledgerline eval --all --systems ledgerline,oneshot --mode replay --trials 1 --run-id sim-1
+   uv run askwell eval --all --systems ledgerline,oneshot --mode replay --trials 1 --run-id sim-1
    ```
 
    The report lands in `evals/reports/sim-1.md` and `.json`. Delete `evals/runs/sim-1/`
@@ -74,7 +74,7 @@ its first line.
    A run never reuses a result made with a different prompt version or registry (both
    are part of each checkpoint key), so the old checkpoint would only hold results that
    no longer count.
-   Tag every Ledgerline miss in `evals/triage/<schema>.yaml`.
+   Tag every Askwell miss in `evals/triage/<schema>.yaml`.
 
 Spider recordings stay on your machine (`evals/recordings/eval/spider_*/` is gitignored),
 because answers can quote Spider data. Only the fieldservice recordings are committed.
@@ -97,7 +97,7 @@ their own store, `evals/recordings/interpret.jsonl`:
 ```sh
 uv run python -m evals.replay_cases export   # writes evals/pending/<key>.json
 # answer each request as above, then:
-uv run ledgerline replay import
+uv run askwell replay import
 uv run python -m evals.replay_cases export   # again, for any retry requests
 ```
 
@@ -109,7 +109,7 @@ https://openrouter.ai/settings/keys; it is the backstop if anything else fails. 
 recording in one step.
 
 ```sh
-uv run ledgerline eval --all --systems ledgerline,oneshot --mode record --trials 1 --budget 2 --run-id live-1
+uv run askwell eval --all --systems ledgerline,oneshot --mode record --trials 1 --budget 2 --run-id live-1
 ```
 
 `--budget` is a hard cap for the whole run, in US dollars. Before each call, the run checks

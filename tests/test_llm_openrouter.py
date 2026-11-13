@@ -9,9 +9,9 @@ import httpx
 import pytest
 from pydantic import BaseModel, SecretStr
 
-from ledgerline.config import Settings
-from ledgerline.llm.gateway import OpenRouterTransport
-from ledgerline.llm.types import ChatMessage
+from askwell.config import Settings
+from askwell.llm.gateway import OpenRouterTransport
+from askwell.llm.types import ChatMessage
 
 
 class Answer(BaseModel):

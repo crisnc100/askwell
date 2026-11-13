@@ -1,6 +1,6 @@
-# ledgerline
+# askwell
 
-Ledgerline answers plain-English questions about a database, and shows the SQL behind
+Askwell answers plain-English questions about a database, and shows the SQL behind
 every answer. It is built so that a wrong number is rare and easy to spot.
 
 A model never writes the SQL. It fills in an *intent*: a small, typed form that says which
@@ -26,7 +26,7 @@ with npm. No API key is needed.
 uv sync
 docker compose up -d                  # a demo database, filled with made-up data
 (cd web && npm ci && npm run build)   # the web pages
-uv run uvicorn ledgerline.api:create_app --factory
+uv run uvicorn askwell.api:create_app --factory
 ```
 
 Open `http://localhost:8000/` and go through the five steps with the sample shop data
@@ -45,7 +45,7 @@ linked on the first page:
 To see an answer with no key, ask the demo database one of its recorded questions:
 
 ```sh
-uv run ledgerline ask "How many invoices are still unpaid?"
+uv run askwell ask "How many invoices are still unpaid?"
 ```
 
 It prints the intent, the check, the SQL and the rows. Recorded questions are ones the
@@ -53,10 +53,10 @@ model answers; [Results](#results) has its measured accuracy.
 
 ## Results
 
-`http://localhost:8000/results/` shows the benchmark: how often Ledgerline is right,
+`http://localhost:8000/results/` shows the benchmark: how often Askwell is right,
 wrong or refuses, beside a baseline where the model writes SQL. Fieldservice, live, 3 trials:
 
-| Live, fieldservice | Ledgerline | one-shot |
+| Live, fieldservice | Askwell | one-shot |
 |---|---|---|
 | Held-out: rows match | 47.6% (40/84) | 60.7% (51/84) |
 | Held-out: wrong among answered | 25.9% (14/54) | 39.3% (33/84) |
@@ -64,7 +64,7 @@ wrong or refuses, beside a baseline where the model writes SQL. Fieldservice, li
 | Seen: wrong among answered | 1.8% (2/113) | 23.3% (30/129) |
 
 v0.2 was built from the seen questions; the held-out ones came first. Both miss the
-held-out target (80% right, 5% wrong); 12 of Ledgerline's 14 wrong answers differ
+held-out target (80% right, 5% wrong); 12 of Askwell's 14 wrong answers differ
 only by an id column or tie order. [docs/failures/](docs/failures/README.md) has more.
 
 ## Read more
@@ -86,14 +86,35 @@ The browser tests need Chromium, installed once from the repository root with
 against the seeded database.
 
 Postgres listens on `localhost:56432`. On first start it creates two roles:
-`ledgerline_owner`, which owns the data, and `ledgerline_ro`, which can only read. The
-defaults in `ledgerline/config.py` match them. To change them, copy `.env.example` to
+`askwell_owner`, which owns the data, and `askwell_ro`, which can only read. The
+defaults in `askwell/config.py` match them. To change them, copy `.env.example` to
 `.env`.
 
+Askwell was called Ledgerline before 0.2.0. For this release, the old `LEDGERLINE_`
+names still work in the environment, `.env` and `.env.beta`, and in the compose files'
+port and password variables. Within one place
+an `ASKWELL_` name beats its `LEDGERLINE_` twin, and the environment beats `.env`
+whatever the prefix. The app logs a warning naming each old name it reads. The next
+release drops the old names.
+
+A checkout from before the rename has a `.env` and a Postgres volume with the old role
+and database names (`ledgerline_owner`, `ledgerline_ro`, `ledgerline`,
+`ledgerline_app`). To move to the new ones:
+
+1. Copy `.env.example` to `.env` again, or in your `.env` rename every `LEDGERLINE_` to
+   `ASKWELL_` and every `ledgerline` in the URLs and passwords to `askwell`. Do this
+   first: the old URLs still apply through the fallback and would point at roles the
+   new volume does not have.
+2. `docker compose down -v`, then `docker compose up -d`. This recreates the volume with
+   the new roles and seeds it.
+
+Until then, the old `.env` keeps the app and `askwell` commands on the old volume, but the
+compose `seed` service and `./verify.sh` expect the new names.
+
 Model calls default to replay mode, which answers only from recorded responses. A model is
-called live only with `--mode record` or `--mode live`, with `LEDGERLINE_LLM_MODE=record`
-or `live` in the environment (it sets the mode for `ledgerline ask` and the API when no
-`--mode` is given), or by `ledgerline spike`. Each of those needs the key for the model's
+called live only with `--mode record` or `--mode live`, with `ASKWELL_LLM_MODE=record`
+or `live` in the environment (it sets the mode for `askwell ask` and the API when no
+`--mode` is given), or by `askwell spike`. Each of those needs the key for the model's
 provider: `ANTHROPIC_API_KEY` for a model named `anthropic:<id>`, `OPENROUTER_API_KEY` for
 any other (the spike always uses OpenRouter).
 
@@ -119,7 +140,7 @@ What stays private:
   so it never appears in a URL the server sees or logs. File names travel the same way.
 - **Your address.** It is not stored. A keyed hash of it counts your workspaces.
 - **Your files.** They expire after 7 days without use and are deleted the next time
-  `uv run ledgerline sweep` runs (run it from cron, for example once an hour) or the
+  `uv run askwell sweep` runs (run it from cron, for example once an hour) or the
   workspace is opened. "Delete my data" removes them at once.
 
 Limits: at most 10 files per workspace, and per file 10 MB, 200 columns, 1,000,000 rows
@@ -127,18 +148,18 @@ and 10,000 characters per value. Each address gets 3 workspaces at a time, 20 up
 30 questions an hour (questions to `/ask` count too), and at most 2 uploads running at
 once. An upload must finish within 2 minutes. The hourly counts live in the
 server process and start again when it restarts; the workspace count does not. All
-workspaces together share 2 GB of disk. Behind a proxy that sets `X-Forwarded-For`, set `LEDGERLINE_TRUST_PROXY=1` so the limits
+workspaces together share 2 GB of disk. Behind a proxy that sets `X-Forwarded-For`, set `ASKWELL_TRUST_PROXY=1` so the limits
 see the real address. Leave it off otherwise, or any client could claim any address.
 
 Answers on your own data need a live model, because no answers are recorded for your
-files. Set `ANTHROPIC_API_KEY` (for the default model) and `LEDGERLINE_LLM_MODE=live` (see
+files. Set `ANTHROPIC_API_KEY` (for the default model) and `ASKWELL_LLM_MODE=live` (see
 [.env.example](.env.example)). Without them, Ask replies "Live answers need a model key;
 see the README." Questions like "last month" use today's date in your workspace's time
 zone.
 
 ## Asking from the command line and the API
 
-`ledgerline ask` prints the whole trace as JSON: the intent, each attempt and its
+`askwell ask` prints the whole trace as JSON: the intent, each attempt and its
 validation result, the SQL with its parameters, the columns and rows, or a refusal with its
 reason.
 `--schema` picks a schema from `config/schemas.yaml` (default `fieldservice`).
@@ -146,7 +167,7 @@ reason.
 The same pipeline is an HTTP API:
 
 ```sh
-uv run uvicorn ledgerline.api:create_app --factory
+uv run uvicorn askwell.api:create_app --factory
 curl -s localhost:8000/ask -H 'content-type: application/json' \
   -d '{"schema_id": "fieldservice", "question": "How many invoices are still unpaid?"}'
 ```
@@ -165,15 +186,15 @@ explains why the graph (built with LangGraph) does no more than that.
 
 Every `ask` and `/ask` writes one row to the audit log (`ask_log`, below), whether it
 was answered, refused or failed. In live or record mode each ask also has its own
-spending limit (`LEDGERLINE_ASK_BUDGET_USD`, default $0.05). A question that would go
+spending limit (`ASKWELL_ASK_BUDGET_USD`, default $0.05). A question that would go
 over it is refused, and that refusal is audited too.
 
 ## The demo database
 
-`ledgerline seed` drops and rebuilds *fieldservice*, a synthetic field-service business:
+`askwell seed` drops and rebuilds *fieldservice*, a synthetic field-service business:
 customers, sites, technicians, parts, work orders, invoices and back-office users. The
 same seed and reference time give the same rows every time. The reference time is
-`LEDGERLINE_NOW` (default 2026-06-30 00:00 UTC). The command prints a SHA-256 of the
+`ASKWELL_NOW` (default 2026-06-30 00:00 UTC). The command prints a SHA-256 of the
 content, so you can check that two databases match.
 
 The read-only role cannot read `users.email` or `users.password_hash` at all. The
@@ -200,8 +221,8 @@ database.
 To draft a registry for another database:
 
 ```sh
-uv run ledgerline registry init <database-url> -o my.yaml [--values]
-uv run ledgerline registry check my.yaml
+uv run askwell registry init <database-url> -o my.yaml [--values]
+uv run askwell registry check my.yaml
 ```
 
 `registry init` opens the database read-only and reads its tables, views, columns and
@@ -216,14 +237,14 @@ database gives the same file. It warns when the connecting role could write.
 
 ## Intents, validation and SQL
 
-An intent (`ledgerline/core/intent.py`) has an `intent_type` (`summary`,
+An intent (`askwell/core/intent.py`) has an `intent_type` (`summary`,
 `grouped_summary`, `row_list`, `date_series`, or `unanswerable` with a reason), a base
 `entity`, and optional `select`, `metrics`, `filters`, `having`, `group_by`, `date_range`,
 `order_by` and `limit`. A field is named `entity.field`, or just `field` on the base entity.
 Filters can be grouped one level deep (`any_of`, `all_of`) and can compare two columns.
 A group-by on a date can take a calendar grain (`day`, `iso_week`, `month`, `quarter`,
 `year`). A date range is either a start and end, or a token such as `last_quarter`;
-code turns the token into dates using `LEDGERLINE_NOW`, never the model.
+code turns the token into dates using `ASKWELL_NOW`, never the model.
 
 A metric can carry its own `where` conditions; it is then counted or summed only over
 the rows that match. The `ratio` aggregate divides one other metric of the intent by
@@ -233,7 +254,7 @@ row per period, one column per series. Each series is a metric counted or summed
 own date field, with its own `where`, and a `date_range` applies to each series by that
 field. [ADR-007](docs/adr/ADR-007-grammar-v02.md) explains why.
 
-The validator (`ledgerline/core/validate.py`) checks an intent against the registry. It
+The validator (`askwell/core/validate.py`) checks an intent against the registry. It
 never raises for a bad intent; it returns typed errors such as `unknown_field`,
 `hidden_field`, `ambiguous_path` (two equally short join paths: refused, not guessed),
 `fan_out` (an aggregate across a one-to-many join, which would double count; see
@@ -241,14 +262,14 @@ never raises for a bad intent; it returns typed errors such as `unknown_field`,
 (a reason such as "none" in `unanswerable_reason`). `ErrorCode` in that file lists them
 all.
 
-The SQL builder (`ledgerline/core/sqlbuild.py`) writes SQLAlchemy Core. Table and column
+The SQL builder (`askwell/core/sqlbuild.py`) writes SQLAlchemy Core. Table and column
 names come only from the registry, and every value is a bound parameter. Joins follow
 many-to-one relationships only, at most 3 hops from the base entity. A join used only
 inside an `any_of` group is a LEFT JOIN, so it does not drop rows that match another
 branch. Every sort puts NULLs last, so Postgres and SQLite return the same order.
 Postgres and SQLite are supported.
 
-The executor (`ledgerline/core/executor.py`) runs the query in a read-only transaction
+The executor (`askwell/core/executor.py`) runs the query in a read-only transaction
 with a timeout (5 seconds by default) and a row cap (1000 by default); the result says
 when rows were cut off. SQLite files are opened read-only. Given an audit log, it writes
 one row to `ask_log` for every query it runs, including one that could not connect. The
@@ -271,7 +292,7 @@ Try it with an intent file, for example `revenue.json`:
 ```
 
 ```sh
-uv run ledgerline compile --registry registries/fieldservice.yaml --intent revenue.json
+uv run askwell compile --registry registries/fieldservice.yaml --intent revenue.json
 ```
 
 It prints the Postgres SQL with placeholders, then the parameter values. Base the same
@@ -280,7 +301,7 @@ instead, because a work order can have more than one invoice.
 
 ## Model gateway
 
-`ledgerline/llm/` makes one call to a model and parses its answer into the requested
+`askwell/llm/` makes one call to a model and parses its answer into the requested
 form. The model's configured name picks the provider: `anthropic:<model id>` (for example
 `anthropic:claude-haiku-5-5`) calls the Anthropic API directly with the official SDK;
 any other name is an OpenRouter model, called through LangChain with structured output.
@@ -294,23 +315,23 @@ budget, and stops when it would go over. A long eval run saves each finished ite
 stopped run can resume and its spend still counts.
 [ADR-005](docs/adr/ADR-005-replay-and-budget.md) has the details.
 
-An answer cut off at the token limit (`LEDGERLINE_MAX_TOKENS`), blocked by a content
+An answer cut off at the token limit (`ASKWELL_MAX_TOKENS`), blocked by a content
 filter or refused by the model is still paid for, so it is charged and counted as
 unreadable, like any answer that does not parse.
 
-The default and second models (`LEDGERLINE_DEFAULT_MODEL`, `LEDGERLINE_SECOND_MODEL`) were
+The default and second models (`ASKWELL_DEFAULT_MODEL`, `ASKWELL_SECOND_MODEL`) were
 measured on the fieldservice benchmark against three gates (few unreadable answers,
 near-perfect refusals, a median answer within 3 seconds). The default, Claude Haiku 5.5,
 was Cristian's choice and passed them; the second is the best eligible model from
 another vendor. [ADR-004](docs/adr/ADR-004-model-choice.md) has the rule and the numbers.
-`ledgerline spike` is the earlier, smaller check of structured output; its report is in
+`askwell spike` is the earlier, smaller check of structured output; its report is in
 `evals/spike/`.
 
 ## Simulated answers
 
 Without a key, a stand-in model makes the recordings. Export mode writes every request
 that has no recording to `evals/pending/`. The stand-in (here a Claude model) answers
-each one as the target model would. `ledgerline replay import` (or `ledgerline eval --mode
+each one as the target model would. `askwell replay import` (or `askwell eval --mode
 import`) checks each JSON answer strictly against the response schema and stores it as a
 recording, marked with who wrote it and which model it stands in for.
 That mark reaches every result: `ask` and `/ask` return it as `provenance`, and every
@@ -329,10 +350,11 @@ benchmark; its data is downloaded, never committed. See
 [evals/gold/README.md](evals/gold/README.md) and
 [ADR-006](docs/adr/ADR-006-benchmark-methodology.md).
 
-`ledgerline eval` scores Ledgerline against a *one-shot baseline*: the same model writes
-SQL directly from the schema, and that SQL runs read-only. The baseline's SQL must be a
-single SELECT, and the database driver refuses a second statement, so it cannot leave
-the read-only transaction. Spider registries come from `registry init` with no edits,
+`askwell eval` scores Askwell against a *one-shot baseline*: the same model writes
+SQL directly from the schema, and that SQL runs read-only. In `--systems` and in reports,
+Askwell's system id is `ledgerline`, its name when the committed reports were recorded.
+The baseline's SQL must be a single SELECT, and the database driver refuses a second
+statement, so it cannot leave the read-only transaction. Spider registries come from `registry init` with no edits,
 and the eval stops if one no longer matches its committed hash.
 
 `--gold <file>` scores another gold file, such as the held-out set
@@ -352,7 +374,7 @@ scoring. Every answer in it was written by claude-haiku-5-5 standing in for
 `openai/gpt-oss-120b`, so those are simulated numbers, not a measurement of that model.
 On fieldservice:
 
-| Simulated, fieldservice | Ledgerline | one-shot |
+| Simulated, fieldservice | Askwell | one-shot |
 |---|---|---|
 | Execution accuracy (rows match the gold) | 76.7% (33/43) | 69.8% (30/43) |
 | Wrong answers among answered | 13.2% (5/38) | 30.2% (13/43) |
@@ -360,22 +382,22 @@ On fieldservice:
 
 The floor for fieldservice, the minimum v0.1 set out to reach (execution accuracy at
 least 80%, wrong answers at most 5%), is **not met in v0.1**, simulated or live. The report lists every
-Ledgerline miss with a tag for its cause;
+Askwell miss with a tag for its cause;
 [ADR-001](docs/adr/ADR-001-intent-not-sql.md) explains the result against its
 prediction. `./verify.sh` replays the committed fieldservice recordings and checks that
 they reproduce `evals/reports/replay-fieldservice.md`.
 
 The Results page (`/results/`) draws every report in `evals/reports/` from its JSON file.
 `evals/report.schema.json` is the shape of that file. It is generated from
-`ledgerline/bench/report_schema.py` (`uv run python -m ledgerline.bench.report_schema
+`askwell/bench/report_schema.py` (`uv run python -m askwell.bench.report_schema
 --write`), and a test checks every committed report against it. The page links each
 schema's triage file, `evals/triage/<schema>.yaml`, which gives every miss its cause.
 
 ## Deploy the hosted beta
 
-The hosted beta is one container on one host, behind [Caddy](https://caddyserver.com),
-a web server that handles HTTPS. It answers live questions with Claude Haiku 5.5, through a
-beta-only Anthropic API key. Three controls keep it small and cheap:
+The hosted beta, <https://askwell.cristianortega.dev>, is one container on one host,
+behind [Caddy](https://caddyserver.com), a web server that handles HTTPS. It answers live
+questions with Claude Haiku 5.5, through a beta-only Anthropic API key. Three controls keep it small and cheap:
 
 - **Invite gate.** Every page and API route needs an invite code, except `/healthz`.
   A visitor enters the code once; for 30 days the browser keeps a hash of it in a cookie
@@ -383,7 +405,7 @@ beta-only Anthropic API key. Three controls keep it small and cheap:
   Only wrong codes count against an address, by any route; a right code never does.
   After ten wrong codes within an hour, that address gets no new login until the oldest
   of them is an hour old. People already signed in from it keep working, so one guesser
-  cannot lock out a whole office. The image sets `LEDGERLINE_ENV=beta`, which refuses to
+  cannot lock out a whole office. The image sets `ASKWELL_ENV=beta`, which refuses to
   start without codes.
 - **Daily cap.** All live answers together may spend at most a set amount per UTC day.
   Each model call reserves its worst-case cost before it is sent, so the cap holds even
@@ -410,20 +432,38 @@ On the host:
    | Setting | What it does |
    |---|---|
    | `ANTHROPIC_API_KEY` | The key for the default model, `anthropic:claude-haiku-5-5`. Set a spend limit on it in the Anthropic console too. |
-   | `OPENROUTER_API_KEY` | Only if `LEDGERLINE_DEFAULT_MODEL` names an OpenRouter model. Give that key a credit limit on OpenRouter too. |
-   | `LEDGERLINE_INVITE_CODES` | The invite codes, comma-separated. Make each one long and random, for example from `python -c "import secrets; print(secrets.token_urlsafe(16))"`. The app will not start without them. |
-   | `LEDGERLINE_DAILY_SPEND_CAP_USD` | The most live answers may cost per UTC day, for example `1.00`. |
-   | `LEDGERLINE_LIVE_ANSWERS_OFF` | `1` turns live answers off. Restart the app after changing it. |
+   | `OPENROUTER_API_KEY` | Only if `ASKWELL_DEFAULT_MODEL` names an OpenRouter model. Give that key a credit limit on OpenRouter too. |
+   | `ASKWELL_INVITE_CODES` | The invite codes, comma-separated. Make each one long and random, for example from `python -c "import secrets; print(secrets.token_urlsafe(16))"`. The app will not start without them. |
+   | `ASKWELL_DAILY_SPEND_CAP_USD` | The most live answers may cost per UTC day, for example `1.00`. |
+   | `ASKWELL_LIVE_ANSWERS_OFF` | `1` turns live answers off. Restart the app after changing it. |
 
-   `compose.prod.yaml` also sets `LEDGERLINE_TRUST_PROXY=1`, because Caddy is the only
+   `compose.prod.yaml` also sets `ASKWELL_TRUST_PROXY=1`, because Caddy is the only
    client and it writes `X-Forwarded-For`. The image sets the database and data paths.
-2. Start it: `docker compose -f compose.prod.yaml up -d --build`. It starts two
+2. If this host ran the beta as Ledgerline, move its data first. Compose names a
+   project after its folder unless `-p` names it, and a volume is named
+   `<project>_<volume>`, so find the real names before copying:
+   - The old project: `docker volume ls --filter name=ledgerline-data` shows
+     `<old project>_ledgerline-data` (`ledgerline` if it ran from `/opt/ledgerline`).
+   - The new project: the name of the folder you run the new app from (`askwell` for
+     `/opt/askwell`), or the `-p` name you will give `docker compose`. Run the next steps
+     from that folder, and use the same name with every later `docker compose` command.
+
+   Stop the old app (`docker compose -f compose.prod.yaml down` in its folder; `docker
+   compose ls` lists running projects), then run
+   `scripts/migrate_volume.sh <old project> <new project>`, for example
+   `scripts/migrate_volume.sh ledgerline askwell`. It copies
+   `<old project>_ledgerline-data` into `<new project>_askwell-data` once, keeping owners
+   and modes, and refuses if the old volume is still in use or the new one is not empty.
+   Skip it and the app starts on an empty `/data`: old uploads are then out of reach of
+   the hourly sweep and "Delete my data", the audit log starts empty, and the daily spend
+   cap starts again from zero.
+3. Start it: `docker compose -f compose.prod.yaml up -d --build`. It starts two
    services: `app`, on `127.0.0.1:8000` so only the host can reach it, and `sweep`,
    which deletes expired workspaces once an hour.
-3. Point Caddy at it. Caddy gets the HTTPS certificate on its own:
+4. Point Caddy at it. Caddy gets the HTTPS certificate on its own:
 
    ```
-   ledgerline.example.com {
+   askwell.cristianortega.dev {
        request_body {
            max_size 12MB
        }
@@ -434,17 +474,21 @@ On the host:
    `max_size` stops an oversized request at Caddy; the largest real request is one
    10 MB CSV.
 
-4. Check it: `curl https://ledgerline.example.com/healthz` returns
+5. Check it: `curl https://askwell.cristianortega.dev/healthz` returns
    `{"status": "ok", "mode": "live"}`. It answers 503 if the demo database cannot be read.
+6. If you moved the data in step 2, delete the old volume once step 5 passes: run the
+   `docker volume rm <old project>_ledgerline-data` command the script printed. Until
+   then it keeps a full copy of every upload, the audit log and the day's spend, out of
+   reach of the sweep and "Delete my data".
 
-To turn live answers off in a hurry, set `LEDGERLINE_LIVE_ANSWERS_OFF=1` in `.env.beta`
+To turn live answers off in a hurry, set `ASKWELL_LIVE_ANSWERS_OFF=1` in `.env.beta`
 and run `docker compose -f compose.prod.yaml up -d`. To back up or move the beta, copy
-the `ledgerline-data` volume.
+the `askwell-data` volume.
 
 ## Checks
 
 `./verify.sh` is the one gate, locally and in CI. It runs a locked `uv sync`, ruff
-(lint and format), pyright (strict on `ledgerline/core` and `ledgerline/workspace`),
+(lint and format), pyright (strict on `askwell/core` and `askwell/workspace`),
 detect-secrets against `.secrets.baseline`, pytest with branch coverage, per-module
 coverage floors (`scripts/check_coverage.py`) and the replay check above. It then type
 checks and builds the pages in `web/` and runs the browser tests (Playwright, against a

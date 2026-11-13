@@ -2,7 +2,7 @@ import { defineConfig } from "vite";
 import { resolve } from "node:path";
 
 // `npm run dev` serves the page on its own port and sends API calls to a local
-// `uvicorn ledgerline.api:create_app --factory` on port 8000.
+// `uvicorn askwell.api:create_app --factory` on port 8000.
 export default defineConfig({
   server: {
     proxy: {

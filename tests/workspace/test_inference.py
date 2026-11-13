@@ -14,9 +14,9 @@ from typing import Any
 from hypothesis import given, settings
 from hypothesis import strategies as st
 
-from ledgerline.workspace.check import UploadedFile
-from ledgerline.workspace.limits import Limits
-from ledgerline.workspace.load import load_tables
+from askwell.workspace.check import UploadedFile
+from askwell.workspace.limits import Limits
+from askwell.workspace.load import load_tables
 from tests.workspace.conftest import check, csv_file
 from tests.workspace.test_roundtrip import assert_round_trip
 

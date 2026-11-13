@@ -8,11 +8,11 @@ import json
 from collections.abc import Callable, Mapping
 from typing import Any
 
-from ledgerline.config import Settings
-from ledgerline.core.intent import Intent
-from ledgerline.llm.errors import ParseError
-from ledgerline.llm.types import ChatMessage, LLMResult, RawResponse
-from ledgerline.pipeline.service import AskService
+from askwell.config import Settings
+from askwell.core.intent import Intent
+from askwell.llm.errors import ParseError
+from askwell.llm.types import ChatMessage, LLMResult, RawResponse
+from askwell.pipeline.service import AskService
 
 UNANSWERABLE = {"intent_type": "unanswerable", "unanswerable_reason": "not in the data"}
 

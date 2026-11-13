@@ -11,7 +11,7 @@ from typing import Any
 import pytest
 from sqlalchemy import Engine, text
 
-from ledgerline.gold import GOLD_DIR, GoldItem, load_gold
+from askwell.gold import GOLD_DIR, GoldItem, load_gold
 
 GOLD = load_gold(GOLD_DIR / "fieldservice.jsonl")
 IN_SCHEMA = [item for item in GOLD if item.category == "in_schema"]

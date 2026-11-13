@@ -8,8 +8,8 @@ import pytest
 from sqlalchemy import Engine, create_engine, text
 from sqlalchemy.exc import DBAPIError
 
-from ledgerline.config import get_settings
-from ledgerline.fieldservice.seed import Dataset, content_hash, generate, load
+from askwell.config import get_settings
+from askwell.fieldservice.seed import Dataset, content_hash, generate, load
 
 
 def _now() -> datetime:

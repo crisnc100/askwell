@@ -16,7 +16,7 @@ def test_rerecord_guide_covers_the_whole_loop() -> None:
         "--mode replay",
         "scripts.check_replay_report --write",
         "evals.replay_cases export",
-        "ledgerline replay import",
+        "askwell replay import",
     ):
         assert command in text, command
 
@@ -56,7 +56,7 @@ def test_each_failure_names_the_question_what_happened_why_category_and_fix() ->
         assert page.name in index, page.name
         for part in (
             "**Question.**",
-            "**What Ledgerline did.**",
+            "**What Askwell did.**",
             "**Category.**",
             "**What would fix it.**",
         ):

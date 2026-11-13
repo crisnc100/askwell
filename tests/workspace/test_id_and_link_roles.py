@@ -12,7 +12,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from ledgerline.workspace.check import CheckResult, UploadedFile
+from askwell.workspace.check import CheckResult, UploadedFile
 from tests.workspace.conftest import check, csv_file
 
 MAIN_TS = Path(__file__).resolve().parents[2] / "web" / "src" / "main.ts"

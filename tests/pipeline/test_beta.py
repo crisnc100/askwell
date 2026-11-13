@@ -13,19 +13,19 @@ from fastapi.testclient import TestClient
 from pydantic import BaseModel, SecretStr
 from sqlalchemy import Engine
 
-from ledgerline import invite
-from ledgerline.api import create_app
-from ledgerline.config import Settings
-from ledgerline.core.audit import AuditLog
-from ledgerline.llm.budget import BudgetGuard
-from ledgerline.llm.daily import CAP_REACHED, DailyCapReachedError, DailySpend
-from ledgerline.llm.errors import LIVE_ANSWERS_OFF, LiveAnswersOffError, ParseError
-from ledgerline.llm.gateway import Gateway
-from ledgerline.llm.pricing import ModelPrice
-from ledgerline.llm.replay import ReplayStore
-from ledgerline.llm.types import ChatMessage, RawResponse
-from ledgerline.pipeline import service as service_module
-from ledgerline.pipeline.service import AskService, SchemaConfig, build_gateway
+from askwell import invite
+from askwell.api import create_app
+from askwell.config import Settings
+from askwell.core.audit import AuditLog
+from askwell.llm.budget import BudgetGuard
+from askwell.llm.daily import CAP_REACHED, DailyCapReachedError, DailySpend
+from askwell.llm.errors import LIVE_ANSWERS_OFF, LiveAnswersOffError, ParseError
+from askwell.llm.gateway import Gateway
+from askwell.llm.pricing import ModelPrice
+from askwell.llm.replay import ReplayStore
+from askwell.llm.types import ChatMessage, RawResponse
+from askwell.pipeline import service as service_module
+from askwell.pipeline.service import AskService, SchemaConfig, build_gateway
 
 CODES = [b"alpha-123", b"beta-456"]
 
@@ -321,9 +321,9 @@ def test_settings_turn_on_the_cap_and_the_kill_switch(
     monkeypatch.setattr(
         service_module.PriceBook, "fetch", lambda *_a, **_k: service_module.PriceBook({})
     )
-    monkeypatch.setenv("LEDGERLINE_LIVE_ANSWERS_OFF", "1")
-    monkeypatch.setenv("LEDGERLINE_DAILY_SPEND_CAP_USD", "2.5")
-    monkeypatch.setenv("LEDGERLINE_SPEND_DB", str(tmp_path / "spend.sqlite"))
+    monkeypatch.setenv("ASKWELL_LIVE_ANSWERS_OFF", "1")
+    monkeypatch.setenv("ASKWELL_DAILY_SPEND_CAP_USD", "2.5")
+    monkeypatch.setenv("ASKWELL_SPEND_DB", str(tmp_path / "spend.sqlite"))
     settings = Settings(OPENROUTER_API_KEY=SecretStr("sk-test"))  # type: ignore[call-arg]
     gateway = build_gateway(settings, "live")
     assert gateway.live_answers_off is True

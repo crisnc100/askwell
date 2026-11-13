@@ -15,13 +15,13 @@ import httpx
 import pytest
 from pydantic import BaseModel, SecretStr
 
-from ledgerline.config import Settings
-from ledgerline.llm.budget import BudgetGuard, Checkpoint, ItemResult, run_checkpointed
-from ledgerline.llm.errors import ParseError
-from ledgerline.llm.gateway import Gateway, OpenRouterTransport, parse_output
-from ledgerline.llm.pricing import ModelPrice
-from ledgerline.llm.replay import ReplayStore
-from ledgerline.llm.types import ChatMessage, RawResponse
+from askwell.config import Settings
+from askwell.llm.budget import BudgetGuard, Checkpoint, ItemResult, run_checkpointed
+from askwell.llm.errors import ParseError
+from askwell.llm.gateway import Gateway, OpenRouterTransport, parse_output
+from askwell.llm.pricing import ModelPrice
+from askwell.llm.replay import ReplayStore
+from askwell.llm.types import ChatMessage, RawResponse
 
 MODEL = "test/model-a"
 MESSAGES = [ChatMessage(role="user", content="label it")]

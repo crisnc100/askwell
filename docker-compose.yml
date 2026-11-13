@@ -1,28 +1,29 @@
 # Local development stack. `docker compose up -d db` starts Postgres;
-# `docker compose up -d` also runs `seed`, which is `uv run ledgerline seed` in a container
+# `docker compose up -d` also runs `seed`, which is `uv run askwell seed` in a container
 # (the same command you can run on the host).
 # Credentials here are local-dev defaults; override them in .env.
+# Each ${LEDGERLINE_*} fallback keeps a pre-0.2.0 .env working for one release.
 services:
   db:
     image: postgres:16
     environment:
-      POSTGRES_DB: ledgerline
-      POSTGRES_USER: ledgerline_owner
-      POSTGRES_PASSWORD: ${LEDGERLINE_OWNER_PASSWORD:-ledgerline}
-      LEDGERLINE_RO_PASSWORD: ${LEDGERLINE_RO_PASSWORD:-ledgerline_ro}
+      POSTGRES_DB: askwell
+      POSTGRES_USER: askwell_owner
+      POSTGRES_PASSWORD: ${ASKWELL_OWNER_PASSWORD:-${LEDGERLINE_OWNER_PASSWORD:-askwell}}
+      ASKWELL_RO_PASSWORD: ${ASKWELL_RO_PASSWORD:-${LEDGERLINE_RO_PASSWORD:-askwell_ro}}
     ports:
-      - "127.0.0.1:${LEDGERLINE_DB_PORT:-56432}:5432"
+      - "127.0.0.1:${ASKWELL_DB_PORT:-${LEDGERLINE_DB_PORT:-56432}}:5432"
     volumes:
       - ./infra/postgres/init:/docker-entrypoint-initdb.d:ro
-      - ./infra/postgres/roles.sql:/ledgerline/roles.sql:ro
+      - ./infra/postgres/roles.sql:/askwell/roles.sql:ro
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ledgerline_owner -d ledgerline"]
+      test: ["CMD-SHELL", "pg_isready -U askwell_owner -d askwell"]
       interval: 2s
       timeout: 5s
       retries: 30
 
-  # The one seed path: the same `ledgerline seed` command, run in a container.
+  # The one seed path: the same `askwell seed` command, run in a container.
   seed:
     image: ghcr.io/astral-sh/uv:0.9.11-python3.12-bookworm-slim
     depends_on:
@@ -32,11 +33,11 @@ services:
     environment:
       UV_PROJECT_ENVIRONMENT: /venv
       UV_LINK_MODE: copy
-      LEDGERLINE_DATABASE_URL: postgresql+psycopg://ledgerline_owner:${LEDGERLINE_OWNER_PASSWORD:-ledgerline}@db:5432/ledgerline
+      ASKWELL_DATABASE_URL: postgresql+psycopg://askwell_owner:${ASKWELL_OWNER_PASSWORD:-${LEDGERLINE_OWNER_PASSWORD:-askwell}}@db:5432/askwell
     volumes:
       - .:/app:ro
       - uvcache:/root/.cache/uv
-    command: ["uv", "run", "--locked", "--no-dev", "ledgerline", "seed"]
+    command: ["uv", "run", "--locked", "--no-dev", "askwell", "seed"]
 
 volumes:
   pgdata:

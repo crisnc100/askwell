@@ -8,12 +8,12 @@ from typing import Any
 import pytest
 from sqlalchemy import Engine, create_engine
 
-from ledgerline.config import Settings, get_settings
-from ledgerline.core.audit import AuditLog
-from ledgerline.core.intent import Intent
-from ledgerline.llm.errors import ParseError
-from ledgerline.llm.types import ChatMessage, LLMResult, RawResponse
-from ledgerline.pipeline.service import AskService, SchemaConfig
+from askwell.config import Settings, get_settings
+from askwell.core.audit import AuditLog
+from askwell.core.intent import Intent
+from askwell.llm.errors import ParseError
+from askwell.llm.types import ChatMessage, LLMResult, RawResponse
+from askwell.pipeline.service import AskService, SchemaConfig
 from tests.core.conftest import FIELDSERVICE_REGISTRY
 
 

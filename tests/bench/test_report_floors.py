@@ -5,7 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
-from ledgerline.bench.report import floor_checks
+from askwell.bench.report import floor_checks
 
 
 def _row(acc: tuple[int, int], wrong: tuple[int, int]) -> dict[str, object]:
@@ -43,7 +43,7 @@ def test_floors_met_and_not_met(tmp_path: Path) -> None:
     assert [c["rule"] for c in passing["checks"]] == [">= 80%", "<= 5%"]
 
 
-def test_no_floors_file_or_no_ledgerline_row(tmp_path: Path) -> None:
+def test_no_floors_file_or_no_askwell_row(tmp_path: Path) -> None:
     assert floor_checks([_row((1, 1), (0, 1))], tmp_path / "missing.yaml") == []
     path = tmp_path / "floors.yaml"
     path.write_text(FLOORS)
@@ -51,7 +51,7 @@ def test_no_floors_file_or_no_ledgerline_row(tmp_path: Path) -> None:
 
 
 def test_floor_heading_is_plain_words_in_code_and_in_every_committed_report() -> None:
-    from ledgerline.bench import report as report_module
+    from askwell.bench import report as report_module
 
     data: dict[str, Any] = {
         "simulation": None,
@@ -124,7 +124,7 @@ def test_an_entry_with_no_gold_file_checks_only_the_default_gold(tmp_path: Path)
 
 
 def test_a_held_out_floor_names_its_gold_file_in_the_heading(tmp_path: Path) -> None:
-    from ledgerline.bench import report as report_module
+    from askwell.bench import report as report_module
 
     path = tmp_path / "floors.yaml"
     path.write_text(HELD_OUT)

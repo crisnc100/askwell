@@ -2,7 +2,7 @@
   "$defs": {
     "BaselineWin": {
       "additionalProperties": false,
-      "description": "An item a baseline got right and Ledgerline did not.",
+      "description": "An item a baseline got right and Askwell did not.",
       "properties": {
         "gold": {
           "anyOf": [
@@ -50,7 +50,7 @@
     },
     "Floor": {
       "additionalProperties": false,
-      "description": "One schema's acceptance floor from `evals/floors.yaml`, checked on Ledgerline.",
+      "description": "One schema's acceptance floor from `evals/floors.yaml`, checked on Askwell.",
       "properties": {
         "cause": {
           "anyOf": [
@@ -166,7 +166,7 @@
     },
     "Miss": {
       "additionalProperties": false,
-      "description": "A Ledgerline item that was not answered correctly, with its triage tag.",
+      "description": "An Askwell item that was not answered correctly, with its triage tag.",
       "properties": {
         "error": {
           "anyOf": [

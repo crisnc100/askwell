@@ -1,0 +1,1 @@
+{"f1":{"status":"fixed","response":"real"},"x1":{"status":"rejected","response":"wrong","reason":"ASKWELL_ already beats LEDGERLINE_ within one source for aliased fields; only env-over-.env applies, which is intended.","evidence":"tests/test_legacy_env.py (0ddeebf); REFUTED dispute on fix-1794534787307-b04392 x1"}}

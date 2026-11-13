@@ -7,7 +7,7 @@ were completed?"
 were opened. "Completed" counts them by the month they were completed. January: 240 opened,
 230 completed.
 
-**What Ledgerline did.** The model grouped work orders by the month they were opened, and
+**What Askwell did.** The model grouped work orders by the month they were opened, and
 counted both the orders and the ones that have a completion date. So "completed" became
 "orders opened this month that were later completed". January came out as 240 and 231.
 Every month's second number was off, by up to 31 (June: 182 instead of 213).

@@ -27,8 +27,8 @@ def test_all_floors_met() -> None:
 
 def test_a_module_below_its_floor_fails() -> None:
     report = _report(**dict.fromkeys(FLOORS, (100, 100)))
-    report["files"]["ledgerline/core/validate.py"]["summary"]["covered_branches"] = 94
-    assert check(report) == ["ledgerline/core/validate.py: branch coverage 94.0% < 95%"]
+    report["files"]["askwell/core/validate.py"]["summary"]["covered_branches"] = 94
+    assert check(report) == ["askwell/core/validate.py: branch coverage 94.0% < 95%"]
 
 
 def test_a_missing_module_fails() -> None:

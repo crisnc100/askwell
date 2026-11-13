@@ -8,14 +8,14 @@ from pathlib import Path
 import pytest
 from sqlalchemy import Engine, create_engine, text
 
-from ledgerline.config import get_settings
-from ledgerline.core.audit import AuditLog, ask_log
-from ledgerline.core.executor import ExecutionError, Executor, readonly_engine, run
-from ledgerline.core.intent import Intent
-from ledgerline.core.registry import Registry
-from ledgerline.core.registry_init import init_registry
-from ledgerline.core.sqlbuild import build
-from ledgerline.core.validate import validate
+from askwell.config import get_settings
+from askwell.core.audit import AuditLog, ask_log
+from askwell.core.executor import ExecutionError, Executor, readonly_engine, run
+from askwell.core.intent import Intent
+from askwell.core.registry import Registry
+from askwell.core.registry_init import init_registry
+from askwell.core.sqlbuild import build
+from askwell.core.validate import validate
 from tests.core.conftest import NOW
 
 
@@ -119,7 +119,7 @@ def test_sqlite_datetime_filters_ignore_the_stored_text_format(
 
 # --- f4: 64-bit integers are not narrowed to 32 bits on Postgres ---
 
-BIG_SCHEMA = "ledgerline_test_bigint"
+BIG_SCHEMA = "askwell_test_bigint"
 
 
 @pytest.fixture
@@ -129,8 +129,8 @@ def bigint_pg(pg_owner: Engine) -> Iterator[Engine]:
         conn.execute(text(f"CREATE SCHEMA {BIG_SCHEMA}"))
         conn.execute(text(f"CREATE TABLE {BIG_SCHEMA}.big (id bigint PRIMARY KEY, n int)"))
         conn.execute(text(f"INSERT INTO {BIG_SCHEMA}.big VALUES (7000000001, 1), (2, 2)"))
-        conn.execute(text(f"GRANT USAGE ON SCHEMA {BIG_SCHEMA} TO ledgerline_ro"))
-        conn.execute(text(f"GRANT SELECT ON {BIG_SCHEMA}.big TO ledgerline_ro"))
+        conn.execute(text(f"GRANT USAGE ON SCHEMA {BIG_SCHEMA} TO askwell_ro"))
+        conn.execute(text(f"GRANT SELECT ON {BIG_SCHEMA}.big TO askwell_ro"))
     engine = readonly_engine(get_settings().database_ro_url)
     yield engine
     engine.dispose()
@@ -139,7 +139,7 @@ def bigint_pg(pg_owner: Engine) -> Iterator[Engine]:
 
 
 def test_bigint_values_beyond_32_bits_filter_correctly(bigint_pg: Engine) -> None:
-    from ledgerline.core.registry import EntityDef, FieldDef
+    from askwell.core.registry import EntityDef, FieldDef
 
     registry = Registry(
         schema_version=1,

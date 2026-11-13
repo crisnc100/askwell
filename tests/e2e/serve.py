@@ -18,14 +18,14 @@ from typing import Any
 
 import uvicorn
 
-from ledgerline.api import create_app
-from ledgerline.config import get_settings
-from ledgerline.core.intent import Intent
-from ledgerline.core.registry import slugify
-from ledgerline.llm.types import ChatMessage, LLMResult
-from ledgerline.workspace.api import WorkspaceApp
-from ledgerline.workspace.limits import Limits
-from ledgerline.workspace.store import WorkspaceStore
+from askwell.api import create_app
+from askwell.config import get_settings
+from askwell.core.intent import Intent
+from askwell.core.registry import slugify
+from askwell.llm.types import ChatMessage, LLMResult
+from askwell.workspace.api import WorkspaceApp
+from askwell.workspace.limits import Limits
+from askwell.workspace.store import WorkspaceStore
 from tests.workspace.fake_model import FakeModel, fake_service
 
 # Kept in step with web/e2e/xss.spec.ts.
@@ -99,7 +99,7 @@ def main() -> None:
     args = parser.parse_args()
     shutil.rmtree(args.export_dir, ignore_errors=True)
     args.export_dir.mkdir(parents=True)
-    workspaces = Path(tempfile.mkdtemp(prefix="ledgerline-e2e-"))
+    workspaces = Path(tempfile.mkdtemp(prefix="askwell-e2e-"))
     service = fake_service(get_settings(), ExportingModel(args.export_dir))
     # Every browser test comes from one address. The per-address limits have their own
     # tests (test_limits.py), so they are lifted here.

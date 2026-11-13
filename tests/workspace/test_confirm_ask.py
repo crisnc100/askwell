@@ -16,14 +16,14 @@ from typing import Any
 import pytest
 from fastapi.testclient import TestClient
 
-from ledgerline.api import create_app
-from ledgerline.config import Settings, get_settings
-from ledgerline.llm.simulate import PendingRequestError
-from ledgerline.pipeline.service import build_gateway
-from ledgerline.workspace.api import HEADER, WorkspaceApp
-from ledgerline.workspace.ask import NEEDS_KEY, explain, workspace_target
-from ledgerline.workspace.limits import Limits
-from ledgerline.workspace.store import DEFAULT_TIME_ZONE, WorkspaceStore
+from askwell.api import create_app
+from askwell.config import Settings, get_settings
+from askwell.llm.simulate import PendingRequestError
+from askwell.pipeline.service import build_gateway
+from askwell.workspace.api import HEADER, WorkspaceApp
+from askwell.workspace.ask import NEEDS_KEY, explain, workspace_target
+from askwell.workspace.limits import Limits
+from askwell.workspace.store import DEFAULT_TIME_ZONE, WorkspaceStore
 from tests.workspace.conftest import SAMPLE, FakeClock, upload_sample
 from tests.workspace.fake_model import FakeModel, fake_service
 
@@ -378,7 +378,7 @@ def _orders_between(start: str, end: str) -> int:
 
 
 def test_configured_schemas_keep_the_pinned_reference_time(settings: Settings) -> None:
-    from ledgerline.pipeline.service import AskService, SchemaConfig
+    from askwell.pipeline.service import AskService, SchemaConfig
     from tests.core.conftest import FIELDSERVICE_REGISTRY
 
     schemas = {

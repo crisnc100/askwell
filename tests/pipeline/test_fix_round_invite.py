@@ -13,12 +13,12 @@ import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import Engine
 
-from ledgerline import invite
-from ledgerline.api import create_app
-from ledgerline.config import Settings, get_settings
-from ledgerline.core.audit import AuditLog
-from ledgerline.llm.gateway import Gateway
-from ledgerline.pipeline.service import AskService, SchemaConfig
+from askwell import invite
+from askwell.api import create_app
+from askwell.config import Settings, get_settings
+from askwell.core.audit import AuditLog
+from askwell.llm.gateway import Gateway
+from askwell.pipeline.service import AskService, SchemaConfig
 from tests.pipeline.conftest import ScriptedGateway
 
 CODES = ["alpha-123", "招待コード-7"]
@@ -98,11 +98,11 @@ def test_the_limit_is_checked_before_the_body_is_read(client: TestClient) -> Non
 def test_a_beta_or_production_deployment_without_codes_refuses_to_start(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path, env: str
 ) -> None:
-    monkeypatch.setenv("LEDGERLINE_ENV", env)
-    monkeypatch.delenv("LEDGERLINE_INVITE_CODES", raising=False)
+    monkeypatch.setenv("ASKWELL_ENV", env)
+    monkeypatch.delenv("ASKWELL_INVITE_CODES", raising=False)
     get_settings.cache_clear()
     try:
-        with pytest.raises(RuntimeError, match="LEDGERLINE_INVITE_CODES"):
+        with pytest.raises(RuntimeError, match="ASKWELL_INVITE_CODES"):
             create_app(service=object(), web_dir=tmp_path / "none")  # type: ignore[arg-type]
     finally:
         get_settings.cache_clear()

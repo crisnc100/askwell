@@ -10,10 +10,10 @@ from pathlib import Path
 import pytest
 from fastapi.testclient import TestClient
 
-from ledgerline.api import create_app
-from ledgerline.workspace.api import FILE_HEADER, HEADER, WorkspaceApp
-from ledgerline.workspace.limits import Limits, RateLimiter
-from ledgerline.workspace.store import (
+from askwell.api import create_app
+from askwell.workspace.api import FILE_HEADER, HEADER, WorkspaceApp
+from askwell.workspace.limits import Limits, RateLimiter
+from askwell.workspace.store import (
     DiskFullError,
     FileTooLargeError,
     WorkspaceStore,
@@ -92,7 +92,7 @@ async def test_disk_cap_while_streaming(small: WorkspaceStore) -> None:
 def test_disk_cap_before_loading(small: WorkspaceStore) -> None:
     workspace = small.create("1.1.1.1")
     (workspace.uploads / "f1.csv").write_bytes(b"id\n1\n")
-    from ledgerline.workspace.store import FileEntry
+    from askwell.workspace.store import FileEntry
 
     workspace.meta.files.append(FileEntry("a.csv", "f1.csv", 5, workspace.meta.created_at))
     workspace.save()

@@ -4,7 +4,7 @@
 
 **Expected answer.** One number: about 6.42% (159 of the 2,478 work orders opened in 2025).
 
-**What Ledgerline did.** The model returned an intent that counts work orders opened last
+**What Askwell did.** The model returned an intent that counts work orders opened last
 year, grouped by status. The check passed it, because every part was valid, and the answer
 was a two-row table: cancelled 159, completed 2,319. The counts are right, but the question
 asked for a percentage, and nothing in the answer says that the person has to work it out.

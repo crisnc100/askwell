@@ -10,12 +10,12 @@ from pathlib import Path
 import pytest
 from sqlalchemy import Engine, create_engine, text
 
-from ledgerline.config import get_settings
-from ledgerline.core.executor import readonly_engine, run
-from ledgerline.core.intent import Intent
-from ledgerline.core.registry import EntityDef, FieldDef, Registry
-from ledgerline.core.sqlbuild import build
-from ledgerline.core.validate import validate
+from askwell.config import get_settings
+from askwell.core.executor import readonly_engine, run
+from askwell.core.intent import Intent
+from askwell.core.registry import EntityDef, FieldDef, Registry
+from askwell.core.sqlbuild import build
+from askwell.core.validate import validate
 from tests.core.conftest import NOW
 
 ROWS = [
@@ -25,7 +25,7 @@ ROWS = [
     (4, "2026-06-03 00:00:00", "2026-06-02"),  # a day after: greater
 ]
 EXPECTED = {"eq": [1], "neq": [2, 3, 4], "gt": [2, 4], "gte": [1, 2, 4], "lt": [3], "lte": [1, 3]}
-SCHEMA = "ledgerline_test_temporal"
+SCHEMA = "askwell_test_temporal"
 
 
 def _registry(db_schema: str | None) -> Registry:
@@ -82,8 +82,8 @@ def pg_jobs(pg_owner: Engine) -> Iterator[Engine]:
                 ),
                 {"i": i, "d": done, "u": due},
             )
-        conn.execute(text(f"GRANT USAGE ON SCHEMA {SCHEMA} TO ledgerline_ro"))
-        conn.execute(text(f"GRANT SELECT ON {SCHEMA}.jobs TO ledgerline_ro"))
+        conn.execute(text(f"GRANT USAGE ON SCHEMA {SCHEMA} TO askwell_ro"))
+        conn.execute(text(f"GRANT SELECT ON {SCHEMA}.jobs TO askwell_ro"))
     engine = readonly_engine(get_settings().database_ro_url)
     yield engine
     engine.dispose()
@@ -117,7 +117,7 @@ def test_date_vs_datetime_comparison_including_midnight(
         assert got == EXPECTED[mirror if flipped else op], (engine_name, left, op, right)
 
 
-MICRO_SCHEMA = "ledgerline_test_micro"
+MICRO_SCHEMA = "askwell_test_micro"
 MICRO_ROWS = [
     (1, "2026-06-01 00:00:00.000001", "2026-06-01"),  # one microsecond after midnight
     (2, "2026-06-01 00:00:00", "2026-06-01"),  # exactly midnight
@@ -156,8 +156,8 @@ def micro_engines(tmp_path: Path, pg_owner: Engine) -> Iterator[dict[str, tuple[
                 ),
                 {"i": i, "d": done, "u": due},
             )
-        conn.execute(text(f"GRANT USAGE ON SCHEMA {MICRO_SCHEMA} TO ledgerline_ro"))
-        conn.execute(text(f"GRANT SELECT ON {MICRO_SCHEMA}.jobs TO ledgerline_ro"))
+        conn.execute(text(f"GRANT USAGE ON SCHEMA {MICRO_SCHEMA} TO askwell_ro"))
+        conn.execute(text(f"GRANT SELECT ON {MICRO_SCHEMA}.jobs TO askwell_ro"))
     lite = readonly_engine(f"sqlite:///{path}")
     pg = readonly_engine(get_settings().database_ro_url)
     yield {"sqlite": (lite, _registry(None)), "postgresql": (pg, _registry(MICRO_SCHEMA))}

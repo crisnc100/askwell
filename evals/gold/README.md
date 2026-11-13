@@ -15,7 +15,7 @@ which rewrites the hashes, bumps the revision and adds the reason to `CHANGELOG.
 ## `fieldservice.jsonl`
 
 One JSON object per line: `id`, `category`, `difficulty`, `features`, `question`,
-`gold_sql`, `ordered`, `refusal_reason`. The schema is `ledgerline/gold.py`.
+`gold_sql`, `ordered`, `refusal_reason`. The schema is `askwell/gold.py`.
 
 - **Categories** (`builds/v01/plan.md`, Definitions): `in_schema` items have a `gold_sql` that must
   execute and return a non-empty, deterministic result; `out_of_schema` items ask for data
@@ -26,7 +26,7 @@ One JSON object per line: `id`, `category`, `difficulty`, `features`, `question`
   and these definitions only. Several are deliberately beyond any simple query grammar
   (subqueries, anti-joins, ratios, per-month series); missing them is a coverage finding,
   not a gold error.
-- **Reference time** is `LEDGERLINE_NOW = 2026-06-30T00:00:00Z`. Relative periods are
+- **Reference time** is `ASKWELL_NOW = 2026-06-30T00:00:00Z`. Relative periods are
   written into `gold_sql` as literals: last month = May 2026; last quarter = 2026-Q1;
   this year / so far = 2026-01-01 up to the reference time; last year = 2025; last
   12 months = 2025-06-30 up to the reference time; last 90 days = 2026-04-01 onward;

@@ -55,11 +55,11 @@ def test_the_adr_replay_commands_name_the_schema_and_every_model() -> None:
         "openai/gpt-oss-120b,openai/gpt-4o-mini"
     )
     assert (
-        "ledgerline eval --schema fieldservice --systems ledgerline,oneshot --mode replay "
+        "askwell eval --schema fieldservice --systems ledgerline,oneshot --mode replay "
         f"--models {four} --trials 1 --run-id select-2026-11-11"
     ) in text
     assert (
-        "ledgerline eval --schema fieldservice --systems ledgerline,oneshot --mode replay "
+        "askwell eval --schema fieldservice --systems ledgerline,oneshot --mode replay "
         "--models anthropic:claude-haiku-5-5 --trials 1 --run-id select-haiku-2026-11-11"
     ) in text
 

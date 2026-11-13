@@ -10,19 +10,19 @@ from pathlib import Path
 import pytest
 from sqlalchemy import Engine, create_engine, select, text
 
-from ledgerline.config import get_settings
-from ledgerline.core.audit import AuditEntry, AuditLog, ask_log, params_hash
-from ledgerline.core.executor import (
+from askwell.config import get_settings
+from askwell.core.audit import AuditEntry, AuditLog, ask_log, params_hash
+from askwell.core.executor import (
     ExecutionError,
     Executor,
     QueryTimeoutError,
     readonly_engine,
     run,
 )
-from ledgerline.core.intent import Intent
-from ledgerline.core.registry import Registry
-from ledgerline.core.validate import QueryPlan, validate
-from ledgerline.fieldservice.seed import content_hash
+from askwell.core.intent import Intent
+from askwell.core.registry import Registry
+from askwell.core.validate import QueryPlan, validate
+from askwell.fieldservice.seed import content_hash
 from tests.core.conftest import NOW
 
 WRITES = [
@@ -220,7 +220,7 @@ def test_audit_writes_to_the_postgres_app_db() -> None:
 
 
 def test_readonly_role_cannot_reach_the_app_db() -> None:
-    ro = get_settings().database_ro_url.rsplit("/", 1)[0] + "/ledgerline_app"
+    ro = get_settings().database_ro_url.rsplit("/", 1)[0] + "/askwell_app"
     engine = create_engine(ro)
     try:
         with pytest.raises(Exception, match="CONNECT"), engine.connect():

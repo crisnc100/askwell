@@ -1,4 +1,4 @@
-"""`ledgerline eval --gold <file>`: a second gold file for the same schema. The report
+"""`askwell eval --gold <file>`: a second gold file for the same schema. The report
 names the gold file in its header and in every row, so seen and held-out results are
 never mixed up."""
 
@@ -11,13 +11,13 @@ import pytest
 from sqlalchemy import Engine
 from typer.testing import CliRunner
 
-from ledgerline.bench import report as report_module
-from ledgerline.bench import run as run_module
-from ledgerline.bench.report_schema import Report
-from ledgerline.cli import app
-from ledgerline.config import get_settings
-from ledgerline.llm.replay import ReplayStore
-from ledgerline.llm.simulate import answer_path, import_answers, pending_requests
+from askwell.bench import report as report_module
+from askwell.bench import run as run_module
+from askwell.bench.report_schema import Report
+from askwell.cli import app
+from askwell.config import get_settings
+from askwell.llm.replay import ReplayStore
+from askwell.llm.simulate import answer_path, import_answers, pending_requests
 
 FIXTURE = Path(__file__).parent / "fixtures" / "gold-two.jsonl"
 

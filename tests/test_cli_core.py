@@ -8,7 +8,7 @@ from pathlib import Path
 from sqlalchemy import Engine
 from typer.testing import CliRunner
 
-from ledgerline.cli import app
+from askwell.cli import app
 from tests.core.conftest import FIELDSERVICE_REGISTRY
 
 runner = CliRunner()

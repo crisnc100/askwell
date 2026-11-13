@@ -8,7 +8,7 @@ import json
 import re
 from pathlib import Path
 
-from ledgerline.core.registry import Registry, load_registry
+from askwell.core.registry import Registry, load_registry
 
 ROOT = Path(__file__).resolve().parent.parent
 GOLD = ROOT / "evals" / "gold"
@@ -62,7 +62,7 @@ def test_the_checker_finds_a_planted_run() -> None:
 def test_no_gold_question_run_is_in_the_prompt_or_registries() -> None:
     questions = _questions()
     assert len(questions) >= 67  # the seen set; the held-out set joins it in Phase 4
-    targets = [(ROOT / "ledgerline" / "pipeline" / "prompt.py").read_text(encoding="utf-8")]
+    targets = [(ROOT / "askwell" / "pipeline" / "prompt.py").read_text(encoding="utf-8")]
     for path in sorted((ROOT / "registries").glob("*.yaml")):
         targets += _registry_text(load_registry(path))
     assert _leaks(targets, questions) == []

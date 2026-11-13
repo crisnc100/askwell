@@ -10,13 +10,13 @@ from pathlib import Path
 import pytest
 from sqlalchemy import Engine, create_engine, text
 
-from ledgerline.config import get_settings
-from ledgerline.core.executor import readonly_engine, run
-from ledgerline.core.intent import Intent
-from ledgerline.core.registry import EntityDef, FieldDef, Registry
-from ledgerline.core.registry_init import init_registry
-from ledgerline.core.sqlbuild import build, compile_sql
-from ledgerline.core.validate import validate
+from askwell.config import get_settings
+from askwell.core.executor import readonly_engine, run
+from askwell.core.intent import Intent
+from askwell.core.registry import EntityDef, FieldDef, Registry
+from askwell.core.registry_init import init_registry
+from askwell.core.sqlbuild import build, compile_sql
+from askwell.core.validate import validate
 from tests.core.conftest import NOW
 
 
@@ -142,7 +142,7 @@ def test_fractional_having_threshold_keeps_groups_of_two(
 
 # --- f3: declared foreign keys resolve by schema and exact name ---
 
-FK_SCHEMA_A, FK_SCHEMA_B = "ledgerline_test_fk_a", "ledgerline_test_fk_b"
+FK_SCHEMA_A, FK_SCHEMA_B = "askwell_test_fk_a", "askwell_test_fk_b"
 
 
 @pytest.fixture

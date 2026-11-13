@@ -25,7 +25,7 @@ SQL); no result rows are ever sent to OpenRouter. No node gives the model tools.
 ## Result
 Measured on the eval run `sim-1` ([evals/reports/sim-1.md](../../evals/reports/sim-1.md)). Its model answers were **simulated**: claude-haiku-5-5 answered every request as a stand-in for `openai/gpt-oss-120b`, because there is no OpenRouter key yet. A simulated run tests the pipeline and the scoring; it does not measure the target model. One trial.
 
-1. **The graph module stays under 150 lines:** wrong. `ledgerline/pipeline/graph.py` is
+1. **The graph module stays under 150 lines:** wrong. `askwell/pipeline/graph.py` is
    171 lines. About 35 of them declare the typed state the nodes pass along (each attempt's
    answer, intent, issues and where the answer came from), which the trace view and the
    audit log need. The graph still has five fixed nodes, one model call and no tools.

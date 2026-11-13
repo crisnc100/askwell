@@ -10,9 +10,9 @@ import time
 
 import pytest
 
-from ledgerline.workspace import check as check_module
-from ledgerline.workspace import rules
-from ledgerline.workspace.limits import Limits
+from askwell.workspace import check as check_module
+from askwell.workspace import rules
+from askwell.workspace.limits import Limits
 from tests.workspace.conftest import check, csv_file
 
 N = 10_000

@@ -9,9 +9,9 @@ from pathlib import Path
 import pytest
 from pydantic import ValidationError
 
-from ledgerline.bench import report as report_module
-from ledgerline.bench.report_schema import SCHEMA_FILE, Report, json_schema
-from ledgerline.bench.run import RunResult
+from askwell.bench import report as report_module
+from askwell.bench.report_schema import SCHEMA_FILE, Report, json_schema
+from askwell.bench.run import RunResult
 
 COMMITTED = sorted(report_module.REPORTS_DIR.glob("*.json"))
 

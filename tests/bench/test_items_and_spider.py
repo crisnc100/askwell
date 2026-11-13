@@ -7,8 +7,8 @@ from pathlib import Path
 
 import pytest
 
-from ledgerline.bench import spider
-from ledgerline.bench.items import fieldservice_items, spider_databases, spider_items
+from askwell.bench import spider
+from askwell.bench.items import fieldservice_items, spider_databases, spider_items
 
 
 def test_fieldservice_items_are_the_gold_set() -> None:

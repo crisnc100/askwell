@@ -8,7 +8,7 @@ schemas:
   fieldservice:
     title: Field service (synthetic)
     registry: registries/fieldservice.yaml
-    db_url_env: LEDGERLINE_DATABASE_RO_URL
+    db_url_env: ASKWELL_DATABASE_RO_URL
     allow_draft: false
     examples:
       - How many invoices are still unpaid?
