@@ -6,6 +6,7 @@ import logging
 from pathlib import Path
 
 import pytest
+from pydantic import SecretStr
 
 from askwell.config import Settings
 
@@ -93,3 +94,60 @@ def test_the_image_sets_its_defaults_in_its_env_file_not_its_environment() -> No
     assert not any("ASKWELL_" in line for line in env)
     assert "ASKWELL_LLM_MODE=live" in text
     assert "/app/.env" in text
+
+
+ALIASED = [
+    ("OPENROUTER_API_KEY", "openrouter_api_key"),
+    ("ANTHROPIC_API_KEY", "anthropic_api_key"),
+    ("ANTHROPIC_INPUT_USD_PER_MTOK", "anthropic_input_usd_per_mtok"),
+    ("ANTHROPIC_OUTPUT_USD_PER_MTOK", "anthropic_output_usd_per_mtok"),
+]
+
+
+def _value(settings: Settings, field: str) -> str:
+    value = getattr(settings, field)
+    if isinstance(value, SecretStr):
+        return value.get_secret_value()
+    return str(value)
+
+
+def _clear(monkeypatch: pytest.MonkeyPatch, name: str) -> None:
+    for prefix in ("", "ASKWELL_", "LEDGERLINE_"):
+        monkeypatch.delenv(prefix + name, raising=False)
+
+
+@pytest.mark.parametrize(("name", "field"), ALIASED)
+def test_in_the_environment_the_new_alias_beats_the_old(
+    monkeypatch: pytest.MonkeyPatch, name: str, field: str
+) -> None:
+    _clear(monkeypatch, name)
+    monkeypatch.setenv(f"ASKWELL_{name}", "1.5")
+    monkeypatch.setenv(f"LEDGERLINE_{name}", "2.5")
+    assert _value(Settings(), field) == "1.5"
+
+
+@pytest.mark.parametrize(("name", "field"), ALIASED)
+def test_in_the_env_file_the_new_alias_beats_the_old(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path, name: str, field: str
+) -> None:
+    _clear(monkeypatch, name)
+    (tmp_path / ".env").write_text(f"LEDGERLINE_{name}=2.5\nASKWELL_{name}=1.5\n", encoding="utf-8")
+    assert _value(Settings(), field) == "1.5"
+
+
+@pytest.mark.parametrize(("name", "field"), ALIASED)
+@pytest.mark.parametrize(
+    ("env_prefix", "file_prefix"), [("LEDGERLINE_", "ASKWELL_"), ("ASKWELL_", "LEDGERLINE_")]
+)
+def test_the_environment_beats_the_env_file_whatever_the_prefix(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    name: str,
+    field: str,
+    env_prefix: str,
+    file_prefix: str,
+) -> None:
+    _clear(monkeypatch, name)
+    (tmp_path / ".env").write_text(f"{file_prefix}{name}=2.5\n", encoding="utf-8")
+    monkeypatch.setenv(env_prefix + name, "1.5")
+    assert _value(Settings(), field) == "1.5"
