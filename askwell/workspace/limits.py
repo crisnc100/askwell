@@ -5,6 +5,7 @@ so an oversized file is refused before it is fully read."""
 
 from __future__ import annotations
 
+import math
 import threading
 import time
 from collections import deque
@@ -37,6 +38,21 @@ class Limits:
     idle_days: int = 7
 
 
+def wait_words(seconds: float) -> str:
+    """How long to wait, in words, for a message that names no count or quota."""
+    minutes = math.ceil(seconds / 60)
+    if minutes <= 1:
+        return "in a minute"
+    if minutes < 60:
+        return f"in {minutes} minutes"
+    hours = math.ceil(seconds / 3600)
+    if hours <= 1:
+        return "in an hour"
+    if hours < 48:
+        return f"in {hours} hours"
+    return f"in {math.ceil(seconds / 86400)} days"
+
+
 class RateLimiter:
     """At most `limit` events per key in any `window_s` seconds (a sliding window).
     It lives in the process, so each server process counts on its own."""
@@ -60,6 +76,17 @@ class RateLimiter:
             while events and events[0] <= now - self.window_s:
                 events.popleft()
             return len(events) >= self.limit
+
+    def retry_after(self, key: str) -> float:
+        """Seconds until `key` may have another event; 0 if it may now."""
+        now = self.clock()
+        with self._lock:
+            events = self._events.get(key)
+            while events and events[0] <= now - self.window_s:
+                events.popleft()
+            if not events or len(events) < self.limit:
+                return 0.0
+            return events[0] + self.window_s - now
 
     def refund(self, key: str) -> None:
         """Give back the most recent event `allow` counted for `key`."""

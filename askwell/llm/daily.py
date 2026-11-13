@@ -17,7 +17,7 @@ from pathlib import Path
 
 from askwell.llm.errors import LLMError
 
-CAP_REACHED = "Today's budget for live answers is used up. Try again tomorrow."
+CAP_REACHED = "Askwell has hit today's limit. Try again tomorrow."
 
 
 class DailyCapReachedError(LLMError):

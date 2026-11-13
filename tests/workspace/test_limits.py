@@ -107,7 +107,10 @@ def test_live_workspaces_per_ip(small_client: TestClient, clock: FakeClock) -> N
     new_workspace(small_client)
     third = small_client.post("/api/workspaces", json={})
     assert third.status_code == 429
-    assert "already have 2 workspaces" in third.json()["detail"]
+    detail = third.json()["detail"]
+    # Limits stay out of sight: the refusal names no count, only when to try again.
+    assert "2" not in detail
+    assert detail.endswith("try again in 7 days.")
     clock.advance(days=8)  # both expire
     new_workspace(small_client)
 

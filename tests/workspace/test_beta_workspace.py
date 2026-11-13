@@ -32,9 +32,7 @@ def model() -> FakeModel:
 
 @pytest.fixture
 def client(store: WorkspaceStore, settings: Settings, model: FakeModel) -> Iterator[TestClient]:
-    app = create_app(
-        service=fake_service(settings, model), workspaces=WorkspaceApp(store), invite_codes=[]
-    )
+    app = create_app(service=fake_service(settings, model), workspaces=WorkspaceApp(store))
     with TestClient(app) as c:
         yield c
 
