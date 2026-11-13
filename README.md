@@ -475,6 +475,10 @@ On the host:
 
 5. Check it: `curl https://askwell.cristianortega.dev/healthz` returns
    `{"status": "ok", "mode": "live"}`. It answers 503 if the demo database cannot be read.
+6. If you moved the data in step 2, delete the old volume once step 5 passes: run the
+   `docker volume rm <old project>_ledgerline-data` command the script printed. Until
+   then it keeps a full copy of every upload, the audit log and the day's spend, out of
+   reach of the sweep and "Delete my data".
 
 To turn live answers off in a hurry, set `ASKWELL_LIVE_ANSWERS_OFF=1` in `.env.beta`
 and run `docker compose -f compose.prod.yaml up -d`. To back up or move the beta, copy
