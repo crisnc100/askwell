@@ -395,9 +395,9 @@ schema's triage file, `evals/triage/<schema>.yaml`, which gives every miss its c
 
 `http://localhost:8000/value/` is a value calculator. You enter your own question volume,
 time and costs, and it shows what Askwell would cost a month and what it could be worth.
-Its model cost and rates come from the committed reports: the main figure from `v02-seen`,
-and a range from `v02-holdout`'s wrong-answer interval as the stricter figure. Costs are
-list price, and the rates come from one benchmark schema, not your data.
+Its model cost comes from `v02-seen`. Its rates come from `v02-holdout`, the questions
+written blind, with a range across the wrong-answer interval. Costs are list price, and
+the rates come from one benchmark schema, not your data.
 
 ## Deploy the hosted beta
 
