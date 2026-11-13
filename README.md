@@ -67,6 +67,12 @@ v0.2 was built from the seen questions; the held-out ones came first. Both miss 
 held-out target (80% right, 5% wrong); 12 of Askwell's 14 wrong answers differ
 only by an id column or tie order. [docs/failures/](docs/failures/README.md) has more.
 
+`http://localhost:8000/value/` is a value calculator. You enter your own question volume,
+time and costs, and it shows what Askwell would cost a month and what it could be worth.
+Its model cost and rates come from the committed reports: the main figure from `v02-seen`,
+and a range from `v02-holdout`'s wrong-answer interval as the stricter figure. Costs are
+list price, and the rates come from one benchmark schema, not your data.
+
 ## Read more
 
 - [docs/product-brief.md](docs/product-brief.md): the problem, who it is for, what it
