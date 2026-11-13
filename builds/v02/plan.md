@@ -290,8 +290,10 @@ pages, so no Python changes.
 **Measured, read from a committed report** (shown, not editable, each with its source):
 - the model id, the run id and the run date;
 - cost per question;
-- answered share: the coverage on in_schema questions;
-- wrong-answer rate among answered, with its 95% interval.
+- answered share: the coverage on in_schema questions, on held-out (`v02-holdout`) and on
+  seen (`v02-seen`) questions;
+- wrong-answer rate among answered, with its 95% interval, on both sets. It is shown
+  only and does not feed the formula.
 
 **Set by the reader** (sliders with a number box beside each; defaults labelled
 "example, replace with your own"):
@@ -299,26 +301,27 @@ pages, so no Python changes.
 - minutes a person takes to answer one question by hand (example: 20);
 - minutes to check an answer Ledgerline gives (example: 2);
 - that person's cost per hour (example: $60);
-- what one wrong answer costs when someone acts on it (example: $200);
 - hosting per month (example: $10).
 
-**The formula** (shown on the page, in words and as math):
+**The formula** (owner's decision, 2026-11-13: the page shows the value of a tool like
+this, the hours saved against the running cost; shown on the page, in words and as math):
 - running cost = questions × cost per question + hosting;
 - answered = questions × answered share;
 - time saved = answered × (minutes by hand − minutes to check) ÷ 60, in hours;
 - value of time = time saved × cost per hour;
-- risk = answered × wrong-answer rate × cost of a wrong answer;
-- net value a month = value of time − risk − running cost.
+- net value a month = value of time − running cost.
 
 A refused question goes back to a person, so it saves nothing. Its model cost is already
-in cost per question.
+in cost per question. A wrong answer has no separate dollar cost: every answer shows its
+query, and checking it is how a wrong one gets caught, so the check time is counted.
 
-**A range, not one number.** Net value is also shown at the two ends of the
-wrong-answer rate's 95% interval, so the reader sees how much the answer depends on a
-measured rate that is still uncertain.
+**The headline and its range** (owner's decision, 2026-11-13). The headline uses the
+held-out answered share. Net value is also shown at the seen answered share, so the
+range runs from "on questions it never saw" to "on questions it was tuned on". Cost per
+question comes from `v02-seen`.
 
-**Plain words on the page:** the cost is the model's list price; Cristian's API credits
-are not counted. The measured rates come from one benchmark schema, not the reader's data.
+**Plain words on the page:** model cost is the provider's list price. The measured rates
+come from one benchmark schema, not the reader's data.
 
 ### The cost source
 The page reads one report through the existing `/api/reports/<id>` route. The report id is
@@ -348,8 +351,8 @@ Design happens in two places, both run by the orchestrator, never by the builder
 - **V4** Every reader-set input is labelled as an example. Every measured input names its
   source. Moving a slider updates the results. Typing out of range clamps the value, and
   no `NaN` or `Infinity` ever shows (Playwright).
-- **V5** The range at the ends of the wrong-answer interval matches the formula at those
-  two rates (test).
+- **V5** The range at the held-out and seen answered shares matches the formula at those
+  two shares (test; owner's decision, 2026-11-13).
 - **V6** Works with the keyboard alone, has labels on every input, honours reduced
   motion, and has no sideways scroll at 375 px wide (Playwright).
 - **V7** `value-design.md` exists before the first page commit (`git log`), and the
