@@ -141,7 +141,7 @@ test("V3: the page shows the formula", async ({ page }) => {
   await open(page);
   const formula = page.locator("#formula");
   await expect(formula).toContainText("running cost  = questions × cost per question + hosting");
-  await expect(formula).toContainText("net value     = value of time − running cost");
+  await expect(formula).toContainText("net value     = value of time + findings − running cost");
   await expect(formula).not.toContainText("risk");
   await expect(formula).toContainText("A refused question goes back to a person");
 });

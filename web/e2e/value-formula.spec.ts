@@ -14,6 +14,7 @@ const READER: ReaderInputs = {
   minutesToCheck: 2,
   costPerHour: 60,
   hosting: 10,
+  findings: 0,
 };
 
 test("V3: the formula on known inputs", () => {
