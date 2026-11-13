@@ -309,9 +309,10 @@ class AskService:
             else None
         )
         try:
-            if ask_guard is not None:
-                self.gateway.precheck_ask(ask_guard.limit_usd)
-            return self._ask(build(), question, trace_id, audit, ask_guard, trial, context)
+            if ask_guard is None:
+                return self._ask(build(), question, trace_id, audit, ask_guard, trial, context)
+            with self.gateway.reserve_ask(ask_guard):
+                return self._ask(build(), question, trace_id, audit, ask_guard, trial, context)
         except Exception as exc:
             if not audit.written:
                 spent = ask_guard.spent_usd if ask_guard is not None else 0.0

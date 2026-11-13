@@ -60,14 +60,6 @@ class DailySpend:
             row = conn.execute("SELECT usd FROM spend WHERE day = ?", (self._day(),)).fetchone()
         return float(row[0]) if row else 0.0
 
-    def precheck(self, amount_usd: float) -> None:
-        """Refuse, spending nothing, if `amount_usd` more would pass today's cap. An ask
-        checks its whole budget here first, so one that starts is not cut off halfway
-        by the cap (a concurrent ask can still take the last of it; `reserve` holds)."""
-        spent = self.spent_today()
-        if spent + amount_usd > self.cap_usd:
-            raise DailyCapReachedError(spent, amount_usd, self.cap_usd)
-
     def reserve(self, worst_case_usd: float) -> str:
         """Add `worst_case_usd` to today's spend, or refuse if it would pass the cap.
         Returns the day it was charged to, for `settle`."""

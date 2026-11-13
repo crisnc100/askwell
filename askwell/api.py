@@ -55,7 +55,14 @@ def create_app(
         yield
         app.state.service.close()
 
-    if get_settings().invite_codes is not None:
+    current = get_settings()
+    if current.llm_mode == "live" and current.daily_spend_cap_usd is None:
+        # Fail closed: a site anyone can reach must never answer live without a cap.
+        raise RuntimeError(
+            "ASKWELL_LLM_MODE is live but ASKWELL_DAILY_SPEND_CAP_USD is unset: refusing "
+            "to start without a daily spending cap. Set it, for example to 1.00."
+        )
+    if current.invite_codes is not None:
         log.warning(
             "ASKWELL_INVITE_CODES is set but ignored: Askwell is open to everyone. "
             "Remove it from the deployment's settings."

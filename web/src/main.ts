@@ -530,6 +530,10 @@ function askPage(main: HTMLElement): void {
   const button = h("button", { attrs: { type: "submit" } }, "Ask");
   const result = h("div", { class: "result", attrs: { "aria-live": "polite" } });
   const starters = h("div", { attrs: { id: "starters" } });
+  const setBusy = (busy: boolean) => {
+    button.disabled = busy;
+    for (const b of starters.querySelectorAll("button")) b.disabled = busy;
+  };
   const form = h(
     "form",
     {
@@ -538,8 +542,9 @@ function askPage(main: HTMLElement): void {
         submit: async (event) => {
           event.preventDefault();
           const question = input.value.trim();
-          if (!question) return;
-          button.disabled = true;
+          // One ask at a time, so two answers never overwrite each other.
+          if (!question || button.disabled) return;
+          setBusy(true);
           clear(result);
           append(result, h("p", { class: "muted" }, "Working…"));
           try {
@@ -550,7 +555,7 @@ function askPage(main: HTMLElement): void {
             clear(result);
             showError(result, err);
           } finally {
-            button.disabled = false;
+            setBusy(false);
           }
         },
       },
@@ -582,6 +587,7 @@ function askPage(main: HTMLElement): void {
                   attrs: { type: "button" },
                   on: {
                     click: () => {
+                      if (button.disabled) return;
                       input.value = q;
                       form.requestSubmit();
                     },
@@ -593,6 +599,8 @@ function askPage(main: HTMLElement): void {
           ),
         ),
       );
+      // Starters that arrive while an ask is already running start disabled too.
+      setBusy(button.disabled);
     })
     // Starters are a convenience; the page works without them.
     .catch(() => undefined);
