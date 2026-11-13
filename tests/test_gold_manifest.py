@@ -164,7 +164,8 @@ def _as_revision_4(raw: str) -> str:
 
 def test_the_committed_holdout_is_revision_5_byte_for_byte() -> None:
     manifest = json.loads((GOLD_DIR / "MANIFEST.json").read_text())
-    assert "pending" not in manifest
+    assert "holdout-v02.jsonl" not in manifest.get("pending", {})
+    assert "holdout-v02.jsonl" in manifest["files"]
     raw = (GOLD_DIR / "holdout-v02.jsonl").read_bytes()
     assert hashlib.sha256(raw).hexdigest() == REVISION_5_HASH
 
