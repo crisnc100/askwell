@@ -309,6 +309,8 @@ class AskService:
             else None
         )
         try:
+            if ask_guard is not None:
+                self.gateway.precheck_ask(ask_guard.limit_usd)
             return self._ask(build(), question, trace_id, audit, ask_guard, trial, context)
         except Exception as exc:
             if not audit.written:

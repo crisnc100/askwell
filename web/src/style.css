@@ -67,3 +67,6 @@ pre { background: var(--panel); border: 1px solid var(--line); padding: 10px; ov
 #results #out-net { font-weight: 700; }
 #measured { overflow-wrap: anywhere; }
 #out-range strong { white-space: nowrap; }
+.starters { list-style: none; padding: 0; margin: 4px 0 12px; }
+.starters li { margin: 2px 0; }
+.starters .link-button { margin: 0; text-align: left; }

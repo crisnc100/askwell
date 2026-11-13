@@ -130,10 +130,20 @@ class Gateway:
         self.max_tokens = max_tokens
         self._backoff_sleep = backoff_sleep
         self.pending_dir = pending_dir
-        # The hosted beta's daily cap and kill switch. Both apply to every call that would
+        # The public site's daily cap and kill switch. Both apply to every call that would
         # reach a provider (live and record modes), never to replay or export.
         self.daily = daily
         self.live_answers_off = live_answers_off
+
+    def precheck_ask(self, budget_usd: float) -> None:
+        """Before an ask's first call: refuse it whole if the kill switch is on or the
+        daily cap could not cover its budget, so a limit never stops an ask halfway."""
+        if self.mode not in ("live", "record"):
+            return
+        if self.live_answers_off:
+            raise LiveAnswersOffError
+        if self.daily is not None:
+            self.daily.precheck(budget_usd)
 
     def complete[T: BaseModel](
         self,
