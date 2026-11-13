@@ -57,11 +57,13 @@ class FieldEdit(BaseModel):
 
 
 class Edits(BaseModel):
-    """Edits keyed by `entity.field`."""
+    """Field edits keyed by `entity.field`, and each table's name column keyed by table:
+    a field name, or null for none. A table left out keeps the drafted name column."""
 
     model_config = ConfigDict(extra="forbid")
 
     fields: dict[str, FieldEdit] = Field(default_factory=dict[str, FieldEdit])
+    labels: dict[str, str | None] = Field(default_factory=dict[str, str | None])
 
 
 @dataclass
@@ -143,12 +145,31 @@ def _is_key(registry: Registry, entity: str, name: str) -> bool:
     return name == "id" or name.endswith("_id")
 
 
+def label_options(registry: Registry, entity: str) -> list[str]:
+    """The fields that can name a row of `entity`: its text fields other than keys and
+    links, when it has a single-field key."""
+    edef = registry.entities[entity]
+    if len(edef.primary_key) != 1:
+        return []
+    return [
+        name
+        for name, fdef in edef.fields.items()
+        if fdef.type == "text" and not _is_key(registry, entity, name)
+    ]
+
+
 def apply(registry: Registry, info: FieldInfo, edits: Edits) -> Registry:
-    """The registry with `edits` applied, marked confirmed (`draft: false`)."""
+    """The registry with `edits` applied, marked confirmed (`draft: false`). A hidden
+    field never names a row: hiding the name column leaves the table without one."""
     for key in edits.fields:
         entity, _, name = key.partition(".")
         if entity not in registry.entities or name not in registry.entities[entity].fields:
             raise WorkspaceError(f"There is no field {key!r} in this workspace.")
+    for entity, label in edits.labels.items():
+        if entity not in registry.entities:
+            raise WorkspaceError(f"There is no table {entity!r} in this workspace.")
+        if label is not None and label not in label_options(registry, entity):
+            raise WorkspaceError(f"The field {entity}.{label} cannot name a row of {entity}.")
     entities: dict[str, EntityDef] = {}
     for slug, entity in registry.entities.items():
         fields: dict[str, FieldDef] = {}
@@ -172,7 +193,12 @@ def apply(registry: Registry, info: FieldInfo, edits: Edits) -> Registry:
                 categorical=bool(values),
                 allowed_values=values,
             )
-        entities[slug] = entity.model_copy(update={"fields": fields})
+        label = edits.labels.get(slug, entity.label)
+        if label is not None and fields[label].hidden:
+            label = None
+        entities[slug] = EntityDef.model_validate(
+            {**entity.model_dump(), "fields": fields, "label": label}
+        )
     return Registry(
         schema_version=1,
         draft=False,
@@ -207,7 +233,16 @@ def field_rows(registry: Registry, info: FieldInfo, edits: Edits) -> list[dict[s
                     "link": links.get((slug, name)),
                 }
             )
-        tables.append({"name": slug, "fields": rows})
+        tables.append(
+            {
+                "name": slug,
+                "fields": rows,
+                "label": entity.label,
+                "label_options": [
+                    name for name in label_options(applied, slug) if not entity.fields[name].hidden
+                ],
+            }
+        )
     return tables
 
 
@@ -224,7 +259,7 @@ def normalized(registry: Registry, edits: Edits) -> Edits:
         if hidden and share:
             share = False
         out[key] = edit.model_copy(update={"share_values": share})
-    return Edits(fields=out)
+    return Edits(fields=out, labels=dict(edits.labels))
 
 
 def confirm(store: WorkspaceStore, workspace: Workspace, edits: Edits) -> Registry:

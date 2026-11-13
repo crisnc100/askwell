@@ -170,6 +170,7 @@ class AskResult:
     model: str
     provenance: dict[str, str] | None
     prompt_truncation: list[str]
+    tied_at_cutoff: bool = False
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -185,6 +186,7 @@ class AskResult:
             "columns": self.columns,
             "rows": [[_jsonable(v) for v in row] for row in self.rows],
             "truncated": self.truncated,
+            "tied_at_cutoff": self.tied_at_cutoff,
             "refusal": self.refusal,
             "cost_usd": self.cost_usd,
             "model": self.model,
@@ -459,6 +461,7 @@ class AskService:
             model=self.model,
             provenance=state.get("provenance"),
             prompt_truncation=truncation,
+            tied_at_cutoff=execution.tied_at_cutoff if execution else False,
         )
 
 

@@ -68,7 +68,24 @@ class EntityDef(_Strict):
     description: str = ""
     aliases: list[str] = Field(default_factory=list[str])
     primary_key: list[str] = Field(default_factory=list[str])  # field slugs
+    # The field that names one row ("the name of the thing"). Grouping by it groups by
+    # the key as well, so two customers that share a name stay two rows.
+    label: str | None = None
     fields: dict[str, FieldDef]
+
+    @model_validator(mode="after")
+    def _check_label(self) -> Self:
+        if self.label is None:
+            return self
+        if self.label not in self.fields:
+            raise ValueError(f"{self.table}: label {self.label!r} is not a field")
+        if len(self.primary_key) != 1:
+            raise ValueError(f"{self.table}: a label needs a single-field primary key")
+        if self.label == self.primary_key[0]:
+            raise ValueError(f"{self.table}: the label cannot be the primary key")
+        if self.fields[self.label].hidden:
+            raise ValueError(f"{self.table}: the label {self.label!r} is hidden")
+        return self
 
 
 class Relationship(_Strict):
@@ -122,4 +139,9 @@ def load_registry(path: Path | str) -> Registry:
 def dump_registry(registry: Registry) -> str:
     """Deterministic YAML: model field order, entities and relationships as given."""
     data = registry.model_dump(mode="json")
+    for entity in data["entities"].values():
+        # Written only when set, so a registry without labels dumps as it did before
+        # labels existed (Spider registries are checked against committed hashes).
+        if entity["label"] is None:
+            del entity["label"]
     return yaml.safe_dump(data, sort_keys=False, allow_unicode=True, width=100)

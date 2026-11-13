@@ -17,6 +17,7 @@ entities:
     - clients
     primary_key:
     - id
+    label: name
     fields:
       id:
         column: id
@@ -206,6 +207,7 @@ entities:
     - catalogue
     primary_key:
     - id
+    label: name
     fields:
       id:
         column: id
@@ -294,6 +296,7 @@ entities:
     - service site
     primary_key:
     - id
+    label: name
     fields:
       id:
         column: id
@@ -451,6 +454,7 @@ entities:
     - engineer
     primary_key:
     - id
+    label: full_name
     fields:
       id:
         column: id
@@ -556,6 +560,7 @@ entities:
     - staff
     primary_key:
     - id
+    label: full_name
     fields:
       id:
         column: id

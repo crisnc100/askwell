@@ -6,6 +6,7 @@ import {
   type Edits,
   type Field,
   type FieldEdit,
+  type FieldTable,
   type Status,
   useWorkspace,
 } from "./api";
@@ -394,8 +395,9 @@ async function confirmPage(main: HTMLElement): Promise<void> {
   if (draw !== drawn) return;
   // The edits are the one source of truth: they start as the fields' current state, the
   // boxes are drawn from them, and the preview and Confirm send exactly them.
-  edits = { fields: {} };
+  edits = { fields: {}, labels: {} };
   for (const table of data.tables) {
+    if (edits.labels) edits.labels[table.name] = table.label;
     for (const field of table.fields) {
       edits.fields[field.key] = {
         hidden: field.hidden,
@@ -443,6 +445,7 @@ async function confirmPage(main: HTMLElement): Promise<void> {
     append(
       main,
       h("h2", {}, table.name),
+      table.label_options.length ? nameColumn(table) : null,
       h(
         "table",
         { class: "fields", attrs: { "data-table": table.name } },
@@ -468,6 +471,30 @@ async function confirmPage(main: HTMLElement): Promise<void> {
   });
   append(main, h("h2", {}, "What the model will see"), preview, button, workspaceBox());
   refresh();
+}
+
+function nameColumn(table: FieldTable): HTMLElement {
+  const id = `label-${table.name}`;
+  const select = h("select", { attrs: { id, "data-table": table.name, "data-role": "label" } });
+  for (const option of ["", ...table.label_options]) {
+    const item = h("option", { attrs: { value: option } }, option || "none");
+    item.selected = option === (table.label ?? "");
+    select.appendChild(item);
+  }
+  select.addEventListener("change", () => {
+    edits.labels = { ...(edits.labels ?? {}), [table.name]: select.value || null };
+  });
+  return h(
+    "p",
+    { class: "name-column" },
+    h("label", { attrs: { for: id } }, "Name column "),
+    select,
+    h(
+      "span",
+      { class: "muted" },
+      " Answers that group by this column count each row separately, even when two share a name, and show their IDs.",
+    ),
+  );
 }
 
 function fieldRow(
@@ -571,6 +598,7 @@ function showAnswer(where: HTMLElement, answer: Answer): void {
     );
     append(where, table);
     if (answer.truncated) append(where, h("p", { class: "muted" }, "Only the first rows are shown."));
+    if (answer.tied_at_cutoff) append(where, h("p", { class: "muted tie-note" }, "More rows tie with the last one shown."));
   }
   const attempts = answer.validation.attempts;
   const issues = attempts.length ? attempts[attempts.length - 1].issues : [];

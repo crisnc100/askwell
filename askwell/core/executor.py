@@ -27,7 +27,14 @@ from sqlalchemy.pool import NullPool
 from sqlalchemy.sql import Executable, Select, TextClause
 
 from askwell.core.audit import AuditEntry, AuditSink, params_hash
-from askwell.core.sqlbuild import build, compile_sql
+from askwell.core.sqlbuild import (
+    ORDER_PREFIX,
+    build,
+    compile_sql,
+    peeks,
+    tie_labels,
+    values_tie,
+)
 from askwell.core.validate import QueryPlan
 
 DEFAULT_TIMEOUT_S = 5.0
@@ -59,6 +66,9 @@ class Execution:
     sql: str
     params: dict[str, Any]
     result: QueryResult
+    # A top-N whose next row ties with its last on every ORDER BY value: which rows
+    # made the list is arbitrary, and the answer says so.
+    tied_at_cutoff: bool = False
 
 
 def readonly_engine(url: str) -> Engine:
@@ -192,7 +202,8 @@ class Executor:
         trace_id: str | None = None,
     ) -> Execution:
         trace = trace_id or str(uuid.uuid4())
-        stmt = build(plan)
+        peek = peeks(plan, self.row_cap)
+        stmt = build(plan, peek=peek)
         sql, params = compile_sql(stmt, self.engine.dialect.name)
         entry = AuditEntry(
             trace_id=trace,
@@ -213,6 +224,25 @@ class Executor:
             if self.audit is not None:
                 self.audit.record(entry)
             raise
+        tied = False
+        if peek:
+            result, tied = _cut_peek(plan, result)
         if self.audit is not None:
             self.audit.record(replace(entry, row_count=result.row_count, outcome="answered"))
-        return Execution(trace, sql, params, result)
+        return Execution(trace, sql, params, result, tied)
+
+
+def _cut_peek(plan: QueryPlan, result: QueryResult) -> tuple[QueryResult, bool]:
+    """The answer without the extra row and the extra ORDER BY columns, and whether the
+    extra row tied with the last one shown."""
+    assert plan.limit is not None
+    rows = result.rows
+    index = {name: i for i, name in enumerate(result.columns)}
+    targets = [index[label] for label in tie_labels(plan)]
+    tied = len(rows) > plan.limit and all(
+        values_tie(rows[plan.limit - 1][i], rows[plan.limit][i]) for i in targets
+    )
+    keep = [i for i, name in enumerate(result.columns) if not name.startswith(ORDER_PREFIX)]
+    trimmed = [tuple(row[i] for i in keep) for row in rows[: plan.limit]]
+    columns = [result.columns[i] for i in keep]
+    return QueryResult(columns, trimmed, result.truncated), tied

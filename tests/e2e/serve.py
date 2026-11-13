@@ -70,6 +70,14 @@ ANSWERS: dict[str, dict[str, Any]] = {
             },
         ],
     },
+    "Top 2 customers by orders": {
+        "intent_type": "grouped_summary",
+        "entity": "orders",
+        "metrics": [{"agg": "count", "alias": "orders"}],
+        "group_by": [{"field": "customers.name"}],
+        "order_by": [{"target": "orders", "direction": "desc"}],
+        "limit": 2,
+    },
     "Show the odd table": {
         "intent_type": "row_list",
         "entity": slugify(XSS_FILE.removesuffix(".csv")),
