@@ -13,36 +13,35 @@ const READER: ReaderInputs = {
   minutesByHand: 20,
   minutesToCheck: 2,
   costPerHour: 60,
-  wrongCost: 200,
   hosting: 10,
 };
 
 test("V3: the formula on known inputs", () => {
-  const out = monthly(READER, { costPerQuestion: 0.001, answeredShare: 0.8, wrongRate: 0.05 });
+  const out = monthly(READER, { costPerQuestion: 0.001, answeredShare: 0.8 });
   // 500 × 0.001 + 10
   expect(out.runningCost).toBeCloseTo(10.5, 10);
   expect(out.answered).toBeCloseTo(400, 10);
   // 400 × 18 ÷ 60
   expect(out.hoursSaved).toBeCloseTo(120, 10);
   expect(out.valueOfTime).toBeCloseTo(7200, 10);
-  // 400 × 0.05 × 200
-  expect(out.risk).toBeCloseTo(4000, 10);
-  expect(out.net).toBeCloseTo(7200 - 4000 - 10.5, 10);
+  expect(out.net).toBeCloseTo(7200 - 10.5, 10);
+  // The owner removed the dollar-risk term (2026-11-13); it must not come back.
+  expect(out).not.toHaveProperty("risk");
+  expect(INPUTS.map((spec) => spec.key)).not.toContain("wrongCost");
 });
 
-test("V3: a zero answered share saves nothing and risks nothing, but still costs", () => {
-  const out = monthly(READER, { costPerQuestion: 0.001, answeredShare: 0, wrongRate: 0.05 });
+test("V3: a zero answered share saves nothing, but still costs", () => {
+  const out = monthly(READER, { costPerQuestion: 0.001, answeredShare: 0 });
   expect(out.answered).toBe(0);
   expect(out.hoursSaved).toBe(0);
   expect(out.valueOfTime).toBe(0);
-  expect(out.risk).toBe(0);
   expect(out.net).toBeCloseTo(-10.5, 10);
 });
 
 test("V3: checking that takes longer than answering by hand loses time", () => {
   const out = monthly(
     { ...READER, minutesByHand: 5, minutesToCheck: 11 },
-    { costPerQuestion: 0.001, answeredShare: 0.5, wrongRate: 0 },
+    { costPerQuestion: 0.001, answeredShare: 0.5 },
   );
   // 250 answered × (5 − 11) ÷ 60
   expect(out.hoursSaved).toBeCloseTo(-25, 10);
@@ -50,15 +49,13 @@ test("V3: checking that takes longer than answering by hand loses time", () => {
   expect(out.net).toBeCloseTo(-1500 - 10.5, 10);
 });
 
-test("V5: the range is the formula at the two ends of the wrong-answer interval", () => {
-  const measured = { costPerQuestion: 0.00048, answeredShare: 0.643, wrongInterval: [0.161, 0.389] as [number, number] };
-  const [atLow, atHigh] = range(READER, measured);
-  const formula = (wrongRate: number) =>
-    monthly(READER, { costPerQuestion: measured.costPerQuestion, answeredShare: measured.answeredShare, wrongRate }).net;
-  expect(atLow).toBe(formula(0.161));
-  expect(atHigh).toBe(formula(0.389));
-  // A higher wrong-answer rate can only lower the net value.
-  expect(atHigh).toBeLessThan(atLow);
+test("V5: the range is the formula at the two answered shares", () => {
+  const cost = 0.00048;
+  const [atUnseen, atTuned] = range(READER, { costPerQuestion: cost, answeredShares: [0.643, 0.876] });
+  expect(atUnseen).toBe(monthly(READER, { costPerQuestion: cost, answeredShare: 0.643 }).net);
+  expect(atTuned).toBe(monthly(READER, { costPerQuestion: cost, answeredShare: 0.876 }).net);
+  // When checking is quicker than answering by hand, answering more is worth more.
+  expect(atTuned).toBeGreaterThan(atUnseen);
 });
 
 test("clamp keeps every value finite and inside its bounds", () => {

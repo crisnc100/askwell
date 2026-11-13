@@ -36,9 +36,14 @@ test("V1, V2: the page shows the model, run and cost from the committed reports"
   await expect(page.locator("#seen-run-id")).toHaveText(SOURCE.seen);
   await expect(page.locator("#seen-run-date")).toHaveText(SOURCE.date);
   await expect(page.locator("#holdout-run-id")).toHaveText(SOURCE.holdout);
-  await expect(page.locator("#seen-line")).toContainText("On the questions it was tuned on");
-  await expect(page.locator("#seen-line")).toContainText("measured on the seen questions");
-  await expect(page.locator("#seen-line")).toContainText("do not feed the net value");
+  const accuracy = page.locator("#accuracy");
+  await expect(accuracy).toContainText("On questions it never saw");
+  await expect(accuracy).toContainText("On questions it was tuned on");
+  const [low, high] = holdout.wrong_answer_rate_given_answered.ci95;
+  await expect(page.locator("#holdout-wrong")).toContainText(`95% range ${(low * 100).toFixed(1)}% to ${(high * 100).toFixed(1)}%`);
+  await expect(page.locator("#seen-wrong")).toContainText(
+    `${(seen.wrong_answer_rate_given_answered.rate * 100).toFixed(1)}%`,
+  );
 
   await expect(page.locator("#cost-per-question")).toHaveText(`$${seen.mean_cost_usd.toFixed(6)}`);
   await expect(page.locator("#seen-answered")).toContainText(`${(seen.coverage.rate * 100).toFixed(1)}%`);
@@ -64,7 +69,6 @@ test("V4: inputs are examples, measured figures name their source, and results f
   const measured = {
     costPerQuestion: seen.mean_cost_usd,
     answeredShare: holdout.coverage.rate,
-    wrongRate: holdout.wrong_answer_rate_given_answered.rate,
   };
   await expect(page.locator("#out-net")).toHaveText(money(monthly(reader, measured).net));
 
@@ -74,16 +78,12 @@ test("V4: inputs are examples, measured figures name their source, and results f
   await expect(page.locator("#questions-number")).toHaveValue("2000");
   await expect(page.locator("#out-net")).not.toHaveText(before);
   await expect(page.locator("#out-net")).toHaveText(money(monthly({ ...reader, questions: 2000 }, measured).net));
-  const [atLow, atHigh] = range(
+  const [atUnseen, atTuned] = range(
     { ...reader, questions: 2000 },
-    {
-      costPerQuestion: seen.mean_cost_usd,
-      answeredShare: holdout.coverage.rate,
-      wrongInterval: holdout.wrong_answer_rate_given_answered.ci95,
-    },
+    { costPerQuestion: seen.mean_cost_usd, answeredShares: [holdout.coverage.rate, seen.coverage.rate] },
   );
-  await expect(page.locator("#out-range-low")).toHaveText(money(atLow));
-  await expect(page.locator("#out-range-high")).toHaveText(money(atHigh));
+  await expect(page.locator("#out-range-unseen")).toHaveText(money(atUnseen));
+  await expect(page.locator("#out-range-tuned")).toHaveText(money(atTuned));
 
   // Typing out of range clamps, in both directions, and nothing ever reads NaN or Infinity.
   const box = page.locator("#questions-number");
@@ -111,38 +111,38 @@ test("V4: inputs are examples, measured figures name their source, and results f
   await noBadNumbers(page);
 });
 
-test("V3: the headline is the formula at the held-out rates, inside its own range", async ({ page }) => {
+test("V3: the headline is the formula at the held-out answered share, and the range spans both shares", async ({ page }) => {
   await open(page);
   const reader = Object.fromEntries(INPUTS.map((s) => [s.key, s.example])) as unknown as Parameters<typeof monthly>[0];
-  const wrong = holdout.wrong_answer_rate_given_answered;
-  const out = monthly(reader, { costPerQuestion: seen.mean_cost_usd, answeredShare: holdout.coverage.rate, wrongRate: wrong.rate });
-  // Not the seen rates: they are shown, but must not move the net value.
-  const atSeen = monthly(reader, {
-    costPerQuestion: seen.mean_cost_usd,
-    answeredShare: seen.coverage.rate,
-    wrongRate: seen.wrong_answer_rate_given_answered.rate,
-  });
+  const out = monthly(reader, { costPerQuestion: seen.mean_cost_usd, answeredShare: holdout.coverage.rate });
+  // Not the seen share: it is shown, but the headline must not use it.
+  const atSeen = monthly(reader, { costPerQuestion: seen.mean_cost_usd, answeredShare: seen.coverage.rate });
   expect(money(atSeen.net)).not.toBe(money(out.net));
   await expect(page.locator("#out-net")).toHaveText(money(out.net));
-  await expect(page.locator("#out-risk")).toHaveText(money(out.risk));
+  await expect(page.locator("#out-value-of-time")).toHaveText(money(out.valueOfTime));
   await expect(page.locator("#out-running-cost")).toHaveText(money(out.runningCost));
 
-  const [atLow, atHigh] = range(reader, {
-    costPerQuestion: seen.mean_cost_usd,
-    answeredShare: holdout.coverage.rate,
-    wrongInterval: wrong.ci95,
-  });
-  expect(out.net).toBeLessThanOrEqual(atLow);
-  expect(out.net).toBeGreaterThanOrEqual(atHigh);
-  await expect(page.locator("#out-range-low")).toHaveText(money(atLow));
-  await expect(page.locator("#out-range-high")).toHaveText(money(atHigh));
+  await expect(page.locator("#out-range-unseen")).toHaveText(money(out.net));
+  await expect(page.locator("#out-range-tuned")).toHaveText(money(atSeen.net));
+  await expect(page.locator("#out-range")).toContainText("on questions it never saw");
+  await expect(page.locator("#out-range")).toContainText("on questions it was tuned on");
+
+  // The dollar-risk term is gone, and wrong-answer rates do not move the result.
+  await expect(page.locator("#out-risk")).toHaveCount(0);
+  await expect(page.locator("#inputs")).not.toContainText("wrong answer");
+  await expect(page.locator("#accuracy")).toBeVisible();
+  await expect(page.locator("#measured")).toContainText("These do not feed the formula.");
+  await expect(page.locator("#measured")).toContainText("Every answer shows its query; the check time is counted.");
+  await expect(page.locator("#measured")).toContainText("Model cost is the provider's list price.");
+  await expect(page.locator("#app")).not.toContainText("credits");
 });
 
 test("V3: the page shows the formula", async ({ page }) => {
   await open(page);
   const formula = page.locator("#formula");
   await expect(formula).toContainText("running cost  = questions × cost per question + hosting");
-  await expect(formula).toContainText("net value     = value of time − risk − running cost");
+  await expect(formula).toContainText("net value     = value of time − running cost");
+  await expect(formula).not.toContainText("risk");
   await expect(formula).toContainText("A refused question goes back to a person");
 });
 
