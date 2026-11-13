@@ -57,6 +57,7 @@ ignore = ["S101"]
 "tests/**" = ["S105", "S106", "S608", "S603", "S607"]
 "askwell/fieldservice/seed.py" = ["S311"]
 "evals/gold/spider_selection.py" = ["S311"]
+"evals/gold/spider_selection_v03.py" = ["S311"]
 
 [tool.pyright]
 include = ["askwell", "tests", "scripts", "evals"]

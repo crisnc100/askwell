@@ -74,8 +74,8 @@ None is deployed before the Phase 4 gate. See "PR shape".
   refused, 14 wrong on in_schema; 36 of 36 refusal items refused. The scripts are
   committed in `builds/v03/evidence/`: `replay_holdout.py` (the replay),
   `idcheck.py` (gold against answer rows with `compare.py`) and `namecheck.py` (the seen
-  golds that group by a thing). They expect the database on port 56452 (see "How this
-  was run").
+  golds that group by a thing). The last two take the read-only database URL as their
+  argument; the replay reads it from the environment.
 
 ### Held-out, the 14 wrong answers
 
