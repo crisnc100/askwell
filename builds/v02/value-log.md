@@ -43,3 +43,10 @@
 ## Note for the redesign
 At the example inputs the seen figure is about +$6,300 a month. The held-out range is
 about −$19,300 to −$4,600, because the risk term (answered × wrong rate × $200) dominates.
+
+## README and verify
+- The README paragraph sits in "Evaluation", after the Results page paragraph.
+  `tests/test_docs.py` caps the walkthrough above "Setup details" at 600 words, and it
+  had about 5 words to spare.
+- `./verify.sh` green (1105 pytest, 23 Playwright), using this worktree's own compose db
+  and seed on 56432, with Spider data copied from a sibling worktree's gitignored `data/spider`.
