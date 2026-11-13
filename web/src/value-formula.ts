@@ -6,14 +6,12 @@ export interface ReaderInputs {
   minutesByHand: number;
   minutesToCheck: number;
   costPerHour: number;
-  wrongCost: number;
   hosting: number;
 }
 
 export interface Measured {
   costPerQuestion: number;
   answeredShare: number;
-  wrongRate: number;
 }
 
 export interface Monthly {
@@ -21,7 +19,6 @@ export interface Monthly {
   answered: number;
   hoursSaved: number;
   valueOfTime: number;
-  risk: number;
   net: number;
 }
 
@@ -40,7 +37,6 @@ export const INPUTS: InputSpec[] = [
   { key: "minutesByHand", label: "Minutes a person takes to answer one question by hand", unit: "minutes", min: 0, max: 240, step: 1, example: 20 },
   { key: "minutesToCheck", label: "Minutes to check an answer Askwell gives", unit: "minutes", min: 0, max: 240, step: 1, example: 2 },
   { key: "costPerHour", label: "That person's cost per hour", unit: "usd", min: 0, max: 500, step: 1, example: 60 },
-  { key: "wrongCost", label: "What one wrong answer costs when someone acts on it", unit: "usd", min: 0, max: 10000, step: 10, example: 200 },
   { key: "hosting", label: "Hosting per month", unit: "usd", min: 0, max: 1000, step: 1, example: 10 },
 ];
 
@@ -50,22 +46,22 @@ export function clamp(value: number, min: number, max: number): number {
 }
 
 // A refused question goes back to a person, so it saves nothing; its model cost is
-// already inside cost per question.
+// already inside cost per question. Wrong answers carry no separate cost: checking every
+// answer is how a wrong one gets caught, and that time is already subtracted.
 export function monthly(reader: ReaderInputs, measured: Measured): Monthly {
   const runningCost = reader.questions * measured.costPerQuestion + reader.hosting;
   const answered = reader.questions * measured.answeredShare;
   const hoursSaved = (answered * (reader.minutesByHand - reader.minutesToCheck)) / 60;
   const valueOfTime = hoursSaved * reader.costPerHour;
-  const risk = answered * measured.wrongRate * reader.wrongCost;
-  return { runningCost, answered, hoursSaved, valueOfTime, risk, net: valueOfTime - risk - runningCost };
+  return { runningCost, answered, hoursSaved, valueOfTime, net: valueOfTime - runningCost };
 }
 
-// Net value at the low and the high end of the wrong-answer rate's 95% interval.
+// Net value at each of two answered shares, in the order given: the page passes the share
+// on questions the model never saw and the share on questions it was tuned on.
 export function range(
   reader: ReaderInputs,
-  measured: { costPerQuestion: number; answeredShare: number; wrongInterval: [number, number] },
+  measured: { costPerQuestion: number; answeredShares: [number, number] },
 ): [number, number] {
-  const at = (wrongRate: number) =>
-    monthly(reader, { costPerQuestion: measured.costPerQuestion, answeredShare: measured.answeredShare, wrongRate }).net;
-  return [at(measured.wrongInterval[0]), at(measured.wrongInterval[1])];
+  const at = (answeredShare: number) => monthly(reader, { costPerQuestion: measured.costPerQuestion, answeredShare }).net;
+  return [at(measured.answeredShares[0]), at(measured.answeredShares[1])];
 }

@@ -118,36 +118,33 @@ function measuredSection(seen: Figures, holdout: Figures): HTMLElement {
       from("span", "seen-run-date", seen, SOURCE.date),
       ".",
     ),
-    h(
-      "p",
-      {},
-      "The rates below feed the calculator. They are measured on the held-out questions (report ",
-      from("span", "holdout-run-id", holdout, holdout.reportId),
-      "), which were written blind and never seen while Askwell was built.",
-    ),
+    h("h3", {}, "Answered share (of answerable questions), used below"),
     h(
       "dl",
       { class: "definitions" },
-      h("dt", {}, "Answered share (of answerable questions)"),
+      h("dt", {}, "On questions it never saw (report ", from("span", "holdout-run-id", holdout, holdout.reportId), ", written blind)"),
       from("dd", "holdout-answered", holdout, rate(holdout.answered, holdout.answeredShare)),
-      h("dt", {}, "Wrong answers among answered"),
+      h("dt", {}, `On questions it was tuned on (report ${seen.reportId})`),
+      from("dd", "seen-answered", seen, rate(seen.answered, seen.answeredShare)),
+    ),
+    h("h3", {}, "Wrong answers among answered, shown only"),
+    h(
+      "dl",
+      { class: "definitions", attrs: { id: "accuracy" } },
+      h("dt", {}, "On questions it never saw"),
       from("dd", "holdout-wrong", holdout, `${rate(holdout.wrong, holdout.wrongRate)}, ${interval(holdout)}`),
+      h("dt", {}, "On questions it was tuned on"),
+      from("dd", "seen-wrong", seen, `${rate(seen.wrong, seen.wrongRate)}, ${interval(seen)}`),
     ),
     h(
       "p",
-      { class: "muted", attrs: { id: "seen-line" } },
-      "On the questions it was tuned on (measured on the seen questions, report ",
-      seen.reportId,
-      "): answered ",
-      from("span", "seen-answered", seen, rate(seen.answered, seen.answeredShare)),
-      ", wrong ",
-      from("span", "seen-wrong", seen, `${rate(seen.wrong, seen.wrongRate)}, ${interval(seen)}`),
-      ". Shown only; these do not feed the net value.",
+      { class: "muted" },
+      "These do not feed the formula. Every answer shows its query; the check time is counted.",
     ),
     h(
       "ul",
       { class: "muted" },
-      h("li", {}, "The cost is the model's list price. Cristian's API credits are not counted."),
+      h("li", {}, "Model cost is the provider's list price."),
       h("li", {}, "The rates come from one benchmark schema (a synthetic field-service business), not from your data."),
     ),
   );
@@ -200,8 +197,8 @@ function formulaSection(): HTMLElement {
       h("li", {}, "Answered: the questions Askwell answers instead of refusing."),
       h("li", {}, "Time saved: for each answered question, the time to answer it by hand minus the time to check Askwell's answer."),
       h("li", {}, "Value of time: the time saved at the person's cost per hour."),
-      h("li", {}, "Risk: the answered questions that are wrong, each costing what a wrong answer costs."),
-      h("li", {}, "Net value a month: value of time, minus risk, minus running cost."),
+      h("li", {}, "Net value a month: value of time, minus running cost."),
+      h("li", {}, "A wrong answer has no separate cost here. Every answer shows its query; the check time is counted."),
       h("li", {}, "A refused question goes back to a person, so it saves nothing. Its model cost is already in cost per question."),
     ),
     h(
@@ -212,8 +209,7 @@ function formulaSection(): HTMLElement {
         "answered      = questions × answered share",
         "time saved    = answered × (minutes by hand − minutes to check) ÷ 60",
         "value of time = time saved × cost per hour",
-        "risk          = answered × wrong-answer rate × cost of a wrong answer",
-        "net value     = value of time − risk − running cost",
+        "net value     = value of time − running cost",
       ].join("\n"),
     ),
   );
@@ -224,11 +220,10 @@ function render(seen: Figures, holdout: Figures): void {
   const results = h("section", { attrs: { id: "results", "aria-live": "polite" } });
 
   const update = () => {
-    const out = monthly(state, { costPerQuestion: seen.costPerQuestion, answeredShare: holdout.answeredShare, wrongRate: holdout.wrongRate });
-    const [atLow, atHigh] = range(state, {
+    const out = monthly(state, { costPerQuestion: seen.costPerQuestion, answeredShare: holdout.answeredShare });
+    const [atUnseen, atTuned] = range(state, {
       costPerQuestion: seen.costPerQuestion,
-      answeredShare: holdout.answeredShare,
-      wrongInterval: holdout.wrongInterval,
+      answeredShares: [holdout.answeredShare, seen.answeredShare],
     });
     const line = (label: string, id: string, value: string) =>
       h("tr", {}, h("th", { attrs: { scope: "row" } }, label), h("td", { attrs: { id } }, value));
@@ -239,7 +234,7 @@ function render(seen: Figures, holdout: Figures): void {
       h(
         "p",
         { class: "muted" },
-        `At the held-out rates (${holdout.reportId}): answered ${pct(holdout.answeredShare)}, wrong ${pct(holdout.wrongRate)}. Model cost from ${seen.reportId}.`,
+        `At the answered share on questions it never saw (${pct(holdout.answeredShare)}, ${holdout.reportId}). Model cost from ${seen.reportId}.`,
       ),
       h(
         "table",
@@ -251,18 +246,17 @@ function render(seen: Figures, holdout: Figures): void {
           line("Questions answered", "out-answered", number(out.answered)),
           line("Hours saved", "out-hours-saved", number(out.hoursSaved)),
           line("Value of the time saved", "out-value-of-time", money(out.valueOfTime)),
-          line("Risk from wrong answers", "out-risk", money(out.risk)),
           line("Net value", "out-net", money(out.net)),
         ),
       ),
       h(
         "p",
         { attrs: { id: "out-range" } },
-        `The wrong-answer rate is still uncertain. Anywhere in its 95% range, net value a month is between `,
-        h("strong", { attrs: { id: "out-range-high" } }, money(atHigh)),
-        ` (wrong-answer rate ${pct(holdout.wrongInterval[1])}) and `,
-        h("strong", { attrs: { id: "out-range-low" } }, money(atLow)),
-        ` (${pct(holdout.wrongInterval[0])}).`,
+        "Net value a month is ",
+        h("strong", { attrs: { id: "out-range-unseen" } }, money(atUnseen)),
+        ` on questions it never saw (answered ${pct(holdout.answeredShare)}) and `,
+        h("strong", { attrs: { id: "out-range-tuned" } }, money(atTuned)),
+        ` on questions it was tuned on (answered ${pct(seen.answeredShare)}).`,
       ),
     );
   };
