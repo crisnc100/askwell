@@ -438,14 +438,24 @@ On the host:
 
    `compose.prod.yaml` also sets `ASKWELL_TRUST_PROXY=1`, because Caddy is the only
    client and it writes `X-Forwarded-For`. The image sets the database and data paths.
-2. If this host ran the beta as Ledgerline, move its data first. Stop the old app
-   (`docker compose -f compose.prod.yaml down` in its folder), then run
-   `scripts/migrate_volume.sh ledgerline askwell`, naming the old and new compose
-   projects (by default, their folder names). It copies `ledgerline_ledgerline-data`
-   into `askwell_askwell-data` once, keeping owners and modes, and refuses if the new
-   volume is not empty. Skip it and the app starts on an empty `/data`: old uploads are
-   then out of reach of the hourly sweep and "Delete my data", the audit log starts
-   empty, and the daily spend cap starts again from zero.
+2. If this host ran the beta as Ledgerline, move its data first. Compose names a
+   project after its folder unless `-p` names it, and a volume is named
+   `<project>_<volume>`, so find the real names before copying:
+   - The old project: `docker volume ls --filter name=ledgerline-data` shows
+     `<old project>_ledgerline-data` (`ledgerline` if it ran from `/opt/ledgerline`).
+   - The new project: the name of the folder you run the new app from (`askwell` for
+     `/opt/askwell`), or the `-p` name you will give `docker compose`. Run the next steps
+     from that folder, and use the same name with every later `docker compose` command.
+
+   Stop the old app (`docker compose -f compose.prod.yaml down` in its folder; `docker
+   compose ls` lists running projects), then run
+   `scripts/migrate_volume.sh <old project> <new project>`, for example
+   `scripts/migrate_volume.sh ledgerline askwell`. It copies
+   `<old project>_ledgerline-data` into `<new project>_askwell-data` once, keeping owners
+   and modes, and refuses if the old volume is still in use or the new one is not empty.
+   Skip it and the app starts on an empty `/data`: old uploads are then out of reach of
+   the hourly sweep and "Delete my data", the audit log starts empty, and the daily spend
+   cap starts again from zero.
 3. Start it: `docker compose -f compose.prod.yaml up -d --build`. It starts two
    services: `app`, on `127.0.0.1:8000` so only the host can reach it, and `sweep`,
    which deletes expired workspaces once an hour.
