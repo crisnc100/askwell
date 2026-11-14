@@ -89,18 +89,22 @@ def summarise(outcomes: list[ItemOutcome]) -> dict[str, Any]:
     }
 
 
-def _right_by_question(records: list[dict[str, Any]]) -> dict[str, bool]:
-    """Each in-schema question, right when right in more than half of its trials."""
-    trials: dict[str, list[str]] = {}
+def _right_by_question(records: list[dict[str, Any]], planned: int) -> dict[str, bool]:
+    """Each in-schema question, right when right in more than half of the trials its
+    run planned. A trial that is missing or pending is not right, so an unfinished run
+    never lowers the bar."""
+    correct: dict[str, int] = {}
     for record in records:
-        if record["category"] == "in_schema" and record["outcome"] != "pending":
-            trials.setdefault(record["item_id"], []).append(record["outcome"])
-    return {item: 2 * outs.count("correct") > len(outs) for item, outs in trials.items()}
+        if record["category"] == "in_schema":
+            hit = record["outcome"] == "correct"
+            correct[record["item_id"]] = correct.get(record["item_id"], 0) + hit
+    return {item: 2 * n > planned for item, n in correct.items()}
 
 
-def question_level(records: list[dict[str, Any]]) -> tuple[int, int]:
-    """(questions right in most of their trials, distinct questions), in-schema only."""
-    right = _right_by_question(records)
+def question_level(records: list[dict[str, Any]], planned: int) -> tuple[int, int]:
+    """(questions right in most of their planned trials, distinct questions),
+    in-schema only."""
+    right = _right_by_question(records, planned)
     return sum(right.values()), len(right)
 
 

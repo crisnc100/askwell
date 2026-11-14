@@ -107,6 +107,12 @@ class RunResult:
         default_factory=dict[str, dict[str, list[str]]]
     )
     trials: int = 1
+    # Trials each schema was planned to run: every trial on a run of named items,
+    # otherwise as `trials_for` says. Empty on a result built by hand.
+    planned_trials: dict[str, int] = field(default_factory=dict[str, int])
+
+    def planned(self, schema_id: str) -> int:
+        return self.planned_trials.get(schema_id, trials_for(schema_id, self.trials))
 
 
 def _schemas(
@@ -229,6 +235,7 @@ def run_eval(
         missing = sorted(item_ids - {i.id for items in chosen.values() for i in items})
         if missing:
             raise ValueError(f"no schema given has these items: {', '.join(missing)}")
+    planned = {s: trials if item_ids else trials_for(s, trials) for s in schema_ids}
     tasks = [
         Task(
             schema_id,
@@ -241,7 +248,7 @@ def run_eval(
         )
         for schema_id in schema_ids
         for model in models
-        for trial in range(1, (trials if item_ids else trials_for(schema_id, trials)) + 1)
+        for trial in range(1, planned[schema_id] + 1)
         for system in systems
         for item in chosen[schema_id]
     ]
@@ -377,6 +384,7 @@ def run_eval(
         systems=systems,
         models=models,
         trials=trials,
+        planned_trials=planned,
         csv_load_failures=csv_failures,
     )
 

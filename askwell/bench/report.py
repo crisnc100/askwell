@@ -250,7 +250,7 @@ def build(result: RunResult) -> dict[str, Any]:
                 "system": system,
                 "model": model,
                 "gold": gold,
-                "right": Rate(*question_level(records)).to_dict(),
+                "right": Rate(*question_level(records, result.planned(schema_id))).to_dict(),
             }
             for (schema_id, gold, system, model), records in sorted(groups.items())
         ]
@@ -356,7 +356,8 @@ def render_markdown(report: dict[str, Any]) -> str:
             "",
             "## Question-level accuracy",
             "",
-            "A question counts as right when it is right in more than half of its trials. "
+            "A question counts as right when it is right in more than half of its planned "
+            "trials; a trial that did not finish counts as not right. "
             "The interval is over distinct questions.",
             "",
             "| Schema | System | Model | Right | Gold |",
@@ -396,14 +397,18 @@ def write(report: dict[str, Any], out_dir: Path = REPORTS_DIR) -> tuple[Path, Pa
 
 def compare_runs(before: RunResult, after: RunResult) -> list[dict[str, Any]]:
     """Per schema, gold, system and model present in both runs: question-level right or
-    not, paired on the same questions, with the exact McNemar p-value."""
+    not against each run's planned trials, paired on the same questions, with the exact
+    McNemar p-value."""
 
     def by_key(result: RunResult) -> dict[tuple[str, str, str, str], dict[str, bool]]:
         groups: dict[tuple[str, str, str, str], list[dict[str, Any]]] = defaultdict(list)
         for record in result.records:
             key = (record["schema_id"], _gold(record), record["system"], record["model"])
             groups[key].append(record)
-        return {key: _right_by_question(records) for key, records in groups.items()}
+        return {
+            key: _right_by_question(records, result.planned(key[0]))
+            for key, records in groups.items()
+        }
 
     old, new = by_key(before), by_key(after)
     out: list[dict[str, Any]] = []

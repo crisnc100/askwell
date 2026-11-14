@@ -301,3 +301,21 @@ questions and gives the exact McNemar p-value. One-trial reports keep their old 
   missing ID no longer fails Check.
 - b77b893: `test_prompt.py` follows `interpret-v3`; the features now described are
   required in the all-off prompt's out-of-reach list and absent from the all-on one.
+
+**PR-3 review fixes (4 MEDIUM).**
+- f1: a `has` filter that names a link (`flights@origin_id`) is refused as
+  `feature_off` when `link_roles` is off, and its ambiguous-path refusal then names no
+  link. The prompt teaches `entity@link` for `has` only with `link_roles` on. With every
+  switch on the prompt is byte for byte the same, so no recording changed; the deployed
+  prompt (`link_roles` off) loses that one sentence.
+- f2: the two fields of a computed value are cast to a float on both engines. Two
+  integer fields made an integer expression, and Postgres compared it with `2.4` as an
+  integer (0 rows where 590 were right; tested on both engines).
+- f3: a selected computed value's name cannot be a base field's name
+  (`alias_collision`) or another column's (`duplicate_alias`); before, an `order_by`
+  naming it sorted by the computed column, not the field.
+- f4: question-level accuracy counts against the trials each schema planned
+  (`RunResult.planned_trials`: every trial on a run of named items, otherwise one for
+  Spider), so a missing or pending trial is not right; `compare_runs` does the same.
+- Existing test changed in its own commit: c75e9bf, `question_level` takes
+  `planned=3`; the expected result is unchanged.
