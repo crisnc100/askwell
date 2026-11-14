@@ -109,6 +109,7 @@ def test_a_declared_key_to_a_unique_column_is_kept(engines: list[Engine]) -> Non
                 to_entity="model_list",
                 to_field="model",
                 source="declared",
+                feature="inferred_links",
             )
         ]
 
