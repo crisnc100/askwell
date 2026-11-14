@@ -319,3 +319,8 @@ questions and gives the exact McNemar p-value. One-trial reports keep their old 
   Spider), so a missing or pending trial is not right; `compare_runs` does the same.
 - Existing test changed in its own commit: c75e9bf, `question_level` takes
   `planned=3`; the expected result is unchanged.
+- Fix check, x2: the select-name check collects every output label first, so a
+  computed value named `parts__name` clashes with `parts.name` in either order (tested
+  both ways).
+- Fix check, x1, deferred: a computed value is a float, exact only up to 2^53 (about
+  9 × 10^15); business amounts stay far below that.

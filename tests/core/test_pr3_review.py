@@ -112,3 +112,13 @@ def test_two_computed_values_cannot_share_a_name(registry: Registry) -> None:
     assert _check(registry, twice).codes == ["duplicate_alias"]
     fine = {**twice, "select": [{**PRODUCT, "alias": "line_total"}, "quantity"]}
     assert _check(registry, fine).ok
+
+
+@pytest.mark.parametrize("computed_first", [True, False], ids=["computed_first", "field_first"])
+def test_a_computed_name_clash_is_refused_in_either_order(
+    registry: Registry, computed_first: bool
+) -> None:
+    computed = {**PRODUCT, "alias": "parts__name"}
+    select = [computed, "parts.name"] if computed_first else ["parts.name", computed]
+    intent = {"intent_type": "row_list", "entity": "work_order_parts", "select": select}
+    assert _check(registry, intent).codes == ["duplicate_alias"]

@@ -8,7 +8,7 @@ registry and every value is already converted to the field's Python type.
 from __future__ import annotations
 
 import re
-from collections import deque
+from collections import Counter, deque
 from collections.abc import Sequence
 from dataclasses import dataclass, field
 from datetime import date, datetime
@@ -1409,18 +1409,24 @@ class _Validator:
             out.append(PlanHaving(having.metric, having.op, (having.value,)))
         return out
 
-    def _check_select_label(
-        self, rfield: ResolvedField, before: list[ResolvedField], loc: str
-    ) -> None:
+    def _check_select_labels(self, select: list[tuple[int, ResolvedField]]) -> None:
         """A computed value's name is its column and what `order_by` names, so it must not
-        be a base field's name (ordering would pick the field) or another column's."""
-        if rfield.expr is None:
-            return
+        be a base field's name (ordering would pick the field) or another column's. Every
+        label is collected first, so the order of `select` does not matter."""
         assert self.base_def is not None
-        if rfield.label in self.base_def.fields:
-            self.fail("alias_collision", f"{loc}.alias", f"{rfield.label!r} is a field's name")
-        elif any(other.label == rfield.label for other in before):
-            self.fail("duplicate_alias", f"{loc}.alias", f"{rfield.label!r} is used twice")
+        counts = Counter(rfield.label for _, rfield in select)
+        reported: set[str] = set()
+        for index, rfield in select:
+            if rfield.expr is None or rfield.label in reported:
+                continue
+            loc = f"select[{index}].alias"
+            if rfield.label in self.base_def.fields:
+                self.fail("alias_collision", loc, f"{rfield.label!r} is a field's name")
+            elif counts[rfield.label] > 1:
+                self.fail("duplicate_alias", loc, f"{rfield.label!r} is used twice")
+            else:
+                continue
+            reported.add(rfield.label)
 
     def check_order(
         self,
@@ -1482,12 +1488,13 @@ class _Validator:
         if self.intent.intent_type == "date_series":
             return self.run_series(base)
 
-        select: list[ResolvedField] = []
+        selected: list[tuple[int, ResolvedField]] = []
         for index, ref in enumerate(self.intent.select):
             resolved = self.resolve_expr(ref, f"select[{index}]")
             if resolved is not None:
-                self._check_select_label(resolved[0], select, f"select[{index}]")
-                select.append(resolved[0])
+                selected.append((index, resolved[0]))
+        self._check_select_labels(selected)
+        select = [rfield for _, rfield in selected]
         groups = self.check_group_by()
         group_labels = {g.label for g in groups} | {
             g.key.label for g in groups if g.key and g.key_shown
