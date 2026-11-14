@@ -249,11 +249,22 @@ never add a filter the question does not state, and a named span of whole months
 explicit start and end dates. The Confirm preview and the API send the workspace's
 switches (`PromptView.features`).
 
-**Every replay recording misses until the re-record.** The prompt text and the Intent
-JSON schema both changed, so `tests/pipeline/test_api_replay.py` (13 tests) and
-verify's replay-report check fail until the orchestrator re-records the demo and
-fieldservice recordings live under `interpret-v3` (P3.5), then rewrites the committed
-replay report with `uv run python -m scripts.check_replay_report --write`.
+**Re-recorded live under `interpret-v3` (P3.5: met).** The prompt text and the Intent
+JSON schema both changed, so every recording missed. Re-recorded on
+`anthropic:claude-haiku-5-5`, cap $0.15:
+```
+uv run python -m evals.replay_cases record
+uv run askwell eval --schema fieldservice --systems ledgerline,oneshot --mode record --models anthropic:claude-haiku-5-5 --trials 1 --budget 0.14 --run-id rerecord-v3-fieldservice
+uv run python -m scripts.check_replay_report --write
+```
+- The canned questions and the Spider init-then-ask case: 10 calls, $0.0051. Every
+  canned question answers or refuses as its test expects.
+- The fieldservice record run: 134 calls, $0.0669. Report:
+  `evals/reports/rerecord-v3-fieldservice.md`. Seen questions, 1 trial: ledgerline 41
+  of 43 right, 1 wrong among 42 answered (fs-024, the two-date reading tagged
+  gold_issue), fs-037 refused as expected.
+- Spend: $0.0720. The replay report reproduces from the new recordings, and
+  `./verify.sh` is green.
 
 **O11, no ID column (Cristian, 2026-11-14).** A file with no ID column, other than a
 link table, now passes Check with a warning, "No id column found; rows are numbered for
