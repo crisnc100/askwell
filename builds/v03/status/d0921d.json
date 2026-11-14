@@ -1,1 +1,1 @@
-{"f1":{"status":"fixed","response":"real"}}
+{"f1": {"status": "fixed", "response": "real"}, "x1": {"status": "deferred", "reason": "Only a run whose whole schema group is deferred (budget halt before any trial finishes) loses that group from question-level stats; the Phase 4 runs are complete fresh runs and a halted run is reported as incomplete. Follow-up: seed groups from planned_items."}}
