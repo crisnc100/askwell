@@ -614,6 +614,8 @@ Decided by the orchestrator (see Decisions). The recommendations that now stand:
   - Recommendation: B in PR-3, before Phase 4, so the CSV measurement says what visitors
     meet. C widens what links and needs the same evidence rules as inferred links, so it
     is better as its own change after the measurement.
+  - **Decided by Cristian, 2026-11-14: B**, built in PR-3 before Phase 4. The check shows
+    a gentle note, not an error: "No id column found; rows are numbered for you".
 
 ## Out of scope
 - Set operations, comparison with the top row's value, distinct counts of periods,

@@ -101,6 +101,11 @@ class RunResult:
     registry_hashes: dict[str, str] = field(default_factory=dict[str, str])
     systems: list[str] = field(default_factory=list[str])
     models: list[str] = field(default_factory=list[str])
+    # askwell_csv: per schema, every table whose file failed the upload check, with its
+    # problem codes, whether or not a scored question reads it.
+    csv_load_failures: dict[str, dict[str, list[str]]] = field(
+        default_factory=dict[str, dict[str, list[str]]]
+    )
     trials: int = 1
 
 
@@ -356,6 +361,11 @@ def run_eval(
         for system in built.values():
             if isinstance(system, AskwellCsvSystem):
                 system.close()
+    csv_failures = {
+        key[0]: dict(system.workspace.failed)
+        for key, system in built.items()
+        if isinstance(system, AskwellCsvSystem) and system.workspace.failed
+    }
     return RunResult(
         run_id=run_id,
         records=outcome.records,
@@ -367,6 +377,7 @@ def run_eval(
         systems=systems,
         models=models,
         trials=trials,
+        csv_load_failures=csv_failures,
     )
 
 

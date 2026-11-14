@@ -111,6 +111,9 @@ class TablePlan:
     id_column: str | None
     links: list[Link]
     rows: list[list[str | None]]
+    # Link columns adopted by name and evidence (inferred_links), not by the `<x>_id`
+    # rule; the drafted registry marks their relationships with that switch.
+    named_links: list[str] = field(default_factory=list[str])
 
 
 @dataclass
@@ -589,13 +592,14 @@ def _plural_forms(table: str) -> set[str]:
 
 def _add_named_links(
     parsed: list[_Parsed], id_index: dict[str, int], links: dict[str, list[tuple[int, str]]]
-) -> None:
+) -> set[tuple[str, int]]:
     """Links the `<x>_id` rule misses, kept only on evidence: a column named
     `<x>_id` or `<role>_<x>_id`, where `<x>` is a table's name or singular (the longest
     such table wins; two of one length give none), with at least
     MIN_DISTINCT_FOR_LINK distinct values, every one of them an ID in that table. A
     column that fails is left a plain column, never an error, so a set that loaded
-    before still loads."""
+    before still loads. Returns the (table, column index) pairs it linked."""
+    adopted: set[tuple[str, int]] = set()
     by_slug = {p.slug: p for p in parsed}
     for p in parsed:
         linked = {index for index, _ in links.get(p.slug, [])}
@@ -618,14 +622,14 @@ def _add_named_links(
             if len(targets) != 1:
                 continue
             target = targets[0]
-            values = {str(v).strip() for r in p.rows if (v := r[index]) is not None}
-            ids = {
-                str(v).strip()
-                for r in by_slug[target].rows
-                if (v := r[id_index[target]]) is not None
-            }
+            # The cells exactly as the loader converts them: ' 1' is not the ID 1 there,
+            # so a link adopted on trimmed values would fail to load.
+            values = {v for r in p.rows if (v := r[index]) is not None}
+            ids = {v for r in by_slug[target].rows if (v := r[id_index[target]]) is not None}
             if len(values) >= MIN_DISTINCT_FOR_LINK and values <= ids:
                 links.setdefault(p.slug, []).append((index, target))
+                adopted.add((p.slug, index))
+    return adopted
 
 
 def _type_by_role(
@@ -667,8 +671,9 @@ def _cross_file(parsed: list[_Parsed], features: Features = ALL) -> list[TablePl
     """ID columns, links and link types across the whole set, then the plans."""
     by_slug = {p.slug: p for p in parsed}
     id_index, links = _roles(parsed, set(by_slug), complete=True)
+    named: set[tuple[str, int]] = set()
     if "inferred_links" in features:
-        _add_named_links(parsed, id_index, links)
+        named = _add_named_links(parsed, id_index, links)
     _type_by_role(parsed, id_index, links)
 
     id_values: dict[str, set[int | float | str]] = {}
@@ -712,6 +717,7 @@ def _cross_file(parsed: list[_Parsed], features: Features = ALL) -> list[TablePl
                     for i, t in links.get(p.slug, [])
                 ],
                 rows=p.rows,
+                named_links=[p.names[i] for i, _ in links.get(p.slug, []) if (p.slug, i) in named],
             )
         )
     return plans

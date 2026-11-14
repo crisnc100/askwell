@@ -117,6 +117,10 @@ class Relationship(_Strict):
     to_field: str
     cardinality: Literal["many_to_one"] = "many_to_one"
     source: Literal["declared", "inferred"]
+    # The feature switch this link was drawn under (askwell/core/features.py), or None
+    # for a link Askwell drew before switches existed. With that switch off the link is
+    # not used, so a registry drafted with it on behaves as one drafted with it off.
+    feature: Literal["inferred_links"] | None = None
 
 
 class Registry(_Strict):
@@ -150,6 +154,14 @@ class Registry(_Strict):
         return self
 
 
+def enabled_links(registry: Registry, features: frozenset[str]) -> Registry:
+    """The registry without the links whose feature switch is off."""
+    kept = [r for r in registry.relationships if r.feature is None or r.feature in features]
+    if len(kept) == len(registry.relationships):
+        return registry
+    return registry.model_copy(update={"relationships": kept})
+
+
 def load_registry(path: Path | str) -> Registry:
     with Path(path).open(encoding="utf-8") as fh:
         data = yaml.safe_load(fh)
@@ -167,4 +179,7 @@ def dump_registry(registry: Registry) -> str:
         for fdef in entity["fields"].values():
             if not fdef["text_number"]:
                 del fdef["text_number"]
+    for rel in data["relationships"]:
+        if rel["feature"] is None:
+            del rel["feature"]
     return yaml.safe_dump(data, sort_keys=False, allow_unicode=True, width=100)

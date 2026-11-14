@@ -196,3 +196,24 @@ uv run askwell eval --schema spider_network_1 --schema spider_wta_1 --systems le
   `CODE_MAX`; the avg, sum, count and filter expectations follow the larger data.
 - 946cf72: the CSV fixture's `orders.amount` gains three values; no assertion changed.
 - d4e4fcb: the gate-list test expects 26 network_1 and wta_1 items, not 36.
+
+**Review a13dba fixes (8 MEDIUM).**
+- f1: a link drawn only because `inferred_links` is on carries `feature: inferred_links`
+  in the registry (the new name forms, a declared key to a unique column, and upload
+  links adopted by name and evidence). With the switch off the validator and the prompt
+  leave it out, so an existing registry behaves as one drafted with the switch off.
+  Older inferred links carry no mark. The car_1 and flight_2 hashes change for the mark
+  alone; prompts do not show it, so no recording key changes.
+- f2: upload containment compares the cells exactly as the loader converts them, so a
+  padded `' 1'` never adopts a link that would then fail to load.
+- f3: a label key reached by a named link carries that link, so grouping by both ends
+  of two links keeps two key columns.
+- f4: numbers-as-text detection trims spaces only, as SQL `TRIM()` does on both
+  engines; a value padded with a tab or a newline keeps the column text.
+- f5: only ASCII digits read as numbers.
+- f6: containment leaves NULL target keys out of its `NOT IN`.
+- f7: a column whose stored type differs from the target key's (text against integer)
+  is never linked, and a containment query that cannot run counts as no evidence
+  instead of stopping `registry init` (tested on Postgres).
+- f8: an eval run carries every CSV load failure per schema (`RunResult.
+  csv_load_failures`), so the report lists tables no scored question reads.

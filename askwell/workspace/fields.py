@@ -93,8 +93,11 @@ def draft(db_path: Path, plans: list[TablePlan], features: Features = ALL) -> di
     finally:
         engine.dispose()
     found = {(p.name, link.column) for p in plans for link in p.links}
+    named = {(p.name, column) for p in plans for column in p.named_links}
     relationships = [
-        r
+        r.model_copy(update={"feature": "inferred_links"})
+        if (r.from_entity, r.from_field) in named
+        else r
         for r in result.registry.relationships
         if r.source == "declared" and (r.from_entity, r.from_field) in found
     ]

@@ -227,6 +227,10 @@ def build(result: RunResult) -> dict[str, Any]:
         and outcomes.get("ledgerline") not in (None, "correct")
     ]
     csv_failures: dict[str, dict[str, list[str]]] = defaultdict(dict)
+    for schema_id, tables in result.csv_load_failures.items():
+        csv_failures[schema_id].update(tables)
+    # A resumed run builds no system for work already done; its records still name the
+    # tables their questions needed.
     for record in result.records:
         for table_name, codes in record["detail"].get("failed_tables", {}).items():
             csv_failures[record["schema_id"]][table_name] = codes

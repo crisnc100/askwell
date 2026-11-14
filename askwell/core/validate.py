@@ -31,6 +31,7 @@ from askwell.core.registry import (
     FieldType,
     Registry,
     Relationship,
+    enabled_links,
 )
 
 MAX_HOPS = 3
@@ -310,7 +311,7 @@ class _Validator:
     ) -> None:
         self.features = features
         self.intent = intent
-        self.registry = registry
+        self.registry = enabled_links(registry, features)
         self.now = now
         self.row_cap = row_cap
         self.issues: list[Issue] = []
@@ -1058,13 +1059,17 @@ class _Validator:
             for g in out
         ]
 
-    def _key_of(self, entity_slug: str, alias: str, is_base: bool) -> tuple[ResolvedField, ...]:
+    def _key_of(
+        self, entity_slug: str, alias: str, is_base: bool, link: str | None = None
+    ) -> tuple[ResolvedField, ...]:
         """Every field of the entity's key, in order, on the same join as a field of it.
         Hidden ones too: a key only groups or orders rows here, and is returned only
         when it is visible (`PlanGroup.key_shown`)."""
         entity = self.registry.entities[entity_slug]
         return tuple(
-            ResolvedField(alias, entity_slug, name, fdef.column, fdef.type, is_base)
+            # The link a field was reached by names its key too, so the keys of one
+            # entity reached by two links stay two columns.
+            ResolvedField(alias, entity_slug, name, fdef.column, fdef.type, is_base, link=link)
             for name in entity.primary_key
             for fdef in (entity.fields[name],)
         )
@@ -1076,7 +1081,7 @@ class _Validator:
         if self.registry.entities[rfield.entity].label != rfield.name:
             return None
         # The registry allows a label only beside a single-field key.
-        (key,) = self._key_of(rfield.entity, rfield.alias, rfield.is_base)
+        (key,) = self._key_of(rfield.entity, rfield.alias, rfield.is_base, rfield.link)
         return key
 
     def check_having(self, metrics: list[PlanMetric]) -> list[PlanHaving]:

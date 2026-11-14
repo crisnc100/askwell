@@ -15,7 +15,7 @@ from datetime import datetime
 from typing import Any
 
 from askwell.core.features import ALL, Features
-from askwell.core.registry import FieldDef, Registry
+from askwell.core.registry import FieldDef, Registry, enabled_links
 from askwell.core.validate import Issue
 from askwell.llm.types import ChatMessage
 
@@ -168,6 +168,7 @@ def _render(
     time_zone: str,
     features: Features = ALL,
 ) -> str:
+    registry = enabled_links(registry, features)
     lines = [f"Reference date: {now.date().isoformat()} ({time_zone}).", "", "Entities:"]
     for slug, entity in registry.entities.items():
         header = f"## {slug}"

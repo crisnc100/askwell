@@ -42,7 +42,7 @@ from sqlalchemy import (
     table,
     text,
 )
-from sqlalchemy.exc import OperationalError
+from sqlalchemy.exc import DBAPIError, OperationalError
 
 from askwell.core.features import ALL, Features
 from askwell.core.registry import (
@@ -208,6 +208,7 @@ def _relationships(
                     to_entity=entity_slug[target.name],
                     to_field=field_slugs[target.name][dst_col],
                     source="declared",
+                    feature=None if single_pk.get(target.name) == dst_col else "inferred_links",
                 ),
             )
 
@@ -236,7 +237,9 @@ def _relationships(
             for owner in pk_owner.get(col_name.lower(), []):
                 if owner != t.name and owner not in candidates:
                     candidates.append(owner)
-            if not candidates and "inferred_links" in features and engine is not None:
+            named = not candidates and "inferred_links" in features and engine is not None
+            if named:
+                assert engine is not None
                 candidates = _named_targets(col_name, t, tables, single_pk)
                 if len(candidates) == 1 and not _values_contained(
                     engine, t, col_name, by_name[candidates[0]], single_pk[candidates[0]]
@@ -257,6 +260,7 @@ def _relationships(
                 to_entity=entity_slug[target_name],
                 to_field=field_slugs[target_name][single_pk[target_name]],
                 source="inferred",
+                feature="inferred_links" if named else None,
             )
     return sorted(rels.values(), key=lambda r: (r.from_entity, r.from_field, r.to_entity))
 
@@ -301,29 +305,48 @@ def _values_contained(
 ) -> bool:
     """Enough evidence that a column holds the target's keys: at least
     MIN_DISTINCT_FOR_LINK distinct values, every one of them a target key. Small integer
-    keys contain each other by chance, which is why a name match comes first."""
+    keys contain each other by chance, which is why a name match comes first. A column
+    whose stored type differs from the key's (text against integer) is never a link:
+    Postgres cannot even compare them, and a join on them would fail the same way."""
+    if _type_family(t, col_name) != _type_family(target, target_key):
+        return False
     src = table(t.name, column(col_name))
     dst = table(target.name, column(target_key))
     value = src.c[col_name]
-    with engine.connect() as conn:
-        distinct = conn.execute(select(func.count(value.distinct())).select_from(src)).scalar()
-        missing = conn.execute(
-            select(func.count())
-            .select_from(src)
-            .where(value.is_not(None), value.not_in(select(dst.c[target_key])))
-        ).scalar()
+    key = dst.c[target_key]
+    # NULL keys are left out of the list: one NULL makes every NOT IN unknown, which
+    # would count no value as missing.
+    keys = select(key).where(key.is_not(None))
+    try:
+        with engine.connect() as conn:
+            distinct = conn.execute(select(func.count(value.distinct())).select_from(src)).scalar()
+            missing = conn.execute(
+                select(func.count()).select_from(src).where(value.is_not(None), value.not_in(keys))
+            ).scalar()
+    except DBAPIError:
+        # A check that cannot run is no evidence; the column stays unlinked and the rest
+        # of the registry is still drafted.
+        return False
     return int(distinct or 0) >= MIN_DISTINCT_FOR_LINK and int(missing or 0) == 0
 
 
+def _type_family(t: _Table, col_name: str) -> str:
+    sa_type = next(c["type"] for c in t.columns if str(c["name"]) == col_name)
+    ftype = field_type(sa_type)
+    return "number" if ftype in NUMERIC_TYPES else ftype
+
+
 _NOT_A_NUMBER_NAME = re.compile(r"(id|code|zip|postal|phone)$", re.IGNORECASE)
-_LEADING_ZERO = re.compile(r"^[+-]?0\d")
+# ASCII digits only: the database casts read no other digits (Python's \d also matches
+# Arabic-Indic and other scripts).
+_LEADING_ZERO = re.compile(r"^[+-]?0[0-9]")
 _NUMBER_SAMPLE = 50
 # A column with at most this many distinct numbers is read as codes (0/1 flags, a 1-3
 # status), kept as categorical text so the model sees its values. Five covers flags and
 # small code sets; a measured quantity rarely has so few, and one with more (dog ages
 # 1 to 9) is the kind a question averages.
 CODE_MAX = 5
-_NUMBER = re.compile(r"^[+-]?(\d+(\.\d*)?|\.\d+)([eE][+-]?\d+)?$")
+_NUMBER = re.compile(r"^[+-]?([0-9]+(\.[0-9]*)?|\.[0-9]+)([eE][+-]?[0-9]+)?$")
 
 
 def _holds_numbers(engine: Engine, t: _Table, col_name: str) -> bool:
@@ -352,14 +375,19 @@ def _holds_numbers(engine: Engine, t: _Table, col_name: str) -> bool:
 
 
 def _distinct_numbers(values: Sequence[object]) -> int:
-    return len(
-        {float(v) for raw in values if (v := str(raw).strip()) not in TEXT_NUMBER_PLACEHOLDERS}
-    )
+    return len({float(v) for raw in values if (v := _trimmed(raw)) not in TEXT_NUMBER_PLACEHOLDERS})
+
+
+def _trimmed(raw: object) -> str:
+    # Spaces only, as SQL's TRIM() removes: a value padded with a tab or a newline is not
+    # one the builder's cast treats the same on both engines, so it does not read as a
+    # number or a placeholder here.
+    return str(raw).strip(" ")
 
 
 def _all_numbers(values: Sequence[object]) -> bool:
     for raw in values:
-        value = str(raw).strip()
+        value = _trimmed(raw)
         if value in TEXT_NUMBER_PLACEHOLDERS:
             continue
         if _LEADING_ZERO.match(value) or not _NUMBER.match(value):
