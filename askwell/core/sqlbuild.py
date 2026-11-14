@@ -8,6 +8,7 @@ period's first day as a DATE on every engine.
 
 from __future__ import annotations
 
+from decimal import Decimal
 from typing import Any
 
 from sqlalchemy import (
@@ -273,7 +274,9 @@ def _fields(plan: QueryPlan) -> list[ResolvedField]:
     out: list[ResolvedField] = list(plan.select)
     out += [m.field for m in plan.metrics if m.field is not None]
     out += [g.field for g in plan.group_by]
+    out += [g.key for g in plan.group_by if g.key is not None]
     out += [o.field for o in plan.order_by if o.field is not None]
+    out += plan.tiebreak
     for series in plan.series:
         out.append(series.date_field)
         if series.metric.field is not None:
@@ -516,7 +519,59 @@ def _build_series(plan: QueryPlan) -> Select[Any]:
     return select(*columns).select_from(source).order_by(period)
 
 
-def build(plan: QueryPlan) -> Select[Any]:
+ORDER_PREFIX = "_order_"  # labels are slugs, which start with a letter, so never collide
+
+# Two ordering values within this distance tie: the eval scorer's tolerance, so a float
+# sum that differs in its last bits between Postgres and SQLite still counts as a tie.
+TIE_TOLERANCE = 1e-6
+
+
+def peeks(plan: QueryPlan, row_cap: int) -> bool:
+    """Whether a run fetches one row past the limit, to see if it ties with the last."""
+    return (
+        plan.intent_type != "date_series"
+        and plan.limit is not None
+        and bool(plan.order_by)
+        and plan.limit < row_cap
+    )
+
+
+def _hidden_order_index(plan: QueryPlan, index: int) -> bool:
+    """A row-list ORDER BY field that is not also selected needs its own column to be
+    compared."""
+    item = plan.order_by[index]
+    return item.field is not None and all(
+        (f.alias, f.column) != (item.field.alias, item.field.column) for f in plan.select
+    )
+
+
+def tie_labels(plan: QueryPlan) -> list[str]:
+    """The output column of each ORDER BY item, in order."""
+    labels: list[str] = []
+    for index, item in enumerate(plan.order_by):
+        if item.field is None:
+            labels.append(item.label or "")
+        elif _hidden_order_index(plan, index):
+            labels.append(f"{ORDER_PREFIX}{index}")
+        else:
+            labels.append(item.field.label)
+    return labels
+
+
+def values_tie(a: Any, b: Any) -> bool:
+    if a is None or b is None:
+        return a is None and b is None
+    numeric = (int, float, Decimal)
+    both_numbers = isinstance(a, numeric) and isinstance(b, numeric)
+    if both_numbers and not isinstance(a, bool) and not isinstance(b, bool):
+        return abs(float(a) - float(b)) <= TIE_TOLERANCE
+    return bool(a == b)
+
+
+def build(plan: QueryPlan, *, peek: bool = False) -> Select[Any]:
+    """`peek` fetches one row past the limit, and adds a column for each row-list
+    ORDER BY field that is not selected, so the caller can tell whether the next row
+    ties with the last one. The caller drops both (`peeks`, `tie_labels`)."""
     if plan.intent_type == "date_series":
         return _build_series(plan)
     tables = _Tables(plan)
@@ -529,6 +584,12 @@ def build(plan: QueryPlan) -> Select[Any]:
         columns = [tables.col(f).label(f.label) for f in plan.select]
     else:
         for group in plan.group_by:
+            if group.key is not None:
+                key = tables.value(group.key)
+                group_exprs.append(key)
+                if group.key_shown:
+                    columns.append(key.label(group.key.label))
+                    _label(labelled, group.key.label, key)
             expr = tables.value(group.field)
             if group.grain is not None:
                 expr = GRAINS[group.grain](expr)
@@ -560,9 +621,22 @@ def build(plan: QueryPlan) -> Select[Any]:
         # descending and SQLite puts them last, so the same intent would sort differently.
         ordered = expr.desc() if item.direction == "desc" else expr.asc()
         order.append(ordered.nulls_last())
+    # Then a defined order inside ties: every group column (its key first), or a row
+    # list's key, ascending. Without it, tied rows come back in whatever order the
+    # engine returns, which differs between Postgres and SQLite.
+    for group in plan.group_by:
+        if group.key is not None:
+            order.append(tables.value(group.key).asc().nulls_last())
+        order.append(labelled[group.label].asc().nulls_last())
+    order += [tables.value(f).asc().nulls_last() for f in plan.tiebreak]
     if order:
         stmt = stmt.order_by(*order)
-    if plan.limit is not None:
+    if peek and plan.limit is not None:
+        for index, item in enumerate(plan.order_by):
+            if item.field is not None and _hidden_order_index(plan, index):
+                stmt = stmt.add_columns(tables.value(item.field).label(f"{ORDER_PREFIX}{index}"))
+        stmt = stmt.limit(plan.limit + 1)
+    elif plan.limit is not None:
         stmt = stmt.limit(plan.limit)
     return stmt
 

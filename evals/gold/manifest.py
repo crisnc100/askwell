@@ -23,7 +23,14 @@ from typing import Any
 GOLD_DIR = Path(__file__).resolve().parent
 MANIFEST = GOLD_DIR / "MANIFEST.json"
 CHANGELOG = GOLD_DIR / "CHANGELOG.md"
-GOLD_FILES = ("fieldservice.jsonl", "spider_ids.json", "spider_selection.py", "holdout-v02.jsonl")
+GOLD_FILES = (
+    "fieldservice.jsonl",
+    "spider_ids.json",
+    "spider_selection.py",
+    "holdout-v02.jsonl",
+    "spider_selection_v03.py",
+    "spider_ids_v03.json",
+)
 REVISION_HEADING = re.compile(r"^## Revision (\d+) — (\d{4}-\d{2}-\d{2})$", re.MULTILINE)
 
 

@@ -19,3 +19,4 @@ and those Results say so. ADR-004's amendments and ADR-007 were measured live.
 | [005](ADR-005-replay-and-budget.md) | Replay recordings and a hard per-run budget | Replay held; spend and cost not measured |
 | [006](ADR-006-benchmark-methodology.md) | Questions fixed in advance, on fieldservice and 5 Spider databases | Recorded (simulated); sql_agent not measured |
 | [007](ADR-007-grammar-v02.md) | Grammar v0.2: ratios, conditional metrics, two-date series, refuse first | Measured live: 8 of 10 predictions held; held-out wrong answers 25.9%, not 8% |
+| [008](ADR-008-accuracy-v03.md) | v0.3 accuracy: stable answers, uncurated schemas, four grammar features, a deploy gate | Not measured yet |

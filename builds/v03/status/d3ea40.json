@@ -1,0 +1,1 @@
+{"f1":{"status":"fixed","response":"real"},"f2":{"status":"fixed","response":"real"},"x1":{"status":"deferred","reason":"Only a composite key that includes a DATETIME field stored in mixed SQLite text forms; fieldservice and uploads have no such key. Follow-up: tie-break on the raw key value."}}

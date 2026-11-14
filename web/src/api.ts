@@ -57,6 +57,15 @@ export interface FieldEdit {
 
 export interface Edits {
   fields: Record<string, FieldEdit>;
+  // Each table's name column, or null for none; a table left out keeps the drafted one.
+  labels?: Record<string, string | null>;
+}
+
+export interface FieldTable {
+  name: string;
+  fields: Field[];
+  label: string | null;
+  label_options: string[];
 }
 
 export interface Answer {
@@ -68,6 +77,7 @@ export interface Answer {
   columns: string[];
   rows: unknown[][];
   truncated: boolean;
+  tied_at_cutoff?: boolean;
   refusal: string | null;
   explanation: { message: string; suggestion: string } | null;
 }
@@ -119,7 +129,7 @@ export const api = {
   remove: (name: string) =>
     call<Status>("DELETE", "/api/workspace/files", undefined, true, name),
   check: () => call<Status>("POST", "/api/workspace/check"),
-  fields: () => call<{ tables: { name: string; fields: Field[] }[]; edits: Edits }>(
+  fields: () => call<{ tables: FieldTable[]; edits: Edits }>(
     "GET",
     "/api/workspace/fields",
   ),

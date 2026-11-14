@@ -156,6 +156,10 @@ class PlanGroup:
     label: str
     field: ResolvedField
     grain: str | None
+    # Set when `field` is its entity's label: the entity's key, grouped with it so two
+    # things that share a name stay apart. Returned too, unless the key is hidden.
+    key: ResolvedField | None = None
+    key_shown: bool = True
 
 
 @dataclass(frozen=True)
@@ -197,6 +201,9 @@ class QueryPlan:
     limit: int | None
     grain: str | None = None  # date_series only
     series: tuple[PlanSeries, ...] = ()
+    # row_list: the base entity's key, ordered after the intent's own order_by so rows
+    # that tie come back in one order on every engine.
+    tiebreak: tuple[ResolvedField, ...] = ()
 
 
 @dataclass
@@ -960,8 +967,36 @@ class _Validator:
             if label in {g.label for g in out}:
                 self.fail("alias_collision", loc, f"{group.field} is grouped twice")
                 continue
-            out.append(PlanGroup(label, rfield, group.grain))
-        return out
+            key = self._label_key(rfield) if group.grain is None else None
+            shown = key is not None and not self._is_hidden(key)
+            out.append(PlanGroup(label, rfield, group.grain, key, shown))
+        grouped = {g.field.key for g in out if g.grain is None}
+        # A key the intent also groups by on its own is already there.
+        return [
+            g if g.key is None or g.key.key not in grouped else PlanGroup(g.label, g.field, g.grain)
+            for g in out
+        ]
+
+    def _key_of(self, entity_slug: str, alias: str, is_base: bool) -> tuple[ResolvedField, ...]:
+        """Every field of the entity's key, in order, on the same join as a field of it.
+        Hidden ones too: a key only groups or orders rows here, and is returned only
+        when it is visible (`PlanGroup.key_shown`)."""
+        entity = self.registry.entities[entity_slug]
+        return tuple(
+            ResolvedField(alias, entity_slug, name, fdef.column, fdef.type, is_base)
+            for name in entity.primary_key
+            for fdef in (entity.fields[name],)
+        )
+
+    def _is_hidden(self, rfield: ResolvedField) -> bool:
+        return self.registry.entities[rfield.entity].fields[rfield.name].hidden
+
+    def _label_key(self, rfield: ResolvedField) -> ResolvedField | None:
+        if self.registry.entities[rfield.entity].label != rfield.name:
+            return None
+        # The registry allows a label only beside a single-field key.
+        (key,) = self._key_of(rfield.entity, rfield.alias, rfield.is_base)
+        return key
 
     def check_having(self, metrics: list[PlanMetric]) -> list[PlanHaving]:
         out: list[PlanHaving] = []
@@ -1056,7 +1091,10 @@ class _Validator:
             if resolved is not None:
                 select.append(resolved[0])
         groups = self.check_group_by()
-        metrics = self.check_metrics({g.label for g in groups})
+        group_labels = {g.label for g in groups} | {
+            g.key.label for g in groups if g.key and g.key_shown
+        }
+        metrics = self.check_metrics(group_labels)
         where = self.check_filters()
         where_dates = self.check_date_range(where)
         having = self.check_having(metrics)
@@ -1078,8 +1116,14 @@ class _Validator:
             having=tuple(having),
             order_by=tuple(order),
             limit=limit,
+            tiebreak=self._row_tiebreak(),
         )
         return ValidationResult(plan=plan)
+
+    def _row_tiebreak(self) -> tuple[ResolvedField, ...]:
+        if self.intent.intent_type != "row_list":
+            return ()
+        return self._key_of(self.base, "t0", is_base=True)
 
     def run_series(self, base: str) -> ValidationResult:
         assert self.base_def is not None

@@ -295,6 +295,25 @@ def write_privilege_warning(
     return f"cannot check write privileges on {dialect}"
 
 
+def infer_label(entity: str, primary_key: list[str], fields: dict[str, FieldDef]) -> str | None:
+    """The field that names a row, when exactly one visible text field is called `name`,
+    `full_name`, `title` or `<entity>_name` (also with the entity's name without a final
+    `s`), beside a single-field key. Otherwise none: a wrong guess would group by a key
+    where the person meant a value."""
+    if len(primary_key) != 1:
+        return None
+    names = {"name", "full_name", "title", f"{entity}_name", f"{entity.removesuffix('s')}_name"}
+    candidates = [
+        slug
+        for slug, fdef in fields.items()
+        if fdef.column.lower() in names
+        and fdef.type == "text"
+        and not fdef.hidden
+        and slug != primary_key[0]
+    ]
+    return candidates[0] if len(candidates) == 1 else None
+
+
 def init_registry(
     engine: Engine,
     *,
@@ -344,10 +363,12 @@ def init_registry(
                 categorical=bool(allowed),
                 allowed_values=allowed,
             )
+        primary_key = [field_slugs[t.name][c] for c in t.pk if c in field_slugs[t.name]]
         entities[slug] = EntityDef(
             table=t.name,
             kind="view" if t.kind == "view" else "table",
-            primary_key=[field_slugs[t.name][c] for c in t.pk if c in field_slugs[t.name]],
+            primary_key=primary_key,
+            label=infer_label(slug, primary_key, fields),
             fields=fields,
         )
     warning = write_privilege_warning(

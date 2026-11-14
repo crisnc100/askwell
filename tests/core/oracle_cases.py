@@ -77,8 +77,9 @@ CASES: list[tuple[str, dict[str, Any], str]] = [
             "order_by": [{"target": "qty", "direction": "desc"}, {"target": "parts.name"}],
             "limit": 5,
         },
-        "SELECT p.name, sum(wp.quantity) AS qty FROM work_order_parts wp "
-        "JOIN parts p ON p.id = wp.part_id GROUP BY p.name ORDER BY qty DESC, p.name LIMIT 5",
+        "SELECT p.id, p.name, sum(wp.quantity) AS qty FROM work_order_parts wp "
+        "JOIN parts p ON p.id = wp.part_id GROUP BY p.id, p.name "
+        "ORDER BY qty DESC, p.name, p.id LIMIT 5",
     ),
     (
         "o07_states_with_25_sites",
@@ -157,10 +158,10 @@ CASES: list[tuple[str, dict[str, Any], str]] = [
             ],
             "limit": 3,
         },
-        "SELECT t.full_name, sum(i.amount) AS invoiced FROM invoices i "
+        "SELECT t.id, t.full_name, sum(i.amount) AS invoiced FROM invoices i "
         "JOIN work_orders w ON w.id = i.work_order_id JOIN technicians t ON t.id = w.technician_id "
         "WHERE i.status <> 'void' AND i.issued_at >= '2025-06-30' AND i.issued_at < '2026-06-30' "
-        "GROUP BY t.full_name ORDER BY invoiced DESC, t.full_name LIMIT 3",
+        "GROUP BY t.id, t.full_name ORDER BY invoiced DESC, t.full_name, t.id LIMIT 3",
     ),
     (
         "o13_region_by_quarter_2025",
@@ -188,10 +189,10 @@ CASES: list[tuple[str, dict[str, Any], str]] = [
             "date_range": {"field": "opened_at", "relative": "last_n_months", "n": 12},
             "having": [{"metric": "n", "op": "gt", "value": 15}],
         },
-        "SELECT c.name, count(*) FROM work_orders w JOIN sites s ON s.id = w.site_id "
+        "SELECT c.id, c.name, count(*) FROM work_orders w JOIN sites s ON s.id = w.site_id "
         "JOIN customers c ON c.id = s.customer_id "
         "WHERE w.opened_at >= '2025-06-30' AND w.opened_at < '2026-06-30' "
-        "GROUP BY c.name HAVING count(*) > 15",
+        "GROUP BY c.id, c.name HAVING count(*) > 15",
     ),
     (
         "o15_avg_invoice_by_job_type_q1",
@@ -227,10 +228,11 @@ CASES: list[tuple[str, dict[str, Any], str]] = [
             ],
             "limit": 1,
         },
-        "SELECT t.full_name, avg(w.labor_hours) AS avg_hours, count(*) FROM work_orders w "
+        "SELECT t.id, t.full_name, avg(w.labor_hours) AS avg_hours, count(*) FROM work_orders w "
         "JOIN technicians t ON t.id = w.technician_id WHERE w.status = 'completed' "
         "AND w.completed_at >= '2025-01-01' AND w.completed_at < '2026-01-01' "
-        "GROUP BY t.full_name HAVING count(*) >= 20 ORDER BY avg_hours DESC, t.full_name LIMIT 1",
+        "GROUP BY t.id, t.full_name HAVING count(*) >= 20 "
+        "ORDER BY avg_hours DESC, t.full_name, t.id LIMIT 1",
     ),
     (
         "o17_weekly_orders_last_4_weeks",
