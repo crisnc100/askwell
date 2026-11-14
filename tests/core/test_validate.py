@@ -170,6 +170,62 @@ def test_rule_unknown_link() -> None:
     ) == ["unknown_link"]
 
 
+def test_rule_feature_off(registry: Registry) -> None:
+    from askwell.core.features import ALL
+
+    intent = Intent.model_validate(
+        {
+            "intent_type": "summary",
+            "entity": "technicians",
+            "metrics": [{"agg": "count"}],
+            "filters": [{"has": "work_orders", "none": True}],
+        }
+    )
+    assert validate(intent, registry, now=NOW).ok
+    assert validate(intent, registry, now=NOW, features=ALL - {"has"}).codes == ["feature_off"]
+
+
+def test_rule_computed_type(registry: Registry) -> None:
+    product = {"op": "multiply", "left": "quantity", "right": "parts.name"}
+    assert codes(
+        registry,
+        intent_type="summary",
+        entity="work_order_parts",
+        metrics=[{"agg": "sum", "field": product}],
+    ) == ["computed_type"]
+
+
+def test_rule_duration_type(registry: Registry) -> None:
+    assert codes(
+        registry,
+        intent_type="summary",
+        entity="work_orders",
+        metrics=[{"agg": "avg", "field": {"days_between": ["labor_hours", "now"]}}],
+    ) == ["duration_type"]
+
+
+def test_rule_has_link(registry: Registry) -> None:
+    # parts point at nothing that points back at customers.
+    assert codes(
+        registry,
+        intent_type="summary",
+        entity="customers",
+        metrics=COUNT,
+        filters=[{"has": "parts"}],
+    ) == ["has_link"]
+
+
+def test_rule_vs_aggregate_scope(registry: Registry) -> None:
+    assert codes(
+        registry,
+        intent_type="grouped_summary",
+        entity="invoices",
+        metrics=COUNT,
+        group_by=[{"field": "status"}],
+        filters=[{"field": "amount", "op": "gt", "value": {"of": "avg"}}],
+    ) == ["vs_aggregate_scope"]
+
+
 def test_rule_ambiguous_path_at_three_hops() -> None:
     # a -> b -> c -> e and a -> b -> d -> e: two shortest 3-hop paths to e.
     reg = make_registry(

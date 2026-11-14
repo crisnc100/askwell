@@ -28,6 +28,7 @@ from sqlalchemy import (
     case,
     cast,
     column,
+    exists,
     func,
     literal_column,
     or_,
@@ -47,6 +48,8 @@ from sqlalchemy.types import NullType, TypeDecorator
 from askwell.core.registry import TEXT_NUMBER_PLACEHOLDERS
 from askwell.core.validate import (
     PERIOD_LABEL,
+    JoinStep,
+    PlanExists,
     PlanMetric,
     PlanSeries,
     Predicate,
@@ -242,25 +245,80 @@ def _as_datetime_other(element: AsDatetime, compiler: SQLCompiler, **kw: Any) ->
     raise CompileError(f"datetime normalisation is not implemented for {compiler.dialect.name}")
 
 
+class DaysBetween(FunctionElement[Any]):
+    """Days from the first operand to the second, with fractions, per dialect."""
+
+    type = Float()
+    name = "days_between"
+    inherit_cache = True
+
+
+@compiles(DaysBetween, "sqlite")
+def _days_between_sqlite(element: DaysBetween, compiler: SQLCompiler, **kw: Any) -> str:
+    start, end = (compiler.process(c, **kw) for c in element.clauses)
+    return f"(julianday({end}) - julianday({start}))"
+
+
+@compiles(DaysBetween, "postgresql")
+def _days_between_postgres(element: DaysBetween, compiler: SQLCompiler, **kw: Any) -> str:
+    start, end = (compiler.process(c, **kw) for c in element.clauses)
+    # As timestamps, so a DATE and a DATETIME subtract alike; seconds over a day's.
+    return (
+        f"(EXTRACT(EPOCH FROM (CAST({end} AS TIMESTAMP) - CAST({start} AS TIMESTAMP))) / 86400.0)"
+    )
+
+
+@compiles(DaysBetween)
+def _days_between_other(element: DaysBetween, compiler: SQLCompiler, **kw: Any) -> str:
+    raise CompileError(f"days_between is not implemented for {compiler.dialect.name}")
+
+
 class _Tables:
-    def __init__(self, plan: QueryPlan) -> None:
-        columns: dict[str, dict[str, TypeEngine[Any]]] = {plan.base_alias: {}}
-        names: dict[str, tuple[str, str | None]] = {
-            plan.base_alias: (plan.base_table, plan.base_schema)
-        }
-        for join in plan.joins:
+    def __init__(
+        self,
+        plan: QueryPlan | None = None,
+        *,
+        base: tuple[str, str, str | None] | None = None,
+        joins: tuple[JoinStep, ...] = (),
+        fields: list[ResolvedField] | None = None,
+        keys: dict[str, list[str]] | None = None,
+        rename: dict[str, str] | None = None,
+    ) -> None:
+        """The tables of `plan`, or of a subquery: `base` is (alias, table, schema),
+        `fields` the fields it reads, `keys` extra columns by alias, and `rename` gives a
+        table a different SQL alias than its plan alias (a subquery over the same
+        table as the outer query)."""
+        if plan is not None:
+            base = (plan.base_alias, plan.base_table, plan.base_schema)
+            joins = plan.joins
+            fields = _fields(plan)
+            keys = {
+                plan.base_alias: [e.parent_column for e in plan.where if isinstance(e, PlanExists)]
+            }
+        assert base is not None
+        base_alias, base_table, base_schema = base
+        columns: dict[str, dict[str, TypeEngine[Any]]] = {base_alias: {}}
+        names: dict[str, tuple[str, str | None]] = {base_alias: (base_table, base_schema)}
+        for join in joins:
             names[join.alias] = (join.table, join.db_schema)
             columns.setdefault(join.parent_alias, {}).setdefault(join.parent_column, NullType())
             columns.setdefault(join.alias, {}).setdefault(join.column, NullType())
-        for rfield in _fields(plan):
+        for alias, extra in (keys or {}).items():
+            for name in extra:
+                columns.setdefault(alias, {}).setdefault(name, NullType())
+        for rfield in (leaf for f in fields or [] for leaf in _leaves(f)):
             stored = String() if rfield.text_number else _TYPES[rfield.type]
             columns.setdefault(rfield.alias, {})[rfield.column] = stored
+        self.base = base
         self.tables: dict[str, FromClause] = {}
         for alias, (name, schema) in names.items():
             cols = [column(c, t) for c, t in sorted(columns.get(alias, {}).items())]
-            self.tables[alias] = table(name, *cols, schema=schema).alias(alias)
+            sql_alias = (rename or {}).get(alias, alias)
+            self.tables[alias] = table(name, *cols, schema=schema).alias(sql_alias)
 
     def col(self, rfield: ResolvedField) -> ColumnElement[Any]:
+        if rfield.expr is not None:
+            return self._computed(rfield)
         raw = self.tables[rfield.alias].c[rfield.column]
         if not rfield.text_number:
             return raw
@@ -271,6 +329,24 @@ class _Tables:
         )
         return cast(case((placeholder, None), else_=raw), Float)
 
+    def _computed(self, rfield: ResolvedField) -> ColumnElement[Any]:
+        if rfield.expr == "days_between":
+            start = self.col(rfield.parts[0])
+            end = (
+                self.col(rfield.parts[1])
+                if rfield.now is None
+                else bindparam(None, rfield.now, type_=DateTime())
+            )
+            return DaysBetween(start, end)
+        left, right = (self.col(part) for part in rfield.parts)
+        if rfield.expr == "multiply":
+            return left * right
+        if rfield.expr == "subtract":
+            return left - right
+        if rfield.expr == "add":
+            return left + right
+        raise ValueError(f"unknown expression {rfield.expr!r}")
+
     def value(self, rfield: ResolvedField) -> ColumnElement[Any]:
         """The field as compared, aggregated, grouped or ordered. A DATETIME gets one
         canonical text form on SQLite (a no-op elsewhere), so equal instants stored in
@@ -278,6 +354,13 @@ class _Tables:
         stored."""
         raw = self.col(rfield)
         return SqliteDatetimeText(raw) if rfield.type == "datetime" else raw
+
+
+def _leaves(rfield: ResolvedField) -> list[ResolvedField]:
+    """The stored fields a value reads: itself, or a computed value's fields."""
+    if rfield.expr is None:
+        return [rfield]
+    return [leaf for part in rfield.parts for leaf in _leaves(part)]
 
 
 def _fields(plan: QueryPlan) -> list[ResolvedField]:
@@ -294,6 +377,8 @@ def _fields(plan: QueryPlan) -> list[ResolvedField]:
     predicates = [p for m in plan.metrics for p in m.where]
     predicates += [p for series in plan.series for p in series.where]
     for item in plan.where:
+        if isinstance(item, PlanExists):
+            continue  # its own tables (_exists)
         predicates += item.predicates if isinstance(item, PredicateGroup) else (item,)
     for predicate in predicates:
         out.append(predicate.field)
@@ -315,7 +400,9 @@ def _required_aliases(plan: QueryPlan) -> set[str]:
     # ORDER BY is not listed: sorting by a field from an optional join must not turn it
     # into an inner join and drop the rows the OR kept (they sort with NULLs).
     for item in plan.where:
-        if isinstance(item, PredicateGroup) and item.mode == "any_of":
+        if isinstance(item, PlanExists) or (
+            isinstance(item, PredicateGroup) and item.mode == "any_of"
+        ):
             continue
         predicates = item.predicates if isinstance(item, PredicateGroup) else (item,)
         for predicate in predicates:
@@ -325,10 +412,12 @@ def _required_aliases(plan: QueryPlan) -> set[str]:
     return _with_parents(plan, used)
 
 
-def _with_parents(plan: QueryPlan, used: list[ResolvedField]) -> set[str]:
-    parents = {join.alias: join.parent_alias for join in plan.joins}
+def _with_parents(
+    plan: QueryPlan | None, used: list[ResolvedField], joins: tuple[JoinStep, ...] = ()
+) -> set[str]:
+    parents = {join.alias: join.parent_alias for join in (plan.joins if plan else joins)}
     required: set[str] = set()
-    for rfield in used:
+    for rfield in (leaf for f in used for leaf in _leaves(f)):
         alias: str | None = rfield.alias
         while alias is not None and alias not in required:
             required.add(alias)
@@ -352,9 +441,29 @@ def _comparison_operands(
     return tables.value(predicate.field), tables.value(predicate.other)
 
 
+def _scope_aggregate(tables: _Tables, predicate: Predicate) -> ColumnElement[Any]:
+    """The aggregate of the predicate's field over the base rows its scope selects: the
+    same base table again under its own SQL alias, never correlated with the outer row."""
+    alias = tables.base[0]
+    fields = [predicate.field]
+    for item in predicate.scope:
+        for p in item.predicates if isinstance(item, PredicateGroup) else (item,):
+            fields += [p.field] + ([p.other] if p.other is not None else [])
+    inner = _Tables(base=tables.base, fields=fields, rename={alias: f"{alias}_agg"})
+    stmt = select(getattr(func, predicate.of or "")(inner.value(predicate.field)))
+    stmt = stmt.select_from(inner.tables[alias])
+    conditions = _shared_where_items(inner, predicate.scope)
+    if conditions:
+        stmt = stmt.where(and_(*conditions))
+    return stmt.scalar_subquery()
+
+
 def _predicate(tables: _Tables, predicate: Predicate) -> ColumnElement[bool]:
     op = predicate.op
-    if predicate.other is not None:
+    if predicate.of is not None:
+        col = tables.value(predicate.field)
+        rhs = _scope_aggregate(tables, predicate)
+    elif predicate.other is not None:
         col, rhs = _comparison_operands(tables, predicate)
     else:
         raw = tables.col(predicate.field)
@@ -464,10 +573,41 @@ def _source(plan: QueryPlan, tables: _Tables, required: set[str]) -> FromClause:
     return source
 
 
+def _exists(tables: _Tables, item: PlanExists) -> ColumnElement[bool]:
+    """EXISTS (or NOT EXISTS) a related row: its own tables, joined inner (each of its
+    conditions must hold), and tied to the outer base row by its key."""
+    fields = [f for p in item.where for f in (p.field, p.other) if f is not None]
+    inner = _Tables(
+        base=(item.alias, item.table, item.db_schema),
+        joins=item.joins,
+        fields=fields,
+        keys={item.alias: [item.column]},
+    )
+    source = inner.tables[item.alias]
+    for join in item.joins:
+        parent = inner.tables[join.parent_alias]
+        child = inner.tables[join.alias]
+        source = source.join(child, parent.c[join.parent_column] == child.c[join.column])
+    outer = tables.tables[tables.base[0]]
+    link = inner.tables[item.alias].c[item.column] == outer.c[item.parent_column]
+    conditions = [link, *(_predicate(inner, p) for p in item.where)]
+    one: ColumnElement[Any] = literal_column("1", BigInteger())
+    found = exists(select(one).select_from(source).where(and_(*conditions)))
+    return ~found if item.none else found
+
+
 def _shared_where(tables: _Tables, plan: QueryPlan) -> list[ColumnElement[bool]]:
+    return _shared_where_items(tables, plan.where)
+
+
+def _shared_where_items(
+    tables: _Tables, where: tuple[Predicate | PredicateGroup | PlanExists, ...]
+) -> list[ColumnElement[bool]]:
     conditions: list[ColumnElement[bool]] = []
-    for item in plan.where:
-        if isinstance(item, PredicateGroup):
+    for item in where:
+        if isinstance(item, PlanExists):
+            conditions.append(_exists(tables, item))
+        elif isinstance(item, PredicateGroup):
             parts = [_predicate(tables, p) for p in item.predicates]
             conditions.append(or_(*parts) if item.mode == "any_of" else and_(*parts))
         else:
@@ -483,7 +623,9 @@ def _series_part(plan: QueryPlan, series: PlanSeries, index: int) -> CTE:
     if series.metric.field is not None:
         used.append(series.metric.field)
     for item in plan.where:
-        if isinstance(item, PredicateGroup) and item.mode == "any_of":
+        if isinstance(item, PlanExists) or (
+            isinstance(item, PredicateGroup) and item.mode == "any_of"
+        ):
             continue
         predicates = item.predicates if isinstance(item, PredicateGroup) else (item,)
         used += [p.field for p in predicates]
@@ -550,9 +692,7 @@ def _hidden_order_index(plan: QueryPlan, index: int) -> bool:
     """A row-list ORDER BY field that is not also selected needs its own column to be
     compared."""
     item = plan.order_by[index]
-    return item.field is not None and all(
-        (f.alias, f.column) != (item.field.alias, item.field.column) for f in plan.select
-    )
+    return item.field is not None and all(f.key != item.field.key for f in plan.select)
 
 
 def tie_labels(plan: QueryPlan) -> list[str]:
