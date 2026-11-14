@@ -25,6 +25,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy.engine import Engine
 
 from askwell.core.executor import readonly_engine
+from askwell.core.features import ALL, Features
 from askwell.core.registry import (
     NUMERIC_TYPES,
     TEMPORAL_TYPES,
@@ -83,12 +84,12 @@ class FieldInfo:
         return json.dumps(asdict(self), indent=2)
 
 
-def draft(db_path: Path, plans: list[TablePlan]) -> dict[str, str]:
+def draft(db_path: Path, plans: list[TablePlan], features: Features = ALL) -> dict[str, str]:
     """Draft the registry for a freshly loaded database. Returns the draft files by
     name, for the store to swap in with the database."""
     engine: Engine = readonly_engine(f"sqlite:///{db_path}")
     try:
-        result = init_registry(engine, include_values=True)
+        result = init_registry(engine, include_values=True, features=features)
     finally:
         engine.dispose()
     found = {(p.name, link.column) for p in plans for link in p.links}

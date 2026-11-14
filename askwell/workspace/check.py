@@ -6,8 +6,11 @@ problems; the rest are counted. Errors block loading; warnings (a link value wit
 match) do not.
 
 When the whole set passes, the result carries a plan per table: column types, the ID
-column, the links between tables and the rows. The loader stores exactly that plan,
-and Check has already run the loader's conversion on every value.
+column, the links between tables and the rows. A link is a `<x>_id` column naming
+another table; with `inferred_links` on, `<role>_<x>_id` and singular forms the plain
+rule misses link too, when their values are that table's IDs (`_add_named_links`).
+The loader stores exactly that plan, and Check has already run the loader's conversion
+on every value.
 """
 
 from __future__ import annotations
@@ -19,6 +22,7 @@ from collections.abc import Iterator
 from dataclasses import dataclass, field
 from typing import Literal
 
+from askwell.core.features import ALL, Features
 from askwell.core.registry import slugify
 from askwell.workspace.limits import Limits
 from askwell.workspace.rules import (
@@ -215,7 +219,9 @@ def id_column_candidates(table: str) -> list[str]:
     return names
 
 
-def check_files(files: list[UploadedFile], limits: Limits | None = None) -> CheckResult:
+def check_files(
+    files: list[UploadedFile], limits: Limits | None = None, features: Features = ALL
+) -> CheckResult:
     limits = limits or Limits()
     parsed: list[_Parsed] = []
     reports: list[FileReport] = []
@@ -237,7 +243,7 @@ def check_files(files: list[UploadedFile], limits: Limits | None = None) -> Chec
     # make them report problems that are not there. Without them, each column is still
     # typed and its damaged values reported.
     if len(parsed) == len(files):
-        plans = _cross_file(parsed)
+        plans = _cross_file(parsed, features)
     else:
         tables = {r.table for r in reports if r.table is not None}
         id_index, links = _roles(parsed, tables, complete=False)
@@ -565,6 +571,63 @@ def _roles(
     return id_index, links
 
 
+MIN_DISTINCT_FOR_LINK = 10
+
+
+def _plural_forms(table: str) -> set[str]:
+    """The singular stems a table name answers to: `sites` -> site, `addresses` ->
+    address, `companies` -> company, and the name itself."""
+    forms = {table}
+    if table.endswith("ies") and len(table) > 3:
+        forms.add(table[:-3] + "y")
+    if table.endswith("es") and len(table) > 2:
+        forms.add(table[:-2])
+    if table.endswith("s") and len(table) > 1:
+        forms.add(table[:-1])
+    return forms
+
+
+def _add_named_links(
+    parsed: list[_Parsed], id_index: dict[str, int], links: dict[str, list[tuple[int, str]]]
+) -> None:
+    """Links the `<x>_id` rule misses, kept only on evidence: a column named
+    `<x>_id` or `<role>_<x>_id`, where `<x>` is a table's name or singular (the longest
+    such table wins; two of one length give none), with at least
+    MIN_DISTINCT_FOR_LINK distinct values, every one of them an ID in that table. A
+    column that fails is left a plain column, never an error, so a set that loaded
+    before still loads."""
+    by_slug = {p.slug: p for p in parsed}
+    for p in parsed:
+        linked = {index for index, _ in links.get(p.slug, [])}
+        own = id_index.get(p.slug)
+        for index, name in enumerate(p.names):
+            if index in linked or index == own or not name.endswith("_id"):
+                continue
+            stem = name.removesuffix("_id")
+            matches: list[tuple[int, str]] = []
+            for target, other in by_slug.items():
+                if target == p.slug or target not in id_index:
+                    continue
+                for form in _plural_forms(target):
+                    if stem == form or stem.endswith(f"_{form}"):
+                        matches.append((len(form), other.slug))
+            if not matches:
+                continue
+            longest = max(length for length, _ in matches)
+            targets = sorted({slug for length, slug in matches if length == longest})
+            if len(targets) != 1:
+                continue
+            target = targets[0]
+            values = {str(v).strip() for r in p.rows if (v := r[index]) is not None}
+            ids = {
+                str(v).strip()
+                for r in by_slug[target].rows
+                if (v := r[id_index[target]]) is not None
+            }
+            if len(values) >= MIN_DISTINCT_FOR_LINK and values <= ids:
+                links.setdefault(p.slug, []).append((index, target))
+
+
 def _type_by_role(
     parsed: list[_Parsed], id_index: dict[str, int], links: dict[str, list[tuple[int, str]]]
 ) -> None:
@@ -600,10 +663,12 @@ def _has_clean_values(values: list[str | None]) -> bool:
     return any(v is not None and kind(v) in CLEAN_KINDS for v in values)
 
 
-def _cross_file(parsed: list[_Parsed]) -> list[TablePlan]:
+def _cross_file(parsed: list[_Parsed], features: Features = ALL) -> list[TablePlan]:
     """ID columns, links and link types across the whole set, then the plans."""
     by_slug = {p.slug: p for p in parsed}
     id_index, links = _roles(parsed, set(by_slug), complete=True)
+    if "inferred_links" in features:
+        _add_named_links(parsed, id_index, links)
     _type_by_role(parsed, id_index, links)
 
     id_values: dict[str, set[int | float | str]] = {}

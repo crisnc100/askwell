@@ -1,13 +1,19 @@
 """`registry init`: draft a registry from a live database.
 
 - Introspection uses the SQLAlchemy inspector (tables and views, columns, primary keys,
-  single-column foreign keys to a single-column primary key).
+  single-column foreign keys to a single-column primary key, or, with `inferred_links`
+  on, to a single-column unique column).
 - Without a declared foreign key, `<x>_id` (or a column named exactly like another
   table's primary key) pointing at a single-column primary key becomes an `inferred`
-  relationship.
-- Fields whose names look sensitive are hidden. Nothing reads data unless
-  `include_values` is set; then short text fields that are not name-like become
-  categorical with their distinct values.
+  relationship. With `inferred_links` on, a column named after a table (`airline`,
+  `origin_airport_id`) links to it too, but only on evidence read from the data: at
+  least MIN_DISTINCT_FOR_LINK distinct values, every one of them that table's key.
+- With `numeric_text` on, a text column whose every value reads as a number (blank and
+  'null'-like placeholders aside) is drafted as a number, marked `text_number` so the
+  builder casts it. Leading zeros and id, code, zip, postal or phone names stay text.
+- Fields whose names look sensitive are hidden. Values are read for the two checks
+  above; beyond them nothing reads data unless `include_values` is set, and then short
+  text fields that are not name-like become categorical with their distinct values.
 - The output is marked `draft: true`, and a role that can write is reported.
 - Same database in, byte-identical YAML out.
 """
@@ -16,6 +22,7 @@ from __future__ import annotations
 
 import os
 import re
+from collections.abc import Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -35,10 +42,13 @@ from sqlalchemy import (
     table,
     text,
 )
+from sqlalchemy.exc import OperationalError
 
+from askwell.core.features import ALL, Features
 from askwell.core.registry import (
     NUMERIC_TYPES,
     TEMPORAL_TYPES,
+    TEXT_NUMBER_PLACEHOLDERS,
     EntityDef,
     FieldDef,
     FieldType,
@@ -95,6 +105,7 @@ class _Table:
     columns: list[dict[str, Any]]
     pk: list[str]
     fks: list[dict[str, Any]]
+    unique: set[str] = field(default_factory=set[str])  # single-column unique columns
 
 
 def _read_tables(engine: Engine) -> list[_Table]:
@@ -112,9 +123,16 @@ def _read_tables(engine: Engine) -> list[_Table]:
                 columns=[dict(c) for c in insp.get_columns(name)],
                 pk=list(insp.get_pk_constraint(name).get("constrained_columns") or []),
                 fks=[dict(fk) for fk in insp.get_foreign_keys(name)] if kind == "table" else [],
+                unique=_unique_columns(insp, name) if kind == "table" else set(),
             )
         )
     return tables
+
+
+def _unique_columns(insp: Any, name: str) -> set[str]:
+    found = [list(u.get("column_names") or []) for u in insp.get_unique_constraints(name)]
+    found += [list(i.get("column_names") or []) for i in insp.get_indexes(name) if i.get("unique")]
+    return {str(cols[0]) for cols in found if len(cols) == 1}
 
 
 def _find(names: list[str], wanted: str, case_insensitive: bool) -> str | None:
@@ -137,6 +155,8 @@ def _relationships(
     *,
     default_schema: str | None = None,
     case_insensitive: bool = True,
+    engine: Engine | None = None,
+    features: Features = ALL,
 ) -> list[Relationship]:
     by_lower = {t.name.lower(): t for t in tables}
     by_name = {t.name: t for t in tables}
@@ -168,7 +188,12 @@ def _relationships(
                 continue
             dst_col = _find(list(field_slugs[target.name]), dst_cols[0], case_insensitive)
             src_col = _find(list(field_slugs[t.name]), src_cols[0], case_insensitive)
-            if dst_col is None or src_col is None or single_pk.get(target.name) != dst_col:
+            to_unique = "inferred_links" in features and dst_col in target.unique
+            if (
+                dst_col is None
+                or src_col is None
+                or (single_pk.get(target.name) != dst_col and not to_unique)
+            ):
                 warnings.append(
                     f"skipped foreign key {t.name}.{src_cols[0]}: target is not a primary key"
                 )
@@ -211,6 +236,16 @@ def _relationships(
             for owner in pk_owner.get(col_name.lower(), []):
                 if owner != t.name and owner not in candidates:
                     candidates.append(owner)
+            if not candidates and "inferred_links" in features and engine is not None:
+                candidates = _named_targets(col_name, t, tables, single_pk)
+                if len(candidates) == 1 and not _values_contained(
+                    engine, t, col_name, by_name[candidates[0]], single_pk[candidates[0]]
+                ):
+                    warnings.append(
+                        f"{t.name}.{col_name}: named like {candidates[0]}, but its values "
+                        "are not all its keys; not linked"
+                    )
+                    continue
             if len(candidates) != 1:
                 if len(candidates) > 1:
                     warnings.append(f"{t.name}.{col_name}: several inferred targets, none kept")
@@ -224,6 +259,105 @@ def _relationships(
                 source="inferred",
             )
     return sorted(rels.values(), key=lambda r: (r.from_entity, r.from_field, r.to_entity))
+
+
+MIN_DISTINCT_FOR_LINK = 10
+
+
+def _singular(name: str) -> str:
+    lowered = name.lower()
+    if lowered.endswith("ies"):
+        return lowered[:-3] + "y"
+    if lowered.endswith(("ses", "xes", "ches", "shes")):
+        return lowered[:-2]
+    return lowered.removesuffix("s")
+
+
+def _named_targets(
+    col_name: str, t: _Table, tables: list[_Table], single_pk: dict[str, str]
+) -> list[str]:
+    """Tables a column is named after, beyond the `<x>_id` forms: the table's name or
+    its singular (`airline` -> airlines), or `<role>_<table>_id` with the table's name
+    or singular (`origin_airport_id` -> airports). When several tables end the name,
+    the longest wins; two of the same length give none."""
+    lowered = col_name.lower()
+    matches: list[tuple[int, str]] = []
+    for target in tables:
+        if target.name == t.name or target.name not in single_pk:
+            continue
+        for form in {target.name.lower(), _singular(target.name)}:
+            if lowered == form or (
+                lowered.endswith(f"_{form}_id") and len(lowered) > len(form) + 4
+            ):
+                matches.append((len(form), target.name))
+    if not matches:
+        return []
+    longest = max(length for length, _ in matches)
+    return sorted({name for length, name in matches if length == longest})
+
+
+def _values_contained(
+    engine: Engine, t: _Table, col_name: str, target: _Table, target_key: str
+) -> bool:
+    """Enough evidence that a column holds the target's keys: at least
+    MIN_DISTINCT_FOR_LINK distinct values, every one of them a target key. Small integer
+    keys contain each other by chance, which is why a name match comes first."""
+    src = table(t.name, column(col_name))
+    dst = table(target.name, column(target_key))
+    value = src.c[col_name]
+    with engine.connect() as conn:
+        distinct = conn.execute(select(func.count(value.distinct())).select_from(src)).scalar()
+        missing = conn.execute(
+            select(func.count())
+            .select_from(src)
+            .where(value.is_not(None), value.not_in(select(dst.c[target_key])))
+        ).scalar()
+    return int(distinct or 0) >= MIN_DISTINCT_FOR_LINK and int(missing or 0) == 0
+
+
+_NOT_A_NUMBER_NAME = re.compile(r"(id|code|zip|postal|phone)$", re.IGNORECASE)
+_LEADING_ZERO = re.compile(r"^[+-]?0\d")
+_NUMBER_SAMPLE = 50
+_NUMBER = re.compile(r"^[+-]?(\d+(\.\d*)?|\.\d+)([eE][+-]?\d+)?$")
+
+
+def _holds_numbers(engine: Engine, t: _Table, col_name: str) -> bool:
+    """A text column whose every value, after trimming and skipping placeholders such as
+    'null', reads as a number, and that holds at least one. Values with a leading zero
+    ('01234') stay text: a zip code or an ID, not an amount."""
+    if _NOT_A_NUMBER_NAME.search(col_name):
+        return False
+    ref = table(t.name, column(col_name))
+    col = ref.c[col_name]
+    query = select(col).where(col.is_not(None)).distinct()
+    try:
+        with engine.connect() as conn:
+            # Most text columns fail on their first few values, so read a sample before
+            # reading them all.
+            sample = conn.execute(query.limit(_NUMBER_SAMPLE)).scalars().all()
+            if not _all_numbers(sample):
+                return False
+            if len(sample) < _NUMBER_SAMPLE:
+                return any(_reads_as_number(v) for v in sample)
+            values = conn.execute(query).scalars().all()
+    except OperationalError:
+        # SQLite raises when stored bytes are not UTF-8; such a column is not numbers.
+        return False
+    return _all_numbers(values) and any(_reads_as_number(v) for v in values)
+
+
+def _reads_as_number(raw: object) -> bool:
+    return str(raw).strip() not in TEXT_NUMBER_PLACEHOLDERS
+
+
+def _all_numbers(values: Sequence[object]) -> bool:
+    for raw in values:
+        value = str(raw).strip()
+        if value in TEXT_NUMBER_PLACEHOLDERS:
+            continue
+        if _LEADING_ZERO.match(value) or not _NUMBER.match(value):
+            return False
+    return True
 
 
 def _categorical_values(engine: Engine, t: _Table, col_name: str) -> list[str] | None:
@@ -320,6 +454,7 @@ def init_registry(
     include_values: bool = False,
     name: str = "",
     sqlite_path: str | None = None,
+    features: Features = ALL,
 ) -> InitResult:
     tables = _read_tables(engine)
     warnings: list[str] = []
@@ -332,6 +467,8 @@ def init_registry(
         warnings,
         default_schema=inspect(engine).default_schema_name,
         case_insensitive=engine.dialect.name == "sqlite",
+        engine=engine,
+        features=features,
     )
     key_columns = {(r.from_entity, r.from_field) for r in relationships}
 
@@ -349,6 +486,15 @@ def init_registry(
             is_key = (
                 col_name in t.pk or (slug, fslug) in key_columns or bool(_ID_SUFFIX.match(col_name))
             )
+            text_number = (
+                "numeric_text" in features
+                and ftype == "text"
+                and not hidden
+                and not is_key
+                and _holds_numbers(engine, t, col_name)
+            )
+            if text_number:
+                ftype = "number"
             allowed: list[str] = []
             if include_values and ftype == "text" and not hidden and not NAME_LIKE.search(col_name):
                 allowed = _categorical_values(engine, t, col_name) or []
@@ -362,6 +508,7 @@ def init_registry(
                 hidden=hidden,
                 categorical=bool(allowed),
                 allowed_values=allowed,
+                text_number=text_number,
             )
         primary_key = [field_slugs[t.name][c] for c in t.pk if c in field_slugs[t.name]]
         entities[slug] = EntityDef(

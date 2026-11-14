@@ -124,6 +124,11 @@ class Report(_Strict):
     floors: list[Floor]
     misses: list[Miss]
     baseline_wins: list[BaselineWin]
+    # askwell_csv only: per schema, each table whose file failed the upload check, with
+    # the check's problem codes. Its questions were scored as refused.
+    csv_load_failures: dict[str, dict[str, list[str]]] = Field(
+        default_factory=dict[str, dict[str, list[str]]]
+    )
 
 
 def json_schema() -> str:

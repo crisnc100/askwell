@@ -18,6 +18,8 @@ from pydantic_settings import (
     SettingsConfigDict,
 )
 
+from askwell.core.features import FEATURES, Features, parse_off
+
 DEFAULT_NOW = datetime(2026, 6, 30, tzinfo=UTC)
 
 # replay: recordings only. export: recordings, and every unrecorded request is written
@@ -99,6 +101,13 @@ class Settings(BaseSettings):
         ),
     )
 
+    # Feature switches to turn off, comma-separated (askwell/core/features.py).
+    features_off: str = ""
+
+    @property
+    def features(self) -> Features:
+        return FEATURES - parse_off(self.features_off)
+
     llm_mode: LLMMode = "replay"
     replay_dir: str = "evals/recordings"
     pending_dir: str = "evals/pending"
@@ -153,6 +162,12 @@ class Settings(BaseSettings):
         if value.tzinfo is None:
             return value.replace(tzinfo=UTC)
         return value.astimezone(UTC)
+
+    @field_validator("features_off")
+    @classmethod
+    def _known_features(cls, value: str) -> str:
+        parse_off(value)  # an unknown name fails at startup, not at the first ask
+        return value
 
 
 class LegacyNamesSource(PydanticBaseSettingsSource):

@@ -335,7 +335,11 @@ class AskService:
         schema_id = target.schema_id
         registry = target.registry
         view = registry_view(
-            registry, target.now, self.settings.prompt_budget_chars, target.time_zone
+            registry,
+            target.now,
+            self.settings.prompt_budget_chars,
+            target.time_zone,
+            self.settings.features,
         )
         for step in view.truncation:
             log.info("prompt truncation for %s: %s", schema_id, step)
@@ -359,6 +363,7 @@ class AskService:
                 now=target.now,
                 allow_draft=target.allow_draft,
                 row_cap=self.settings.row_cap,
+                features=self.settings.features,
             )
 
         executor = Executor(

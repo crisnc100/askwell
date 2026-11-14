@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
 from typing import Annotated
 
@@ -56,7 +57,13 @@ def registry_init(
     sqlite_path = url.database if url.get_backend_name() == "sqlite" else None
     engine = readonly_engine(db_url)
     try:
-        result = init_registry(engine, include_values=values, name=name, sqlite_path=sqlite_path)
+        result = init_registry(
+            engine,
+            include_values=values,
+            name=name,
+            sqlite_path=sqlite_path,
+            features=get_settings().features,
+        )
     finally:
         engine.dispose()
     Path(output).write_text(dump_registry(result.registry), encoding="utf-8")
@@ -109,6 +116,7 @@ def compile_intent(
         now=settings.now,
         allow_draft=allow_draft,
         row_cap=settings.row_cap,
+        features=settings.features,
     )
     if result.refusal_reason is not None:
         typer.echo(f"refusal: {result.refusal_reason}")
@@ -300,6 +308,13 @@ def eval_command(
         Path | None,
         typer.Option(help="A second gold file for the one --schema given, e.g. a held-out set."),
     ] = None,
+    items: Annotated[
+        Path | None,
+        typer.Option(
+            help='Run only the item IDs in this JSON file ({"ids": [...]}), each for every '
+            "trial, Spider included."
+        ),
+    ] = None,
 ) -> None:
     """Run the benchmark and write evals/reports/<run id>.md and .json.
 
@@ -344,6 +359,7 @@ def eval_command(
         trials=trials,
         budget_usd=budget,
         gold=gold,
+        item_ids=set(json.loads(items.read_text(encoding="utf-8"))["ids"]) if items else None,
     )
     if result.deferred:
         typer.echo("exported for simulated answers (pending requests per schema/system):")

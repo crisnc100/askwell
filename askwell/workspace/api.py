@@ -22,6 +22,7 @@ from fastapi import APIRouter, FastAPI, Request
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field, ValidationError
 
+from askwell.core.features import ALL, Features
 from askwell.workspace import fields
 from askwell.workspace.ask import ask_workspace, prompt_preview
 from askwell.workspace.fields import Edits
@@ -57,6 +58,8 @@ class WorkspaceApp:
     # The interpret prompt's size budget (Settings.prompt_budget_chars); the Confirm
     # preview truncates exactly as the prompt does.
     prompt_budget_chars: int = 16000
+    # The feature switches that are on (Settings.features).
+    features: Features = ALL
     uploads: RateLimiter = field(init=False)
     asks: RateLimiter = field(init=False)
     checks: RateLimiter = field(init=False)
@@ -227,7 +230,11 @@ def install(fastapi_app: FastAPI, app: WorkspaceApp) -> APIRouter:
                 f"Too many checks from your address (the limit is "
                 f"{app.limits.checks_per_hour} an hour). Try again later."
             )
-        app.store.check(workspace, after_load=fields.draft)
+        app.store.check(
+            workspace,
+            after_load=lambda db, plans: fields.draft(db, plans, app.features),
+            features=app.features,
+        )
         return status(app, app.store.open(workspace.id, touch=False))
 
     @router.get("/workspace/fields")
@@ -243,7 +250,11 @@ def install(fastapi_app: FastAPI, app: WorkspaceApp) -> APIRouter:
         registry, info = fields.load_draft(workspace)
         applied = fields.apply(registry, info, edits)
         return prompt_preview(
-            applied, workspace.meta.time_zone, app.store.clock, app.prompt_budget_chars
+            applied,
+            workspace.meta.time_zone,
+            app.store.clock,
+            app.prompt_budget_chars,
+            app.features,
         )
 
     @router.post("/workspace/confirm")

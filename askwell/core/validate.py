@@ -14,6 +14,7 @@ from datetime import date, datetime
 from typing import Literal
 
 from askwell.core.dates import naive_utc, resolve_relative
+from askwell.core.features import ALL, Features
 from askwell.core.intent import (
     COMPARISON_OPS,
     Condition,
@@ -29,6 +30,7 @@ from askwell.core.registry import (
     FieldDef,
     FieldType,
     Registry,
+    Relationship,
 )
 
 MAX_HOPS = 3
@@ -74,6 +76,7 @@ ErrorCode = Literal[
     "ratio_shape",
     "series_shape",
     "series_date_field",
+    "unknown_link",
 ]
 
 _ALIAS = re.compile(r"^[a-z][a-z0-9_]{0,62}$")
@@ -115,14 +118,25 @@ class ResolvedField:
     column: str
     type: FieldType
     is_base: bool
+    # The named link the join took, when the reference named one (`entity@link.field`).
+    link: str | None = None
+    # A text column that holds only numbers, read as a number (see FieldDef.text_number).
+    text_number: bool = False
 
     @property
     def label(self) -> str:
-        return self.name if self.is_base else f"{self.entity}__{self.name}"
+        if self.is_base:
+            return self.name
+        if self.link is not None:
+            return f"{self.entity}_{self.link}__{self.name}"
+        return f"{self.entity}__{self.name}"
 
     @property
-    def key(self) -> tuple[str, str]:
-        return (self.entity, self.name)
+    def key(self) -> tuple[str, ...]:
+        # The same field reached through two named links is two different values.
+        if self.link is None:
+            return (self.entity, self.name)
+        return (self.entity, self.name, self.link)
 
 
 @dataclass(frozen=True)
@@ -286,7 +300,15 @@ def _shortest_paths(registry: Registry, base: str) -> dict[str, _PathInfo]:
 
 
 class _Validator:
-    def __init__(self, intent: Intent, registry: Registry, now: datetime, row_cap: int) -> None:
+    def __init__(
+        self,
+        intent: Intent,
+        registry: Registry,
+        now: datetime,
+        row_cap: int,
+        features: Features = ALL,
+    ) -> None:
+        self.features = features
         self.intent = intent
         self.registry = registry
         self.now = now
@@ -347,8 +369,11 @@ class _Validator:
 
     def resolve(self, ref: str, location: str) -> tuple[ResolvedField, FieldDef] | None:
         assert self.base_def is not None
+        link: str | None = None
         if "." in ref:
             entity_name, field_name = ref.split(".", 1)
+            if "link_roles" in self.features and "@" in entity_name:
+                entity_name, link = entity_name.split("@", 1)
             entity_slug = self._find_entity(entity_name)
             if entity_slug is None:
                 self.fail("unknown_entity", location, f"no entity {entity_name!r}")
@@ -364,22 +389,29 @@ class _Validator:
         if fdef.hidden:
             self.fail("hidden_field", location, f"{entity_slug}.{field_slug} is hidden")
             return None
-        info = self.paths.get(entity_slug)
-        if info is None:
-            self.fail(
-                "unreachable_field",
-                location,
-                f"{entity_slug} has no path from {self.base} within {MAX_HOPS} hops",
-            )
-            return None
-        if info.count > 1:
-            self.fail(
-                "ambiguous_path",
-                location,
-                f"{info.count} equally short paths from {self.base} to {entity_slug}",
-            )
-            return None
-        if any(edge.down for edge in info.path):
+        if link is not None:
+            path = self._linked_path(entity_slug, link, location)
+            if path is None:
+                return None
+        else:
+            info = self.paths.get(entity_slug)
+            if info is None:
+                self.fail(
+                    "unreachable_field",
+                    location,
+                    f"{entity_slug} has no path from {self.base} within {MAX_HOPS} hops",
+                )
+                return None
+            if info.count > 1:
+                self.fail(
+                    "ambiguous_path",
+                    location,
+                    f"{info.count} equally short paths from {self.base} to {entity_slug}"
+                    + self._link_hint(entity_slug, field_name),
+                )
+                return None
+            path = info.path
+        if any(edge.down for edge in path):
             if self.aggregated:
                 self.fail(
                     "fan_out",
@@ -394,16 +426,65 @@ class _Validator:
                     f"{entity_slug} is on the many side of {self.base}; re-base the question",
                 )
             return None
-        alias = self._alias_for(info.path)
+        alias = self._alias_for(path)
+        text_number = fdef.text_number and "numeric_text" in self.features
         resolved = ResolvedField(
             alias=alias,
             entity=entity_slug,
             name=field_slug,
             column=fdef.column,
-            type=fdef.type,
-            is_base=not info.path,
+            # With the switch off, a text column drafted as numbers is read as the text it is.
+            type="text" if fdef.text_number and not text_number else fdef.type,
+            is_base=not path,
+            link=link,
+            text_number=text_number,
         )
         return resolved, fdef
+
+    def _links_into(self, entity_slug: str) -> list[tuple[int, Relationship]]:
+        return [
+            (index, rel)
+            for index, rel in enumerate(self.registry.relationships)
+            if rel.to_entity == entity_slug and rel.from_entity != entity_slug
+        ]
+
+    def _linked_path(self, entity_slug: str, link: str, location: str) -> tuple[_Edge, ...] | None:
+        """The path to `entity_slug` that enters it through the link named `link`: the
+        many-to-one relationship whose column is `link`, reached by the one shortest
+        path from the base to that column's entity."""
+        found: list[tuple[_Edge, ...]] = []
+        # A link names the way in to another entity; the base entity has no way in.
+        links = [] if entity_slug == self.base else self._links_into(entity_slug)
+        for index, rel in links:
+            if rel.from_field != link.lower():
+                continue
+            edge = _Edge(index, rel.from_entity, rel.to_entity, rel.from_field, rel.to_field, False)
+            if rel.from_entity == self.base:
+                found.append((edge,))
+                continue
+            info = self.paths.get(rel.from_entity)
+            if info is not None and info.count == 1 and info.hops < MAX_HOPS:
+                found.append((*info.path, edge))
+        if len(found) != 1:
+            names = sorted({rel.from_field for _, rel in self._links_into(entity_slug)})
+            self.fail(
+                "unknown_link",
+                location,
+                f"no single link {link!r} into {entity_slug} from {self.base}; "
+                f"its links: {', '.join(names) or 'none'}",
+            )
+            return None
+        return found[0]
+
+    def _link_hint(self, entity_slug: str, field_name: str) -> str:
+        """For an ambiguous path, the links that can name one, when links can be named."""
+        if "link_roles" not in self.features:
+            return ""
+        names = sorted({rel.from_field for _, rel in self._links_into(entity_slug)})
+        if len(names) < 2:
+            return ""
+        examples = ", ".join(f"{entity_slug}@{name}.{field_name}" for name in names)
+        return f"; name the link: {examples}"
 
     def convert(self, value: Scalar | None, ftype: FieldType, location: str) -> Value | None:
         ok = True
@@ -1182,6 +1263,8 @@ def _family(ftype: str) -> str:
 
 
 def _ref(rfield: ResolvedField) -> str:
+    if rfield.link is not None:
+        return f"{rfield.entity}@{rfield.link}.{rfield.name}"
     return f"{rfield.entity}.{rfield.name}"
 
 
@@ -1202,6 +1285,7 @@ def validate(
     now: datetime,
     allow_draft: bool = False,
     row_cap: int = DEFAULT_ROW_CAP,
+    features: Features = ALL,
 ) -> ValidationResult:
     """Validate `intent` against `registry`. Never raises for a bad intent."""
-    return _Validator(intent, registry, now, row_cap).run(allow_draft)
+    return _Validator(intent, registry, now, row_cap, features).run(allow_draft)

@@ -50,6 +50,7 @@ from pathlib import Path
 from typing import Literal
 from zoneinfo import available_timezones
 
+from askwell.core.features import ALL, Features
 from askwell.workspace.check import CheckResult, TablePlan, UploadedFile, check_files
 from askwell.workspace.limits import MB, Limits
 from askwell.workspace.load import load_tables
@@ -715,6 +716,7 @@ class WorkspaceStore:
         self,
         workspace: Workspace,
         after_load: Callable[[Path, list[TablePlan]], dict[str, str]] | None = None,
+        features: Features = ALL,
     ) -> CheckResult:
         """Check every file. If the whole set passes, build the database (and the files
         `after_load` returns for it, the drafted registry) in a staging folder, then swap
@@ -728,7 +730,7 @@ class WorkspaceStore:
             if not meta.files:
                 raise WrongStateError("Upload at least one CSV file first.")
             files = fresh.read_files()
-            result = check_files(files, self.limits)
+            result = check_files(files, self.limits, features)
             report = json.dumps(result.to_dict()).encode("utf-8")
             if not result.ok:
                 fresh.clear_loaded()

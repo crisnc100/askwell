@@ -363,6 +363,13 @@ and the eval stops if one no longer matches its committed hash.
 `evals/floors.yaml` may name a `schema` and a `gold` file, and is then checked only on
 rows from that file, so a held-out run never borrows the seen set's verdict.
 
+`--items <file>` runs only the item IDs in a JSON file (`{"ids": [...]}`), each for every
+trial asked for, Spider included; `evals/v03_roles_seen.json` is the link-role gate's
+list. The system `askwell_csv` asks a SQLite schema the way an uploaded workspace would:
+each table exported to CSV, then the upload check, the load and the drafted registry
+confirmed as drafted. A table whose file fails the check is dropped, its questions count
+as refused, and the report lists it with the check's problem codes.
+
 The live run `select-2026-11-11` compared four OpenRouter models on fieldservice
 ([report](evals/reports/select-2026-11-11.md)), and `select-haiku-2026-11-11` measured
 Claude Haiku 5.5, the default, with v0.1 on the seen questions: 35/43 right and 2 of 37
@@ -444,6 +451,7 @@ On the host:
    | `ASKWELL_INVITE_CODES` | The invite codes, comma-separated. Make each one long and random, for example from `python -c "import secrets; print(secrets.token_urlsafe(16))"`. The app will not start without them. |
    | `ASKWELL_DAILY_SPEND_CAP_USD` | The most live answers may cost per UTC day, for example `1.00`. |
    | `ASKWELL_LIVE_ANSWERS_OFF` | `1` turns live answers off. Restart the app after changing it. |
+   | `ASKWELL_FEATURES_OFF` | Features to switch off, comma-separated: `link_roles`, `inferred_links`, `numeric_text`. Off, Askwell drafts, prompts and refuses as it did before that feature. Empty by default. |
 
    `compose.prod.yaml` also sets `ASKWELL_TRUST_PROXY=1`, because Caddy is the only
    client and it writes `X-Forwarded-For`. The image sets the database and data paths.

@@ -157,6 +157,19 @@ def test_rule_ambiguous_path() -> None:
     ]
 
 
+def test_rule_unknown_link() -> None:
+    reg = make_registry(
+        {"flights": ["origin_id", "dest_id"], "airports": ["elevation"]},
+        [("flights", "origin_id", "airports", "id"), ("flights", "dest_id", "airports", "id")],
+    )
+    assert check(
+        reg, intent_type="row_list", entity="flights", select=["airports@origin_id.elevation"]
+    ).ok
+    assert codes(
+        reg, intent_type="row_list", entity="flights", select=["airports@gate_id.elevation"]
+    ) == ["unknown_link"]
+
+
 def test_rule_ambiguous_path_at_three_hops() -> None:
     # a -> b -> c -> e and a -> b -> d -> e: two shortest 3-hop paths to e.
     reg = make_registry(

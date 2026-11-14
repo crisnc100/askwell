@@ -25,7 +25,7 @@ from askwell.llm.errors import ParseError
 from askwell.llm.gateway import Gateway
 from askwell.llm.simulate import register_response_model
 from askwell.llm.types import ChatMessage
-from askwell.pipeline.service import AskService
+from askwell.pipeline.service import AskResult, AskService
 
 ONESHOT_PROMPT_VERSION = "oneshot-v1"
 
@@ -85,16 +85,19 @@ class AskwellSystem:
         self.schema_id = schema_id
         service.reset_budget_per_ask = False
 
-    def answer(self, item: EvalItem, trial: int, guard: BudgetGuard | None) -> SystemAnswer:
-        if guard is not None and self.service.gateway.mode in ("live", "record"):
-            self.service.gateway.guard = guard
-        started = time.perf_counter()
-        result = self.service.ask(
+    def _ask(self, item: EvalItem, trial: int) -> AskResult:
+        return self.service.ask(
             self.schema_id,
             item.question,
             trial=trial,
             context={"system": self.name, "item_id": item.id, "trial": trial},
         )
+
+    def answer(self, item: EvalItem, trial: int, guard: BudgetGuard | None) -> SystemAnswer:
+        if guard is not None and self.service.gateway.mode in ("live", "record"):
+            self.service.gateway.guard = guard
+        started = time.perf_counter()
+        result = self._ask(item, trial)
         latency = (time.perf_counter() - started) * 1000
         error = None
         refused = result.refusal is not None

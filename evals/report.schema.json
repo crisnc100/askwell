@@ -456,6 +456,19 @@
       "title": "Baseline Wins",
       "type": "array"
     },
+    "csv_load_failures": {
+      "additionalProperties": {
+        "additionalProperties": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "type": "object"
+      },
+      "title": "Csv Load Failures",
+      "type": "object"
+    },
     "deferred": {
       "additionalProperties": {
         "type": "integer"

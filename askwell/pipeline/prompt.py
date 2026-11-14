@@ -9,10 +9,12 @@ taken is returned so the caller can log it.
 from __future__ import annotations
 
 import json
+from collections import Counter
 from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Any
 
+from askwell.core.features import ALL, Features
 from askwell.core.registry import FieldDef, Registry
 from askwell.core.validate import Issue
 from askwell.llm.types import ChatMessage
@@ -164,6 +166,7 @@ def _render(
     max_values: int | None,
     desc_len: int | None,
     time_zone: str,
+    features: Features = ALL,
 ) -> str:
     lines = [f"Reference date: {now.date().isoformat()} ({time_zone}).", "", "Entities:"]
     for slug, entity in registry.entities.items():
@@ -192,11 +195,29 @@ def _render(
         lines += ["", "Relationships (many-to-one; joins follow them):"]
         for rel in shown:
             lines.append(f"- {rel.from_entity}.{rel.from_field} -> {rel.to_entity}.{rel.to_field}")
+    pairs = Counter((rel.from_entity, rel.to_entity) for rel in shown)
+    doubled = [rel for rel in shown if pairs[(rel.from_entity, rel.to_entity)] > 1]
+    # Written only for a schema that has such links, so every other prompt is unchanged.
+    if doubled and "link_roles" in features:
+        lines += [
+            "",
+            "Named links: these entities are linked in more than one way. A field across one "
+            "of them names the link, as entity@link.field, where link is the linking field:",
+        ]
+        for rel in doubled:
+            lines.append(
+                f"- {rel.to_entity}@{rel.from_field}.<field>: through "
+                f"{rel.from_entity}.{rel.from_field}"
+            )
     return "\n".join(lines) + "\n"
 
 
 def registry_view(
-    registry: Registry, now: datetime, budget_chars: int, time_zone: str = "UTC"
+    registry: Registry,
+    now: datetime,
+    budget_chars: int,
+    time_zone: str = "UTC",
+    features: Features = ALL,
 ) -> PromptView:
     """The registry part of the interpret prompt. The Confirm page's preview calls this
     same function, so it shows exactly what the model is sent."""
@@ -209,7 +230,7 @@ def registry_view(
     truncation: list[str] = []
     text = ""
     for label, max_values, desc_len in steps:
-        text = _render(registry, now, max_values, desc_len, time_zone)
+        text = _render(registry, now, max_values, desc_len, time_zone, features)
         if label != "full":
             truncation.append(label)
         if len(text) <= budget_chars:
