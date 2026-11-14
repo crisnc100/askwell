@@ -338,7 +338,9 @@ class _Tables:
                 else bindparam(None, rfield.now, type_=DateTime())
             )
             return DaysBetween(start, end)
-        left, right = (self.col(part) for part in rfield.parts)
+        # As floats, so two integer fields do not make an integer expression: Postgres
+        # would then compare it with a fractional value as an integer.
+        left, right = (cast(self.col(part), Float) for part in rfield.parts)
         if rfield.expr == "multiply":
             return left * right
         if rfield.expr == "subtract":

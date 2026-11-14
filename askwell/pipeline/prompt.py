@@ -210,8 +210,7 @@ goes (average days to close, how long each item has been open).
 - A related-rows filter, in filters: {"has": <entity>, "where": [conditions], "none": \
 true|false}. It keeps the base rows that have (with "none": true, that have no) rows of \
 that entity leading to them, directly or along a chain of links. "where" narrows which \
-related rows count; its fields are read from that entity. When two links lead back, \
-name one as "entity@link".
+related rows count; its fields are read from that entity.
 """,
         '"has none" questions (items with no related rows)',
     ),
@@ -235,10 +234,21 @@ _ALWAYS_OUT = (
 )
 
 
+# The has text when links can be named; with link_roles off the validator refuses
+# `entity@link`, so the prompt does not teach it.
+_HAS_NAMED_LINK = _FEATURE_TEXT["has"][0].replace(
+    "that entity.\n", 'that entity. When two links lead back, name one as "entity@link".\n'
+)
+
+
 def system_prompt(features: Features = ALL) -> str:
     """The instructions, describing each switched-on feature and naming every other one
     as out of reach."""
-    described = "".join(text for name, (text, _) in _FEATURE_TEXT.items() if name in features)
+    described = "".join(
+        _HAS_NAMED_LINK if name == "has" and "link_roles" in features else text
+        for name, (text, _) in _FEATURE_TEXT.items()
+        if name in features
+    )
     off = [out for name, (_, out) in _FEATURE_TEXT.items() if name not in features]
     out_of_reach = ", ".join([*off, _ALWAYS_OUT])
     examples = "".join(

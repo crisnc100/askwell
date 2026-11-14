@@ -922,6 +922,9 @@ class _Validator:
             self.fail("feature_off", loc, "has / has none filters are switched off")
             return None
         name, _, link = item.has.partition("@")
+        if link and "link_roles" not in self.features:
+            self.fail("feature_off", f"{loc}.has", "named links are switched off")
+            return None
         child = self._find_entity(name)
         if child is None:
             self.fail("unknown_entity", f"{loc}.has", f"no entity {name!r}")
@@ -942,10 +945,11 @@ class _Validator:
         if link:
             direct = [rel for rel in direct if rel.from_field == link.lower()]
         if len(direct) > 1:
-            forms = ", ".join(f"{child}@{rel.from_field}" for rel in direct)
-            self.fail(
-                "ambiguous_path", f"{loc}.has", f"{child} points at {self.base} twice: {forms}"
-            )
+            message = f"{child} points at {self.base} more than one way"
+            if "link_roles" in self.features:
+                forms = ", ".join(f"{child}@{rel.from_field}" for rel in direct)
+                message += f"; name the link: {forms}"
+            self.fail("ambiguous_path", f"{loc}.has", message)
             return None
         if direct:
             link_alias = sub.base_alias
@@ -1405,6 +1409,19 @@ class _Validator:
             out.append(PlanHaving(having.metric, having.op, (having.value,)))
         return out
 
+    def _check_select_label(
+        self, rfield: ResolvedField, before: list[ResolvedField], loc: str
+    ) -> None:
+        """A computed value's name is its column and what `order_by` names, so it must not
+        be a base field's name (ordering would pick the field) or another column's."""
+        if rfield.expr is None:
+            return
+        assert self.base_def is not None
+        if rfield.label in self.base_def.fields:
+            self.fail("alias_collision", f"{loc}.alias", f"{rfield.label!r} is a field's name")
+        elif any(other.label == rfield.label for other in before):
+            self.fail("duplicate_alias", f"{loc}.alias", f"{rfield.label!r} is used twice")
+
     def check_order(
         self,
         metrics: list[PlanMetric],
@@ -1469,6 +1486,7 @@ class _Validator:
         for index, ref in enumerate(self.intent.select):
             resolved = self.resolve_expr(ref, f"select[{index}]")
             if resolved is not None:
+                self._check_select_label(resolved[0], select, f"select[{index}]")
                 select.append(resolved[0])
         groups = self.check_group_by()
         group_labels = {g.label for g in groups} | {
