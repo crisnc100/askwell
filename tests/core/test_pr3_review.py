@@ -122,3 +122,32 @@ def test_a_computed_name_clash_is_refused_in_either_order(
     select = [computed, "parts.name"] if computed_first else ["parts.name", computed]
     intent = {"intent_type": "row_list", "entity": "work_order_parts", "select": select}
     assert _check(registry, intent).codes == ["duplicate_alias"]
+
+
+def test_an_aggregate_comparison_needs_an_aggregatable_field(registry: Registry) -> None:
+    on_key = {
+        "intent_type": "row_list",
+        "entity": "technicians",
+        "select": ["name"],
+        "filters": [{"field": "id", "op": "gt", "value": {"of": "avg"}}],
+    }
+    assert _check(registry, on_key).codes == ["not_aggregatable"]
+    on_measure = {
+        "intent_type": "summary",
+        "entity": "invoices",
+        "metrics": [{"agg": "count"}],
+        "filters": [{"field": "amount", "op": "gt", "value": {"of": "avg"}}],
+    }
+    assert _check(registry, on_measure).ok
+
+
+def test_a_computed_name_cannot_be_a_fields_registered_alias(registry: Registry) -> None:
+    margin = {"op": "subtract", "left": "unit_price", "right": "unit_cost"}
+    intent = {
+        "intent_type": "row_list",
+        "entity": "parts",
+        "select": [{**margin, "alias": "price"}],
+    }
+    assert _check(registry, intent).codes == ["alias_collision"]
+    renamed = {**intent, "select": [{**margin, "alias": "margin"}]}
+    assert _check(registry, renamed).ok

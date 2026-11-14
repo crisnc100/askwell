@@ -808,7 +808,7 @@ class _Validator:
             return None
         op = cond.op
         if isinstance(cond.value, AggregateOf):
-            return self.check_vs_aggregate(cond, cond.value, rfield, loc, top)
+            return self.check_vs_aggregate(cond, cond.value, rfield, fdef, loc, top)
         if op in _RANGE_OPS and rfield.type not in _ORDERABLE:
             self.fail("operator_type", f"{loc}.op", f"{op} does not apply to {rfield.type}")
             return None
@@ -857,7 +857,13 @@ class _Validator:
         return self._values_predicate(rfield, fdef, op, [cond.value], loc)
 
     def check_vs_aggregate(
-        self, cond: Condition, of: AggregateOf, rfield: ResolvedField, loc: str, top: bool
+        self,
+        cond: Condition,
+        of: AggregateOf,
+        rfield: ResolvedField,
+        fdef: FieldDef,
+        loc: str,
+        top: bool,
     ) -> Predicate | None:
         """The aggregate's rows are filled in by `run`, once every filter is known."""
         if "vs_aggregate" not in self.features:
@@ -879,6 +885,9 @@ class _Validator:
                 f"{loc}.field",
                 "compare with an aggregate only on a numeric field of the base entity",
             )
+            return None
+        if not fdef.aggregatable:
+            self.fail("not_aggregatable", f"{loc}.field", f"{cond.field} is not aggregatable")
             return None
         return Predicate(rfield, cond.op, (), of=of.of)
 
@@ -1411,16 +1420,20 @@ class _Validator:
 
     def _check_select_labels(self, select: list[tuple[int, ResolvedField]]) -> None:
         """A computed value's name is its column and what `order_by` names, so it must not
-        be a base field's name (ordering would pick the field) or another column's. Every
-        label is collected first, so the order of `select` does not matter."""
+        be a base field's name or registered alias (ordering would pick the field) or
+        another column's. Every label is collected first, so the order of `select` does
+        not matter."""
         assert self.base_def is not None
+        taken = set(self.base_def.fields) | {
+            alias.lower() for fdef in self.base_def.fields.values() for alias in fdef.aliases
+        }
         counts = Counter(rfield.label for _, rfield in select)
         reported: set[str] = set()
         for index, rfield in select:
             if rfield.expr is None or rfield.label in reported:
                 continue
             loc = f"select[{index}].alias"
-            if rfield.label in self.base_def.fields:
+            if rfield.label in taken:
                 self.fail("alias_collision", loc, f"{rfield.label!r} is a field's name")
             elif counts[rfield.label] > 1:
                 self.fail("duplicate_alias", loc, f"{rfield.label!r} is used twice")

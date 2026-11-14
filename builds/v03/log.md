@@ -324,3 +324,7 @@ questions and gives the exact McNemar p-value. One-trial reports keep their old 
   both ways).
 - Fix check, x1, deferred: a computed value is a float, exact only up to 2^53 (about
   9 × 10^15); business amounts stay far below that.
+- Slice 29cc46, f1: an aggregate comparison obeys the registry's aggregatable flag
+  (`technicians.id` against its average is `not_aggregatable`), as a metric does.
+- Slice 29cc46, f2: a computed value's name cannot be a base field's registered alias
+  (`price` on parts, the alias of `unit_price`); refused as `alias_collision`.
