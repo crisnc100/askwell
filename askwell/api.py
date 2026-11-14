@@ -74,6 +74,7 @@ def create_app(
             WorkspaceStore(Path(settings.workspace_dir)),
             trust_proxy=settings.trust_proxy,
             prompt_budget_chars=settings.prompt_budget_chars,
+            features=settings.features,
         )
     app.state.workspaces = workspaces
 

@@ -13,6 +13,7 @@ from pathlib import Path
 
 from askwell.bench.items import ROOT, SPIDER_DIR
 from askwell.core.executor import readonly_engine
+from askwell.core.features import ALL, Features
 from askwell.core.registry import dump_registry
 from askwell.core.registry_init import init_registry
 from askwell.pipeline.service import SchemaConfig
@@ -29,13 +30,15 @@ def db_path(db_id: str) -> Path:
     return SPIDER_DIR / "database" / db_id / f"{db_id}.sqlite"
 
 
-def generate(db_id: str) -> str:
+def generate(db_id: str, features: Features = ALL) -> str:
     path = db_path(db_id)
     if not path.exists():
         raise FileNotFoundError(f"{path}: run `uv run python -m scripts.fetch_benchmarks`")
     engine = readonly_engine(f"sqlite:///{path}")
     try:
-        return dump_registry(init_registry(engine, include_values=True, name=db_id).registry)
+        return dump_registry(
+            init_registry(engine, include_values=True, name=db_id, features=features).registry
+        )
     finally:
         engine.dispose()
 
@@ -48,12 +51,17 @@ def committed_hashes() -> dict[str, str]:
     return json.loads(HASHES.read_text()) if HASHES.exists() else {}
 
 
-def schema_for(db_id: str, *, check: bool = True) -> tuple[SchemaConfig, str]:
+def schema_for(
+    db_id: str, *, check: bool = True, features: Features = ALL
+) -> tuple[SchemaConfig, str]:
     """Generate the registry, check it against the committed hash, write it to the
-    gitignored data/registries/, and return the schema config and the hash."""
-    text = generate(db_id)
+    gitignored data/registries/, and return the schema config and the hash.
+
+    The committed hashes are for every feature on; a run with a feature off draws a
+    different registry, so its hash is recorded but not checked."""
+    text = generate(db_id, features)
     digest = sha256(text)
-    if check:
+    if check and features == ALL:
         expected = committed_hashes().get(db_id)
         if expected is None:
             raise RegistryDriftError(f"{db_id}: no committed registry hash in {HASHES.name}")

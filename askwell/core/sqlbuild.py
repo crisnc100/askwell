@@ -44,6 +44,7 @@ from sqlalchemy.sql.functions import FunctionElement
 from sqlalchemy.sql.type_api import TypeEngine
 from sqlalchemy.types import NullType, TypeDecorator
 
+from askwell.core.registry import TEXT_NUMBER_PLACEHOLDERS
 from askwell.core.validate import (
     PERIOD_LABEL,
     PlanMetric,
@@ -252,14 +253,23 @@ class _Tables:
             columns.setdefault(join.parent_alias, {}).setdefault(join.parent_column, NullType())
             columns.setdefault(join.alias, {}).setdefault(join.column, NullType())
         for rfield in _fields(plan):
-            columns.setdefault(rfield.alias, {})[rfield.column] = _TYPES[rfield.type]
+            stored = String() if rfield.text_number else _TYPES[rfield.type]
+            columns.setdefault(rfield.alias, {})[rfield.column] = stored
         self.tables: dict[str, FromClause] = {}
         for alias, (name, schema) in names.items():
             cols = [column(c, t) for c, t in sorted(columns.get(alias, {}).items())]
             self.tables[alias] = table(name, *cols, schema=schema).alias(alias)
 
     def col(self, rfield: ResolvedField) -> ColumnElement[Any]:
-        return self.tables[rfield.alias].c[rfield.column]
+        raw = self.tables[rfield.alias].c[rfield.column]
+        if not rfield.text_number:
+            return raw
+        # Placeholder text reads as NULL on both engines: SQLite would cast 'null' to 0
+        # without an error, Postgres would fail the whole query.
+        placeholder = func.trim(raw).in_(
+            [bindparam(None, p, type_=String()) for p in TEXT_NUMBER_PLACEHOLDERS]
+        )
+        return cast(case((placeholder, None), else_=raw), Float)
 
     def value(self, rfield: ResolvedField) -> ColumnElement[Any]:
         """The field as compared, aggregated, grouped or ordered. A DATETIME gets one

@@ -22,6 +22,7 @@ from fastapi import APIRouter, FastAPI, Request
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field, ValidationError
 
+from askwell.core.features import ALL, Features
 from askwell.core.registry import load_registry
 from askwell.workspace import fields
 from askwell.workspace.ask import CONFIRM_FIRST, ask_workspace, local_now, prompt_preview
@@ -60,6 +61,8 @@ class WorkspaceApp:
     # The interpret prompt's size budget (Settings.prompt_budget_chars); the Confirm
     # preview truncates exactly as the prompt does.
     prompt_budget_chars: int = 16000
+    # The feature switches that are on (Settings.features).
+    features: Features = ALL
     uploads: RateLimiter = field(init=False)
     asks: RateLimiter = field(init=False)
     checks: RateLimiter = field(init=False)
@@ -232,7 +235,11 @@ def install(fastapi_app: FastAPI, app: WorkspaceApp) -> APIRouter:
                 "You've run a lot of checks in the last hour. "
                 f"Try again {wait_words(app.checks.retry_after(ip))}."
             )
-        app.store.check(workspace, after_load=fields.draft)
+        app.store.check(
+            workspace,
+            after_load=lambda db, plans: fields.draft(db, plans, app.features),
+            features=app.features,
+        )
         return status(app, app.store.open(workspace.id, touch=False))
 
     @router.get("/workspace/fields")
@@ -248,7 +255,11 @@ def install(fastapi_app: FastAPI, app: WorkspaceApp) -> APIRouter:
         registry, info = fields.load_draft(workspace)
         applied = fields.apply(registry, info, edits)
         return prompt_preview(
-            applied, workspace.meta.time_zone, app.store.clock, app.prompt_budget_chars
+            applied,
+            workspace.meta.time_zone,
+            app.store.clock,
+            app.prompt_budget_chars,
+            app.features,
         )
 
     @router.post("/workspace/confirm")
@@ -265,7 +276,7 @@ def install(fastapi_app: FastAPI, app: WorkspaceApp) -> APIRouter:
         _, info = fields.load_draft(workspace)
         registry = load_registry(workspace.registry_path)
         now = local_now(workspace.meta.time_zone, app.store.clock)
-        return {"questions": [s.question for s in starters(registry, info, now)]}
+        return {"questions": [s.question for s in starters(registry, info, now, app.features)]}
 
     @router.post("/workspace/ask")
     def ask(request: Request, body: AskRequest) -> dict[str, Any]:

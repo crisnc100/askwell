@@ -20,6 +20,21 @@ TEMPORAL_TYPES: frozenset[str] = frozenset({"date", "datetime"})
 
 _SLUG = re.compile(r"^[a-z][a-z0-9_]*$")
 
+# Text that stands for "no value" in a column of numbers stored as text, compared after
+# trimming. `registry init` skips it when deciding a column holds numbers; the SQL
+# builder reads it as NULL.
+TEXT_NUMBER_PLACEHOLDERS: tuple[str, ...] = (
+    "",
+    "null",
+    "NULL",
+    "Null",
+    "N/A",
+    "n/a",
+    "NA",
+    "na",
+    "-",
+)
+
 
 def slugify(name: str) -> str:
     """Lowercase, non-alphanumerics to `_`, collapsed; a leading digit gets a prefix."""
@@ -48,6 +63,9 @@ class FieldDef(_Strict):
     allowed_values: list[str] = Field(default_factory=list[str])
     # alias (case-insensitive) -> canonical allowed value
     value_aliases: dict[str, str] = Field(default_factory=dict[str, str])
+    # A number stored in a text column (`registry init`'s numeric_text): read through a
+    # cast, with placeholder text such as 'null' read as NULL.
+    text_number: bool = False
 
     @model_validator(mode="after")
     def _check(self) -> Self:
@@ -55,6 +73,8 @@ class FieldDef(_Strict):
             raise ValueError(f"{self.column}: allowed_values need categorical: true")
         if self.hidden and self.categorical:
             raise ValueError(f"{self.column}: a hidden field cannot be categorical")
+        if self.text_number and self.type != "number":
+            raise ValueError(f"{self.column}: text_number needs type: number")
         for alias, target in self.value_aliases.items():
             if target not in self.allowed_values:
                 raise ValueError(f"{self.column}: value alias {alias!r} -> unknown {target!r}")
@@ -97,6 +117,10 @@ class Relationship(_Strict):
     to_field: str
     cardinality: Literal["many_to_one"] = "many_to_one"
     source: Literal["declared", "inferred"]
+    # The feature switch this link was drawn under (askwell/core/features.py), or None
+    # for a link Askwell drew before switches existed. With that switch off the link is
+    # not used, so a registry drafted with it on behaves as one drafted with it off.
+    feature: Literal["inferred_links"] | None = None
 
 
 class Registry(_Strict):
@@ -130,6 +154,14 @@ class Registry(_Strict):
         return self
 
 
+def enabled_links(registry: Registry, features: frozenset[str]) -> Registry:
+    """The registry without the links whose feature switch is off."""
+    kept = [r for r in registry.relationships if r.feature is None or r.feature in features]
+    if len(kept) == len(registry.relationships):
+        return registry
+    return registry.model_copy(update={"relationships": kept})
+
+
 def load_registry(path: Path | str) -> Registry:
     with Path(path).open(encoding="utf-8") as fh:
         data = yaml.safe_load(fh)
@@ -140,8 +172,14 @@ def dump_registry(registry: Registry) -> str:
     """Deterministic YAML: model field order, entities and relationships as given."""
     data = registry.model_dump(mode="json")
     for entity in data["entities"].values():
-        # Written only when set, so a registry without labels dumps as it did before
-        # labels existed (Spider registries are checked against committed hashes).
+        # Written only when set, so a registry without them dumps as it did before they
+        # existed (Spider registries are checked against committed hashes).
         if entity["label"] is None:
             del entity["label"]
+        for fdef in entity["fields"].values():
+            if not fdef["text_number"]:
+                del fdef["text_number"]
+    for rel in data["relationships"]:
+        if rel["feature"] is None:
+            del rel["feature"]
     return yaml.safe_dump(data, sort_keys=False, allow_unicode=True, width=100)

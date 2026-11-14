@@ -1,0 +1,31 @@
+{
+  "note": "v03-roles-seen: the seen Spider questions refused for two links between the same tables (evals/triage), network_1 and wta_1 only; IDs only. flight_2's 10 are left out: its airport codes carry a leading space, so either link gives zero rows and a wrong link cannot show.",
+  "ids": [
+    "spider:451",
+    "spider:488",
+    "spider:885",
+    "spider:886",
+    "spider:887",
+    "spider:889",
+    "spider:890",
+    "spider:891",
+    "spider:892",
+    "spider:893",
+    "spider:894",
+    "spider:896",
+    "spider:897",
+    "spider:898",
+    "spider:900",
+    "spider:904",
+    "spider:905",
+    "spider:906",
+    "spider:907",
+    "spider:908",
+    "spider:909",
+    "spider:910",
+    "spider:911",
+    "spider:912",
+    "spider:913",
+    "spider:917"
+  ]
+}

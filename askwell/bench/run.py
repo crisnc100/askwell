@@ -15,9 +15,10 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
-from sqlalchemy import Engine
+from sqlalchemy import Engine, make_url
 
 from askwell.bench.compare import results_match
+from askwell.bench.csv_path import AskwellCsvSystem, build_workspace, export_csv
 from askwell.bench.items import (
     ROOT,
     EvalItem,
@@ -36,11 +37,13 @@ from askwell.llm.budget import (
     ItemResult,
     run_checkpointed,
 )
+from askwell.llm.gateway import Gateway
 from askwell.llm.simulate import PendingRequestError
 from askwell.pipeline.service import AskService, SchemaConfig, build_gateway, load_schemas
 
 # "ledgerline" is Askwell's system id, kept as recorded in the frozen reports and checkpoints.
-SYSTEMS = ("ledgerline", "oneshot", "sql_agent")
+SYSTEMS = ("ledgerline", "askwell_csv", "oneshot", "sql_agent")
+CSV_DIR = ROOT / "data" / "csv"
 RUNS_DIR = ROOT / "evals" / "runs"
 EVAL_RECORDINGS = ROOT / "evals" / "recordings" / "eval"
 EVAL_PENDING = ROOT / "evals" / "pending" / "eval"
@@ -82,7 +85,7 @@ def prompt_version_for(system: str) -> str:
     from askwell.bench import systems as systems_module
     from askwell.pipeline import service as service_module
 
-    if system == "ledgerline":
+    if system in ("ledgerline", "askwell_csv"):
         return str(service_module.PROMPT_VERSION)
     return str(systems_module.ONESHOT_PROMPT_VERSION)
 
@@ -98,6 +101,11 @@ class RunResult:
     registry_hashes: dict[str, str] = field(default_factory=dict[str, str])
     systems: list[str] = field(default_factory=list[str])
     models: list[str] = field(default_factory=list[str])
+    # askwell_csv: per schema, every table whose file failed the upload check, with its
+    # problem codes, whether or not a scored question reads it.
+    csv_load_failures: dict[str, dict[str, list[str]]] = field(
+        default_factory=dict[str, dict[str, list[str]]]
+    )
     trials: int = 1
 
 
@@ -116,7 +124,7 @@ def _schemas(
             continue
         if not schema_id.startswith("spider_"):
             raise ValueError(f"unknown schema {schema_id!r}")
-        config, digest = schema_for(schema_id.removeprefix("spider_"))
+        config, digest = schema_for(schema_id.removeprefix("spider_"), features=settings.features)
         out[schema_id] = config
         hashes[schema_id] = digest
     return out, hashes
@@ -188,9 +196,12 @@ def run_eval(
     budget_usd: float,
     progress: Callable[[str], None] = lambda _m: None,
     gold: Path | None = None,
+    item_ids: set[str] | None = None,
 ) -> RunResult:
     """`gold` scores a second gold file for the one schema given, in place of its
-    default gold set."""
+    default gold set. `item_ids` runs those items only, each for every trial asked for,
+    Spider included: a targeted gate (such as v03-roles-seen) needs repeats that the
+    full Spider run (one trial, ADR-006) does not."""
     if gold is not None and len(schema_ids) != 1:
         raise ValueError("--gold takes exactly one schema")
     for system in systems:
@@ -206,6 +217,18 @@ def run_eval(
         schema_id: hashlib.sha256(config.registry_path.read_bytes()).hexdigest()
         for schema_id, config in schemas.items()
     }
+    chosen = {
+        schema_id: [
+            item
+            for item in (items_for(schema_id) if gold is None else items_for(schema_id, gold))
+            if item_ids is None or item.id in item_ids
+        ]
+        for schema_id in schema_ids
+    }
+    if item_ids is not None:
+        missing = sorted(item_ids - {i.id for items in chosen.values() for i in items})
+        if missing:
+            raise ValueError(f"no schema given has these items: {', '.join(missing)}")
     tasks = [
         Task(
             schema_id,
@@ -218,9 +241,9 @@ def run_eval(
         )
         for schema_id in schema_ids
         for model in models
-        for trial in range(1, trials_for(schema_id, trials) + 1)
+        for trial in range(1, (trials if item_ids else trials_for(schema_id, trials)) + 1)
         for system in systems
-        for item in (items_for(schema_id) if gold is None else items_for(schema_id, gold))
+        for item in chosen[schema_id]
     ]
     engines: dict[str, Engine] = {}
     golds: dict[str, _Gold] = {}
@@ -240,7 +263,10 @@ def run_eval(
             gateway = build_gateway(
                 settings, mode, store_path=store, pending_dir=pending, budget_usd=budget_usd
             )
-            if task.system == "ledgerline":
+            if task.system == "askwell_csv":
+                engine(task.schema_id)  # the gold runs on the source database
+                built[key] = _csv_system(settings, task, schemas[task.schema_id], gateway)
+            elif task.system == "ledgerline":
                 service = AskService(
                     settings,
                     {task.schema_id: schemas[task.schema_id]},
@@ -332,6 +358,14 @@ def run_eval(
     finally:
         for eng in engines.values():
             eng.dispose()
+        for system in built.values():
+            if isinstance(system, AskwellCsvSystem):
+                system.close()
+    csv_failures = {
+        key[0]: dict(system.workspace.failed)
+        for key, system in built.items()
+        if isinstance(system, AskwellCsvSystem) and system.workspace.failed
+    }
     return RunResult(
         run_id=run_id,
         records=outcome.records,
@@ -343,7 +377,23 @@ def run_eval(
         systems=systems,
         models=models,
         trials=trials,
+        csv_load_failures=csv_failures,
     )
+
+
+def _csv_system(
+    settings: Settings, task: Task, config: SchemaConfig, gateway: Gateway
+) -> AskwellCsvSystem:
+    """The CSV path for a schema stored in SQLite: its tables exported to data/csv/, then
+    uploaded as they are (askwell/bench/csv_path.py)."""
+    url = make_url(config.db_url)
+    if url.get_backend_name() != "sqlite" or not url.database:
+        raise ValueError(f"askwell_csv needs a SQLite schema, not {task.schema_id}")
+    base = CSV_DIR / task.schema_id
+    files = export_csv(Path(url.database), base / "files")
+    workspace = build_workspace(files, base / "workspace", features=settings.features)
+    service = AskService(settings, {}, gateway, audit=None, model=task.model)
+    return AskwellCsvSystem(service, task.schema_id, workspace, settings.now)
 
 
 def pending_counts() -> dict[str, int]:

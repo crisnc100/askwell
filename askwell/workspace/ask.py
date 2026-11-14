@@ -24,6 +24,7 @@ from sqlalchemy import create_engine
 
 from askwell.core.audit import AuditLog
 from askwell.core.executor import readonly_engine
+from askwell.core.features import ALL, Features
 from askwell.core.registry import Registry, load_registry
 from askwell.llm.daily import DailyCapReachedError
 from askwell.llm.errors import LiveAnswersOffError
@@ -65,11 +66,15 @@ def local_now(time_zone: str, clock: Callable[[], datetime]) -> datetime:
 
 
 def prompt_preview(
-    registry: Registry, time_zone: str, clock: Callable[[], datetime], budget_chars: int
+    registry: Registry,
+    time_zone: str,
+    clock: Callable[[], datetime],
+    budget_chars: int,
+    features: Features = ALL,
 ) -> dict[str, Any]:
     """The system message the model would get for this registry, built by the same
     function the interpret step uses, with the same truncation."""
-    view = registry_view(registry, local_now(time_zone, clock), budget_chars, time_zone)
+    view = registry_view(registry, local_now(time_zone, clock), budget_chars, time_zone, features)
     return {"prompt": system_message(view), "truncation": view.truncation}
 
 
@@ -130,7 +135,7 @@ _PLAIN: list[tuple[frozenset[str], str, str]] = [
         "count order lines per order).",
     ),
     (
-        frozenset({"ambiguous_path"}),
+        frozenset({"ambiguous_path", "unknown_link"}),
         "Two tables are linked in more than one way, so the question could mean either.",
         "Say which link you mean (for example, 'by the billing customer').",
     ),

@@ -10,6 +10,7 @@ from collections.abc import Iterator
 from dataclasses import dataclass
 from datetime import datetime
 
+from askwell.core.features import ALL, Features
 from askwell.core.intent import GroupBy, Intent, Metric, OrderBy
 from askwell.core.registry import Registry
 from askwell.core.sqlbuild import build
@@ -159,13 +160,15 @@ def _candidates(fields: dict[str, list[_Field]]) -> Iterator[Starter]:
             break
 
 
-def starters(registry: Registry, info: FieldInfo, now: datetime) -> list[Starter]:
+def starters(
+    registry: Registry, info: FieldInfo, now: datetime, features: Features = ALL
+) -> list[Starter]:
     """Up to `MAX_STARTERS` questions about this registry's own tables and columns."""
     out: list[Starter] = []
     for candidate in _candidates(_fields(registry, info)):
         if candidate.question in {s.question for s in out}:
             continue
-        result = validate(candidate.intent, registry, now=now, allow_draft=False)
+        result = validate(candidate.intent, registry, now=now, allow_draft=False, features=features)
         if not result.ok or result.plan is None:
             continue
         try:

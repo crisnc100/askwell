@@ -13,6 +13,9 @@ services:
     environment:
       # Caddy on the same host is the only client, and it writes X-Forwarded-For.
       ASKWELL_TRUST_PROXY: "1"
+      # Named links failed their gate (ADR-008, seen checks in PR-2); off, questions
+      # across two links between the same tables are refused as before.
+      ASKWELL_FEATURES_OFF: "link_roles"
     ports:
       # Only Caddy on this host can reach the app.
       - "127.0.0.1:${ASKWELL_PORT:-${LEDGERLINE_PORT:-8000}}:8000"
