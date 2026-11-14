@@ -218,14 +218,14 @@ def test_an_eval_run_exports_every_question_of_a_spider_schema(
 def test_when_no_file_loads_every_question_is_refused(tmp_path: Path) -> None:
     path = tmp_path / "noid.sqlite"
     with sqlite3.connect(path) as conn:
-        conn.execute("CREATE TABLE pairs (a_code TEXT, b_code TEXT)")
-        conn.execute("INSERT INTO pairs VALUES ('x', 'y')")
+        conn.execute("CREATE TABLE pairs (id TEXT, b_code TEXT)")
+        conn.execute("INSERT INTO pairs VALUES ('1', 'y'), ('2', 'z'), ('1.23457E+11', 'w')")
     workspace = build_workspace(export_csv(path, tmp_path / "files"), tmp_path / "ws")
     assert workspace.registry is None
-    assert workspace.failed == {"pairs": ["no_id_column"]}
+    assert workspace.failed == {"pairs": ["bad_value"]}
     service = AskService(get_settings(), {}, None, audit=None, model="m")  # type: ignore[arg-type]
     system = AskwellCsvSystem(service, "noid", workspace, get_settings().now)
     [item] = _items()[:1]
     answer = system.answer(item, 1, None)
     assert answer.refused
-    assert answer.detail["failed_tables"] == {"pairs": ["no_id_column"]}
+    assert answer.detail["failed_tables"] == {"pairs": ["bad_value"]}
