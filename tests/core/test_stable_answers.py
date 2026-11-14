@@ -16,7 +16,7 @@ from pydantic import ValidationError
 from sqlalchemy import Engine
 
 from askwell.core.executor import Executor, readonly_engine, run
-from askwell.core.registry import EntityDef, FieldDef, Registry, dump_registry
+from askwell.core.registry import EntityDef, FieldDef, Registry, Relationship, dump_registry
 from askwell.core.registry_init import infer_label, init_registry
 from askwell.core.sqlbuild import build, peeks, values_tie
 from askwell.core.validate import QueryPlan
@@ -373,3 +373,126 @@ def test_registry_init_writes_the_label(tmp_path: Path) -> None:
         engine.dispose()
     assert registry.entities["customers"].label == "name"
     assert registry.entities["notes"].label is None
+
+
+# --- review fixes: a hidden key, a composite key ---
+
+
+def _people_db(tmp_path: Path) -> Path:
+    path = tmp_path / "people.sqlite"
+    con = sqlite3.connect(path)
+    con.executescript(
+        """
+        CREATE TABLE customers (id INTEGER PRIMARY KEY, name TEXT);
+        CREATE TABLE orders (id INTEGER PRIMARY KEY, customer_id INTEGER, total REAL);
+        INSERT INTO customers VALUES (1, 'Garcia Ltd'), (2, 'Garcia Ltd'), (3, 'Akron Co');
+        INSERT INTO orders (customer_id, total) VALUES (1, 10), (2, 20), (2, 5), (3, 1);
+        CREATE TABLE lines (order_id INTEGER, line_no INTEGER, sku TEXT,
+                            PRIMARY KEY (order_id, line_no));
+        INSERT INTO lines VALUES (2, 1, 'x'), (1, 2, 'x'), (1, 1, 'x'), (2, 2, 'y');
+        """
+    )
+    con.commit()
+    con.close()
+    return path
+
+
+def _people_registry(hide_key: bool) -> Registry:
+    return Registry(
+        schema_version=1,
+        draft=False,
+        entities={
+            "customers": EntityDef(
+                table="customers",
+                primary_key=["id"],
+                label="name",
+                fields={
+                    "id": FieldDef(column="id", type="integer", hidden=hide_key),
+                    "name": FieldDef(column="name", type="text"),
+                },
+            ),
+            "orders": EntityDef(
+                table="orders",
+                primary_key=["id"],
+                fields={
+                    "id": FieldDef(column="id", type="integer"),
+                    "customer_id": FieldDef(column="customer_id", type="integer"),
+                    "total": FieldDef(column="total", type="number", aggregatable=True),
+                },
+            ),
+            "lines": EntityDef(
+                table="lines",
+                primary_key=["order_id", "line_no"],
+                fields={
+                    "order_id": FieldDef(column="order_id", type="integer"),
+                    "line_no": FieldDef(column="line_no", type="integer"),
+                    "sku": FieldDef(column="sku", type="text"),
+                },
+            ),
+        },
+        relationships=[
+            Relationship(
+                from_entity="orders",
+                from_field="customer_id",
+                to_entity="customers",
+                to_field="id",
+                source="declared",
+            )
+        ],
+    )
+
+
+def _run_sqlite(path: Path, plan: QueryPlan) -> Any:
+    engine = readonly_engine(f"sqlite:///{path}")
+    try:
+        return run(engine, build(plan))
+    finally:
+        engine.dispose()
+
+
+def test_a_hidden_key_still_keeps_same_named_customers_apart(tmp_path: Path) -> None:
+    path = _people_db(tmp_path)
+    plan = _plan(
+        _people_registry(hide_key=True),
+        intent_type="grouped_summary",
+        entity="orders",
+        metrics=[{"agg": "sum", "field": "total", "alias": "spent"}],
+        group_by=[{"field": "customers.name"}],
+        order_by=[{"target": "spent", "direction": "desc"}],
+    )
+    result = _run_sqlite(path, plan)
+    # The hidden id groups the rows but is never shown.
+    assert result.columns == ["customers__name", "spent"]
+    assert normalise(result.rows, ordered=True) == [
+        ("Garcia Ltd", 25.0),
+        ("Garcia Ltd", 10.0),
+        ("Akron Co", 1.0),
+    ]
+
+
+def test_a_shown_key_is_returned(tmp_path: Path) -> None:
+    plan = _plan(
+        _people_registry(hide_key=False),
+        intent_type="grouped_summary",
+        entity="orders",
+        metrics=[{"agg": "sum", "field": "total", "alias": "spent"}],
+        group_by=[{"field": "customers.name"}],
+    )
+    assert _run_sqlite(_people_db(tmp_path), plan).columns == [
+        "customers__id",
+        "customers__name",
+        "spent",
+    ]
+
+
+def test_a_composite_key_orders_a_list_by_every_key_field(tmp_path: Path) -> None:
+    plan = _plan(
+        _people_registry(hide_key=False),
+        intent_type="row_list",
+        entity="lines",
+        select=["sku", "order_id", "line_no"],
+        order_by=[{"target": "sku"}],
+    )
+    assert [f.name for f in plan.tiebreak] == ["order_id", "line_no"]
+    rows = _run_sqlite(_people_db(tmp_path), plan).rows
+    assert [tuple(r) for r in rows] == [("x", 1, 1), ("x", 1, 2), ("x", 2, 1), ("y", 2, 2)]

@@ -587,8 +587,9 @@ def build(plan: QueryPlan, *, peek: bool = False) -> Select[Any]:
             if group.key is not None:
                 key = tables.value(group.key)
                 group_exprs.append(key)
-                columns.append(key.label(group.key.label))
-                _label(labelled, group.key.label, key)
+                if group.key_shown:
+                    columns.append(key.label(group.key.label))
+                    _label(labelled, group.key.label, key)
             expr = tables.value(group.field)
             if group.grain is not None:
                 expr = GRAINS[group.grain](expr)
@@ -625,7 +626,7 @@ def build(plan: QueryPlan, *, peek: bool = False) -> Select[Any]:
     # engine returns, which differs between Postgres and SQLite.
     for group in plan.group_by:
         if group.key is not None:
-            order.append(labelled[group.key.label].asc().nulls_last())
+            order.append(tables.value(group.key).asc().nulls_last())
         order.append(labelled[group.label].asc().nulls_last())
     order += [tables.value(f).asc().nulls_last() for f in plan.tiebreak]
     if order:
