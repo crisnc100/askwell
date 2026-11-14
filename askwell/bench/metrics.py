@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import math
 import statistics
+from collections.abc import Sequence
 from dataclasses import dataclass
 from typing import Any, Literal
 
@@ -89,11 +90,14 @@ def summarise(outcomes: list[ItemOutcome]) -> dict[str, Any]:
     }
 
 
-def _right_by_question(records: list[dict[str, Any]], planned: int) -> dict[str, bool]:
+def _right_by_question(
+    records: list[dict[str, Any]], planned: int, items: Sequence[str] = ()
+) -> dict[str, bool]:
     """Each in-schema question, right when right in more than half of the trials its
     run planned. A trial that is missing or pending is not right, so an unfinished run
-    never lowers the bar."""
-    correct: dict[str, int] = {}
+    never lowers the bar. `items` are the run's planned in-schema questions: one with no
+    finished trial at all has no record, and still counts as not right."""
+    correct: dict[str, int] = dict.fromkeys(items, 0)
     for record in records:
         if record["category"] == "in_schema":
             hit = record["outcome"] == "correct"
@@ -101,10 +105,12 @@ def _right_by_question(records: list[dict[str, Any]], planned: int) -> dict[str,
     return {item: 2 * n > planned for item, n in correct.items()}
 
 
-def question_level(records: list[dict[str, Any]], planned: int) -> tuple[int, int]:
+def question_level(
+    records: list[dict[str, Any]], planned: int, items: Sequence[str] = ()
+) -> tuple[int, int]:
     """(questions right in most of their planned trials, distinct questions),
     in-schema only."""
-    right = _right_by_question(records, planned)
+    right = _right_by_question(records, planned, items)
     return sum(right.values()), len(right)
 
 

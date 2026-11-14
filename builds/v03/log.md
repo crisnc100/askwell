@@ -334,3 +334,6 @@ questions and gives the exact McNemar p-value. One-trial reports keep their old 
   interpret-v3" instead. `rerecord-v3-fieldservice` and `replay-fieldservice` were
   regenerated from their recordings and checkpoint, with no model call; only the note
   lines changed.
+- Slice d0921d: question-level stats and `compare_runs` count every planned in-schema
+  question (`RunResult.planned_items`), so a question whose trials were all deferred or
+  never ran counts as not right instead of leaving the denominator.

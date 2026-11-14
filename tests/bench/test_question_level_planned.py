@@ -95,3 +95,34 @@ def test_a_run_on_named_items_plans_every_trial_for_spider_too() -> None:
     )
     [row] = build(result)["question_level"]
     assert (row["right"]["n"], row["right"]["of"]) == (0, 1)
+
+
+def _planned_run(outcomes: dict[str, list[str]], run_id: str = "r") -> RunResult:
+    records = [
+        _record(item, trial, outcome)
+        for item, trials in outcomes.items()
+        for trial, outcome in enumerate(trials, start=1)
+    ]
+    return RunResult(
+        run_id=run_id,
+        records=records,
+        systems=["ledgerline"],
+        models=["m"],
+        trials=3,
+        planned_items={"fieldservice": ["q1", "q2"]},
+    )
+
+
+def test_a_question_with_no_finished_trial_still_counts() -> None:
+    # q2's three trials were all deferred, so it has no record at all.
+    [row] = build(_planned_run({"q1": ["correct"] * 3}))["question_level"]
+    assert (row["right"]["n"], row["right"]["of"]) == (1, 2)
+
+
+def test_compare_runs_keeps_a_question_with_no_finished_trial() -> None:
+    before = _planned_run({"q1": ["correct"] * 3, "q2": ["correct"] * 3}, "before")
+    after = _planned_run({"q1": ["correct"] * 3}, "after")
+    [pair] = compare_runs(before, after)
+    assert pair["questions"] == 2
+    assert (pair["before_right"], pair["after_right"]) == (2, 1)
+    assert (pair["only_after"], pair["only_before"], pair["both"]) == (0, 1, 1)

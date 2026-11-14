@@ -110,6 +110,9 @@ class RunResult:
     # Trials each schema was planned to run: every trial on a run of named items,
     # otherwise as `trials_for` says. Empty on a result built by hand.
     planned_trials: dict[str, int] = field(default_factory=dict[str, int])
+    # Each schema's planned in-schema item ids. A deferred or unrun task leaves no
+    # record, so question-level stats count from this list, not from the records.
+    planned_items: dict[str, list[str]] = field(default_factory=dict[str, list[str]])
 
     def planned(self, schema_id: str) -> int:
         return self.planned_trials.get(schema_id, trials_for(schema_id, self.trials))
@@ -385,6 +388,10 @@ def run_eval(
         models=models,
         trials=trials,
         planned_trials=planned,
+        planned_items={
+            schema_id: [item.id for item in items if item.category == "in_schema"]
+            for schema_id, items in chosen.items()
+        },
         csv_load_failures=csv_failures,
     )
 

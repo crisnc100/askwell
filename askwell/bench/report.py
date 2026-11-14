@@ -272,7 +272,13 @@ def build(result: RunResult) -> dict[str, Any]:
                 "system": system,
                 "model": model,
                 "gold": gold,
-                "right": Rate(*question_level(records, result.planned(schema_id))).to_dict(),
+                "right": Rate(
+                    *question_level(
+                        records,
+                        result.planned(schema_id),
+                        result.planned_items.get(schema_id, ()),
+                    )
+                ).to_dict(),
             }
             for (schema_id, gold, system, model), records in sorted(groups.items())
         ]
@@ -432,7 +438,9 @@ def compare_runs(before: RunResult, after: RunResult) -> list[dict[str, Any]]:
             key = (record["schema_id"], _gold(record), record["system"], record["model"])
             groups[key].append(record)
         return {
-            key: _right_by_question(records, result.planned(key[0]))
+            key: _right_by_question(
+                records, result.planned(key[0]), result.planned_items.get(key[0], ())
+            )
             for key, records in groups.items()
         }
 
