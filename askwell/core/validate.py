@@ -183,14 +183,16 @@ class PredicateGroup:
 
 @dataclass(frozen=True)
 class PlanExists:
-    """EXISTS (or, with `none`, NOT EXISTS) a row of `table` AS `alias` whose `column`
-    is the outer base row's `parent_column`, and that matches `where`. `joins` are its
-    own many-to-one joins, for fields of `where` on other entities."""
+    """EXISTS (or, with `none`, NOT EXISTS) a row of `table` AS `alias` that matches
+    `where` and whose `link_alias`.`column` is the outer base row's `parent_column`.
+    `joins` are its own many-to-one joins: toward the base entity when it is more than
+    one link away, and for fields of `where` on other entities."""
 
     none: bool
     table: str
     db_schema: str | None
     alias: str
+    link_alias: str
     column: str
     parent_column: str
     joins: tuple[JoinStep, ...]
@@ -910,6 +912,9 @@ class _Validator:
         ]
 
     def check_has(self, item: HasFilter, loc: str) -> PlanExists | None:
+        """`has` names an entity whose rows each lead to one base row: directly, by a
+        link (`entity@link` picks one of two), or along one shortest chain of
+        many-to-one links (work orders -> sites -> customers)."""
         assert self.base_def is not None
         if "has" not in self.features:
             self.fail("feature_off", loc, "has / has none filters are switched off")
@@ -919,23 +924,6 @@ class _Validator:
         if child is None:
             self.fail("unknown_entity", f"{loc}.has", f"no entity {name!r}")
             return None
-        links = [
-            rel
-            for rel in self.registry.relationships
-            if rel.from_entity == child and rel.to_entity == self.base and child != self.base
-        ]
-        if link:
-            links = [rel for rel in links if rel.from_field == link.lower()]
-        if not links:
-            self.fail("has_link", f"{loc}.has", f"no rows of {child} point at {self.base}")
-            return None
-        if len(links) > 1:
-            forms = ", ".join(f"{child}@{rel.from_field}" for rel in links)
-            self.fail(
-                "ambiguous_path", f"{loc}.has", f"{child} points at {self.base} twice: {forms}"
-            )
-            return None
-        rel = links[0]
         sub = _Validator(
             self.intent, self.registry, self.now, self.row_cap, self.features, f"h{len(self.subs)}_"
         )
@@ -944,6 +932,40 @@ class _Validator:
         sub.base = child
         sub.base_def = self.registry.entities[child]
         sub.paths = _shortest_paths(self.registry, child)
+        direct = [
+            rel
+            for rel in self.registry.relationships
+            if rel.from_entity == child and rel.to_entity == self.base and child != self.base
+        ]
+        if link:
+            direct = [rel for rel in direct if rel.from_field == link.lower()]
+        if len(direct) > 1:
+            forms = ", ".join(f"{child}@{rel.from_field}" for rel in direct)
+            self.fail(
+                "ambiguous_path", f"{loc}.has", f"{child} points at {self.base} twice: {forms}"
+            )
+            return None
+        if direct:
+            link_alias = sub.base_alias
+            column = sub.base_def.fields[direct[0].from_field].column
+            parent_column = self.base_def.fields[direct[0].to_field].column
+        else:
+            info = sub.paths.get(self.base)
+            if link or child == self.base or info is None or any(e.down for e in info.path):
+                self.fail("has_link", f"{loc}.has", f"rows of {child} do not lead to {self.base}")
+                return None
+            if info.count > 1:
+                self.fail(
+                    "ambiguous_path",
+                    f"{loc}.has",
+                    f"{child} leads to {self.base} more than one way",
+                )
+                return None
+            if len(self.base_def.primary_key) != 1:
+                self.fail("has_link", f"{loc}.has", f"{self.base} has no single-column key")
+                return None
+            link_alias = sub._alias_for(info.path)
+            column = parent_column = self.base_def.fields[self.base_def.primary_key[0]].column
         predicates = [
             sub.check_condition(cond, f"{loc}.where[{index}]")
             for index, cond in enumerate(item.where)
@@ -956,8 +978,9 @@ class _Validator:
             table=sub.base_def.table,
             db_schema=sub.base_def.db_schema,
             alias=sub.base_alias,
-            column=sub.base_def.fields[rel.from_field].column,
-            parent_column=self.base_def.fields[rel.to_field].column,
+            link_alias=link_alias,
+            column=column,
+            parent_column=parent_column,
             joins=tuple(sub.joins),
             where=tuple(p for p in predicates if p is not None),
         )

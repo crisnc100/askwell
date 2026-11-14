@@ -581,7 +581,7 @@ def _exists(tables: _Tables, item: PlanExists) -> ColumnElement[bool]:
         base=(item.alias, item.table, item.db_schema),
         joins=item.joins,
         fields=fields,
-        keys={item.alias: [item.column]},
+        keys={item.link_alias: [item.column]},
     )
     source = inner.tables[item.alias]
     for join in item.joins:
@@ -589,7 +589,7 @@ def _exists(tables: _Tables, item: PlanExists) -> ColumnElement[bool]:
         child = inner.tables[join.alias]
         source = source.join(child, parent.c[join.parent_column] == child.c[join.column])
     outer = tables.tables[tables.base[0]]
-    link = inner.tables[item.alias].c[item.column] == outer.c[item.parent_column]
+    link = inner.tables[item.link_alias].c[item.column] == outer.c[item.parent_column]
     conditions = [link, *(_predicate(inner, p) for p in item.where)]
     one: ColumnElement[Any] = literal_column("1", BigInteger())
     found = exists(select(one).select_from(source).where(and_(*conditions)))
