@@ -318,13 +318,18 @@ def _values_contained(
 _NOT_A_NUMBER_NAME = re.compile(r"(id|code|zip|postal|phone)$", re.IGNORECASE)
 _LEADING_ZERO = re.compile(r"^[+-]?0\d")
 _NUMBER_SAMPLE = 50
+# A column with at most this many distinct numbers is read as codes (0/1 flags, a 1-3
+# status), kept as categorical text so the model sees its values. Five covers flags and
+# small code sets; a measured quantity rarely has so few, and one with more (dog ages
+# 1 to 9) is the kind a question averages.
+CODE_MAX = 5
 _NUMBER = re.compile(r"^[+-]?(\d+(\.\d*)?|\.\d+)([eE][+-]?\d+)?$")
 
 
 def _holds_numbers(engine: Engine, t: _Table, col_name: str) -> bool:
     """A text column whose every value, after trimming and skipping placeholders such as
-    'null', reads as a number, and that holds at least one. Values with a leading zero
-    ('01234') stay text: a zip code or an ID, not an amount."""
+    'null', reads as a number, with more than CODE_MAX distinct numbers. Values with a
+    leading zero ('01234') stay text: a zip code or an ID, not an amount."""
     if _NOT_A_NUMBER_NAME.search(col_name):
         return False
     ref = table(t.name, column(col_name))
@@ -338,16 +343,18 @@ def _holds_numbers(engine: Engine, t: _Table, col_name: str) -> bool:
             if not _all_numbers(sample):
                 return False
             if len(sample) < _NUMBER_SAMPLE:
-                return any(_reads_as_number(v) for v in sample)
+                return _distinct_numbers(sample) > CODE_MAX
             values = conn.execute(query).scalars().all()
     except OperationalError:
         # SQLite raises when stored bytes are not UTF-8; such a column is not numbers.
         return False
-    return _all_numbers(values) and any(_reads_as_number(v) for v in values)
+    return _all_numbers(values) and _distinct_numbers(values) > CODE_MAX
 
 
-def _reads_as_number(raw: object) -> bool:
-    return str(raw).strip() not in TEXT_NUMBER_PLACEHOLDERS
+def _distinct_numbers(values: Sequence[object]) -> int:
+    return len(
+        {float(v) for raw in values if (v := str(raw).strip()) not in TEXT_NUMBER_PLACEHOLDERS}
+    )
 
 
 def _all_numbers(values: Sequence[object]) -> bool:

@@ -11,7 +11,7 @@ from typing import Any
 import pytest
 from sqlalchemy import Engine
 
-from askwell.core.executor import run
+from askwell.core.executor import readonly_engine, run
 from askwell.core.features import ALL
 from askwell.core.intent import Intent
 from askwell.core.registry import FieldDef, Registry
@@ -143,3 +143,44 @@ def test_switch_off_refuses_a_sum_over_a_drafted_text_number(engines: list[Engin
     assert not off.ok
     today = init_registry(engines[1], features=NO_NUMBERS).registry
     assert off.codes == _check(today, NO_NUMBERS, **intent).codes
+
+
+CODES = [
+    "CREATE TABLE pets (id INTEGER PRIMARY KEY, flag_yn TEXT, sex TEXT, years TEXT)",
+    "INSERT INTO pets VALUES "
+    "(1, '0', '1', '2'), (2, '1', '0', '3'), (3, '1', '1', '4'), (4, 'null', '0', '5'), "
+    "(5, '0', '1', '6'), (6, '1', '1', '7')",
+]
+
+
+def test_a_column_of_a_few_number_codes_stays_categorical_text(tmp_path: Path) -> None:
+    # 0/1 flags and small code sets keep their value list for the model; a column with
+    # more distinct numbers than CODE_MAX is a quantity.
+    with sqlite_db(tmp_path / "codes.sqlite", CODES) as engine:
+        fields = _fields_of(init_registry(engine, include_values=True).registry, "pets")
+    for name in ("flag_yn", "sex"):
+        assert fields[name].type == "text", name
+        assert not fields[name].text_number, name
+        assert fields[name].categorical, name
+    assert fields["flag_yn"].allowed_values == ["0", "1", "null"]
+    assert fields["years"].type == "number"
+    assert fields["years"].text_number
+
+
+def test_dog_kennels_flags_keep_their_values() -> None:
+    from askwell.bench.spider import db_path
+
+    engine = readonly_engine(f"sqlite:///{db_path('dog_kennels')}")
+    try:
+        fields = _fields_of(init_registry(engine, include_values=True).registry, "dogs")
+    finally:
+        engine.dispose()
+    for name in ("gender", "abandoned_yn"):
+        assert fields[name].type == "text", name
+        assert fields[name].allowed_values == ["0", "1"], name
+    for name in ("age", "weight"):
+        assert fields[name].text_number, name
+
+
+def _fields_of(registry: Registry, entity: str) -> dict[str, FieldDef]:
+    return registry.entities[entity].fields
