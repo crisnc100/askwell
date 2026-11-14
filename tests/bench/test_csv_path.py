@@ -35,7 +35,8 @@ STATEMENTS = [
     # A spreadsheet shortened one ID: the upload check refuses this file.
     "CREATE TABLE notes (id TEXT PRIMARY KEY, body TEXT)",
     "INSERT INTO customers VALUES (1, 'Ash'), (2, 'Birch'), (3, 'Cedar')",
-    "INSERT INTO orders VALUES (1, 1, '10.5'), (2, 1, 'null'), (3, 2, '4'), (4, 3, ' 6 ')",
+    "INSERT INTO orders VALUES (1, 1, '10.5'), (2, 1, 'null'), (3, 2, '4'), (4, 3, ' 6 '), "
+    "(5, 2, '7'), (6, 3, '8.25'), (7, 1, '12')",
     "INSERT INTO notes VALUES ('1', 'a'), ('2', 'b'), ('1.23457E+11', 'c')",
 ]
 
