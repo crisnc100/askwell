@@ -32,7 +32,11 @@ STATEMENTS = [
     "(2, '15.5', 'N/A', '90210', '13', '8', 'beta', NULL), "
     "(3, ' 20 ', '165', '10001', '14', '9', 'gamma', ''), "
     "(4, 'null', '-', '20002', '15', '10', 'delta', 'n/a'), "
-    "(5, '', 'NULL', '30003', '16', '11', 'eps', '-')",
+    "(5, '', 'NULL', '30003', '16', '11', 'eps', '-'), "
+    "(6, '25', '90', '40004', '17', '12', 'zeta', ''), "
+    "(7, '30', '110', '50005', '18', '13', 'eta', ''), "
+    "(8, '12', '150', '60006', '19', '14', 'theta', ''), "
+    "(9, '22', '200', '70007', '20', '15', 'iota', '')",
 ]
 
 
@@ -83,8 +87,8 @@ def test_placeholders_read_as_null_on_both_engines(engines: list[Engine]) -> Non
         )
         assert result.plan is not None, result.issues
         [(avg, hp, n)] = normalise(run(engine, build(result.plan)).rows, ordered=True)
-        assert avg == pytest.approx((18 + 15.5 + 20) / 3)
-        assert (hp, n) == (295.0, 3.0)
+        assert avg == pytest.approx((18 + 15.5 + 20 + 25 + 30 + 12 + 22) / 7)
+        assert (hp, n) == (845.0, 7.0)
 
 
 def test_a_text_number_filters_as_a_number(engines: list[Engine]) -> None:
@@ -99,7 +103,13 @@ def test_a_text_number_filters_as_a_number(engines: list[Engine]) -> None:
             order_by=[{"target": "id"}],
         )
         assert result.plan is not None, result.issues
-        assert normalise(run(engine, build(result.plan)).rows, ordered=True) == [(1.0,), (3.0,)]
+        assert normalise(run(engine, build(result.plan)).rows, ordered=True) == [
+            (1.0,),
+            (3.0,),
+            (6.0,),
+            (7.0,),
+            (9.0,),
+        ]
 
 
 def test_placeholders_are_bound_values_not_sql_text(engines: list[Engine]) -> None:
