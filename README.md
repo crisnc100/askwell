@@ -122,8 +122,9 @@ any other (the spike always uses OpenRouter).
 
 [Try it](#try-it) walks through the five pages. More on each:
 
-- **Prepare.** A file needs one table, a header row, an ID column, `YYYY-MM-DD` dates and
-  plain numbers. You pick your time zone, and the workspace lives in its own folder under
+- **Prepare.** A file needs one table, a header row, `YYYY-MM-DD` dates and plain
+  numbers. A file with no ID column loads with its rows numbered, under a hidden key,
+  but no other table can link to it. You pick your time zone, and the workspace lives in its own folder under
   `data/workspaces/`. Anyone with the workspace link can see your data.
 - **Upload.** A file with the same name replaces the old one.
 - **Check.** Up to 20 problems are listed per file.
@@ -261,12 +262,30 @@ row per period, one column per series. Each series is a metric counted or summed
 own date field, with its own `where`, and a `date_range` applies to each series by that
 field. [ADR-007](docs/adr/ADR-007-grammar-v02.md) explains why.
 
+Four more additions each have a switch (see `ASKWELL_FEATURES_OFF`):
+- **Computed values** (`computed`): a metric, selected or filtered field can be
+  `{op: multiply | subtract | add, left, right}` over two numeric fields, on the base
+  entity or across many-to-one links.
+- **Durations** (`durations`): `{days_between: [start, end]}` in fractional days, where
+  `end` may be `now`, the reference time. It goes wherever a numeric field does.
+- **Has / has none** (`has`): a filter `{has: <table>, where: [...], none: true|false}`
+  keeps the rows that do (or do not) have a matching row in a table that links to the
+  base, as `EXISTS` / `NOT EXISTS`. When two links point back, it names one:
+  `invoices@work_order_id`.
+- **Compare with an aggregate** (`vs_aggregate`): `{field, op, value: {of: avg | min |
+  max}}` compares each row with that aggregate of the same base field over the rows the
+  question already selects (its other filters and date range). It works only as a
+  top-level filter of a `summary` or `row_list`, on a numeric field of the base entity,
+  and every other filter must read the base entity alone, with no `has`; anything else
+  would compare with a different set of rows, so it is refused (`vs_aggregate_scope`).
+
 The validator (`askwell/core/validate.py`) checks an intent against the registry. It
 never raises for a bad intent; it returns typed errors such as `unknown_field`,
 `hidden_field`, `ambiguous_path` (two equally short join paths: refused, not guessed),
 `fan_out` (an aggregate across a one-to-many join, which would double count; see
-[ADR-003](docs/adr/ADR-003-fan-out-rule.md)), `ambiguous_value` and `placeholder_reason`
-(a reason such as "none" in `unanswerable_reason`). `ErrorCode` in that file lists them
+[ADR-003](docs/adr/ADR-003-fan-out-rule.md)), `ambiguous_value`, `placeholder_reason`
+(a reason such as "none" in `unanswerable_reason`) and `feature_off` (an addition that is
+switched off). `ErrorCode` in that file lists them
 all.
 
 The SQL builder (`askwell/core/sqlbuild.py`) writes SQLAlchemy Core. Table and column
@@ -454,7 +473,7 @@ On the host:
    | `OPENROUTER_API_KEY` | Only if `ASKWELL_DEFAULT_MODEL` names an OpenRouter model. Give that key a credit limit on OpenRouter too. |
    | `ASKWELL_DAILY_SPEND_CAP_USD` | The most live answers may cost per UTC day, for example `1.00`. |
    | `ASKWELL_LIVE_ANSWERS_OFF` | `1` turns live answers off. Restart the app after changing it. |
-   | `ASKWELL_FEATURES_OFF` | Features to switch off, comma-separated: `link_roles`, `inferred_links`, `numeric_text`. Off, Askwell drafts, prompts and refuses as it did before that feature. `compose.prod.yaml` sets `link_roles`, which failed its gate (ADR-008). |
+   | `ASKWELL_FEATURES_OFF` | Features to switch off, comma-separated: `link_roles`, `inferred_links`, `numeric_text`, `computed`, `durations`, `has`, `vs_aggregate`. Off, Askwell drafts, prompts and refuses as it did before that feature. `compose.prod.yaml` sets `link_roles`, which failed its gate (ADR-008). |
 
    `compose.prod.yaml` also sets `ASKWELL_TRUST_PROXY=1`, because Caddy is the only
    client and it writes `X-Forwarded-For`. The image sets the database and data paths.

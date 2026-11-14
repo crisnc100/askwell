@@ -217,3 +217,76 @@ uv run askwell eval --schema spider_network_1 --schema spider_wta_1 --systems le
   instead of stopping `registry init` (tested on Postgres).
 - f8: an eval run carries every CSV load failure per schema (`RunResult.
   csv_load_failures`), so the report lists tables no scored question reads.
+
+## Phase 3 — grammar v0.3 (PR-3)
+
+**Four switches.** `computed`, `durations`, `has` and `vs_aggregate` join the three of
+PR-2 in `askwell/core/features.py`. Off, the validator refuses with `feature_off` and
+the prompt lists the feature as out of reach. New refusal codes, each with a named test
+and plain text in `askwell/workspace/ask.py`: `feature_off`, `computed_type`,
+`duration_type`, `has_link`, `vs_aggregate_scope`.
+
+- **Computed values.** `{op, left, right}` over two numeric fields; its label is its
+  alias or a name such as `unit_price_minus_unit_cost`, and an `order_by` can name it.
+  It is aggregatable only when both fields are (the fan-out rule applies to each).
+- **Durations.** `days_between` is `julianday(end) - julianday(start)` on SQLite and the
+  epoch difference over 86400 on Postgres, so fractional days match. `now` is the
+  reference time, bound as a value. A duration is always aggregatable: it reads one row.
+- **Has / has none.** A correlated `EXISTS` over the named table, reached by a direct
+  link, `entity@link` when two point back, or one shortest chain of many-to-one links
+  (work orders to sites to customers), which compares base keys. Its `where` follows
+  every filter rule, under its own aliases (`h1_…`).
+- **Compare with an aggregate.** A scalar subquery over the base table (`t0_agg`) with
+  the intent's other filters and date range. Refused as `vs_aggregate_scope` in a
+  `grouped_summary`, inside an `any_of` / `all_of` group, on a field off the base, and
+  beside a filter on a related entity or a `has`.
+
+**Prompt `interpret-v3`.** `system_prompt(features)` composes the text: each switched-on
+feature is described with made-up entities and one example; a switched-off one joins
+the out-of-reach list, which always names set operations, comparison with the top row's
+value, a distinct count of periods, and window functions. Two general rules are added:
+never add a filter the question does not state, and a named span of whole months uses
+explicit start and end dates. The Confirm preview and the API send the workspace's
+switches (`PromptView.features`).
+
+**Every replay recording misses until the re-record.** The prompt text and the Intent
+JSON schema both changed, so `tests/pipeline/test_api_replay.py` (13 tests) and
+verify's replay-report check fail until the orchestrator re-records the demo and
+fieldservice recordings live under `interpret-v3` (P3.5), then rewrites the committed
+replay report with `uv run python -m scripts.check_replay_report --write`.
+
+**O11, no ID column (Cristian, 2026-11-14).** A file with no ID column, other than a
+link table, now passes Check with a warning, "No id column found; rows are numbered for
+you", and loads with a generated key column `askwell_row` (`askwell_row_2` and so on if
+the file already uses the name), numbered from 1. The name starts with a letter because
+a field slug must. The drafted registry hides the column, so the prompt never shows it,
+and no link is drawn to it. The Prepare page and the README say so.
+
+**P3.1, expressibility: 15 of 22.** Hand-written intents return the gold rows on both
+engines (`tests/core/test_expressible_grammar_v03.py`):
+
+| Set | Right | Not expressible |
+|---|---|---|
+| v0.2 held-out, seen (9) | 8 | ho-014: quantity times (price minus cost) needs three fields; a computed value takes two |
+| Spider, seen (13) | 7: 920, 978, 257, 914, 915, 101, 974 | 924, 925: has-none on a sum of related rows. 167, 168: the gold's aggregate is over all rows, not the question's (item 4). 944, 945: the aggregate is of another entity's field (item 4) |
+
+spider:257's gold is rightly empty, and the test allows it.
+
+**P3.2–P3.4.** 11 oracle cases in `tests/core/oracle_cases_v03.py` match their
+hand-written references on Postgres and SQLite (a zero-row has-none, a duration to
+`now`, a product across a join, an aggregate comparison under a filter and a date
+range among them). The sentinel test covers each new value slot, `now` included.
+Coverage on the core, workspace and bench suites: `validate.py` 98%, `sqlbuild.py` 98%.
+
+**Report additions** (plan, "How results are reported"). With more than one trial, a
+report adds question-level accuracy per schema, system and model: a question is right
+when right in most of its trials, with a Wilson interval on distinct questions.
+`compare_runs(before, after)` in `askwell/bench/report.py` pairs two runs on the same
+questions and gives the exact McNemar p-value. One-trial reports keep their old shape.
+
+**Existing tests changed**, each in its own commit:
+- c3defc9: `test_features.py` expects seven features.
+- 973196e: the CSV path's all-fail fixture fails on a damaged ID (`bad_value`), since a
+  missing ID no longer fails Check.
+- b77b893: `test_prompt.py` follows `interpret-v3`; the features now described are
+  required in the all-off prompt's out-of-reach list and absent from the all-on one.
