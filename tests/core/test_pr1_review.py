@@ -181,7 +181,7 @@ def test_no_inferred_relationship_on_a_skipped_declared_key(tmp_path: Path) -> N
     path = tmp_path / "fk.sqlite"
     writer = create_engine(f"sqlite:///{path}")
     with writer.begin() as conn:
-        conn.execute(text("CREATE TABLE countries (id INTEGER PRIMARY KEY, code TEXT UNIQUE)"))
+        conn.execute(text("CREATE TABLE countries (id INTEGER PRIMARY KEY, code TEXT)"))
         conn.execute(text("CREATE TABLE codes (id INTEGER PRIMARY KEY, label TEXT)"))
         conn.execute(
             text(
