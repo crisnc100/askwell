@@ -95,7 +95,7 @@ def test_relationships_with_a_hidden_endpoint_are_not_shown() -> None:
 def test_v2_describes_the_new_grammar_and_refuse_first() -> None:
     from askwell.pipeline.prompt import PROMPT_VERSION
 
-    assert PROMPT_VERSION == "interpret-v2"
+    assert PROMPT_VERSION == "interpret-v3"
     for phrase in (
         '"where"',
         '"agg": "ratio"',
@@ -106,12 +106,20 @@ def test_v2_describes_the_new_grammar_and_refuse_first() -> None:
         '"date_field"',
         '"grain"',
         "Refuse first",
-        "a duration between two dates",
-        "a product of two fields",
-        '"has none"',
         "a distinct count of periods",
     ):
         assert phrase in SYSTEM_PROMPT, phrase
+    # With every switch on, these are described, not listed as out of reach.
+    from askwell.pipeline.prompt import system_prompt
+
+    off = system_prompt(frozenset())
+    for phrase in (
+        "a duration between two dates",
+        "a product of two fields",
+        '"has none"',
+    ):
+        assert phrase not in SYSTEM_PROMPT, phrase
+        assert phrase in off, phrase
 
 
 def test_v2_examples_use_made_up_entities() -> None:
@@ -154,6 +162,7 @@ def test_every_v2_example_validates_against_a_made_up_registry() -> None:
         fields={
             "id": FieldDef(column="id", type="integer"),
             "team": FieldDef(column="team", type="text"),
+            "rate": FieldDef(column="rate", type="number", aggregatable=True),
         },
     )
     registry = Registry(
@@ -171,7 +180,7 @@ def test_every_v2_example_validates_against_a_made_up_registry() -> None:
         ],
     )
     assert len(EXAMPLES) >= 3
-    for question, example in EXAMPLES:
+    for _feature, question, example in EXAMPLES:
         result = validate(Intent.model_validate(example), registry, now=NOW)
         assert result.ok, (question, result.issues)
         assert question in SYSTEM_PROMPT
