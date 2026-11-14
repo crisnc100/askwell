@@ -50,7 +50,7 @@ def test_a_question_is_right_when_right_in_most_of_its_trials() -> None:
         "q2": ["correct", "refused", "wrong"],
         "q3": ["correct", "correct", "correct"],
     }
-    assert question_level(_run(outcomes).records) == (2, 3)
+    assert question_level(_run(outcomes).records, planned=3) == (2, 3)
 
 
 def test_mcnemar_exact_is_the_two_sided_binomial() -> None:
