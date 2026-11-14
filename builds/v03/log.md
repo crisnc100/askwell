@@ -328,3 +328,9 @@ questions and gives the exact McNemar p-value. One-trial reports keep their old 
   (`technicians.id` against its average is `not_aggregatable`), as a metric does.
 - Slice 29cc46, f2: a computed value's name cannot be a base field's registered alias
   (`price` on parts, the alias of `unit_price`); refused as `alias_collision`.
+- Slice f1b2d4: a floor's written note, cause and next step in `evals/floors.yaml`
+  describe the prompt named in its `prompt_version` (`interpret-v2` for both entries).
+  A run made with another prompt keeps its computed verdict and gets "with prompt
+  interpret-v3" instead. `rerecord-v3-fieldservice` and `replay-fieldservice` were
+  regenerated from their recordings and checkpoint, with no model call; only the note
+  lines changed.

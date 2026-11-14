@@ -49,7 +49,10 @@ def load_triage(schema_id: str) -> dict[str, dict[str, str]]:
 
 
 def floor_checks(
-    table: list[dict[str, Any]], path: Path | None = None, default_model: str | None = None
+    table: list[dict[str, Any]],
+    path: Path | None = None,
+    default_model: str | None = None,
+    prompt_versions: dict[str, list[str]] | None = None,
 ) -> list[dict[str, Any]]:
     """Each schema's floors from `evals/floors.yaml`, checked on Askwell's row for the
     configured default model, never on whichever model sorts first. With
@@ -87,6 +90,14 @@ def floor_checks(
                 ok = value is not None and value <= bound["max"]
                 rule = f"<= {bound['max'] * 100:.0f}%"
             checks.append({"metric": metric, "rule": rule, "rate": row[metric], "met": ok})
+        note, cause, next_step = entry.get("status_note"), entry.get("cause"), entry.get("next")
+        # The written text explains one prompt version's results; a run made with another
+        # keeps its computed verdict and says which version it used instead.
+        written = entry.get("prompt_version")
+        used = (prompt_versions or {}).get(schema_id)
+        if written and used and used != [written]:
+            note = f"with prompt{'s' if len(used) > 1 else ''} {', '.join(used)}"
+            cause = next_step = None
         out.append(
             {
                 "schema": schema_id,
@@ -94,12 +105,23 @@ def floor_checks(
                 "model": row.get("model"),
                 "met": all(c["met"] for c in checks),
                 "checks": checks,
-                "status_note": entry.get("status_note"),
-                "cause": entry.get("cause"),
-                "next": entry.get("next"),
+                "status_note": note,
+                "cause": cause,
+                "next": next_step,
             }
         )
     return out
+
+
+def _prompt_versions(records: list[dict[str, Any]]) -> dict[str, list[str]]:
+    """Per schema, the prompt versions Askwell's records were made with, read from each
+    record's checkpoint key (its sixth part; see `Task.key`)."""
+    found: dict[str, set[str]] = defaultdict(set)
+    for record in records:
+        parts = str(record.get("key", "")).split("|")
+        if record["system"] == "ledgerline" and len(parts) > 5:
+            found[str(record["schema_id"])].add(parts[5])
+    return {schema: sorted(versions) for schema, versions in found.items()}
 
 
 def _is_spider(record: dict[str, Any]) -> bool:
@@ -268,7 +290,11 @@ def build(result: RunResult) -> dict[str, Any]:
         "spent_usd": result.spent_usd,
         "registry_hashes": result.registry_hashes,
         "table": table,
-        "floors": floor_checks(table, default_model=get_settings().default_model),
+        "floors": floor_checks(
+            table,
+            default_model=get_settings().default_model,
+            prompt_versions=_prompt_versions(result.records),
+        ),
         "misses": misses,
         "baseline_wins": wins,
         **extra,

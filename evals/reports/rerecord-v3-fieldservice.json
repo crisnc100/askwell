@@ -21,7 +21,7 @@
   "deferred": {},
   "floors": [
     {
-      "cause": "Seen questions: v0.2 was designed from two of them (fs-028, fs-035), so this is not the headline. In v02-seen (3 trials) accuracy is 111 of 129 (86.0%) and wrong answers are 2 of 113 answered (1.8%). fs-028, fs-035 and fs-041 are right in every trial. Of the misses, 15 are correct refusals of questions v0.2 still cannot express, 2 are misreads and 1 is a question that can be read with either of two dates. v0.1 (select-haiku-2026-11-11, 1 trial) had 2 wrong of 37 answered (5.4%).",
+      "cause": null,
       "checks": [
         {
           "met": true,
@@ -55,9 +55,9 @@
       "gold": null,
       "met": true,
       "model": "anthropic:claude-haiku-5-5",
-      "next": "The held-out result (v02-holdout) is the headline. The v0.2 prompt and grammar are not changed after seeing these results.",
+      "next": null,
       "schema": "fieldservice",
-      "status_note": "in v0.2 on the seen questions (live, default model)"
+      "status_note": "with prompt interpret-v3"
     }
   ],
   "gold_files": [

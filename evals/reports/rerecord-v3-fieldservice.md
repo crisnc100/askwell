@@ -17,9 +17,7 @@ Rates show the value, the Wilson 95% interval, and the counts. Trials are pooled
 - Execution accuracy >= 80%: 95.3% [85-99] (41/43), met
 - Wrong answers among answered <= 5%: 2.4% [0-12] (1/42), met
 
-Result: **met** in v0.2 on the seen questions (live, default model).
-Why: Seen questions: v0.2 was designed from two of them (fs-028, fs-035), so this is not the headline. In v02-seen (3 trials) accuracy is 111 of 129 (86.0%) and wrong answers are 2 of 113 answered (1.8%). fs-028, fs-035 and fs-041 are right in every trial. Of the misses, 15 are correct refusals of questions v0.2 still cannot express, 2 are misreads and 1 is a question that can be read with either of two dates. v0.1 (select-haiku-2026-11-11, 1 trial) had 2 wrong of 37 answered (5.4%).
-Next: The held-out result (v02-holdout) is the headline. The v0.2 prompt and grammar are not changed after seeing these results.
+Result: **met** with prompt interpret-v3.
 
 ## Ledgerline misses
 
