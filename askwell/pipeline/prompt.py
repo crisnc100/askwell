@@ -125,7 +125,7 @@ EXAMPLES: list[tuple[str | None, str, dict[str, Any]]] = [
     ),
     (
         None,
-        "In how many different months did each agent close a ticket?",
+        "Per agent, count the months that had at least one ticket they closed.",
         {
             "intent_type": "unanswerable",
             "unanswerable_reason": "it needs a distinct count of months, which the intent "
