@@ -114,6 +114,8 @@ class TablePlan:
     # Link columns adopted by name and evidence (inferred_links), not by the `<x>_id`
     # rule; the drafted registry marks their relationships with that switch.
     named_links: list[str] = field(default_factory=list[str])
+    # The ID column is generated (the file had none): hidden in the drafted registry.
+    row_key: bool = False
 
 
 @dataclass
@@ -677,19 +679,20 @@ def _cross_file(parsed: list[_Parsed], features: Features = ALL) -> list[TablePl
     _type_by_role(parsed, id_index, links)
 
     id_values: dict[str, set[int | float | str]] = {}
+    numbered: set[str] = set()
     for p in parsed:
         index = id_index.get(p.slug)
         if index is None:
             if len(links.get(p.slug, [])) < 2:
                 options = " or ".join(id_column_candidates(p.slug)[:2])
                 p.out.add(
-                    "error",
+                    "warning",
                     "no_id_column",
-                    "the table has no ID column",
-                    f"add a column named {options} with one unique value per row (a table "
-                    "that only links two others, with two or more <table>_id columns, "
-                    "needs no ID)",
+                    "No id column found; rows are numbered for you",
+                    f"nothing to do; to let other tables link to this one, add a column "
+                    f"named {options} with one unique value per row",
                 )
+                numbered.add(p.slug)
             continue
         id_values[p.slug] = _check_ids(p, index)
 
@@ -704,23 +707,47 @@ def _cross_file(parsed: list[_Parsed], features: Features = ALL) -> list[TablePl
     plans: list[TablePlan] = []
     for p in parsed:
         own = id_index.get(p.slug)
-        plans.append(
-            TablePlan(
-                file=p.report.name,
-                name=p.slug,
-                columns=[
-                    ColumnPlan(h, n, t) for h, n, t in zip(p.headers, p.names, p.types, strict=True)
-                ],
-                id_column=p.names[own] if own is not None else None,
-                links=[
-                    Link(p.names[i], t, by_slug[t].names[id_index[t]])
-                    for i, t in links.get(p.slug, [])
-                ],
-                rows=p.rows,
-                named_links=[p.names[i] for i, _ in links.get(p.slug, []) if (p.slug, i) in named],
-            )
+        plan = TablePlan(
+            file=p.report.name,
+            name=p.slug,
+            columns=[
+                ColumnPlan(h, n, t) for h, n, t in zip(p.headers, p.names, p.types, strict=True)
+            ],
+            id_column=p.names[own] if own is not None else None,
+            links=[
+                Link(p.names[i], t, by_slug[t].names[id_index[t]]) for i, t in links.get(p.slug, [])
+            ],
+            rows=p.rows,
+            named_links=[p.names[i] for i, _ in links.get(p.slug, []) if (p.slug, i) in named],
         )
+        plans.append(_numbered(plan) if p.slug in numbered else plan)
     return plans
+
+
+ROW_KEY = "askwell_row"
+ROW_KEY_HEADER = "(row number)"
+
+
+def _numbered(plan: TablePlan) -> TablePlan:
+    """The table with a generated key first: its rows numbered from 1, in file order.
+    Named `askwell_row` (a slug starts with a letter), or `askwell_row_2`... when the
+    file already has such a column."""
+    taken = {c.name for c in plan.columns}
+    key = ROW_KEY
+    suffix = 2
+    while key in taken:
+        key = f"{ROW_KEY}_{suffix}"
+        suffix += 1
+    return TablePlan(
+        file=plan.file,
+        name=plan.name,
+        columns=[ColumnPlan(ROW_KEY_HEADER, key, "integer"), *plan.columns],
+        id_column=key,
+        links=plan.links,
+        rows=[[str(number), *row] for number, row in enumerate(plan.rows, start=1)],
+        named_links=plan.named_links,
+        row_key=True,
+    )
 
 
 def _type_columns(p: _Parsed, skip: set[int]) -> None:
