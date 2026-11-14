@@ -626,7 +626,9 @@ class _Validator:
             column=label,
             type="number",
             filterable=all(d.filterable for d in defs),
-            aggregatable=all(d.aggregatable for d in defs),
+            # A count of days is a measure whatever its dates allow; a product or a
+            # difference is one when both of its fields are.
+            aggregatable=op == "days_between" or all(d.aggregatable for d in defs),
         )
         return rfield, fdef
 

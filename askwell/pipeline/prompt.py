@@ -19,14 +19,16 @@ from askwell.core.registry import FieldDef, Registry, enabled_links
 from askwell.core.validate import Issue
 from askwell.llm.types import ChatMessage
 
-PROMPT_VERSION = "interpret-v2"
+PROMPT_VERSION = "interpret-v3"
 MAX_VALUES = 20
 SHORT_DESCRIPTION = 60
 
 # Worked examples on a made-up schema (tickets and agents), so the prompt teaches the
-# grammar without naming any real schema's tables. A test validates each one.
-EXAMPLES: list[tuple[str, dict[str, Any]]] = [
+# grammar without naming any real schema's tables. Each is shown only when the feature
+# it uses (or None: always) is switched on. A test validates each one.
+EXAMPLES: list[tuple[str | None, str, dict[str, Any]]] = [
     (
+        None,
         "What percentage of tickets were escalated?",
         {
             "intent_type": "summary",
@@ -49,6 +51,7 @@ EXAMPLES: list[tuple[str, dict[str, Any]]] = [
         },
     ),
     (
+        None,
         "Tickets opened and tickets closed per week this quarter",
         {
             "intent_type": "date_series",
@@ -62,16 +65,76 @@ EXAMPLES: list[tuple[str, dict[str, Any]]] = [
         },
     ),
     (
-        "Mean time from a ticket being opened to it being closed?",
+        "durations",
+        "Mean days from a ticket being opened to it being closed, by stage?",
+        {
+            "intent_type": "grouped_summary",
+            "entity": "tickets",
+            "metrics": [
+                {
+                    "agg": "avg",
+                    "alias": "avg_days",
+                    "field": {"days_between": ["opened_on", "closed_on"]},
+                }
+            ],
+            "group_by": [{"field": "stage"}],
+        },
+    ),
+    (
+        "computed",
+        "What did each team bill, minutes times the agent's rate?",
+        {
+            "intent_type": "grouped_summary",
+            "entity": "tickets",
+            "metrics": [
+                {
+                    "agg": "sum",
+                    "alias": "billed",
+                    "field": {"op": "multiply", "left": "minutes", "right": "agents.rate"},
+                }
+            ],
+            "group_by": [{"field": "agents.team"}],
+        },
+    ),
+    (
+        "has",
+        "Which agents have no escalated tickets?",
+        {
+            "intent_type": "row_list",
+            "entity": "agents",
+            "select": ["id", "team"],
+            "filters": [
+                {
+                    "has": "tickets",
+                    "none": True,
+                    "where": [{"field": "stage", "op": "eq", "value": "escalated"}],
+                }
+            ],
+        },
+    ),
+    (
+        "vs_aggregate",
+        "Tickets opened this month that took longer than this month's average",
+        {
+            "intent_type": "row_list",
+            "entity": "tickets",
+            "select": ["id", "minutes"],
+            "filters": [{"field": "minutes", "op": "gt", "value": {"of": "avg"}}],
+            "date_range": {"field": "opened_on", "relative": "this_month"},
+        },
+    ),
+    (
+        None,
+        "In how many different months did each agent close a ticket?",
         {
             "intent_type": "unanswerable",
-            "unanswerable_reason": "it needs a duration between two dates (opened_on to "
-            "closed_on), which the intent cannot express",
+            "unanswerable_reason": "it needs a distinct count of months, which the intent "
+            "cannot express",
         },
     ),
 ]
 
-SYSTEM_PROMPT = """\
+_BEFORE_FEATURES = """\
 You turn a business question about one database into a structured intent (JSON). You \
 never write SQL. Code validates your intent against the registry below and writes the \
 query, so use only the entities and fields listed, by their exact names.
@@ -98,12 +161,15 @@ group {"any_of": [conditions]} / {"all_of": [conditions]} (groups do not nest). 
 Operators: eq, neq, gt, gte, lt, lte take "value" (or "other_field" to compare two \
 fields); between takes "values": [low, high]; in takes "values": [...]; is_null takes \
 "value": true (IS NULL) or false (IS NOT NULL); ilike_contains takes a text "value". \
-Categorical fields list their allowed values: use one of them.
+Categorical fields list their allowed values: use one of them. Never add a filter the \
+question does not state.
 - date_range: {"field": <a date field>, "relative": <token>} with tokens today, \
 yesterday, last_n_days, last_n_weeks, last_n_months (these three need "n"), this_week, \
 last_week, this_month, last_month, this_quarter, last_quarter, this_year, ytd, \
-last_year; or {"field", "start", "end"} as ISO dates, end exclusive. Do not compute \
-dates yourself and do not also filter that field.
+last_year; or {"field", "start", "end"} as ISO dates, end exclusive. A named span of \
+whole months ("in March", "from March to May") takes "start" and "end": the first day \
+of its first month and the first day after its last month. Do not compute dates for \
+the relative tokens and do not also filter that field.
 - group_by: [{"field", "grain"}]; grain (day, iso_week, month, quarter, year) only on \
 date fields. A grouped label is the field name (or "entity__field" for joined fields), \
 plus "_<grain>" when a grain is set.
@@ -117,26 +183,102 @@ optional "filters" shared by every series, an optional "date_range" with no "fie
 {"metric": {"agg", "field"}, "date_field": <a date field>, "where": [conditions], \
 "alias"}. The first column is "period". No metrics, select, group_by, having, order_by \
 or limit.
+"""
+
+# What each switchable feature adds to "How to fill the intent", and what the prompt
+# says is out of reach when it is switched off.
+_FEATURE_TEXT: dict[str, tuple[str, str]] = {
+    "computed": (
+        """\
+- A value computed from two numeric fields, row by row: {"op": "multiply"|"subtract"|\
+"add", "left": <field>, "right": <field>, "alias"}. It goes wherever a field goes in \
+metrics, select and filters (quantity times price, price minus cost). Exactly two \
+fields; it does not nest. A selected one is sorted by its alias.
+""",
+        "a product of two fields (such as quantity times price)",
+    ),
+    "durations": (
+        """\
+- Days between two dates, with fractions: {"days_between": [<date field>, <date field \
+or "now">], "alias"}; "now" is the reference date. It goes wherever a numeric field \
+goes (average days to close, how long each item has been open).
+""",
+        "a duration between two dates",
+    ),
+    "has": (
+        """\
+- A related-rows filter, in filters: {"has": <entity>, "where": [conditions], "none": \
+true|false}. It keeps the base rows that have (with "none": true, that have no) rows of \
+that entity leading to them, directly or along a chain of links. "where" narrows which \
+related rows count; its fields are read from that entity. When two links lead back, \
+name one as "entity@link".
+""",
+        '"has none" questions (items with no related rows)',
+    ),
+    "vs_aggregate": (
+        """\
+- To compare a numeric field of the base entity with its own average, minimum or \
+maximum: {"field", "op": eq|neq|gt|gte|lt|lte, "value": {"of": "avg"|"min"|"max"}}, as \
+a top-level filter of a summary or row_list. The aggregate is taken over the rows the \
+question selects (its other filters and date range, which must all be on the base \
+entity). When the question compares with a different set of rows ("this year's jobs \
+longer than last year's average"), it is unanswerable.
+""",
+        "comparison with an average or other aggregate",
+    ),
+}
+
+_ALWAYS_OUT = (
+    "set operations (in both of two lists, in one but not the other), comparison with the "
+    "top row's value, a distinct count of periods, and window functions (running totals, "
+    "ranks within groups)"
+)
+
+
+def system_prompt(features: Features = ALL) -> str:
+    """The instructions, describing each switched-on feature and naming every other one
+    as out of reach."""
+    described = "".join(text for name, (text, _) in _FEATURE_TEXT.items() if name in features)
+    off = [out for name, (_, out) in _FEATURE_TEXT.items() if name not in features]
+    out_of_reach = ", ".join([*off, _ALWAYS_OUT])
+    examples = "".join(
+        f"Q: {q}\nA: {json.dumps(intent)}\n"
+        for feature, q, intent in EXAMPLES
+        if feature is None or feature in features
+    )
+    return (
+        _BEFORE_FEATURES
+        + described
+        + """\
 - unanswerable_reason: only for "unanswerable", and it must say what is missing. Leave \
 it out of every other intent.
 
 Refuse first. When a question needs something this intent cannot express, answer \
 "unanswerable" and name what is missing, rather than answer a nearby question. Still \
-out of reach: a duration between two dates, a product of two fields (such as quantity \
-times price), "has none" questions (items with no related rows), and a distinct count \
-of periods. Also answer "unanswerable" when the data is not in the registry, when the \
-question needs a field that is not listed (some fields are deliberately hidden), or \
-when it asks to change data (insert, update, delete, drop). Never guess a field or a \
-value that is not listed.
+out of reach: """
+        + out_of_reach
+        + """\
+. Also answer "unanswerable" when the data is not in the registry, when the question \
+needs a field that is not listed (some fields are deliberately hidden), or when it asks \
+to change data (insert, update, delete, drop). Never guess a field or a value that is \
+not listed.
 
-Examples, on a made-up schema (tickets with opened_on, closed_on, stage and minutes):
-""" + "".join(f"Q: {q}\nA: {json.dumps(intent)}\n" for q, intent in EXAMPLES)
+Examples, on a made-up schema (tickets with opened_on, closed_on, stage and minutes; \
+agents with team and rate):
+"""
+        + examples
+    )
+
+
+SYSTEM_PROMPT = system_prompt(ALL)
 
 
 @dataclass
 class PromptView:
     text: str
     truncation: list[str] = field(default_factory=list[str])
+    # The switches the view was rendered for; the instructions describe the same ones.
+    features: Features = ALL
 
 
 def _field_line(name: str, fdef: FieldDef, max_values: int | None, desc_len: int | None) -> str:
@@ -235,13 +377,13 @@ def registry_view(
         if label != "full":
             truncation.append(label)
         if len(text) <= budget_chars:
-            return PromptView(text, truncation)
+            return PromptView(text, truncation, features)
     truncation.append(f"still over budget ({len(text)} > {budget_chars} characters)")
-    return PromptView(text, truncation)
+    return PromptView(text, truncation, features)
 
 
 def system_message(view: PromptView) -> str:
-    return f"{SYSTEM_PROMPT}\n{view.text}"
+    return f"{system_prompt(view.features)}\n{view.text}"
 
 
 def first_messages(view: PromptView, question: str) -> list[ChatMessage]:
