@@ -55,8 +55,8 @@ def test_a_named_item_no_schema_has_stops_the_run(isolated: Path) -> None:
     assert not (isolated / "pending").exists()
 
 
-def test_the_roles_gate_items_are_the_36_two_link_refusals() -> None:
+def test_the_roles_gate_items_are_the_26_two_link_refusals() -> None:
     ids = json.loads(ROLES_SEEN.read_text())["ids"]
-    assert len(ids) == len(set(ids)) == 36
-    seen = {item.id for db in ("flight_2", "network_1", "wta_1") for item in spider_items(db)}
+    assert len(ids) == len(set(ids)) == 26
+    seen = {item.id for db in ("network_1", "wta_1") for item in spider_items(db)}
     assert set(ids) <= seen
