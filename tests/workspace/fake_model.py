@@ -5,11 +5,13 @@ because a workspace answers only with a live model."""
 from __future__ import annotations
 
 import json
-from collections.abc import Callable, Mapping
+from collections.abc import Callable, Iterator, Mapping
+from contextlib import contextmanager
 from typing import Any
 
 from askwell.config import Settings
 from askwell.core.intent import Intent
+from askwell.llm.budget import BudgetGuard
 from askwell.llm.errors import ParseError
 from askwell.llm.types import ChatMessage, LLMResult, RawResponse
 from askwell.pipeline.service import AskService
@@ -45,6 +47,12 @@ class FakeModel:
         return LLMResult[Intent](
             value=value, raw=raw, cost_usd=0.0, cost_source="replay", replayed=False, key="fake"
         )
+
+    @contextmanager
+    def reserve_ask(self, guard: BudgetGuard) -> Iterator[None]:
+        """The real gateway holds the ask's whole budget against the daily cap; this one
+        has no cap."""
+        yield
 
     @property
     def system_prompts(self) -> list[str]:

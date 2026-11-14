@@ -50,8 +50,9 @@ which fields the model may see.
   connection, not only by the code.
 - **It does not write prose about the answer.** The answer is the table and the SQL. A
   model summary could restate a number wrongly.
-- **It is not open to the public.** It runs on your machine, and a hosted beta runs at
-  <https://askwell.cristianortega.dev> behind invite codes and a daily spending cap.
+- **It does not ask who you are.** It runs on your machine, and a public beta at
+  <https://askwell.cristianortega.dev> is open to anyone, with no invite code. A daily
+  spending cap and per-address limits keep it small.
 
 ## How it is measured
 

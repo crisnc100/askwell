@@ -30,6 +30,9 @@ class BudgetGuard:
             raise ValueError("budget must be >= 0")
         self.limit_usd = limit_usd
         self.spent_usd = spent_usd
+        # Set while the gateway holds this whole budget against the daily cap
+        # (Gateway.reserve_ask); each call then charges this guard, not the cap again.
+        self.daily_held = False
 
     @property
     def remaining_usd(self) -> float:

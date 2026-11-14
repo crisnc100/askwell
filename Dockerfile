@@ -37,7 +37,6 @@ RUN useradd --system --uid 10001 --home-dir /nonexistent askwell \
 # The image's settings go in /app/.env, not ENV: the environment (.env.beta) beats
 # .env, so a deployed .env.beta still using LEDGERLINE_ names overrides them.
 RUN printf '%s\n' \
-    ASKWELL_ENV=beta \
     ASKWELL_LLM_MODE=live \
     ASKWELL_DATABASE_RO_URL=sqlite:////app/demo/fieldservice.sqlite \
     ASKWELL_APP_DATABASE_URL=sqlite:////data/app.sqlite \

@@ -52,7 +52,7 @@ from zoneinfo import available_timezones
 
 from askwell.core.features import ALL, Features
 from askwell.workspace.check import CheckResult, TablePlan, UploadedFile, check_files
-from askwell.workspace.limits import MB, Limits
+from askwell.workspace.limits import MB, Limits, wait_words
 from askwell.workspace.load import load_tables
 
 State = Literal["new", "checked", "confirmed"]
@@ -440,9 +440,11 @@ class WorkspaceStore:
         with self._locks_guard:
             mine = [m for m in self.live() if m.owner == owner]
             if len(mine) >= self.limits.workspaces_per_ip:
+                first_free = min(self.expires_at(m) for m in mine)
+                wait = (first_free - self._now()).total_seconds()
                 raise LimitReachedError(
-                    f"You already have {len(mine)} workspaces. Delete one, or wait for one "
-                    "to expire."
+                    "You already have as many workspaces as one address can keep. Delete "
+                    f"one with Delete my data, or try again {wait_words(wait)}."
                 )
             workspace_id = secrets.token_hex(16)
             now = self._now().isoformat()

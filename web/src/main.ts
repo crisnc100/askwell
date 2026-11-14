@@ -257,11 +257,16 @@ function uploadPage(main: HTMLElement): void {
     const files = Array.from(input.files ?? []);
     clear(progress);
     // Every file is tried; the accepted ones are listed and the refused ones explained.
+    // A limit (429) stops the batch: the rest would be refused the same way.
     for (const file of files) {
       append(progress, h("p", { class: "muted" }, `Uploading ${file.name}…`));
       try {
         status = await api.upload(file);
       } catch (err) {
+        if (err instanceof ApiError && err.status === 429) {
+          notices.push(err.message);
+          break;
+        }
         notices.push(`${file.name}: ${err instanceof ApiError ? err.message : "upload failed"}`);
       }
     }
@@ -551,6 +556,11 @@ function askPage(main: HTMLElement): void {
   const input = h("input", { attrs: { type: "text", id: "question", maxlength: "2000", placeholder: "How many orders were paid last month?" } });
   const button = h("button", { attrs: { type: "submit" } }, "Ask");
   const result = h("div", { class: "result", attrs: { "aria-live": "polite" } });
+  const starters = h("div", { attrs: { id: "starters" } });
+  const setBusy = (busy: boolean) => {
+    button.disabled = busy;
+    for (const b of starters.querySelectorAll("button")) b.disabled = busy;
+  };
   const form = h(
     "form",
     {
@@ -559,8 +569,9 @@ function askPage(main: HTMLElement): void {
         submit: async (event) => {
           event.preventDefault();
           const question = input.value.trim();
-          if (!question) return;
-          button.disabled = true;
+          // One ask at a time, so two answers never overwrite each other.
+          if (!question || button.disabled) return;
+          setBusy(true);
           clear(result);
           append(result, h("p", { class: "muted" }, "Working…"));
           try {
@@ -571,7 +582,7 @@ function askPage(main: HTMLElement): void {
             clear(result);
             showError(result, err);
           } finally {
-            button.disabled = false;
+            setBusy(false);
           }
         },
       },
@@ -580,7 +591,46 @@ function askPage(main: HTMLElement): void {
     input,
     button,
   );
-  append(main, h("h1", {}, "Ask a question"), form, result, workspaceBox());
+  append(main, h("h1", {}, "Ask a question"), form, starters, result, workspaceBox());
+  const draw = drawn;
+  void api
+    .starters()
+    .then(({ questions }) => {
+      if (draw !== drawn || !questions.length) return;
+      append(
+        starters,
+        h("p", { class: "muted" }, "Or try one of these, made from your own columns:"),
+        h(
+          "ul",
+          { class: "starters" },
+          ...questions.map((q) =>
+            h(
+              "li",
+              {},
+              h(
+                "button",
+                {
+                  class: "link-button",
+                  attrs: { type: "button" },
+                  on: {
+                    click: () => {
+                      if (button.disabled) return;
+                      input.value = q;
+                      form.requestSubmit();
+                    },
+                  },
+                },
+                q,
+              ),
+            ),
+          ),
+        ),
+      );
+      // Starters that arrive while an ask is already running start disabled too.
+      setBusy(button.disabled);
+    })
+    // Starters are a convenience; the page works without them.
+    .catch(() => undefined);
 }
 
 function showAnswer(where: HTMLElement, answer: Answer): void {

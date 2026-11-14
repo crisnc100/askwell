@@ -1,10 +1,11 @@
 """The HTTP API: POST /ask, GET /schemas, GET /schemas/{id}/examples, GET /healthz, the
-workspace routes under /api (askwell/workspace/api.py), the Results page's report
-routes (askwell/bench/results.py) and, when invite codes are set, the invite gate
-(askwell/invite.py)."""
+workspace routes under /api (askwell/workspace/api.py) and the Results page's report
+routes (askwell/bench/results.py). Every page and route is open to anyone; the daily
+spend cap, the kill switch and the per-address limits protect spend and abuse."""
 
 from __future__ import annotations
 
+import logging
 from collections.abc import AsyncIterator, Awaitable, Callable
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -16,7 +17,6 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 from sqlalchemy import text
 
-from askwell import invite
 from askwell.bench import results
 from askwell.config import get_settings
 from askwell.llm.daily import DailyCapReachedError
@@ -35,16 +35,16 @@ class AskRequest(BaseModel):
 
 WEB_DIST = Path(__file__).resolve().parents[1] / "web" / "dist"
 
+log = logging.getLogger(__name__)
+
 
 def create_app(
     service: AskService | None = None,
     workspaces: WorkspaceApp | None = None,
     web_dir: Path = WEB_DIST,
-    invite_codes: list[bytes] | None = None,
 ) -> FastAPI:
     """The API, plus the pages from `web_dir` at `/` when they have been built
-    (`npm run build` in web/). `invite_codes` overrides `ASKWELL_INVITE_CODES`;
-    an empty list means no gate."""
+    (`npm run build` in web/)."""
 
     @asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncIterator[None]:
@@ -55,15 +55,18 @@ def create_app(
         yield
         app.state.service.close()
 
-    if invite_codes is None:
-        current = get_settings()
-        raw = current.invite_codes
-        invite_codes = invite.parse_codes(raw.get_secret_value() if raw else None)
-        if not invite_codes and current.env != "dev":
-            raise RuntimeError(
-                f"ASKWELL_ENV is {current.env!r} but ASKWELL_INVITE_CODES is empty: "
-                "refusing to start without the invite gate"
-            )
+    current = get_settings()
+    if current.llm_mode == "live" and current.daily_spend_cap_usd is None:
+        # Fail closed: a site anyone can reach must never answer live without a cap.
+        raise RuntimeError(
+            "ASKWELL_LLM_MODE is live but ASKWELL_DAILY_SPEND_CAP_USD is unset: refusing "
+            "to start without a daily spending cap. Set it, for example to 1.00."
+        )
+    if current.invite_codes is not None:
+        log.warning(
+            "ASKWELL_INVITE_CODES is set but ignored: Askwell is open to everyone. "
+            "Remove it from the deployment's settings."
+        )
     app = FastAPI(title="Askwell", version="0.2.0", lifespan=lifespan)
     if workspaces is None:
         settings = get_settings()
@@ -74,8 +77,6 @@ def create_app(
             features=settings.features,
         )
     app.state.workspaces = workspaces
-    # Installed before the header middleware, so its refusals get those headers too.
-    invite.install(app, invite_codes, workspaces.client_ip)
 
     @app.middleware("http")
     async def _headers(  # pyright: ignore[reportUnusedFunction]
@@ -96,8 +97,8 @@ def create_app(
 
     @app.get("/healthz")
     def healthz() -> JSONResponse:
-        """Up, and every demo database answers. It is open without an invite code, so
-        it says nothing about settings, spend or data."""
+        """Up, and every demo database answers. Anyone can call it, so it says nothing
+        about settings, spend or data."""
         service = svc()
         broken: list[str] = []
         for schema_id in service.schemas:

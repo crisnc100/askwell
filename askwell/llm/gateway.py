@@ -13,7 +13,8 @@ from __future__ import annotations
 
 import json
 import re
-from collections.abc import Callable
+from collections.abc import Callable, Iterator
+from contextlib import contextmanager
 from pathlib import Path
 from typing import Any, Protocol
 
@@ -130,10 +131,33 @@ class Gateway:
         self.max_tokens = max_tokens
         self._backoff_sleep = backoff_sleep
         self.pending_dir = pending_dir
-        # The hosted beta's daily cap and kill switch. Both apply to every call that would
+        # The public site's daily cap and kill switch. Both apply to every call that would
         # reach a provider (live and record modes), never to replay or export.
         self.daily = daily
         self.live_answers_off = live_answers_off
+
+    @contextmanager
+    def reserve_ask(self, guard: BudgetGuard) -> Iterator[None]:
+        """Hold an ask's whole budget against the daily cap for as long as it runs, or
+        refuse it before its first call. The hold is taken atomically, so two asks can
+        never both count on the last of the day's allowance and one be cut off halfway.
+        On the way out, success or error, the hold settles to what the guard was
+        charged, giving the rest back."""
+        if self.mode not in ("live", "record"):
+            yield
+            return
+        if self.live_answers_off:
+            raise LiveAnswersOffError
+        if self.daily is None:
+            yield
+            return
+        day = self.daily.reserve(guard.limit_usd)
+        guard.daily_held = True
+        try:
+            yield
+        finally:
+            guard.daily_held = False
+            self.daily.settle(day, guard.limit_usd, guard.spent_usd)
 
     def complete[T: BaseModel](
         self,
@@ -196,7 +220,8 @@ class Gateway:
         ) + len(canonical_json(json_schema).encode("utf-8"))
         worst = worst_case_cost(price, prompt_bytes, self.max_tokens)
         budget.precheck(worst)
-        day = self.daily.reserve(worst) if self.daily is not None else None
+        held = budget.daily_held
+        day = self.daily.reserve(worst) if self.daily is not None and not held else None
 
         def call() -> RawResponse:
             return transport(

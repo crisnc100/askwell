@@ -23,15 +23,18 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field, ValidationError
 
 from askwell.core.features import ALL, Features
+from askwell.core.registry import load_registry
 from askwell.workspace import fields
-from askwell.workspace.ask import ask_workspace, prompt_preview
+from askwell.workspace.ask import CONFIRM_FIRST, ask_workspace, local_now, prompt_preview
 from askwell.workspace.fields import Edits
-from askwell.workspace.limits import Limits, RateLimiter
+from askwell.workspace.limits import Limits, RateLimiter, wait_words
+from askwell.workspace.starters import starters
 from askwell.workspace.store import (
     DEFAULT_TIME_ZONE,
     Workspace,
     WorkspaceError,
     WorkspaceStore,
+    WrongStateError,
     time_zones,
 )
 
@@ -78,7 +81,7 @@ class WorkspaceApp:
         with self._in_flight_lock:
             if self._in_flight.get(ip, 0) >= self.limits.uploads_in_flight_per_ip:
                 raise TooManyRequestsError(
-                    "Your address already has uploads running. Wait for them to finish."
+                    "Your other uploads are still running. Try again when they finish."
                 )
             self._in_flight[ip] = self._in_flight.get(ip, 0) + 1
         try:
@@ -94,10 +97,11 @@ class WorkspaceApp:
         return self.store.limits
 
     def check_ask_rate(self, request: Request) -> None:
-        if not self.asks.allow(self.client_ip(request)):
+        ip = self.client_ip(request)
+        if not self.asks.allow(ip):
             raise TooManyRequestsError(
-                f"Too many questions from your address (the limit is "
-                f"{self.limits.asks_per_hour} an hour). Try again later."
+                "You've asked a lot of questions in the last hour. "
+                f"Try again {wait_words(self.asks.retry_after(ip))}."
             )
 
     def client_ip(self, request: Request) -> str:
@@ -202,8 +206,8 @@ def install(fastapi_app: FastAPI, app: WorkspaceApp) -> APIRouter:
         ip = app.client_ip(request)
         if not app.uploads.allow(ip):
             raise TooManyRequestsError(
-                f"Too many uploads from your address (the limit is "
-                f"{app.limits.uploads_per_hour} an hour). Try again later."
+                "You've uploaded a lot of files in the last hour. "
+                f"Try again {wait_words(app.uploads.retry_after(ip))}."
             )
         length = request.headers.get("content-length")
         with app.upload_slot(ip):
@@ -225,10 +229,11 @@ def install(fastapi_app: FastAPI, app: WorkspaceApp) -> APIRouter:
     @router.post("/workspace/check")
     def check(request: Request) -> dict[str, Any]:
         workspace = opened(request)
-        if not app.checks.allow(app.client_ip(request)):
+        ip = app.client_ip(request)
+        if not app.checks.allow(ip):
             raise TooManyRequestsError(
-                f"Too many checks from your address (the limit is "
-                f"{app.limits.checks_per_hour} an hour). Try again later."
+                "You've run a lot of checks in the last hour. "
+                f"Try again {wait_words(app.checks.retry_after(ip))}."
             )
         app.store.check(
             workspace,
@@ -262,6 +267,16 @@ def install(fastapi_app: FastAPI, app: WorkspaceApp) -> APIRouter:
         workspace = opened(request)
         fields.confirm(app.store, workspace, edits)
         return status(app, app.store.open(workspace.id, touch=False))
+
+    @router.get("/workspace/starters")
+    def list_starters(request: Request) -> dict[str, list[str]]:
+        workspace = opened(request)
+        if workspace.meta.state != "confirmed":
+            raise WrongStateError(CONFIRM_FIRST)
+        _, info = fields.load_draft(workspace)
+        registry = load_registry(workspace.registry_path)
+        now = local_now(workspace.meta.time_zone, app.store.clock)
+        return {"questions": [s.question for s in starters(registry, info, now, app.features)]}
 
     @router.post("/workspace/ask")
     def ask(request: Request, body: AskRequest) -> dict[str, Any]:

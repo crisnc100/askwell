@@ -140,6 +140,7 @@ export const api = {
       JSON.stringify(edits),
     ),
   confirm: (edits: Edits) => call<Status>("POST", "/api/workspace/confirm", JSON.stringify(edits)),
+  starters: () => call<{ questions: string[] }>("GET", "/api/workspace/starters"),
   ask: (question: string) =>
     call<Answer>("POST", "/api/workspace/ask", JSON.stringify({ question })),
   remove_workspace: () => call<{ deleted: boolean }>("DELETE", "/api/workspace"),
