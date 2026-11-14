@@ -87,3 +87,27 @@ def summarise(outcomes: list[ItemOutcome]) -> dict[str, Any]:
         "mean_cost_usd": statistics.fmean(o.cost_usd for o in done) if done else None,
         "p50_latency_ms": statistics.median(latencies) if latencies else None,
     }
+
+
+def _right_by_question(records: list[dict[str, Any]]) -> dict[str, bool]:
+    """Each in-schema question, right when right in more than half of its trials."""
+    trials: dict[str, list[str]] = {}
+    for record in records:
+        if record["category"] == "in_schema" and record["outcome"] != "pending":
+            trials.setdefault(record["item_id"], []).append(record["outcome"])
+    return {item: 2 * outs.count("correct") > len(outs) for item, outs in trials.items()}
+
+
+def question_level(records: list[dict[str, Any]]) -> tuple[int, int]:
+    """(questions right in most of their trials, distinct questions), in-schema only."""
+    right = _right_by_question(records)
+    return sum(right.values()), len(right)
+
+
+def mcnemar_exact(only_after: int, only_before: int) -> float:
+    """Two-sided exact McNemar p-value: a binomial test on the discordant questions."""
+    n = only_after + only_before
+    if n == 0:
+        return 1.0
+    tail = sum(math.comb(n, k) for k in range(min(only_after, only_before) + 1))
+    return min(1.0, 2 * tail / 2**n)

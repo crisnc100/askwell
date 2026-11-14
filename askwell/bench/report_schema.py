@@ -106,6 +106,16 @@ class BaselineWin(_Strict):
     system: str
 
 
+class QuestionLevel(_Strict):
+    """Distinct in-schema questions right in more than half of their trials."""
+
+    schema_: str = Field(alias="schema")
+    system: str
+    model: str
+    gold: str | None = None
+    right: Rate
+
+
 class Report(_Strict):
     """One eval run. `simulation` is set when any model answer was simulated, and says by
     which model and for which target."""
@@ -129,6 +139,8 @@ class Report(_Strict):
     csv_load_failures: dict[str, dict[str, list[str]]] = Field(
         default_factory=dict[str, dict[str, list[str]]]
     )
+    # Runs of more than one trial only (builds/v03/plan.md, "How results are reported").
+    question_level: list[QuestionLevel] = Field(default_factory=list[QuestionLevel])
 
 
 def json_schema() -> str:

@@ -15,7 +15,14 @@ from typing import Any
 import yaml
 
 from askwell.bench.items import ROOT, default_gold
-from askwell.bench.metrics import ItemOutcome, summarise
+from askwell.bench.metrics import (
+    ItemOutcome,
+    Rate,
+    _right_by_question,
+    mcnemar_exact,
+    question_level,
+    summarise,
+)
 from askwell.bench.run import RunResult
 from askwell.config import get_settings
 
@@ -235,7 +242,18 @@ def build(result: RunResult) -> dict[str, Any]:
         for table_name, codes in record["detail"].get("failed_tables", {}).items():
             csv_failures[record["schema_id"]][table_name] = codes
     simulation = simulation_note(result.records)
-    extra = {"csv_load_failures": dict(csv_failures)} if csv_failures else {}
+    extra: dict[str, Any] = {"csv_load_failures": dict(csv_failures)} if csv_failures else {}
+    if result.trials > 1:
+        extra["question_level"] = [
+            {
+                "schema": schema_id,
+                "system": system,
+                "model": model,
+                "gold": gold,
+                "right": Rate(*question_level(records)).to_dict(),
+            }
+            for (schema_id, gold, system, model), records in sorted(groups.items())
+        ]
     return {
         "run_id": result.run_id,
         "gold_files": sorted({_gold(r) for r in result.records}),
@@ -333,6 +351,22 @@ def render_markdown(report: dict[str, Any]) -> str:
             f"- `{win['item_id']}` ({win['schema']}, {win['gold']}, trial {win['trial']}): "
             f"{win['system']}"
         )
+    if report.get("question_level"):
+        lines += [
+            "",
+            "## Question-level accuracy",
+            "",
+            "A question counts as right when it is right in more than half of its trials. "
+            "The interval is over distinct questions.",
+            "",
+            "| Schema | System | Model | Right | Gold |",
+            "|---|---|---|---|---|",
+        ]
+        for row in report["question_level"]:
+            lines.append(
+                f"| {row['schema']} | {row['system']} | {row['model']} "
+                f"| {_pct(row['right'])} | {row.get('gold') or ''} |"
+            )
     if report.get("csv_load_failures"):
         lines += [
             "",
@@ -358,3 +392,41 @@ def write(report: dict[str, Any], out_dir: Path = REPORTS_DIR) -> tuple[Path, Pa
         json.dumps(report, indent=2, sort_keys=True, default=str) + "\n", encoding="utf-8"
     )
     return md, js
+
+
+def compare_runs(before: RunResult, after: RunResult) -> list[dict[str, Any]]:
+    """Per schema, gold, system and model present in both runs: question-level right or
+    not, paired on the same questions, with the exact McNemar p-value."""
+
+    def by_key(result: RunResult) -> dict[tuple[str, str, str, str], dict[str, bool]]:
+        groups: dict[tuple[str, str, str, str], list[dict[str, Any]]] = defaultdict(list)
+        for record in result.records:
+            key = (record["schema_id"], _gold(record), record["system"], record["model"])
+            groups[key].append(record)
+        return {key: _right_by_question(records) for key, records in groups.items()}
+
+    old, new = by_key(before), by_key(after)
+    out: list[dict[str, Any]] = []
+    for key in sorted(old.keys() & new.keys()):
+        questions = sorted(old[key].keys() & new[key].keys())
+        pairs = [(old[key][q], new[key][q]) for q in questions]
+        only_after = sum(not b and a for b, a in pairs)
+        only_before = sum(b and not a for b, a in pairs)
+        schema_id, gold, system, model = key
+        out.append(
+            {
+                "schema": schema_id,
+                "gold": gold,
+                "system": system,
+                "model": model,
+                "questions": len(questions),
+                "before_right": sum(b for b, _ in pairs),
+                "after_right": sum(a for _, a in pairs),
+                "only_after": only_after,
+                "only_before": only_before,
+                "both": sum(b and a for b, a in pairs),
+                "neither": sum(not b and not a for b, a in pairs),
+                "p_value": mcnemar_exact(only_after, only_before),
+            }
+        )
+    return out
