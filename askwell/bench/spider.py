@@ -83,6 +83,8 @@ def schema_for(
 
 
 def write_hashes(db_ids: list[str]) -> dict[str, str]:
+    """Record these databases' hashes, keeping every other database's."""
     hashes = {db_id: sha256(generate(db_id)) for db_id in db_ids}
-    HASHES.write_text(json.dumps(hashes, indent=2, sort_keys=True) + "\n")
+    merged = {**committed_hashes(), **hashes}
+    HASHES.write_text(json.dumps(merged, indent=2, sort_keys=True) + "\n")
     return hashes
