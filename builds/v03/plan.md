@@ -599,6 +599,22 @@ Decided by the orchestrator (see Decisions). The recommendations that now stand:
 - **A new setting** (`ASKWELL_FEATURES_OFF`) and a Confirm-page change (the name column);
   the v0.2 plan's "no new settings" does not hold here.
 
+- **O11, uploads without an ID column (open, for PR-3; raised 2026-11-13 in Phase 2).**
+  The upload check refuses a file with no `id` or `<table>_id` column unless it links two
+  other tables (`check.py`, `no_id_column`). Exported as CSV, most Spider tables fail
+  this way (log, Phase 2: flight_2 and wta_1 load no table a question needs), and
+  visitors' own exports often have no such column either. It is not changed in PR-2.
+  - A. Keep the rule. Phase 4's CSV numbers then mostly measure it.
+  - B. A synthetic row key: such a file loads with a hidden generated `_row` key and a
+    warning, not an error. Its rows can be counted, filtered and grouped; nothing can
+    link to it until it has an ID column.
+  - C. B, and also adopt a column as the ID when its name ends in `id`, `code` or `key`
+    and its values are unique and never empty (`airportcode`), so other tables can link
+    to it.
+  - Recommendation: B in PR-3, before Phase 4, so the CSV measurement says what visitors
+    meet. C widens what links and needs the same evidence rules as inferred links, so it
+    is better as its own change after the measurement.
+
 ## Out of scope
 - Set operations, comparison with the top row's value, distinct counts of periods,
   window functions, distinct row lists, self-links.

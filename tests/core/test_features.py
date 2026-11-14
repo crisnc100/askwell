@@ -42,3 +42,14 @@ def test_unknown_link_has_plain_text() -> None:
     assert explanation is not None
     assert explanation["message"] != _GENERAL[0]
     assert "unknown_link" not in explanation["message"] + explanation["suggestion"]
+
+
+def test_the_deploy_ships_link_roles_off() -> None:
+    # The link-role gate failed (ADR-008); the hosted app runs with the feature off.
+    from pathlib import Path
+
+    import yaml
+
+    compose = Path(__file__).resolve().parents[2] / "compose.prod.yaml"
+    env = yaml.safe_load(compose.read_text())["services"]["app"]["environment"]
+    assert parse_off(env["ASKWELL_FEATURES_OFF"]) == {"link_roles"}

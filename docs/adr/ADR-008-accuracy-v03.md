@@ -79,6 +79,10 @@ answers are per trial, among answered. Predictions are not acceptance; the gate 
 6. **Seen fieldservice:** at or above 81.4% right and at or below 5% wrong (L11).
 7. **Link roles, seen:** on the 36 seen Spider questions refused for two links, per-trial
    wrong among answered at most 5%, and no question wrong in more than 1 of 3 trials.
+   *Amended 2026-11-13, before the run:* read on 26 of the 36, those of network_1 and
+   wta_1. flight_2 stores its airport codes in `flights` with a leading space, so either
+   link returns zero rows and its 10 questions cannot show a wrong link; they would only
+   add right answers.
 8. **Untriaged Spider (`registry init`):** false refusals fall in at least 3 of the 4
    databases; in none does the wrong rate rise by more than 5 points.
 9. **Untriaged Spider as CSV uploads:** false refusals fall by at least 3 points in at
@@ -86,6 +90,23 @@ answers are per trial, among answered. Predictions are not acceptance; the gate 
    refusals.
 10. **Unreadable answers** at most 2% of calls in every run; **cost per question** up at
     most 35% from v0.2's $0.000480.
+
+## Seen checks in PR-2
+Seen questions, so neither is a measurement of accuracy.
+- **Expressibility:** the plan's target was that hand-written intents return the gold
+  rows for at least 55 of the 62 seen Spider refusals caused by two links, missed links
+  or numbers as text. 42 do. 8 cannot be written: their golds also need "has none"
+  (5) or a set intersection (3). 12 are written and answered but differ from a gold
+  that is itself off: 9 car_1 golds compute on the text of a numbers-as-text column
+  (`'null'` averaged as 0, `max` returning `'null'`, comparisons by character), one
+  inner join drops a model whose maker is missing, and two pick one airline from a tie
+  of all of them. No gold was changed.
+- **Link-role gate (prediction 7, as amended): failed.** `evals/reports/v03-roles-seen.md`,
+  26 questions, 3 trials, $0.043. Wrong among answered per trial: 1 of 19 (5.3%), 1 of 19
+  (5.3%), 0 of 18. spider:906 was wrong in 2 of 3 trials: asked who "has the greatest
+  number of likes", the model counted likes received (`highschooler@liked_id`), the
+  gold counts likes given. So `link_roles` ships switched off (`compose.prod.yaml`), as
+  the plan says; with it off those questions are refused as before.
 
 ## Result
 Not measured yet. It is written from the Phase 4 reports of `builds/v03/plan.md`.

@@ -90,7 +90,11 @@ number, after trimming and skipping the placeholders `''`, `null`, `NULL`, `Null
 builder reads it as `CAST(CASE WHEN TRIM(x) IN (placeholders) THEN NULL ELSE x END AS
 FLOAT)`, with every placeholder a bound value; SQLite and Postgres give the same rows. A
 leading zero, or a name ending in id, code, zip, postal or phone, keeps a column text.
-With the switch off at ask time, such a field is read as the text it is. A column whose
+So does a column with at most `CODE_MAX` (5) distinct numbers: those are codes, such as
+dog_kennels' 0/1 `gender` and `abandoned_yn`, and stay categorical text with their value
+list, so the model still sees the values it may filter on. Five covers flags and small
+code sets; dog ages (8 distinct) stay numbers that can be averaged. car_1's `mpg` and
+`horsepower` (130 and 94 distinct) are unaffected, and P2.1 is unchanged. With the switch off at ask time, such a field is read as the text it is. A column whose
 stored bytes are not UTF-8 (wta_1's `players.first_name`) is text.
 
 **Prompt version stays `interpret-v2`.** The plan expected a re-record for PR-2. The
@@ -102,16 +106,17 @@ stay valid. The Spider prompts do change, through their registries:
 | Database | Registry change | Prompt change |
 |---|---|---|
 | car_1 | `cars_data.mpg`, `horsepower` numbers; `car_names.model -> model_list.model` | yes |
-| dog_kennels | `dogs.abandoned_yn`, `age`, `gender`, `weight` numbers | yes |
+| dog_kennels | `dogs.age`, `weight` numbers | yes |
 | flight_2 | `flights.airline -> airlines.uid` | yes, and named links |
 | network_1 | none | named links |
 | wta_1 | none | named links |
 
 `evals/spider_registries.json` is regenerated for car_1, dog_kennels and flight_2 (the
 other two hashes are unchanged). Every recorded Spider answer for these five databases
-now misses in replay; the Phase 4 seen Spider run is live anyway. One test needs a
-re-record before PR-2 is ready: `tests/pipeline/test_api_replay.py::
-test_registry_init_then_ask_on_a_spider_db` asks one dog_kennels question in replay.
+now misses in replay; the Phase 4 seen Spider run is live anyway. The one replay test
+on a Spider database, `tests/pipeline/test_api_replay.py::
+test_registry_init_then_ask_on_a_spider_db`, was re-recorded live (one ask, two
+attempts, $0.0007) and passes unchanged.
 
 **P2.1, hand-written intents for the 62 seen refusals: 42 of 62 return the gold rows;
 the target was 55.** `tests/bench/test_expressible_v03.py` holds each intent (values as
@@ -152,11 +157,42 @@ export mode (no call), most tables fail the upload check's ID-column rule:
 
 So the Phase 4 CSV numbers will mostly measure that rule, not links or numbers.
 
-**`--items` on `askwell eval`.** The link-role gate needs 3 trials on 36 Spider items,
-and a Spider run is one trial (ADR-006). `--items <file>` runs only the IDs in the file,
-each for every trial asked, Spider included; an ID no given schema has stops the run
-before any call. `evals/v03_roles_seen.json` lists the 36 (IDs only).
+**`--items` on `askwell eval`.** The link-role gate needs 3 trials on chosen Spider
+items, and a Spider run is one trial (ADR-006). `--items <file>` runs only the IDs in the
+file, each for every trial asked, Spider included; an ID no given schema has stops the
+run before any call. `evals/v03_roles_seen.json` lists the gate's 26 (IDs only).
 
-**Existing test changed** (its own commit, 67f984c): the f5 fixture in
-`tests/core/test_pr1_review.py` drops `UNIQUE` from `countries.code`, so its declared key
-is still skipped; no assertion changed.
+**Link-role gate, `v03-roles-seen`: failed; `link_roles` ships off.** Read on 26 of the
+plan's 36 questions, network_1's 24 and wta_1's 2. flight_2's 10 are left out, decided
+before the run: its airport codes carry a leading space, so either link returns zero
+rows, matching the gold's zero rows, and a wrong link cannot show. Run:
+```
+uv run askwell eval --schema spider_network_1 --schema spider_wta_1 --systems ledgerline --mode record --models anthropic:claude-haiku-5-5 --trials 3 --items evals/v03_roles_seen.json --budget 0.10 --run-id v03-roles-seen
+```
+78 calls, $0.0427. Report: `evals/reports/v03-roles-seen.md`.
+
+| Trial | Right | Wrong | Refused | Wrong among answered |
+|---|---|---|---|---|
+| 1 | 18 | 1 | 7 | 1 of 19 (5.3%) |
+| 2 | 18 | 1 | 7 | 1 of 19 (5.3%) |
+| 3 | 18 | 0 | 8 | 0 of 18 |
+
+- Both bars fail: two trials are above 5%, and spider:906 is wrong in 2 of 3.
+- spider:906 asks who "has the greatest number of likes". In trials 1 and 2 the model
+  grouped by `highschooler@liked_id` (likes received); the gold groups by `student_id`
+  (likes given). Its rephrasing, spider:907, was right in all three. Every student in
+  `likes` gives exactly one like, so the gold's top row is also an arbitrary pick from a
+  tie; a right answer there matches by the tie order.
+- Refused: the 6 questions that need "has none" or a set intersection (spider:894, 896,
+  897, 898, 900, 917) every time, and spider:910, 911 and 451 sometimes.
+- As the plan says: `compose.prod.yaml` sets `ASKWELL_FEATURES_OFF=link_roles` (tested),
+  the result is in ADR-008, and PR-2 still merges. Off, these questions are refused as
+  before.
+
+**Existing tests changed**, each in its own commit:
+- 67f984c: the f5 fixture in `tests/core/test_pr1_review.py` drops `UNIQUE` from
+  `countries.code`, so its declared key is still skipped; no assertion changed.
+- 614b4d6: the numeric-text fixture gains rows so `mpg` and `horsepower` exceed
+  `CODE_MAX`; the avg, sum, count and filter expectations follow the larger data.
+- 946cf72: the CSV fixture's `orders.amount` gains three values; no assertion changed.
+- d4e4fcb: the gate-list test expects 26 network_1 and wta_1 items, not 36.

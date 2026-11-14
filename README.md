@@ -454,7 +454,7 @@ On the host:
    | `OPENROUTER_API_KEY` | Only if `ASKWELL_DEFAULT_MODEL` names an OpenRouter model. Give that key a credit limit on OpenRouter too. |
    | `ASKWELL_DAILY_SPEND_CAP_USD` | The most live answers may cost per UTC day, for example `1.00`. |
    | `ASKWELL_LIVE_ANSWERS_OFF` | `1` turns live answers off. Restart the app after changing it. |
-   | `ASKWELL_FEATURES_OFF` | Features to switch off, comma-separated: `link_roles`, `inferred_links`, `numeric_text`. Off, Askwell drafts, prompts and refuses as it did before that feature. Empty by default. |
+   | `ASKWELL_FEATURES_OFF` | Features to switch off, comma-separated: `link_roles`, `inferred_links`, `numeric_text`. Off, Askwell drafts, prompts and refuses as it did before that feature. `compose.prod.yaml` sets `link_roles`, which failed its gate (ADR-008). |
 
    `compose.prod.yaml` also sets `ASKWELL_TRUST_PROXY=1`, because Caddy is the only
    client and it writes `X-Forwarded-For`. The image sets the database and data paths.
