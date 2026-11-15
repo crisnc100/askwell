@@ -1,0 +1,1 @@
+{"f1": {"status": "deferred", "reason": "The before reports were made on branch v03-before and can't be rebuilt with this branch's code; the paired outputs in evals/paired and ADR-008 carry the question-level figures (51/96, oneshot 78/96) and the upload failures."}}
