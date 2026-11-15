@@ -39,3 +39,22 @@ spider:379:
 spider:315:
   note: 'Before: refused (has none was not in the grammar). After: right with has none.'
   tag: grammar_gap
+spider:348:
+  note: 'v03-csv-new-before: CSV path refused because `ref_template_types` failed the upload check (no_id_column)
+    and did not load. Right on the CSV path after (numbered rows, O11) and right for Askwell before and
+    after.'
+  tag: validator_false_reject
+spider:349:
+  note: 'v03-csv-new-before: CSV path refused because `ref_template_types` failed the upload check (no_id_column)
+    and did not load. Right on the CSV path after (numbered rows, O11) and right for Askwell before and
+    after.'
+  tag: validator_false_reject
+spider:351:
+  note: 'v03-csv-new-before: CSV path refused because `ref_template_types` failed the upload check (no_id_column)
+    and did not load. Right on the CSV path after (numbered rows, O11) and right for Askwell before and
+    after.'
+  tag: validator_false_reject
+spider:380:
+  note: 'v03-csv-new-before: CSV path refused: two conditions on rows of one table, each met by a different
+    row, could not be expressed. Right on the CSV path after and right for Askwell before and after.'
+  tag: grammar_gap

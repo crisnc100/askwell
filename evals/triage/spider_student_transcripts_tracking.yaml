@@ -97,3 +97,28 @@ spider:537:
 spider:538:
   note: 'Same as spider:537. Before: wrong. After: right.'
   tag: misread
+spider:513:
+  note: 'v03-csv-new-before: CSV path refused because `addresses` failed the upload check (no_id_column)
+    and did not load. Right on the CSV path after (numbered rows, O11) and right for Askwell before and
+    after.'
+  tag: validator_false_reject
+spider:514:
+  note: 'v03-csv-new-before: CSV path refused because `addresses` failed the upload check (no_id_column)
+    and did not load. Right on the CSV path after (numbered rows, O11) and right for Askwell before and
+    after.'
+  tag: validator_false_reject
+spider:571:
+  note: 'v03-csv-new-before: CSV path refused because `transcript_contents` failed the upload check (no_id_column)
+    and did not load. Right on the CSV path after (numbered rows, O11) and right for Askwell before and
+    after.'
+  tag: validator_false_reject
+spider:573:
+  note: 'v03-csv-new-before: CSV path refused because `transcript_contents` failed the upload check (no_id_column)
+    and did not load. Right on the CSV path after (numbered rows, O11) and right for Askwell before and
+    after.'
+  tag: validator_false_reject
+spider:574:
+  note: 'v03-csv-new-before: CSV path refused because `transcript_contents` failed the upload check (no_id_column)
+    and did not load. Right on the CSV path after (numbered rows, O11) and right for Askwell before and
+    after.'
+  tag: validator_false_reject

@@ -125,3 +125,98 @@ spider:788:
     minimum returns all seven, where the gold''s single row is one of the tie. Right in v03-spider-new
     and before (a sorted list with a limit of one, which picks the gold''s row).'
   tag: gold_issue
+spider:714:
+  note: 'v03-csv-new-before: CSV path refused because `country` failed the upload check (no_id_column)
+    and did not load. Right on the CSV path after (numbered rows, O11) and right for Askwell before and
+    after.'
+  tag: validator_false_reject
+spider:715:
+  note: 'v03-csv-new-before: CSV path refused because `country` failed the upload check (no_id_column)
+    and did not load. Right on the CSV path after (numbered rows, O11) and right for Askwell before and
+    after.'
+  tag: validator_false_reject
+spider:716:
+  note: 'v03-csv-new-before: CSV path refused because `country` failed the upload check (no_id_column)
+    and did not load. Right on the CSV path after (numbered rows, O11) and right for Askwell before and
+    after.'
+  tag: validator_false_reject
+spider:717:
+  note: 'v03-csv-new-before: CSV path refused because `country` failed the upload check (no_id_column)
+    and did not load. Right on the CSV path after (numbered rows, O11) and right for Askwell before and
+    after.'
+  tag: validator_false_reject
+spider:720:
+  note: 'v03-csv-new-before: CSV path refused because `country` failed the upload check (no_id_column)
+    and did not load. Right on the CSV path after (numbered rows, O11) and right for Askwell before and
+    after.'
+  tag: validator_false_reject
+spider:723:
+  note: 'v03-csv-new-before: CSV path refused because `country` failed the upload check (no_id_column)
+    and did not load. Right on the CSV path after (numbered rows, O11) and right for Askwell before and
+    after.'
+  tag: validator_false_reject
+spider:726:
+  note: 'v03-csv-new-before: CSV path refused because `country` failed the upload check (no_id_column)
+    and did not load. Right on the CSV path after (numbered rows, O11) and right for Askwell before and
+    after.'
+  tag: validator_false_reject
+spider:735:
+  note: 'v03-csv-new-before: CSV path refused because `country` failed the upload check (no_id_column)
+    and did not load. Right on the CSV path after (numbered rows, O11) and right for Askwell before and
+    after.'
+  tag: validator_false_reject
+spider:780:
+  note: 'v03-csv-new-before: CSV path refused because `countrylanguage` failed the upload check (no_id_column)
+    and did not load. Right on the CSV path after (numbered rows, O11) and right for Askwell before and
+    after.'
+  tag: validator_false_reject
+spider:781:
+  note: 'v03-csv-new-before: CSV path refused because `countrylanguage` failed the upload check (no_id_column)
+    and did not load. Right on the CSV path after (numbered rows, O11) and right for Askwell before and
+    after.'
+  tag: validator_false_reject
+spider:791:
+  note: 'v03-csv-new-before: CSV path refused because `country` failed the upload check (no_id_column)
+    and did not load. Right on the CSV path after (numbered rows, O11) and right for Askwell before and
+    after.'
+  tag: validator_false_reject
+spider:797:
+  note: 'v03-csv-new-before: CSV path refused because `country` failed the upload check (no_id_column)
+    and did not load. Right on the CSV path after (numbered rows, O11) and right for Askwell before and
+    after.'
+  tag: validator_false_reject
+spider:801:
+  note: 'v03-csv-new-before: CSV path refused because `country` failed the upload check (no_id_column)
+    and did not load. Right on the CSV path after (numbered rows, O11) and right for Askwell before and
+    after.'
+  tag: validator_false_reject
+spider:804:
+  note: 'v03-csv-new-before: CSV path refused because `country` failed the upload check (no_id_column)
+    and did not load. Right on the CSV path after (numbered rows, O11) and right for Askwell before and
+    after.'
+  tag: validator_false_reject
+spider:805:
+  note: 'v03-csv-new-before: CSV path refused because `country` failed the upload check (no_id_column)
+    and did not load. Right on the CSV path after (numbered rows, O11) and right for Askwell before and
+    after.'
+  tag: validator_false_reject
+spider:807:
+  note: 'v03-csv-new-before: CSV path refused because `country` failed the upload check (no_id_column)
+    and did not load. Right on the CSV path after (numbered rows, O11) and right for Askwell before and
+    after.'
+  tag: validator_false_reject
+spider:809:
+  note: 'v03-csv-new-before: CSV path refused because `country` failed the upload check (no_id_column)
+    and did not load. Right on the CSV path after (numbered rows, O11) and right for Askwell before and
+    after.'
+  tag: validator_false_reject
+spider:814:
+  note: 'v03-csv-new-before: CSV path refused because `countrylanguage` failed the upload check (no_id_column)
+    and did not load. Right on the CSV path after (numbered rows, O11) and right for Askwell before and
+    after.'
+  tag: validator_false_reject
+spider:815:
+  note: 'v03-csv-new-before: CSV path refused because `countrylanguage` failed the upload check (no_id_column)
+    and did not load. Right on the CSV path after (numbered rows, O11) and right for Askwell before and
+    after.'
+  tag: validator_false_reject

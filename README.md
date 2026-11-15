@@ -11,11 +11,10 @@ reason. A question the intent cannot express can still get a wrong answer, when 
 fills in a valid intent for a nearby question instead of refusing. [docs/product-brief.md](docs/product-brief.md) explains
 who it is for and what it leaves out on purpose.
 
-**Status.** v0.2 runs on your machine, and a public beta answers live questions
+**Status.** v0.3 runs on your machine, and a public beta answers live questions
 ([Deploy the hosted beta](#deploy-the-hosted-beta)). The model is Claude
-Haiku 5.5 ([ADR-004](docs/adr/ADR-004-model-choice.md)). v0.3 is not deployed: on
-held-out questions it is 64.2% right (target 80%) and 4.1% wrong (target 5%), and its
-deploy gate fails ([Results](#results)).
+Haiku 5.5 ([ADR-004](docs/adr/ADR-004-model-choice.md)). v0.3's deploy gate failed on one
+database; Cristian approved deploying anyway ([ADR-008](docs/adr/ADR-008-accuracy-v03.md)).
 
 ## Try it
 
@@ -54,20 +53,26 @@ model answers; [Results](#results) has its measured accuracy.
 ## Results
 
 `http://localhost:8000/results/` shows the benchmark: how often Askwell is right,
-wrong or refuses, beside a baseline where the model writes SQL. v0.3, live:
+wrong or refuses, beside a baseline where the model writes SQL. Fieldservice, live,
+3 trials; a question counts as right when right in most:
 
-| Set | Right | Wrong among answered |
+| | Askwell | One-shot |
 |---|---|---|
-| Held-out, 3 trials | 64.2% (185/288) | 4.1% (8/193) |
-| Held-out, one-shot | 81.9% (236/288) | 7.5% (19/255) |
-| Seen, 3 trials | 94.6% (122/129) | 3.9% (5/127) |
-| Untriaged Spider | 79.5% (159/200) | 13.6% (25/184) |
-| Same, 3 switches off | 72.0% (144/200) | 10.6% (17/161) |
-| Same, CSV upload | 62.0% (124/200) | 12.1% (17/141) |
+| Held-out questions right | 62/96 | 78/96 |
+| Held-out wrong among answered, pooled | 8/193 | 19/255 |
+| Seen questions right | 40/43 | |
 
-*Held-out* questions were revealed after the code froze; *seen* ones were in view while
-building; untriaged databases were never opened. See
-[ADR-008](docs/adr/ADR-008-accuracy-v03.md) and [docs/failures/](docs/failures/README.md).
+Untriaged Spider, wrong among answered:
+
+| Database | Askwell | Switches off | CSV upload |
+|---|---|---|---|
+| cre_Doc_Template_Mgt | 1/50 | 1/47 | 1/44 |
+| student_transcripts_tracking | 12/44 | 10/39 | 9/37 |
+| tvshow | 6/48 | 0/39 | 3/34 |
+| world_1 | 6/42 | 6/36 | 4/26 |
+
+*Held-out* questions came after the code froze; *seen* ones shaped it
+([docs/failures/](docs/failures/README.md)).
 
 ## Read more
 

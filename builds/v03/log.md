@@ -449,7 +449,8 @@ was right in the first run and is wrong on the repeat (its note is updated). Pai
 The CSV world_1 criterion stays failed on the per-database rule: no switch is involved,
 so there is nothing to turn off (2 answered before, because 48 were refused when the
 files did not load; 26 answered after, 22 right and 4 wrong). With two criteria failed,
-nothing deploys; the result goes to Cristian.
+the result went to Cristian, who overrode the gate on 2026-11-15 and approved the deploy
+(reasons in ADR-008). The switches stay as before the repeat: `link_roles` off.
 
 **Plan step 5.** README results table for v0.3 (held-out, seen and untriaged sets
 labelled); `evals/floors.yaml` adds `fieldservice-held-out-v03` (gold
@@ -457,3 +458,21 @@ labelled); `evals/floors.yaml` adds `fieldservice-held-out-v03` (gold
 it; the seen floor stays the v0.2 entry, so v0.3 runs get the note naming their prompt; `docs/failures/` gains a v0.3 section.
 The scorer is unchanged: the numeric-text type mismatch is a documented limitation in
 ADR-008, with counted-right figures beside the official ones.
+
+**Phase 4 review fixes.**
+- `paired.load_run` rebuilt every run with its schema's default plan (one trial over
+  every Spider question) and read every checkpoint entry, stale ones from a reused run id
+  included. `run_eval` now records `planned_trials`, `planned_items` and `task_keys` in
+  the run's config, and `load_run` uses them and keeps only those tasks' entries; a run
+  without them is refused. Test first (13a9fcd and 8c821cb, test-only; 438ca11). The
+  four after runs were replayed to record their plans; the three before runs, made on
+  `v03-before`, had theirs written from their checkpoints after checking that every
+  entry is a distinct task and the count is trials × items × systems × models. The
+  paired outputs are unchanged.
+- README results lead with question-level figures (62/96, one-shot 78/96, seen 40/43);
+  the pooled line is labelled pooled, and Spider is per database.
+- ADR-008: CSV tvshow counted right is 0/34 (615, 616 and 629); prediction 8's false
+  refusals are counts of 50 (4 → 0, 10 → 6, 9 → 2, 13 → 8).
+- The 28 CSV refusals of `v03-csv-new-before` without a triage entry now have one (IDs
+  only): 27 were tables that failed the upload check, 1 a refusal the grammar could not
+  express then. All 28 are right after.

@@ -64,7 +64,8 @@ wrong (main before v0.3: 12 of 164):
 functions, ranks within groups, medians, set intersections or per-group totals beside
 each row, which the grammar does not have.
 
-The untriaged Spider databases are where v0.3's deploy gate fails. Their misses are
+The untriaged Spider databases are where v0.3's deploy gate failed, on world_1;
+Cristian approved the deploy anyway, for reasons recorded in ADR-008. Their misses are
 listed by ID only in `evals/triage/spider_*.yaml`. On world_1, three of the new wrong
 answers come from ties: the gold keeps one row of a tie, and the answer does not
 return just that row. Another limit of the scorer: when a gold stores a number as text,

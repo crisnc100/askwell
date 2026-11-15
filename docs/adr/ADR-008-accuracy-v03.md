@@ -4,8 +4,8 @@
   v0.3 held-out set's hash and the untriaged Spider IDs (gold revision 6, `37f85d7`) and
   before any v0.3 code.
 - **Result:** measured 2026-11-15. Held-out wrong answers fall and accuracy rises
-  (53.1% → 64.6%, below the 70% predicted). The deploy gate fails on world_1 (gated
-  repeat) and CSV world_1, so v0.3 does not deploy until Cristian decides.
+  (53.1% → 64.6%, below the 70% predicted). The deploy gate failed on world_1 (gated
+  repeat) and CSV world_1; Cristian overrode it and approved the deploy.
 
 ## Context
 On the v0.2 held-out questions Askwell was right on 40 of 84 (47.6%, target 80%) and
@@ -117,7 +117,7 @@ read (never merged). Reports are in `evals/reports/`; before and after are paire
 `python -m askwell.bench.paired` (`evals/paired/`). Spend $1.4334, plus $0.0720 for the
 interpret-v3 re-record and $0.0925 for the gated Spider repeat: $1.5979 of the $4 cap.
 
-### The deploy gate: fails on the repeat; nothing deploys until Cristian decides
+### The deploy gate: fails on the repeat; overridden
 The first read failed on tvshow, world_1 and CSV world_1. Per the rule, the switches
 used by the failing run's wrong answers were turned off and the untriaged Spider run
 repeated once (`v03-spider-new-gated`: `has`, `link_roles` and `numeric_text` off). The
@@ -137,8 +137,8 @@ first read stands.
 | CSV path, world_1 | 0.0% (0/2) | 15.4% (4/26) | (not repeated) | **fail (+15.4)** |
 | CSV path, all four together | 14.5% (16/110) | 12.1% (17/141) | (not repeated) | pass (−2.4) |
 
-Two criteria fail, so v0.3 does not deploy; the result goes to Cristian. Spider runs are
-one trial, and each database row moves by a handful of answers, so its interval is wide
+Two criteria fail, so under the rule v0.3 does not deploy and the result goes to
+Cristian. Spider runs are one trial, and each database row moves by a handful of answers, so its interval is wide
 (world_1 on the repeat: 6 of 36, 8–32%).
 
 **What the rule turned off.** Every wrong answer of the first Spider run was validated
@@ -163,6 +163,20 @@ the upload check and did not load; after, they load through the numbered rows of
 and 26 are answered: 22 right and 4 wrong. The CSV path as a whole improves (14.5% →
 12.1% wrong among answered).
 
+**Override.** On 2026-11-15 the gate failed on Spider world_1 (+8.6 points on the gated
+repeat) and on CSV world_1 (per database). Cristian overrode it and approved deploying
+v0.3, for three reasons:
+- the held-out gain is significant (51 → 62 of 96 questions right, p = 0.001, with
+  fewer wrong answers in every trial);
+- 3 of world_1's 6 wrong answers on the repeat (740, 741, 788) are ties the gold
+  resolves to one row; without them world_1 is level with before (3 of 33 against 3 of
+  37);
+- CSV world_1 went from answering 2 questions to answering 26, 22 of them right.
+
+The switches stay as the deploy settings had them before the repeat: `has` and
+`numeric_text` on, `link_roles` off. The repeat's settings were for reading the gate,
+not for deploying.
+
 **A scoring limitation, not fixed.** When a gold stores a number as text ('5.8') and
 `numeric_text` returns the number, the scorer counts the two types as different and
 scores the answer wrong, though the rows and values match. The scorer is unchanged; the
@@ -172,7 +186,7 @@ figures):
 | Run | Questions affected | Official wrong among answered | Counted right |
 |---|---|---|---|
 | Untriaged Spider, first read, tvshow | 615, 616 | 12.5% (6/48) | 8.3% (4/48), still a fail |
-| CSV path, tvshow | 629 | 8.8% (3/34) | 5.9% (2/34) |
+| CSV path, tvshow | 615, 616, 629 | 8.8% (3/34) | 0.0% (0/34) |
 | Seen Spider, car_1 | 155 | 31.8% (14/44) | 29.5% (13/44) |
 | Seen Spider, dog_kennels | 984, 985, 988 | 28.6% (10/35) | 20.0% (7/35) |
 
@@ -207,8 +221,8 @@ the one-shot baseline 81.9% right and 7.5% wrong (19/255).
    3.9% (5/127).
 7. Link roles, seen: **missed** in PR-2 (above); `link_roles` stays off.
 8. Untriaged Spider: false refusals fall in at least 3 of 4, no wrong rate up more than
-   5 points: **half met**. False refusals fell in all 4 (8 → 0, 20 → 12, 18 → 4, 26 → 16
-   per 50), but wrong rose 10.1 points on tvshow and 6.2 on world_1 (8.6 on the gated
+   5 points: **half met**. False refusals fell in all 4 (4 → 0, 10 → 6, 9 → 2, 13 → 8
+   of 50), but wrong rose 10.1 points on tvshow and 6.2 on world_1 (8.6 on the gated
    repeat).
 9. CSV path: false refusals down at least 3 points in at least 2 of 4: **met** in 3
    (cre 18 → 12%, student_transcripts 34 → 26%, world_1 96 → 48%; tvshow 32% both).
