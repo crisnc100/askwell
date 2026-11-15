@@ -3,7 +3,9 @@
 - **Status:** Proposed. Predictions and the deploy gate committed 2026-11-13, after the
   v0.3 held-out set's hash and the untriaged Spider IDs (gold revision 6, `37f85d7`) and
   before any v0.3 code.
-- **Result:** not measured yet.
+- **Result:** measured 2026-11-15. Held-out wrong answers fall and accuracy rises
+  (53.1% → 64.6%, below the 70% predicted). The deploy gate fails on world_1 (gated
+  repeat) and CSV world_1, so v0.3 does not deploy until Cristian decides.
 
 ## Context
 On the v0.2 held-out questions Askwell was right on 40 of 84 (47.6%, target 80%) and
@@ -113,42 +115,68 @@ Measured 2026-11-15 on `anthropic:claude-haiku-5-5`, record mode, every switch o
 before code is branch `v03-before`: main at `4014aa0` plus only the eval files these runs
 read (never merged). Reports are in `evals/reports/`; before and after are paired with
 `python -m askwell.bench.paired` (`evals/paired/`). Spend $1.4334, plus $0.0720 for the
-interpret-v3 re-record: $1.5054 of the $4 cap.
+interpret-v3 re-record and $0.0925 for the gated Spider repeat: $1.5979 of the $4 cap.
 
-### The deploy gate: the first read fails; the gated Spider repeat is pending
-| Criterion | Before | After | Verdict |
-|---|---|---|---|
-| v0.3 held-out, wrong among answered, per trial | 7.3%, 7.4%, 7.3% | 4.7%, 4.7%, 3.1% | pass |
-| cre_Doc_Template_Mgt, wrong among answered | 0.0% (0/46) | 2.0% (1/50) | pass (+2.0) |
-| student_transcripts_tracking | 27.5% (11/40) | 27.3% (12/44) | pass (−0.2) |
-| tvshow | 2.4% (1/41) | 12.5% (6/48) | **fail (+10.1)** |
-| world_1 | 8.1% (3/37) | 14.3% (6/42) | **fail (+6.2)** |
-| CSV path, cre_Doc_Template_Mgt | 2.4% (1/41) | 2.3% (1/44) | pass |
-| CSV path, student_transcripts_tracking | 33.3% (11/33) | 24.3% (9/37) | pass |
-| CSV path, tvshow | 11.8% (4/34) | 8.8% (3/34) | pass |
-| CSV path, world_1 | 0.0% (0/2) | 15.4% (4/26) | **fail (+15.4)** |
-| CSV path, all four together | 14.5% (16/110) | 12.1% (17/141) | pass (−2.4) |
+### The deploy gate: fails on the repeat; nothing deploys until Cristian decides
+The first read failed on tvshow, world_1 and CSV world_1. Per the rule, the switches
+used by the failing run's wrong answers were turned off and the untriaged Spider run
+repeated once (`v03-spider-new-gated`: `has`, `link_roles` and `numeric_text` off). The
+gate is read on the repeat. The CSV run cannot be repeated that way (below), so its
+first read stands.
 
-Spider runs are one trial. Read as wrong over all 50 questions instead, the verdicts are
-the same (tvshow 1 → 6, world_1 3 → 6, CSV world_1 0 → 4). Each database row moves by a
-handful of answers, so its interval is wide (tvshow after: 6 of 48, 6–25%).
+| Criterion | Before | First read | Gated repeat | Verdict |
+|---|---|---|---|---|
+| v0.3 held-out, wrong among answered, per trial | 7.3%, 7.4%, 7.3% | 4.7%, 4.7%, 3.1% | (not repeated) | pass |
+| cre_Doc_Template_Mgt, wrong among answered | 0.0% (0/46) | 2.0% (1/50) | 2.1% (1/47) | pass (+2.1) |
+| student_transcripts_tracking | 27.5% (11/40) | 27.3% (12/44) | 25.6% (10/39) | pass (−1.9) |
+| tvshow | 2.4% (1/41) | 12.5% (6/48) | 0.0% (0/39) | pass (−2.4) |
+| world_1 | 8.1% (3/37) | 14.3% (6/42) | 16.7% (6/36) | **fail (+8.6)** |
+| CSV path, cre_Doc_Template_Mgt | 2.4% (1/41) | 2.3% (1/44) | (not repeated) | pass |
+| CSV path, student_transcripts_tracking | 33.3% (11/33) | 24.3% (9/37) | (not repeated) | pass |
+| CSV path, tvshow | 11.8% (4/34) | 8.8% (3/34) | (not repeated) | pass |
+| CSV path, world_1 | 0.0% (0/2) | 15.4% (4/26) | (not repeated) | **fail (+15.4)** |
+| CSV path, all four together | 14.5% (16/110) | 12.1% (17/141) | (not repeated) | pass (−2.4) |
 
-**What the rule turns off.** Every wrong answer of the two failing runs was validated
+Two criteria fail, so v0.3 does not deploy; the result goes to Cristian. Spider runs are
+one trial, and each database row moves by a handful of answers, so its interval is wide
+(world_1 on the repeat: 6 of 36, 8–32%).
+
+**What the rule turned off.** Every wrong answer of the first Spider run was validated
 again with each switch off; a switch counts as used when the answer is refused or
-compiles to different SQL without it. Two of tvshow's six wrong answers (615, 616)
-return the gold's rows and values; the gold keeps a rating stored as text ('5.8'),
-`numeric_text` returns the number, and the scorer counts the types as different.
-- `v03-spider-new`: `has` (tvshow 635, 636, 637; world_1 783; student_transcripts 578),
-  `numeric_text` (tvshow 613, 615, 616) and `link_roles` (student_transcripts 578, 583,
-  584). The other 15 wrong answers use none. Per the rule these three switches are
-  turned off and the run is repeated once as `v03-spider-new-gated`; the gate is read on
-  the repeat. Pending: the repeat needs its own go.
-- `v03-csv-new`: no wrong answer uses a switch. Its world_1 rise comes from the numbered
-  rows of O11, which have no switch: `country` and `countrylanguage` now load (48
-  questions were refused before because those files failed the upload check; 22 are now
-  right and 4 wrong). Turning switches off cannot change this run, so on the rule as
-  written the CSV world_1 criterion fails, while the CSV path as a whole improves
-  (14.5% → 12.1% wrong among answered).
+compiles to different SQL without it. `has` (tvshow 635, 636, 637; world_1 783;
+student_transcripts 578), `numeric_text` (tvshow 613, 615, 616) and `link_roles`
+(student_transcripts 578, 583, 584). The other 15 wrong answers use none.
+
+**world_1 on the repeat.** Its six wrong answers use no switch. Three were wrong before
+too (705, 724, 758, misreads). Two are new in v0.3 and stay wrong with every switch off
+(740, 741): several countries tie for the most languages, and the gold's single row is
+one of the tie; before, the tie fell the gold's way. One is new on the repeat (788):
+seven countries share the smallest population, and the answer returned all seven where
+the first run and the before run sorted with a limit of one and picked the gold's row.
+All three new ones are tagged `gold_issue` in `evals/triage/spider_world_1.yaml`, but
+the rule counts them as wrong.
+
+**CSV world_1.** Fails on the per-database rule as written. No wrong answer of
+`v03-csv-new` uses a switch, so turning switches off cannot change it. Before, 2 of 50
+questions were answered and 48 refused, because `country` and `countrylanguage` failed
+the upload check and did not load; after, they load through the numbered rows of O11,
+and 26 are answered: 22 right and 4 wrong. The CSV path as a whole improves (14.5% →
+12.1% wrong among answered).
+
+**A scoring limitation, not fixed.** When a gold stores a number as text ('5.8') and
+`numeric_text` returns the number, the scorer counts the two types as different and
+scores the answer wrong, though the rows and values match. The scorer is unchanged; the
+official figures above count these as wrong. Counted right instead (not the official
+figures):
+
+| Run | Questions affected | Official wrong among answered | Counted right |
+|---|---|---|---|
+| Untriaged Spider, first read, tvshow | 615, 616 | 12.5% (6/48) | 8.3% (4/48), still a fail |
+| CSV path, tvshow | 629 | 8.8% (3/34) | 5.9% (2/34) |
+| Seen Spider, car_1 | 155 | 31.8% (14/44) | 29.5% (13/44) |
+| Seen Spider, dog_kennels | 984, 985, 988 | 28.6% (10/35) | 20.0% (7/35) |
+
+The gated repeat runs with `numeric_text` off, so none of its answers are affected.
 
 ### Before and after on the held-out set (question-level, paired)
 | System | Right before | Right after | Only after | Only before | McNemar p |
@@ -180,7 +208,8 @@ the one-shot baseline 81.9% right and 7.5% wrong (19/255).
 7. Link roles, seen: **missed** in PR-2 (above); `link_roles` stays off.
 8. Untriaged Spider: false refusals fall in at least 3 of 4, no wrong rate up more than
    5 points: **half met**. False refusals fell in all 4 (8 → 0, 20 → 12, 18 → 4, 26 → 16
-   per 50), but wrong rose 10.1 points on tvshow and 6.2 on world_1.
+   per 50), but wrong rose 10.1 points on tvshow and 6.2 on world_1 (8.6 on the gated
+   repeat).
 9. CSV path: false refusals down at least 3 points in at least 2 of 4: **met** in 3
    (cre 18 → 12%, student_transcripts 34 → 26%, world_1 96 → 48%; tvshow 32% both).
    No file fails the upload check now; before, five tables failed on `no_id_column`.

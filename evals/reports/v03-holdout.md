@@ -12,6 +12,15 @@ Rates show the value, the Wilson 95% interval, and the counts. Trials are pooled
 | fieldservice | ledgerline | anthropic:claude-haiku-5-5 | 3 | 67.0% [61-72] (193/288) | 64.2% [59-70] (185/288) | 95.9% [92-98] (185/193) | 33.0% [28-39] (95/288) | 4.1% [2-8] (8/193) | 100.0% [95-100] (72/72) | 0.0% [0-1] (0/360) | holdout-v03.jsonl |
 | fieldservice | oneshot | anthropic:claude-haiku-5-5 | 3 | 100.0% [99-100] (288/288) | 81.9% [77-86] (236/288) | 81.9% [77-86] (236/288) | 0.0% [0-1] (0/288) | 7.5% [5-11] (19/255) | 100.0% [95-100] (72/72) | 9.2% [7-13] (33/360) | holdout-v03.jsonl |
 
+## Floor check: fieldservice, holdout-v03.jsonl, anthropic:claude-haiku-5-5 (v0.1 acceptance floor)
+
+- Execution accuracy >= 80%: 64.2% [59-70] (185/288), NOT met
+- Wrong answers among answered <= 5%: 4.1% [2-8] (8/193), met
+
+Result: **not met** on the v0.3 held-out questions (live, default model).
+Why: Held-out questions, written blind and revealed after the v0.3 code was frozen. v0.3 (v03-holdout, 3 trials) is right on 185 of 288 (64.2%; 62 of 96 questions in most trials) and wrong on 8 of 193 answered (4.1%); main at 4014aa0 (v03-holdout-before) was right on 152 of 288 and wrong on 12 of 164 (7.3%). Accuracy misses because 31 questions are refused in every trial, most needing window functions, ranks within groups, medians, set intersections or per-group totals beside rows. h3-065's three wrong answers return the gold's values; its unordered gold passes the row cap.
+Next: Deploying waits on the gate in ADR-008. The interpret-v3 prompt and grammar are not changed after seeing these results.
+
 ## Ledgerline misses
 
 - `h3-005` (fieldservice, holdout-v03.jsonl, trial 1): wrong — rows differ. Tag: **misread**. Wrong in 2 of 3 trials (3 of 3 before): asked for a fraction, it returned a percentage (ratio with as_percent), where the gold returns the fraction.

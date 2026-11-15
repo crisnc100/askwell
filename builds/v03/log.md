@@ -370,9 +370,10 @@ questions and gives the exact McNemar p-value. One-trial reports keep their old 
 | v03-spider-new | accuracy-pr3 | 200 | $0.0991 | 0.10, then 0.11 |
 | v03-csv-new | accuracy-pr3 | 200 | $0.1062 | 0.14 |
 | v03-spider-seen | accuracy-pr3 | 250 | $0.1233 | 0.16 |
-| **Phase 4** | | | **$1.4334** | |
+| v03-spider-new-gated | accuracy-pr3, `has`, `link_roles`, `numeric_text` off | 200 | $0.0925 | 0.12 |
+| **Phase 4** | | | **$1.5259** | |
 
-With the $0.0720 re-record, v0.3's live spend is $1.5054 of the $4 cap.
+With the $0.0720 re-record, v0.3's live spend is $1.5979 of the $4 cap.
 - `v03-spider-new` stopped at its $0.10 cap after 198 of 200: interpret-v3 costs about
   $0.00050 per Spider call against the $0.00036 the plan assumed. The orchestrator
   raised it to $0.11 and the run resumed for the last two; csv-new and spider-seen got
@@ -397,7 +398,7 @@ answer is refused or compiles to different SQL without it.
   student_transcripts 531, 533, 534, 535, 536, 541, 579 (wrong), 547, 548 (right);
   world_1 705, 724, 758 (wrong), 740, 741 (right).
 - So the rule turns off `has`, `numeric_text` and `link_roles` and repeats the run once
-  as `v03-spider-new-gated`, which waits for its own go.
+  as `v03-spider-new-gated`.
 - v03-csv-new: no wrong answer uses a switch. cre 361; student_transcripts 531, 534,
   535, 536, 541, 579 (wrong before), 547, 548 (right before), 552 (refused); tvshow 615,
   616, 629 (wrong before); world_1 705, 706, 707, 724, refused before because `country`
@@ -432,3 +433,27 @@ answer is refused or compiles to different SQL without it.
   reads the newest, so `replay-fieldservice` was rewritten from them
   (`scripts.check_replay_report --write`, no model call): ledgerline 40 of 43 right,
   with fs-022 now wrong in the replayed trial.
+
+**Gated repeat: the gate fails again.** `v03-spider-new-gated` ran with the three
+switches off (`ASKWELL_FEATURES_OFF`; the registries are regenerated without them, so
+their hashes are not checked against the committed ones). Wrong among answered against
+v03-spider-new-before: cre 1 of 47 (+2.1, pass), student_transcripts 10 of 39 (−1.9,
+pass), tvshow 0 of 39 (−2.4, pass), world_1 6 of 36 (+8.6, **fail**). world_1's wrong
+answers use no switch: 705, 724, 758 were wrong before too; 740 and 741 tie for the most
+languages and the gold's single row is one of the tie; 788 is new on the repeat, seven
+countries tie for the smallest population and the answer returned all seven
+(`gold_issue`, added to `evals/triage/spider_world_1.yaml`). student_transcripts 552
+was right in the first run and is wrong on the repeat (its note is updated). Paired:
+`evals/paired/v03-spider-new-gated.md`.
+
+The CSV world_1 criterion stays failed on the per-database rule: no switch is involved,
+so there is nothing to turn off (2 answered before, because 48 were refused when the
+files did not load; 26 answered after, 22 right and 4 wrong). With two criteria failed,
+nothing deploys; the result goes to Cristian.
+
+**Plan step 5.** README results table for v0.3 (held-out, seen and untriaged sets
+labelled); `evals/floors.yaml` adds `fieldservice-held-out-v03` (gold
+`holdout-v03.jsonl`, interpret-v3), and `v03-holdout` was rebuilt in replay mode to show
+it; the seen floor stays the v0.2 entry, so v0.3 runs get the note naming their prompt; `docs/failures/` gains a v0.3 section.
+The scorer is unchanged: the numeric-text type mismatch is a documented limitation in
+ADR-008, with counted-right figures beside the official ones.

@@ -49,7 +49,7 @@ spider:550:
   note: 'Same as spider:549. Before: both refused.'
   tag: validator_false_reject
 spider:552:
-  note: 'Askwell right. CSV path wrong: it counted distinct courses and grouped the date by day, where
+  note: 'Askwell right; wrong in v03-spider-new-gated, where it grouped the date by day and added a count column the gold does not return. CSV path wrong: it counted distinct courses and grouped the date by day, where
     the gold counts rows per transcript. Before: Askwell right, CSV refused.'
   tag: misread
 spider:557:

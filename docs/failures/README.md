@@ -45,3 +45,28 @@ written before the v0.2 code ([report](../../evals/reports/v02-holdout.md)). The
 The other 30 misses are correct refusals of 10 questions v0.2 still cannot express:
 durations between two dates, products of fields, "has none" questions, distinct counts of
 periods and a comparison with an average.
+
+## In v0.3
+
+v0.3 was measured on 96 new held-out questions, written before the code and revealed
+after it was frozen ([ADR-008](../adr/ADR-008-accuracy-v03.md),
+[report](../../evals/reports/v03-holdout.md)). Over 3 trials, 8 of 193 answers were
+wrong (main before v0.3: 12 of 164):
+
+- h3-065, in every trial, returns the gold's values but is scored wrong. Its gold has
+  3,649 rows in no order, past the 1,000-row cap, and the scorer keeps a different 1,000
+  rows than Askwell returns. A scoring limit, tagged `gold_issue`.
+- h3-005, in 2 trials, returns a percentage where the question asks for a fraction.
+- h3-038 and h3-045, once each, return an id without the name the gold also returns.
+- h3-058, once, puts age buckets in the columns of one row instead of one row each.
+
+31 questions are refused in every trial, almost all correctly: they need window
+functions, ranks within groups, medians, set intersections or per-group totals beside
+each row, which the grammar does not have.
+
+The untriaged Spider databases are where v0.3's deploy gate fails. Their misses are
+listed by ID only in `evals/triage/spider_*.yaml`. On world_1, three of the new wrong
+answers come from ties: the gold keeps one row of a tie, and the answer does not
+return just that row. Another limit of the scorer: when a gold stores a number as text,
+an answer with the number itself is scored wrong; ADR-008 lists those answers and shows
+the figures both ways.

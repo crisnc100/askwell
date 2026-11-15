@@ -13,9 +13,9 @@ who it is for and what it leaves out on purpose.
 
 **Status.** v0.2 runs on your machine, and a public beta answers live questions
 ([Deploy the hosted beta](#deploy-the-hosted-beta)). The model is Claude
-Haiku 5.5 ([ADR-004](docs/adr/ADR-004-model-choice.md)). Held-out questions miss both
-targets: 47.6% right (target 80%), 25.9% wrong (target 5%). The seen questions v0.2 was
-built from meet both ([ADR-007](docs/adr/ADR-007-grammar-v02.md)).
+Haiku 5.5 ([ADR-004](docs/adr/ADR-004-model-choice.md)). v0.3 is not deployed: on
+held-out questions it is 64.2% right (target 80%) and 4.1% wrong (target 5%), and its
+deploy gate fails ([Results](#results)).
 
 ## Try it
 
@@ -54,18 +54,20 @@ model answers; [Results](#results) has its measured accuracy.
 ## Results
 
 `http://localhost:8000/results/` shows the benchmark: how often Askwell is right,
-wrong or refuses, beside a baseline where the model writes SQL. Fieldservice, live, 3 trials:
+wrong or refuses, beside a baseline where the model writes SQL. v0.3, live:
 
-| Live, fieldservice | Askwell | one-shot |
+| Set | Right | Wrong among answered |
 |---|---|---|
-| Held-out: rows match | 47.6% (40/84) | 60.7% (51/84) |
-| Held-out: wrong among answered | 25.9% (14/54) | 39.3% (33/84) |
-| Seen: rows match | 86.0% (111/129) | 76.7% (99/129) |
-| Seen: wrong among answered | 1.8% (2/113) | 23.3% (30/129) |
+| Held-out, 3 trials | 64.2% (185/288) | 4.1% (8/193) |
+| Held-out, one-shot | 81.9% (236/288) | 7.5% (19/255) |
+| Seen, 3 trials | 94.6% (122/129) | 3.9% (5/127) |
+| Untriaged Spider | 79.5% (159/200) | 13.6% (25/184) |
+| Same, 3 switches off | 72.0% (144/200) | 10.6% (17/161) |
+| Same, CSV upload | 62.0% (124/200) | 12.1% (17/141) |
 
-v0.2 was built from the seen questions; the held-out ones came first. Both miss the
-held-out target (80% right, 5% wrong); 12 of Askwell's 14 wrong answers differ
-only by an id column or tie order. [docs/failures/](docs/failures/README.md) has more.
+*Held-out* questions were revealed after the code froze; *seen* ones were in view while
+building; untriaged databases were never opened. See
+[ADR-008](docs/adr/ADR-008-accuracy-v03.md) and [docs/failures/](docs/failures/README.md).
 
 ## Read more
 
@@ -74,8 +76,8 @@ only by an id column or tie order. [docs/failures/](docs/failures/README.md) has
 - [docs/adr/](docs/adr/README.md): each design decision, with a prediction made before
   the code and the measured result.
 - [docs/build-log.md](docs/build-log.md): how v0.1 was built, and what reviews caught.
-- [evals/reports/](evals/reports/): the live runs (`select-haiku-2026-11-11` for the
-  default) and `sim-1`, run earlier on simulated answers.
+- [evals/reports/](evals/reports/): the live runs and `sim-1`, run earlier on
+  simulated answers.
 - The sections below: each part of the system in detail.
 
 ## Setup details
@@ -400,7 +402,7 @@ The live run `select-2026-11-11` compared four OpenRouter models on fieldservice
 ([report](evals/reports/select-2026-11-11.md)), and `select-haiku-2026-11-11` measured
 Claude Haiku 5.5, the default, with v0.1 on the seen questions: 35/43 right and 2 of 37
 answered wrong, 1 trial ([report](evals/reports/select-haiku-2026-11-11.md),
-[ADR-004](docs/adr/ADR-004-model-choice.md)). [Results](#results) shows the v0.2 runs.
+[ADR-004](docs/adr/ADR-004-model-choice.md)). [Results](#results) shows the v0.3 runs.
 Before a key existed, the simulated run
 `sim-1` ([evals/reports/sim-1.md](evals/reports/sim-1.md)) checked the pipeline and the
 scoring. Every answer in it was written by claude-haiku-5-5 standing in for

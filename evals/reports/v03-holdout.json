@@ -499,7 +499,47 @@
     }
   ],
   "deferred": {},
-  "floors": [],
+  "floors": [
+    {
+      "cause": "Held-out questions, written blind and revealed after the v0.3 code was frozen. v0.3 (v03-holdout, 3 trials) is right on 185 of 288 (64.2%; 62 of 96 questions in most trials) and wrong on 8 of 193 answered (4.1%); main at 4014aa0 (v03-holdout-before) was right on 152 of 288 and wrong on 12 of 164 (7.3%). Accuracy misses because 31 questions are refused in every trial, most needing window functions, ranks within groups, medians, set intersections or per-group totals beside rows. h3-065's three wrong answers return the gold's values; its unordered gold passes the row cap.",
+      "checks": [
+        {
+          "met": false,
+          "metric": "execution_accuracy",
+          "rate": {
+            "ci95": [
+              0.5854649551961857,
+              0.6955095174896173
+            ],
+            "n": 185,
+            "of": 288,
+            "rate": 0.6423611111111112
+          },
+          "rule": ">= 80%"
+        },
+        {
+          "met": true,
+          "metric": "wrong_answer_rate_given_answered",
+          "rate": {
+            "ci95": [
+              0.021150953290406463,
+              0.0796482327122131
+            ],
+            "n": 8,
+            "of": 193,
+            "rate": 0.04145077720207254
+          },
+          "rule": "<= 5%"
+        }
+      ],
+      "gold": "holdout-v03.jsonl",
+      "met": false,
+      "model": "anthropic:claude-haiku-5-5",
+      "next": "Deploying waits on the gate in ADR-008. The interpret-v3 prompt and grammar are not changed after seeing these results.",
+      "schema": "fieldservice",
+      "status_note": "on the v0.3 held-out questions (live, default model)"
+    }
+  ],
   "gold_files": [
     "holdout-v03.jsonl"
   ],

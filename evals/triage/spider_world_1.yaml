@@ -120,3 +120,8 @@ spider:821:
   note: 'Both refused (a rank within groups); the gold returns every country where the language is spoken,
     not where it leads. Before: both refused.'
   tag: gold_issue
+spider:788:
+  note: 'v03-spider-new-gated: wrong. Seven countries share the smallest population; comparing with the
+    minimum returns all seven, where the gold''s single row is one of the tie. Right in v03-spider-new
+    and before (a sorted list with a limit of one, which picks the gold''s row).'
+  tag: gold_issue
