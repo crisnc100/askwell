@@ -2,6 +2,8 @@
 # and run it describes:
 # - the held-out questions (ho-*) in v02-holdout-before (v0.1 grammar) and v02-holdout
 #   (v0.2 grammar), Claude Haiku 5.5, 3 trials each;
+# - the v0.3 held-out questions (h3-*) in v03-holdout-before (main at 4014aa0) and
+#   v03-holdout (v0.3), Claude Haiku 5.5, 3 trials each;
 # - the seen questions (fs-*) in v02-seen (v0.2 grammar), and before that in
 #   select-haiku-2026-11-11 (Claude Haiku 5.5) and select-2026-11-11 (mistral-small, the
 #   previous default). Other models in select-2026-11-11 missed some of the same questions
@@ -238,3 +240,184 @@ demo-urgent-by-region:
     a placeholder reason ("None"), no group_by, and a sort on customer__region (intent_shape, invalid_order_by).
     Grouping work orders by the customer region answers it.'
   tag: misread
+h3-005:
+  note: 'Wrong in 2 of 3 trials (3 of 3 before): asked for a fraction, it returned a percentage (ratio
+    with as_percent), where the gold returns the fraction.'
+  tag: misread
+h3-022:
+  note: 'Needs a duration between two dates. Before: refused in every trial. After: right with durations.'
+  tag: grammar_gap
+h3-026:
+  note: 'Needs a duration between two dates. Before: refused in every trial. After: right with durations.'
+  tag: grammar_gap
+h3-031:
+  note: 'Needs a difference of two fields. Before: refused in every trial. After: right with computed.'
+  tag: grammar_gap
+h3-037:
+  note: 'Refused in every trial, before and after: it needs a count per customer that keeps customers
+    with no sites (zero rows), which needs the count on the one side without a fan-out, which the intent
+    cannot express.'
+  tag: grammar_gap
+h3-038:
+  note: 'Wrong in 1 of 3 trials (3 of 3 before): it grouped by the customer id alone, without the customer
+    name the gold returns.'
+  tag: misread
+h3-040:
+  note: 'Before: wrong in every trial, grouping by customer name merged customers who share a name. After:
+    right; v0.3 groups by the id and the name (PR-1).'
+  tag: builder_bug
+h3-041:
+  note: 'Before: wrong in every trial for the same name merge as h3-040. After: right.'
+  tag: builder_bug
+h3-045:
+  note: 'Wrong in 1 of 3 trials (right in 3 of 3 before): it grouped by site id without the site name
+    the gold returns.'
+  tag: misread
+h3-047:
+  note: 'Needs a duration between two dates. Before: refused in every trial. After: right with durations.'
+  tag: grammar_gap
+h3-049:
+  note: 'Needs a product of two fields. Before: refused in every trial. After: right with computed.'
+  tag: grammar_gap
+h3-050:
+  note: 'Refused in every trial, before and after: it needs a count per technician that keeps technicians
+    with none (zero rows); grouping from the jobs side drops them and the other side fans out, which the
+    intent cannot express.'
+  tag: grammar_gap
+h3-057:
+  note: 'Before: refused in 1 of 3 trials, right in the others. After: right in every trial.'
+  tag: misread
+h3-058:
+  note: 'Refused in 2 of 3 trials, wrong in 1 (refused in every trial before): it needs one row per computed
+    age bucket; the wrong trial put the buckets in columns of one row.'
+  tag: grammar_gap
+h3-060:
+  note: 'Refused in every trial, before and after: it needs every catalogue part including unused ones
+    with zero units, a count that keeps zero rows, which the intent cannot express.'
+  tag: grammar_gap
+h3-061:
+  note: 'Needs a product of two fields. Before: refused in every trial. After: right with computed.'
+  tag: grammar_gap
+h3-063:
+  note: 'Refused in every trial, before and after: it needs quantity times (price minus cost), a computed
+    value of three fields, which the intent cannot express.'
+  tag: grammar_gap
+h3-065:
+  note: 'Wrong in every trial after (refused before), but the answer is the gold''s: the gold returns
+    3,649 rows with no order, past the 1,000-row cap; Askwell returns the first 1,000 by work order, all
+    with the gold''s values, while the unordered gold cut to the same cap keeps other rows.'
+  tag: gold_issue
+h3-068:
+  note: 'Needs has none. Before: refused in every trial. After: right with has.'
+  tag: grammar_gap
+h3-069:
+  note: 'Needs a product of two fields. Before: refused in every trial. After: right with computed.'
+  tag: grammar_gap
+h3-070:
+  note: 'Refused in every trial, before and after: it needs a segment total beside each customer''s total,
+    which the intent cannot express.'
+  tag: grammar_gap
+h3-071:
+  note: 'Refused in every trial, before and after: it needs the change between two quarters'' totals per
+    customer, which the intent cannot express.'
+  tag: grammar_gap
+h3-072:
+  note: 'Refused in every trial, before and after: it needs "every site has" a recent completed job (a
+    universal condition over related rows), which the intent cannot express.'
+  tag: grammar_gap
+h3-073:
+  note: 'Refused in every trial, before and after: it needs a comparison with the average per segment;
+    compare-with-an-aggregate refuses grouped comparisons by design, which the intent cannot express.'
+  tag: grammar_gap
+h3-074:
+  note: 'Refused in every trial, before and after: it needs each customer''s first completed job date
+    as a value to group by, which the intent cannot express.'
+  tag: grammar_gap
+h3-075:
+  note: 'Refused in every trial, before and after: it needs the difference between two grouped counts
+    per site, which the intent cannot express.'
+  tag: grammar_gap
+h3-076:
+  note: 'Refused in every trial, before and after: it needs the gap between consecutive jobs (a window
+    function), which the intent cannot express.'
+  tag: grammar_gap
+h3-077:
+  note: 'Refused in every trial, before and after: it needs the top site within each customer (a rank
+    within groups), which the intent cannot express.'
+  tag: grammar_gap
+h3-078:
+  note: 'Refused in every trial, before and after: it needs each repair matched to a later repair at the
+    same site, which the intent cannot express.'
+  tag: grammar_gap
+h3-079:
+  note: 'Refused in every trial, before and after: it needs each technician compared with a pooled mean
+    of the others, which the intent cannot express.'
+  tag: grammar_gap
+h3-080:
+  note: 'Refused in every trial, before and after: it needs a dense rank within each skill level (a window
+    function), which the intent cannot express.'
+  tag: grammar_gap
+h3-081:
+  note: 'Refused in every trial, before and after: it needs the longest streak of consecutive days (a
+    window function), which the intent cannot express.'
+  tag: grammar_gap
+h3-082:
+  note: 'Refused in every trial, before and after: it needs a ranking by a difference of three aggregates,
+    which the intent cannot express.'
+  tag: grammar_gap
+h3-083:
+  note: 'Refused in every trial, before and after: it needs a median and percentiles, which the intent
+    cannot express.'
+  tag: grammar_gap
+h3-084:
+  note: 'Refused in every trial, before and after: it needs the longest job within each quarter and type
+    (a rank within groups), which the intent cannot express.'
+  tag: grammar_gap
+h3-085:
+  note: 'Refused in every trial, before and after: it needs a running total across months (a window function),
+    which the intent cannot express.'
+  tag: grammar_gap
+h3-086:
+  note: 'Refused in every trial, before and after: it needs the previous month''s revenue on each row
+    (a window function), which the intent cannot express.'
+  tag: grammar_gap
+h3-087:
+  note: 'Refused in every trial, before and after: it needs a median and a percentile over per-customer
+    means, which the intent cannot express.'
+  tag: grammar_gap
+h3-088:
+  note: 'Refused in every trial, before and after: it needs each customer''s first invoice month as a
+    value to compare, which the intent cannot express.'
+  tag: grammar_gap
+h3-089:
+  note: 'Refused in every trial, before and after: it needs a running total across the ranked customers,
+    which the intent cannot express.'
+  tag: grammar_gap
+h3-090:
+  note: 'Refused in every trial, before and after: it needs the top three parts within each category (a
+    rank within groups), which the intent cannot express.'
+  tag: grammar_gap
+h3-091:
+  note: 'Refused in every trial: after, the answer was cut off at the completion limit each time, so
+    it could not be read as an intent. Refused in every trial before.'
+  tag: misread
+h3-092:
+  note: 'Refused in every trial, before and after: it needs parts used in both quarters (a set intersection),
+    which the intent cannot express.'
+  tag: grammar_gap
+h3-093:
+  note: 'Refused in every trial, before and after: it needs pairs of parts on the same job (a self-join),
+    which the intent cannot express.'
+  tag: grammar_gap
+h3-094:
+  note: 'Refused in every trial, before and after: it needs each job''s parts cost summed, then averaged
+    per technician (an aggregate of an aggregate); one trial was cut off at the completion limit, which
+    the intent cannot express.'
+  tag: grammar_gap
+h3-095:
+  note: 'Refused in every trial, before and after: it needs a segment total beside each part category''s
+    value, which the intent cannot express.'
+  tag: grammar_gap
+h3-096:
+  note: 'Refused in every trial, before and after: it needs a median, which the intent cannot express.'
+  tag: grammar_gap

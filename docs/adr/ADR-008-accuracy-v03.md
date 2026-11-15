@@ -135,7 +135,9 @@ handful of answers, so its interval is wide (tvshow after: 6 of 48, 6–25%).
 
 **What the rule turns off.** Every wrong answer of the two failing runs was validated
 again with each switch off; a switch counts as used when the answer is refused or
-compiles to different SQL without it.
+compiles to different SQL without it. Two of tvshow's six wrong answers (615, 616)
+return the gold's rows and values; the gold keeps a rating stored as text ('5.8'),
+`numeric_text` returns the number, and the scorer counts the types as different.
 - `v03-spider-new`: `has` (tvshow 635, 636, 637; world_1 783; student_transcripts 578),
   `numeric_text` (tvshow 613, 615, 616) and `link_roles` (student_transcripts 578, 583,
   584). The other 15 wrong answers use none. Per the rule these three switches are
@@ -163,7 +165,10 @@ the one-shot baseline 81.9% right and 7.5% wrong (19/255).
    ranks within groups, running totals, medians and percentiles, set intersections,
    per-group totals beside rows, a computed value of three fields); a few look
    expressible and were refused anyway (h3-037 and h3-060, counts that keep the zero
-   rows; h3-073, an average per group).
+   rows; h3-073, an average per group). One of the 34 misses, h3-065, returns the gold's
+   values but is scored wrong: its gold has 3,649 unordered rows, past the 1,000-row
+   cap, and the scorer cuts it to different rows. Counted right, accuracy is 63 of 96
+   (65.6%), still below 70%.
 2. Held-out wrong among answered at most 8% per trial: **met**, 4.7%, 4.7%, 3.1%.
 3. Before and after at least +10 points with p < 0.05 and lower wrong: **met**,
    +11.5 points, p = 0.001, wrong lower in every trial.

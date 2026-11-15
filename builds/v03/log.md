@@ -408,11 +408,15 @@ answer is refused or compiles to different SQL without it.
   switch to turn off) was wrong and was corrected before the repeat was decided.
 
 **Held-out misses (v03-holdout; held-out notes may quote the questions).**
-- Wrong in at least one trial: h3-065 in 3 of 3 ("recorded parts acquisition cost
-  for each work order"; its intent uses `computed`; refused in every trial before); h3-005 in 2 of 3 (fraction of active accounts
-  per segment; wrong in 3 of 3 before); h3-038, h3-045 and h3-058 in 1 of 3 each.
-  h3-065 is the only wrong answer that uses a switch; the held-out gate passes, so
-  nothing is turned off for it.
+- Wrong in at least one trial: h3-065 in 3 of 3, but its answer is the gold's: the
+  gold returns 3,649 unordered rows, past the 1,000-row cap, and the scorer cuts it to a
+  different 1,000 than Askwell's (all 1,000 of Askwell's values match); refused in every
+  trial before. h3-005 in 2 of 3 (a percentage where the question asks a fraction;
+  wrong in 3 of 3 before); h3-038 and h3-045 in 1 of 3 (an id without the name the gold
+  returns); h3-058 in 1 of 3 (age buckets as columns of one row). h3-065 is the only
+  wrong answer that uses a switch (`computed`); the held-out gate passes, so nothing is
+  turned off for it. Every held-out miss is tagged in `evals/triage/fieldservice.yaml`.
+
 - Refused in every trial: 31 questions. h3-070 to h3-096 need what the grammar lacks:
   window functions and ranks within groups (h3-077, 080, 081, 084, 085, 086, 089,
   090), medians and percentiles (h3-083, 087, 096), set intersection (h3-092), a
