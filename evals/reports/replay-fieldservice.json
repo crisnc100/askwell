@@ -3,6 +3,14 @@
   "baseline_wins": [
     {
       "gold": "fieldservice.jsonl",
+      "item_id": "fs-022",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "fieldservice",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "gold": "fieldservice.jsonl",
       "item_id": "fs-024",
       "model": "anthropic:claude-haiku-5-5",
       "schema": "fieldservice",
@@ -28,12 +36,12 @@
           "metric": "execution_accuracy",
           "rate": {
             "ci95": [
-              0.8454450199593603,
-              0.9871507399056197
+              0.8139101309875801,
+              0.9759884104227855
             ],
-            "n": 41,
+            "n": 40,
             "of": 43,
-            "rate": 0.9534883720930233
+            "rate": 0.9302325581395349
           },
           "rule": ">= 80%"
         },
@@ -42,12 +50,12 @@
           "metric": "wrong_answer_rate_given_answered",
           "rate": {
             "ci95": [
-              0.004215404134432499,
-              0.12321201573766646
+              0.013157524908905607,
+              0.15789852396958842
             ],
-            "n": 1,
+            "n": 2,
             "of": 42,
-            "rate": 0.023809523809523808
+            "rate": 0.047619047619047616
           },
           "rule": "<= 5%"
         }
@@ -64,6 +72,19 @@
     "fieldservice.jsonl"
   ],
   "misses": [
+    {
+      "error": null,
+      "gold": "fieldservice.jsonl",
+      "issue_codes": [],
+      "item_id": "fs-022",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "mistral-small (select-2026-11-11): Both intents had a placeholder reason and no group_by; the first also counted from parts, a fan-out. Grouping work_order_parts by part would answer it.",
+      "outcome": "wrong",
+      "refusal": null,
+      "schema": "fieldservice",
+      "tag": "misread",
+      "trial": 1
+    },
     {
       "error": null,
       "gold": "fieldservice.jsonl",
@@ -85,7 +106,7 @@
       "model": "anthropic:claude-haiku-5-5",
       "note": "Haiku 5.5 (v02-seen, v0.2 grammar): Refused correctly in 3 of 3 trials. Haiku 5.5 (select-haiku-2026-11-11): Needs a distinct count of months in HAVING. Refused correctly. mistral-small (select-2026-11-11): Needs a distinct count of months in HAVING. Refused correctly.",
       "outcome": "refused",
-      "refusal": "it needs a distinct count of months per technician, checked against every month of the quarter, which the intent cannot express",
+      "refusal": "it needs a per-technician check that completions occurred in each month of last quarter, which requires counting distinct months per technician. The intent cannot express a distinct count of periods.",
       "schema": "fieldservice",
       "tag": "grammar_gap",
       "trial": 1
@@ -97,18 +118,18 @@
   "registry_hashes": {},
   "run_id": "replay-fieldservice",
   "simulation": null,
-  "spent_usd": 0.06687150000000004,
+  "spent_usd": 0.06495990000000003,
   "status": "complete",
   "table": [
     {
       "accuracy_given_attempted": {
         "ci95": [
-          0.8767879842623334,
-          0.9957845958655673
+          0.8421014760304114,
+          0.9868424750910944
         ],
-        "n": 41,
+        "n": 40,
         "of": 42,
-        "rate": 0.9761904761904762
+        "rate": 0.9523809523809523
       },
       "coverage": {
         "ci95": [
@@ -121,12 +142,12 @@
       },
       "execution_accuracy": {
         "ci95": [
-          0.8454450199593603,
-          0.9871507399056197
+          0.8139101309875801,
+          0.9759884104227855
         ],
-        "n": 41,
+        "n": 40,
         "of": 43,
-        "rate": 0.9534883720930233
+        "rate": 0.9302325581395349
       },
       "execution_error_rate": {
         "ci95": [
@@ -148,9 +169,9 @@
       },
       "gold": "fieldservice.jsonl",
       "items": 67,
-      "mean_cost_usd": 0.0006004179104477612,
+      "mean_cost_usd": 0.0005718119402985075,
       "model": "anthropic:claude-haiku-5-5",
-      "p50_latency_ms": 7.278167060576379,
+      "p50_latency_ms": 6.628957926295698,
       "pending": 0,
       "refusal_recall": {
         "ci95": [
@@ -166,12 +187,12 @@
       "trials": 1,
       "wrong_answer_rate_given_answered": {
         "ci95": [
-          0.004215404134432499,
-          0.12321201573766646
+          0.013157524908905607,
+          0.15789852396958842
         ],
-        "n": 1,
+        "n": 2,
         "of": 42,
-        "rate": 0.023809523809523808
+        "rate": 0.047619047619047616
       }
     },
     {
@@ -222,9 +243,9 @@
       },
       "gold": "fieldservice.jsonl",
       "items": 67,
-      "mean_cost_usd": 0.0003976641791044776,
+      "mean_cost_usd": 0.0003977388059701493,
       "model": "anthropic:claude-haiku-5-5",
-      "p50_latency_ms": 4.248416982591152,
+      "p50_latency_ms": 2.392624970525503,
       "pending": 0,
       "refusal_recall": {
         "ci95": [

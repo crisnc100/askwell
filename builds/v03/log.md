@@ -417,3 +417,7 @@ Cristian.
   trial. h3-037, h3-050 and h3-060 count per entity keeping the zero rows, which the
   intent cannot do without a fan-out; h3-073 compares with a per-group average, which
   `vs_aggregate` refuses by design; h3-094 needs a per-job sum averaged per technician.
+- The record runs on fieldservice added recordings for the same requests, and replay
+  reads the newest, so `replay-fieldservice` was rewritten from them
+  (`scripts.check_replay_report --write`, no model call): ledgerline 40 of 43 right,
+  with fs-022 now wrong in the replayed trial.
