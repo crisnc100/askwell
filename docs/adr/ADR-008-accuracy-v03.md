@@ -115,7 +115,7 @@ read (never merged). Reports are in `evals/reports/`; before and after are paire
 `python -m askwell.bench.paired` (`evals/paired/`). Spend $1.4334, plus $0.0720 for the
 interpret-v3 re-record: $1.5054 of the $4 cap.
 
-### The deploy gate: failed on the untriaged Spider set
+### The deploy gate: the first read fails; the gated Spider repeat is pending
 | Criterion | Before | After | Verdict |
 |---|---|---|---|
 | v0.3 held-out, wrong among answered, per trial | 7.3%, 7.4%, 7.3% | 4.7%, 4.7%, 3.1% | pass |
@@ -133,14 +133,20 @@ Spider runs are one trial. Read as wrong over all 50 questions instead, the verd
 the same (tvshow 1 → 6, world_1 3 → 6, CSV world_1 0 → 4). Each database row moves by a
 handful of answers, so its interval is wide (tvshow after: 6 of 48, 6–25%).
 
-**The rule's remedy has nothing to turn off.** Every wrong answer of `v03-spider-new`
-and `v03-csv-new` was validated again with each switch off: none depends on a switch
-(the SQL is the same with any one of them off). The new wrong answers come from code
-that has no switch: the interpret-v3 prompt and grammar text, PR-1's stable answers, and
-in CSV world_1 the numbered rows of O11, which load `country` and `countrylanguage`
-(48 questions were refused before because those files failed the upload check; 22 are
-now right and 4 wrong). A repeat with the same switches is the same run drawn again, so
-it was not made: per the rule, nothing deploys, and the result goes to Cristian.
+**What the rule turns off.** Every wrong answer of the two failing runs was validated
+again with each switch off; a switch counts as used when the answer is refused or
+compiles to different SQL without it.
+- `v03-spider-new`: `has` (tvshow 635, 636, 637; world_1 783; student_transcripts 578),
+  `numeric_text` (tvshow 613, 615, 616) and `link_roles` (student_transcripts 578, 583,
+  584). The other 15 wrong answers use none. Per the rule these three switches are
+  turned off and the run is repeated once as `v03-spider-new-gated`; the gate is read on
+  the repeat. Pending: the repeat needs its own go.
+- `v03-csv-new`: no wrong answer uses a switch. Its world_1 rise comes from the numbered
+  rows of O11, which have no switch: `country` and `countrylanguage` now load (48
+  questions were refused before because those files failed the upload check; 22 are now
+  right and 4 wrong). Turning switches off cannot change this run, so on the rule as
+  written the CSV world_1 criterion fails, while the CSV path as a whole improves
+  (14.5% → 12.1% wrong among answered).
 
 ### Before and after on the held-out set (question-level, paired)
 | System | Right before | Right after | Only after | Only before | McNemar p |

@@ -380,25 +380,32 @@ With the $0.0720 re-record, v0.3's live spend is $1.5054 of the $4 cap.
 - The first launch of the two Spider before runs passed the `--schema` list as one
   shell word and stopped at argument parsing, before any call.
 
-**Gate: failed** on tvshow (+10.1 points wrong among answered) and world_1 (+6.2), and
-on the CSV path's world_1 (0 of 2 → 4 of 26); the held-out criterion passes (per trial
+**Gate: failed on the first read** on tvshow (+10.1 points wrong among answered) and
+world_1 (+6.2), and on the CSV path's world_1 (0 of 2 → 4 of 26); the held-out
+criterion passes (per trial
 4.7%, 4.7%, 3.1% against 7.3%, 7.4%, 7.3%). ADR-008's Result has the full table and
 every prediction.
 
 **Triage: which switches the failing runs' wrong answers use.** Each wrong answer's
-intent was validated again with each switch off (the validator gates every switch,
-`numeric_text` and `inferred_links` included); none changed. So the rule's remedy has no
-switch to turn off, no gated repeat was run, nothing deploys, and the result goes to
-Cristian.
-- v03-spider-new wrong answers (before → after outcome in brackets): cre 379 (right);
-  student_transcripts 531, 533, 534, 535, 536, 541, 579 (wrong), 547, 548 (right), 578,
-  583, 584 (refused); tvshow 613, 615, 616 (right), 635, 636 (refused), 637 (wrong);
-  world_1 705, 724, 758 (wrong), 740, 741 (right), 783 (refused).
-- v03-csv-new wrong answers: cre 361; student_transcripts 531, 534, 535, 536, 541, 579
-  (wrong before), 547, 548 (right before), 552 (refused); tvshow 615, 616, 629 (wrong
-  before); world_1 705, 706, 707, 724, refused before because `country` and
-  `countrylanguage` failed the upload check (`no_id_column`), now loaded with numbered
-  rows (O11).
+intent was validated again with each switch off (drafts allowed, as the Spider schemas
+are; every intent validates with all switches on). A switch counts as used when the
+answer is refused or compiles to different SQL without it.
+- v03-spider-new (before → after outcome in brackets): `has` on tvshow 635, 636
+  (refused), 637 (wrong), world_1 783 (refused) and student_transcripts 578 (refused,
+  with `link_roles`); `numeric_text` on tvshow 613, 615, 616 (right); `link_roles` on
+  student_transcripts 583, 584 (refused). No switch: cre 379 (right);
+  student_transcripts 531, 533, 534, 535, 536, 541, 579 (wrong), 547, 548 (right);
+  world_1 705, 724, 758 (wrong), 740, 741 (right).
+- So the rule turns off `has`, `numeric_text` and `link_roles` and repeats the run once
+  as `v03-spider-new-gated`, which waits for its own go.
+- v03-csv-new: no wrong answer uses a switch. cre 361; student_transcripts 531, 534,
+  535, 536, 541, 579 (wrong before), 547, 548 (right before), 552 (refused); tvshow 615,
+  616, 629 (wrong before); world_1 705, 706, 707, 724, refused before because `country`
+  and `countrylanguage` failed the upload check (`no_id_column`), now loaded with
+  numbered rows (O11). Nothing to turn off, so the CSV world_1 criterion stays failed.
+- A first pass of this triage validated without allowing drafts, so every intent was
+  refused with and without each switch and none looked used; its conclusion (no
+  switch to turn off) was wrong and was corrected before the repeat was decided.
 
 **Held-out misses (v03-holdout; held-out notes may quote the questions).**
 - Wrong in at least one trial: h3-065 in 3 of 3 ("recorded parts acquisition cost
