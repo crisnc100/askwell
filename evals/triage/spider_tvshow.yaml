@@ -1,0 +1,87 @@
+# Triage of every Askwell miss on this untriaged v0.3 database by Claude Haiku 5.5, one
+# trial each: v03-spider-new (askwell, registry init) and v03-csv-new (askwell_csv, the
+# tables uploaded as CSV files), with the before runs on main at 4014aa0
+# (v03-spider-new-before, v03-csv-new-before) for comparison. Spider notes cite IDs only.
+# Tags: grammar_gap | misread | validator_false_reject | builder_bug | gold_issue.
+spider:611:
+  note: 'Askwell right. CSV path refused: the channel column does not follow the <name>_id rule, so no
+    link to the channel table is drawn from the files. Before: Askwell right, CSV refused.'
+  tag: validator_false_reject
+spider:613:
+  note: 'Askwell wrong: it sorted by rating descending where the question asks plain sorted (ascending);
+    the CSV path sorted ascending and is right. Before: Askwell right (the text sort matched), CSV wrong.'
+  tag: misread
+spider:615:
+  note: 'Same rows and values as the gold; the gold returns the rating as the stored text (''5.8'') and
+    both systems return the number, which the scorer counts as different. Askwell reads it as a number
+    through numeric_text; the CSV path through the upload. Before: Askwell right, CSV wrong.'
+  tag: gold_issue
+spider:616:
+  note: 'Same as spider:615: right values, the gold keeps the rating as text. Before: Askwell right, CSV
+    wrong.'
+  tag: gold_issue
+spider:623:
+  note: 'Askwell right. CSV path refused: the channel column does not follow the <name>_id rule, so no
+    link to the channel table is drawn from the files. Before: both refused.'
+  tag: validator_false_reject
+spider:624:
+  note: 'Askwell right. CSV path refused: the channel column does not follow the <name>_id rule, so no
+    link to the channel table is drawn from the files. Before: Askwell right, CSV refused.'
+  tag: validator_false_reject
+spider:626:
+  note: 'Askwell right. CSV path refused: the channel column does not follow the <name>_id rule, so no
+    link to the channel table is drawn from the files. Before: Askwell right, CSV refused.'
+  tag: validator_false_reject
+spider:629:
+  note: 'CSV path: same row as the gold, but the source stores the channel number as text and the upload
+    reads it as an integer, so the scorer counts it as different. Askwell right. Before: Askwell right,
+    CSV wrong.'
+  tag: gold_issue
+spider:633:
+  note: 'Askwell right. CSV path refused: the channel column does not follow the <name>_id rule, so no
+    link to the channel table is drawn from the files. Before: Askwell right, CSV refused.'
+  tag: validator_false_reject
+spider:634:
+  note: 'Askwell right. CSV path refused: the channel column does not follow the <name>_id rule, so no
+    link to the channel table is drawn from the files. Before: Askwell right, CSV refused.'
+  tag: validator_false_reject
+spider:635:
+  note: 'Askwell wrong (has none): it listed channels without such a cartoon, where the gold keeps countries
+    none of whose channels play one. CSV path refused: no channel link drawn. Before: both refused.'
+  tag: misread
+spider:636:
+  note: 'Same as spider:635, counted per country. CSV path refused: no channel link. Before: both refused.'
+  tag: misread
+spider:637:
+  note: 'Askwell wrong: it read "directed by A and B" as either director (an in-list); two has filters,
+    as in its own right answer to spider:638, give the channels with both. CSV path refused: no channel
+    link. Before: Askwell wrong, CSV refused.'
+  tag: misread
+spider:638:
+  note: 'Askwell right. CSV path refused: the channel column does not follow the <name>_id rule, so no
+    link to the channel table is drawn from the files. Before: Askwell right, CSV refused.'
+  tag: validator_false_reject
+spider:641:
+  note: 'Both refused: it filters channels by a per-country count applied back to each row. The gold groups
+    by country and returns one arbitrary id per country. Before: both refused.'
+  tag: gold_issue
+spider:642:
+  note: 'Same gold as spider:641, with a question that reads as channels containing channels. Before:
+    both refused.'
+  tag: gold_issue
+spider:643:
+  note: 'Askwell right. CSV path refused: the channel column does not follow the <name>_id rule, so no
+    link to the channel table is drawn from the files. Before: both refused.'
+  tag: validator_false_reject
+spider:644:
+  note: 'Askwell right. CSV path refused: the channel column does not follow the <name>_id rule, so no
+    link to the channel table is drawn from the files. Before: both refused.'
+  tag: validator_false_reject
+spider:645:
+  note: 'Askwell right. CSV path refused: the channel column does not follow the <name>_id rule, so no
+    link to the channel table is drawn from the files. Before: both refused.'
+  tag: validator_false_reject
+spider:646:
+  note: 'Askwell right. CSV path refused: the channel column does not follow the <name>_id rule, so no
+    link to the channel table is drawn from the files. Before: both refused.'
+  tag: validator_false_reject
