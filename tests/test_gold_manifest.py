@@ -198,3 +198,28 @@ def test_a_pending_file_is_promoted_only_if_its_hash_matches(tmp_path: Path) -> 
     assert after["files"]["holdout-v02.jsonl"] == real
     assert "pending" not in after
     assert problems(tmp_path) == []
+
+
+def test_a_promoted_file_outside_the_known_list_is_frozen(tmp_path: Path) -> None:
+    """The promoted file joins "files" with its verified hash, and later updates and
+    checks keep it, even when GOLD_FILES does not name it."""
+    from evals.gold.manifest import promote
+
+    for name in (*GOLD_FILES, "MANIFEST.json", "CHANGELOG.md"):
+        shutil.copy(GOLD_DIR / name, tmp_path / name)
+    revealed = tmp_path / "holdout-new.jsonl"
+    revealed.write_text('{"id": "hn-001"}\n')
+    digest = hashlib.sha256(revealed.read_bytes()).hexdigest()
+    manifest = json.loads((tmp_path / "MANIFEST.json").read_text())
+    manifest["pending"] = {"holdout-new.jsonl": digest}
+    (tmp_path / "MANIFEST.json").write_text(json.dumps(manifest))
+    promote("holdout-new.jsonl", "reveal", tmp_path, today="2026-12-01")
+    after = json.loads((tmp_path / "MANIFEST.json").read_text())
+    assert after["files"]["holdout-new.jsonl"] == digest
+    assert problems(tmp_path) == []
+    update("an unrelated revision", tmp_path, today="2026-12-02")
+    assert (
+        json.loads((tmp_path / "MANIFEST.json").read_text())["files"]["holdout-new.jsonl"] == digest
+    )
+    revealed.write_text('{"id": "hn-901"}\n')
+    assert any("holdout-new.jsonl" in p for p in problems(tmp_path))

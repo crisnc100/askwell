@@ -30,12 +30,21 @@ GOLD_FILES = (
     "holdout-v02.jsonl",
     "spider_selection_v03.py",
     "spider_ids_v03.json",
+    "holdout-v03.jsonl",
 )
 REVISION_HEADING = re.compile(r"^## Revision (\d+) — (\d{4}-\d{2}-\d{2})$", re.MULTILINE)
 
 
-def file_hashes(gold_dir: Path = GOLD_DIR) -> dict[str, str]:
-    return {name: hashlib.sha256((gold_dir / name).read_bytes()).hexdigest() for name in GOLD_FILES}
+def file_hashes(
+    gold_dir: Path = GOLD_DIR, names: tuple[str, ...] | list[str] = GOLD_FILES
+) -> dict[str, str]:
+    return {name: hashlib.sha256((gold_dir / name).read_bytes()).hexdigest() for name in names}
+
+
+def _frozen(manifest: dict[str, Any]) -> list[str]:
+    """GOLD_FILES plus any file a promotion added, so one revealed after GOLD_FILES was
+    written stays frozen."""
+    return [*GOLD_FILES, *(name for name in manifest["files"] if name not in GOLD_FILES)]
 
 
 def changelog_revisions(text: str) -> list[tuple[int, str, str]]:
@@ -51,13 +60,14 @@ def changelog_revisions(text: str) -> list[tuple[int, str, str]]:
 def problems(gold_dir: Path = GOLD_DIR) -> list[str]:
     manifest: dict[str, Any] = json.loads((gold_dir / "MANIFEST.json").read_text())
     found: list[str] = []
-    actual = file_hashes(gold_dir)
+    names = _frozen(manifest)
+    missing = sorted(name for name in names if not (gold_dir / name).exists())
+    if missing:
+        found.append(f"manifest lists files that do not exist: {missing}")
+    actual = file_hashes(gold_dir, [name for name in names if name not in missing])
     for name, digest in actual.items():
         if manifest["files"].get(name) != digest:
             found.append(f"{name}: hash {digest} != manifest {manifest['files'].get(name)}")
-    extra = set(manifest["files"]) - set(GOLD_FILES)
-    if extra:
-        found.append(f"manifest lists unknown files: {sorted(extra)}")
     entries = changelog_revisions((gold_dir / "CHANGELOG.md").read_text())
     numbers = [number for number, _, _ in entries]
     if numbers != list(range(1, manifest["revision"] + 1)):
@@ -76,7 +86,7 @@ def update(reason: str, gold_dir: Path = GOLD_DIR, today: str | None = None) -> 
     manifest: dict[str, Any] = json.loads((gold_dir / "MANIFEST.json").read_text())
     revision = int(manifest["revision"]) + 1
     manifest["revision"] = revision
-    manifest["files"] = file_hashes(gold_dir)
+    manifest["files"] = file_hashes(gold_dir, _frozen(manifest))
     (gold_dir / "MANIFEST.json").write_text(json.dumps(manifest, indent=2) + "\n")
     date = today or datetime.now(UTC).strftime("%Y-%m-%d")
     with (gold_dir / "CHANGELOG.md").open("a", encoding="utf-8") as fh:
@@ -96,6 +106,7 @@ def promote(name: str, reason: str, gold_dir: Path = GOLD_DIR, today: str | None
     if actual != pending[name]:
         raise ValueError(f"{name}: hash {actual} does not match the pending {pending[name]}")
     del pending[name]
+    manifest["files"][name] = actual
     if not pending:
         manifest.pop("pending", None)
     (gold_dir / "MANIFEST.json").write_text(json.dumps(manifest, indent=2) + "\n")
