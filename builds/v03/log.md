@@ -337,3 +337,82 @@ questions and gives the exact McNemar p-value. One-trial reports keep their old 
 - Slice d0921d: question-level stats and `compare_runs` count every planned in-schema
   question (`RunResult.planned_items`), so a question whose trials were all deferred or
   never ran counts as not right instead of leaving the denominator.
+
+## Phase 4 — the measurement and the gate
+
+**Setup.**
+- Registry hashes for the four untriaged databases under this branch's code: 61129ae.
+- `v03-before` (never pushed or merged): main at `4014aa0` plus the `askwell_csv`
+  system (PR-2's `csv_path.py` without feature switches, wired into `run.py`), the
+  untriaged-Spider items change (bef02b1), the v0.3 gold and ID files, and registry
+  hashes for the four databases under that code (8bfd4a6). Its `test_csv_path.py` is
+  PR-2's minus the two tests that need numbers-as-text and interpret-v3 recordings.
+  The before runs' reports and recordings are committed there (593a895).
+- Gold revision 8: `promote()` removed `holdout-v03.jsonl` from `pending` in revision 7
+  but never added it to `files`, so it was not hash-checked. Fixed test first (637846c):
+  a promoted file joins `files` with its verified hash, and updates and checks keep every
+  listed file. Revision 8 (0fe226a) freezes it with the revision-7 hash, 5c4b6fca…7342.
+- `python -m askwell.bench.paired <before> <after> [--out <name>]` rebuilds two runs
+  from `evals/runs/` and prints the question-level pairing with McNemar's p and each
+  run's wrong answers among answered, per trial. No model call.
+
+**Runs** (anthropic:claude-haiku-5-5, record mode, every switch on):
+
+| Run | Code | Calls | Spend | Budget |
+|---|---|---|---|---|
+| v03-holdout-before | v03-before | 720 | $0.3457 | 0.45 |
+| v03-spider-new-before | v03-before | 400 | $0.1183 | 0.15 |
+| v03-csv-new-before | v03-before | 200 | $0.0513 | 0.10 |
+| v03-holdout | accuracy-pr3 | 720 | $0.3998 | 0.45 |
+| v03-seen | accuracy-pr3 | 201 | $0.1150 | 0.12 |
+| v03-seen-holdout-v02 | accuracy-pr3 | 120 | $0.0747 | 0.10 |
+| v03-spider-new | accuracy-pr3 | 200 | $0.0991 | 0.10, then 0.11 |
+| v03-csv-new | accuracy-pr3 | 200 | $0.1062 | 0.14 |
+| v03-spider-seen | accuracy-pr3 | 250 | $0.1233 | 0.16 |
+| **Phase 4** | | | **$1.4334** | |
+
+With the $0.0720 re-record, v0.3's live spend is $1.5054 of the $4 cap.
+- `v03-spider-new` stopped at its $0.10 cap after 198 of 200: interpret-v3 costs about
+  $0.00050 per Spider call against the $0.00036 the plan assumed. The orchestrator
+  raised it to $0.11 and the run resumed for the last two; csv-new and spider-seen got
+  $0.14 and $0.16 before they ran.
+- The first launch of the two Spider before runs passed the `--schema` list as one
+  shell word and stopped at argument parsing, before any call.
+
+**Gate: failed** on tvshow (+10.1 points wrong among answered) and world_1 (+6.2), and
+on the CSV path's world_1 (0 of 2 → 4 of 26); the held-out criterion passes (per trial
+4.7%, 4.7%, 3.1% against 7.3%, 7.4%, 7.3%). ADR-008's Result has the full table and
+every prediction.
+
+**Triage: which switches the failing runs' wrong answers use.** Each wrong answer's
+intent was validated again with each switch off (the validator gates every switch,
+`numeric_text` and `inferred_links` included); none changed. So the rule's remedy has no
+switch to turn off, no gated repeat was run, nothing deploys, and the result goes to
+Cristian.
+- v03-spider-new wrong answers (before → after outcome in brackets): cre 379 (right);
+  student_transcripts 531, 533, 534, 535, 536, 541, 579 (wrong), 547, 548 (right), 578,
+  583, 584 (refused); tvshow 613, 615, 616 (right), 635, 636 (refused), 637 (wrong);
+  world_1 705, 724, 758 (wrong), 740, 741 (right), 783 (refused).
+- v03-csv-new wrong answers: cre 361; student_transcripts 531, 534, 535, 536, 541, 579
+  (wrong before), 547, 548 (right before), 552 (refused); tvshow 615, 616, 629 (wrong
+  before); world_1 705, 706, 707, 724, refused before because `country` and
+  `countrylanguage` failed the upload check (`no_id_column`), now loaded with numbered
+  rows (O11).
+
+**Held-out misses (v03-holdout; held-out notes may quote the questions).**
+- Wrong in at least one trial: h3-065 in 3 of 3 ("recorded parts acquisition cost
+  for each work order"; its intent uses `computed`; refused in every trial before); h3-005 in 2 of 3 (fraction of active accounts
+  per segment; wrong in 3 of 3 before); h3-038, h3-045 and h3-058 in 1 of 3 each.
+  h3-065 is the only wrong answer that uses a switch; the held-out gate passes, so
+  nothing is turned off for it.
+- Refused in every trial: 31 questions. h3-070 to h3-096 need what the grammar lacks:
+  window functions and ranks within groups (h3-077, 080, 081, 084, 085, 086, 089,
+  090), medians and percentiles (h3-083, 087, 096), set intersection (h3-092), a
+  self-join (h3-093), per-group totals beside each row (h3-070, 095), differences of
+  two grouped counts (h3-071, 075), "every site has" (h3-072), first-ever dates per
+  entity (h3-074, 088), gaps between consecutive rows (h3-076), matched follow-ups
+  (h3-078), pooled comparisons (h3-079, 082), and a computed value of three fields
+  (h3-063, as ho-014 in P3.1). h3-091 was cut off at the completion limit in every
+  trial. h3-037, h3-050 and h3-060 count per entity keeping the zero rows, which the
+  intent cannot do without a fan-out; h3-073 compares with a per-group average, which
+  `vs_aggregate` refuses by design; h3-094 needs a per-job sum averaged per technician.

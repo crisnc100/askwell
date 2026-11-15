@@ -109,4 +109,84 @@ Seen questions, so neither is a measurement of accuracy.
   the plan says; with it off those questions are refused as before.
 
 ## Result
-Not measured yet. It is written from the Phase 4 reports of `builds/v03/plan.md`.
+Measured 2026-11-15 on `anthropic:claude-haiku-5-5`, record mode, every switch on. The
+before code is branch `v03-before`: main at `4014aa0` plus only the eval files these runs
+read (never merged). Reports are in `evals/reports/`; before and after are paired with
+`python -m askwell.bench.paired` (`v03-paired-*.md`). Spend $1.4334, plus $0.0720 for the
+interpret-v3 re-record: $1.5054 of the $4 cap.
+
+### The deploy gate: failed on the untriaged Spider set
+| Criterion | Before | After | Verdict |
+|---|---|---|---|
+| v0.3 held-out, wrong among answered, per trial | 7.3%, 7.4%, 7.3% | 4.7%, 4.7%, 3.1% | pass |
+| cre_Doc_Template_Mgt, wrong among answered | 0.0% (0/46) | 2.0% (1/50) | pass (+2.0) |
+| student_transcripts_tracking | 27.5% (11/40) | 27.3% (12/44) | pass (−0.2) |
+| tvshow | 2.4% (1/41) | 12.5% (6/48) | **fail (+10.1)** |
+| world_1 | 8.1% (3/37) | 14.3% (6/42) | **fail (+6.2)** |
+| CSV path, cre_Doc_Template_Mgt | 2.4% (1/41) | 2.3% (1/44) | pass |
+| CSV path, student_transcripts_tracking | 33.3% (11/33) | 24.3% (9/37) | pass |
+| CSV path, tvshow | 11.8% (4/34) | 8.8% (3/34) | pass |
+| CSV path, world_1 | 0.0% (0/2) | 15.4% (4/26) | **fail (+15.4)** |
+| CSV path, all four together | 14.5% (16/110) | 12.1% (17/141) | pass (−2.4) |
+
+Spider runs are one trial. Read as wrong over all 50 questions instead, the verdicts are
+the same (tvshow 1 → 6, world_1 3 → 6, CSV world_1 0 → 4). Each database row moves by a
+handful of answers, so its interval is wide (tvshow after: 6 of 48, 6–25%).
+
+**The rule's remedy has nothing to turn off.** Every wrong answer of `v03-spider-new`
+and `v03-csv-new` was validated again with each switch off: none depends on a switch
+(the SQL is the same with any one of them off). The new wrong answers come from code
+that has no switch: the interpret-v3 prompt and grammar text, PR-1's stable answers, and
+in CSV world_1 the numbered rows of O11, which load `country` and `countrylanguage`
+(48 questions were refused before because those files failed the upload check; 22 are
+now right and 4 wrong). A repeat with the same switches is the same run drawn again, so
+it was not made: per the rule, nothing deploys, and the result goes to Cristian.
+
+### Before and after on the held-out set (question-level, paired)
+| System | Right before | Right after | Only after | Only before | McNemar p |
+|---|---|---|---|---|---|
+| Askwell | 51 of 96 (53.1%) | 62 of 96 (64.6%, 55–73%) | 11 | 0 | 0.0010 |
+| One-shot baseline | 78 of 96 | 78 of 96 | 3 | 3 | 1.0 |
+
+Pooled over trials: Askwell 64.2% right (185/288), 4.1% wrong among answered (8/193);
+the one-shot baseline 81.9% right and 7.5% wrong (19/255).
+
+### Predictions
+1. Held-out accuracy at least 70%: **missed**, 64.6% (62 of 96). 31 of the 96 are
+   refused in every trial. Most need what the grammar still lacks (window functions and
+   ranks within groups, running totals, medians and percentiles, set intersections,
+   per-group totals beside rows, a computed value of three fields); a few look
+   expressible and were refused anyway (h3-037 and h3-060, counts that keep the zero
+   rows; h3-073, an average per group).
+2. Held-out wrong among answered at most 8% per trial: **met**, 4.7%, 4.7%, 3.1%.
+3. Before and after at least +10 points with p < 0.05 and lower wrong: **met**,
+   +11.5 points, p = 0.001, wrong lower in every trial.
+4. Refusal recall at least 23 of 24 per trial: **met**, 24 of 24 in each trial.
+5. Seen v0.2 held-out at least 63 of 84, wrong at most 4 per trial: **met**, 75 of 84
+   right, 3 wrong of 78 answered in all.
+6. Seen fieldservice at least 81.4% right, at most 5% wrong: **met**, 94.6% (122/129) and
+   3.9% (5/127).
+7. Link roles, seen: **missed** in PR-2 (above); `link_roles` stays off.
+8. Untriaged Spider: false refusals fall in at least 3 of 4, no wrong rate up more than
+   5 points: **half met**. False refusals fell in all 4 (8 → 0, 20 → 12, 18 → 4, 26 → 16
+   per 50), but wrong rose 10.1 points on tvshow and 6.2 on world_1.
+9. CSV path: false refusals down at least 3 points in at least 2 of 4: **met** in 3
+   (cre 18 → 12%, student_transcripts 34 → 26%, world_1 96 → 48%; tvshow 32% both).
+   No file fails the upload check now; before, five tables failed on `no_id_column`.
+10. Unreadable answers at most 2% of calls, cost per question up at most 35%: **missed**
+    on the held-out run, 13 of 381 calls (3.4%): 10 are answers cut off at the completion
+    limit (h3-091 in every trial, h3-094 and h3-058 once each); at most 0.5% in the
+    others. Cost per
+    question **met**: $0.000642 on the held-out set, up 33.8% from $0.000480.
+
+### Seen Spider, one trial
+| Database | Right | Wrong among answered | False refusals |
+|---|---|---|---|
+| car_1 | 60.0% | 31.8% (14/44) | 12% |
+| dog_kennels | 50.0% | 28.6% (10/35) | 30% |
+| flight_2 | 88.0% | 8.3% (4/48) | 4% |
+| network_1 | 92.0% | 6.1% (3/49) | 2% |
+| wta_1 | 86.0% | 12.2% (6/49) | 2% |
+
+Seen: the PR-2 and PR-3 changes were written from these questions, so these numbers
+show where the fixes landed, not accuracy.
