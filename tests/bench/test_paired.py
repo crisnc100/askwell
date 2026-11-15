@@ -63,10 +63,7 @@ def _write_run(
     (run_dir / "results.jsonl").write_text("\n".join(lines) + "\n")
 
 
-def test_two_runs_pair_with_planned_questions(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    monkeypatch.setattr(paired, "items_for", lambda _schema: _items(["fs-001", "fs-002"]))
+def test_two_runs_pair_with_planned_questions(tmp_path: Path) -> None:
     _write_run(tmp_path, "before", {"fs-001": ["wrong"] * 3})
     _write_run(
         tmp_path, "after", {"fs-001": ["correct", "correct", "wrong"], "fs-002": ["correct"] * 3}
@@ -83,9 +80,3 @@ def test_two_runs_pair_with_planned_questions(
     assert row["wrong_after"]["per_trial"][3]["n"] == 1
     text = paired.render(data)
     assert "| fieldservice | ledgerline | 2 | 0 | 2 | 2 | 0 |" in text
-
-
-def _items(ids: list[str]) -> list[Any]:
-    from askwell.bench.items import EvalItem
-
-    return [EvalItem(i, "fieldservice", "in_schema", "q", "SELECT 1", False, "easy") for i in ids]
