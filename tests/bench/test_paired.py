@@ -32,11 +32,29 @@ def _record(item: str, trial: int, outcome: str) -> dict[str, Any]:
     }
 
 
-def _write_run(runs: Path, run_id: str, outcomes: dict[str, list[str]]) -> None:
+PLANNED = ["fs-001", "fs-002"]
+
+
+def _write_run(
+    runs: Path,
+    run_id: str,
+    outcomes: dict[str, list[str]],
+    planned: list[str] = PLANNED,
+    trials: int = 3,
+) -> None:
     run_dir = runs / run_id
     run_dir.mkdir(parents=True)
-    config = {"schemas": ["fieldservice"], "systems": ["ledgerline"], "models": ["m"], "trials": 3}
-    (run_dir / "config.json").write_text(json.dumps({**config, "gold": None}))
+    config = {
+        "schemas": ["fieldservice"],
+        "systems": ["ledgerline"],
+        "models": ["m"],
+        "trials": 3,
+        "gold": None,
+        "planned_trials": {"fieldservice": trials},
+        "planned_items": {"fieldservice": planned},
+        "task_keys": [f"{item}|{t}" for item in planned for t in range(1, trials + 1)],
+    }
+    (run_dir / "config.json").write_text(json.dumps(config))
     lines = [
         json.dumps({"key": f"{item}|{trial}", "cost_usd": 0.01, "record": _record(item, trial, o)})
         for item, trials in outcomes.items()
