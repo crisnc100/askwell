@@ -1,0 +1,2051 @@
+{
+  "abort_reason": null,
+  "baseline_wins": [
+    {
+      "gold": "holdout-v03.jsonl",
+      "item_id": "h3-005",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "fieldservice",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "gold": "holdout-v03.jsonl",
+      "item_id": "h3-037",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "fieldservice",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "gold": "holdout-v03.jsonl",
+      "item_id": "h3-045",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "fieldservice",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "gold": "holdout-v03.jsonl",
+      "item_id": "h3-050",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "fieldservice",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "gold": "holdout-v03.jsonl",
+      "item_id": "h3-060",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "fieldservice",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "gold": "holdout-v03.jsonl",
+      "item_id": "h3-063",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "fieldservice",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "gold": "holdout-v03.jsonl",
+      "item_id": "h3-070",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "fieldservice",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "gold": "holdout-v03.jsonl",
+      "item_id": "h3-072",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "fieldservice",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "gold": "holdout-v03.jsonl",
+      "item_id": "h3-073",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "fieldservice",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "gold": "holdout-v03.jsonl",
+      "item_id": "h3-074",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "fieldservice",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "gold": "holdout-v03.jsonl",
+      "item_id": "h3-075",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "fieldservice",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "gold": "holdout-v03.jsonl",
+      "item_id": "h3-076",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "fieldservice",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "gold": "holdout-v03.jsonl",
+      "item_id": "h3-080",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "fieldservice",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "gold": "holdout-v03.jsonl",
+      "item_id": "h3-081",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "fieldservice",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "gold": "holdout-v03.jsonl",
+      "item_id": "h3-083",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "fieldservice",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "gold": "holdout-v03.jsonl",
+      "item_id": "h3-084",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "fieldservice",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "gold": "holdout-v03.jsonl",
+      "item_id": "h3-087",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "fieldservice",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "gold": "holdout-v03.jsonl",
+      "item_id": "h3-089",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "fieldservice",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "gold": "holdout-v03.jsonl",
+      "item_id": "h3-090",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "fieldservice",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "gold": "holdout-v03.jsonl",
+      "item_id": "h3-093",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "fieldservice",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "gold": "holdout-v03.jsonl",
+      "item_id": "h3-096",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "fieldservice",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "gold": "holdout-v03.jsonl",
+      "item_id": "h3-005",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "fieldservice",
+      "system": "oneshot",
+      "trial": 2
+    },
+    {
+      "gold": "holdout-v03.jsonl",
+      "item_id": "h3-037",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "fieldservice",
+      "system": "oneshot",
+      "trial": 2
+    },
+    {
+      "gold": "holdout-v03.jsonl",
+      "item_id": "h3-038",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "fieldservice",
+      "system": "oneshot",
+      "trial": 2
+    },
+    {
+      "gold": "holdout-v03.jsonl",
+      "item_id": "h3-050",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "fieldservice",
+      "system": "oneshot",
+      "trial": 2
+    },
+    {
+      "gold": "holdout-v03.jsonl",
+      "item_id": "h3-060",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "fieldservice",
+      "system": "oneshot",
+      "trial": 2
+    },
+    {
+      "gold": "holdout-v03.jsonl",
+      "item_id": "h3-063",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "fieldservice",
+      "system": "oneshot",
+      "trial": 2
+    },
+    {
+      "gold": "holdout-v03.jsonl",
+      "item_id": "h3-070",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "fieldservice",
+      "system": "oneshot",
+      "trial": 2
+    },
+    {
+      "gold": "holdout-v03.jsonl",
+      "item_id": "h3-072",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "fieldservice",
+      "system": "oneshot",
+      "trial": 2
+    },
+    {
+      "gold": "holdout-v03.jsonl",
+      "item_id": "h3-073",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "fieldservice",
+      "system": "oneshot",
+      "trial": 2
+    },
+    {
+      "gold": "holdout-v03.jsonl",
+      "item_id": "h3-074",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "fieldservice",
+      "system": "oneshot",
+      "trial": 2
+    },
+    {
+      "gold": "holdout-v03.jsonl",
+      "item_id": "h3-075",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "fieldservice",
+      "system": "oneshot",
+      "trial": 2
+    },
+    {
+      "gold": "holdout-v03.jsonl",
+      "item_id": "h3-076",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "fieldservice",
+      "system": "oneshot",
+      "trial": 2
+    },
+    {
+      "gold": "holdout-v03.jsonl",
+      "item_id": "h3-077",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "fieldservice",
+      "system": "oneshot",
+      "trial": 2
+    },
+    {
+      "gold": "holdout-v03.jsonl",
+      "item_id": "h3-080",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "fieldservice",
+      "system": "oneshot",
+      "trial": 2
+    },
+    {
+      "gold": "holdout-v03.jsonl",
+      "item_id": "h3-081",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "fieldservice",
+      "system": "oneshot",
+      "trial": 2
+    },
+    {
+      "gold": "holdout-v03.jsonl",
+      "item_id": "h3-083",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "fieldservice",
+      "system": "oneshot",
+      "trial": 2
+    },
+    {
+      "gold": "holdout-v03.jsonl",
+      "item_id": "h3-087",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "fieldservice",
+      "system": "oneshot",
+      "trial": 2
+    },
+    {
+      "gold": "holdout-v03.jsonl",
+      "item_id": "h3-089",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "fieldservice",
+      "system": "oneshot",
+      "trial": 2
+    },
+    {
+      "gold": "holdout-v03.jsonl",
+      "item_id": "h3-090",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "fieldservice",
+      "system": "oneshot",
+      "trial": 2
+    },
+    {
+      "gold": "holdout-v03.jsonl",
+      "item_id": "h3-093",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "fieldservice",
+      "system": "oneshot",
+      "trial": 2
+    },
+    {
+      "gold": "holdout-v03.jsonl",
+      "item_id": "h3-095",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "fieldservice",
+      "system": "oneshot",
+      "trial": 2
+    },
+    {
+      "gold": "holdout-v03.jsonl",
+      "item_id": "h3-096",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "fieldservice",
+      "system": "oneshot",
+      "trial": 2
+    },
+    {
+      "gold": "holdout-v03.jsonl",
+      "item_id": "h3-037",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "fieldservice",
+      "system": "oneshot",
+      "trial": 3
+    },
+    {
+      "gold": "holdout-v03.jsonl",
+      "item_id": "h3-050",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "fieldservice",
+      "system": "oneshot",
+      "trial": 3
+    },
+    {
+      "gold": "holdout-v03.jsonl",
+      "item_id": "h3-060",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "fieldservice",
+      "system": "oneshot",
+      "trial": 3
+    },
+    {
+      "gold": "holdout-v03.jsonl",
+      "item_id": "h3-063",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "fieldservice",
+      "system": "oneshot",
+      "trial": 3
+    },
+    {
+      "gold": "holdout-v03.jsonl",
+      "item_id": "h3-070",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "fieldservice",
+      "system": "oneshot",
+      "trial": 3
+    },
+    {
+      "gold": "holdout-v03.jsonl",
+      "item_id": "h3-071",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "fieldservice",
+      "system": "oneshot",
+      "trial": 3
+    },
+    {
+      "gold": "holdout-v03.jsonl",
+      "item_id": "h3-072",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "fieldservice",
+      "system": "oneshot",
+      "trial": 3
+    },
+    {
+      "gold": "holdout-v03.jsonl",
+      "item_id": "h3-073",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "fieldservice",
+      "system": "oneshot",
+      "trial": 3
+    },
+    {
+      "gold": "holdout-v03.jsonl",
+      "item_id": "h3-075",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "fieldservice",
+      "system": "oneshot",
+      "trial": 3
+    },
+    {
+      "gold": "holdout-v03.jsonl",
+      "item_id": "h3-079",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "fieldservice",
+      "system": "oneshot",
+      "trial": 3
+    },
+    {
+      "gold": "holdout-v03.jsonl",
+      "item_id": "h3-080",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "fieldservice",
+      "system": "oneshot",
+      "trial": 3
+    },
+    {
+      "gold": "holdout-v03.jsonl",
+      "item_id": "h3-081",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "fieldservice",
+      "system": "oneshot",
+      "trial": 3
+    },
+    {
+      "gold": "holdout-v03.jsonl",
+      "item_id": "h3-083",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "fieldservice",
+      "system": "oneshot",
+      "trial": 3
+    },
+    {
+      "gold": "holdout-v03.jsonl",
+      "item_id": "h3-087",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "fieldservice",
+      "system": "oneshot",
+      "trial": 3
+    },
+    {
+      "gold": "holdout-v03.jsonl",
+      "item_id": "h3-089",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "fieldservice",
+      "system": "oneshot",
+      "trial": 3
+    },
+    {
+      "gold": "holdout-v03.jsonl",
+      "item_id": "h3-091",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "fieldservice",
+      "system": "oneshot",
+      "trial": 3
+    },
+    {
+      "gold": "holdout-v03.jsonl",
+      "item_id": "h3-093",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "fieldservice",
+      "system": "oneshot",
+      "trial": 3
+    },
+    {
+      "gold": "holdout-v03.jsonl",
+      "item_id": "h3-095",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "fieldservice",
+      "system": "oneshot",
+      "trial": 3
+    },
+    {
+      "gold": "holdout-v03.jsonl",
+      "item_id": "h3-096",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "fieldservice",
+      "system": "oneshot",
+      "trial": 3
+    }
+  ],
+  "deferred": {},
+  "floors": [],
+  "gold_files": [
+    "holdout-v03.jsonl"
+  ],
+  "misses": [
+    {
+      "error": null,
+      "gold": "holdout-v03.jsonl",
+      "issue_codes": [],
+      "item_id": "h3-005",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "wrong",
+      "refusal": null,
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "holdout-v03.jsonl",
+      "issue_codes": [],
+      "item_id": "h3-037",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "The question needs each customer's site count, including customers with zero sites. The registry only joins sites to customers in the many-to-one direction (sites.customer_id -> customers.id). Counting sites per customer from the customers side, while keeping customers with none, would need a one-to-many link that the intent cannot express.",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "holdout-v03.jsonl",
+      "issue_codes": [],
+      "item_id": "h3-045",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "wrong",
+      "refusal": null,
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "holdout-v03.jsonl",
+      "issue_codes": [
+        "fan_out",
+        "invalid_order_by"
+      ],
+      "item_id": "h3-050",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "Counting a technician's open jobs requires the work orders as the base table, which drops technicians with no jobs; starting from technicians instead would double count across the one-to-many link. The intent cannot return zero counts for groups with no matching rows while counting the related jobs.",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "holdout-v03.jsonl",
+      "issue_codes": [],
+      "item_id": "h3-058",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "the intent cannot group rows into computed age buckets. Group_by only accepts stored fields or date fields with a grain, and days past due (now minus due_at) can only be filtered or aggregated, not used as a group label. Bucket rows with a count and total per bucket would need a grouping by computed days past due.",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "holdout-v03.jsonl",
+      "issue_codes": [
+        "fan_out"
+      ],
+      "item_id": "h3-060",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "The question needs every catalogue part, including unused ones, with its total units. Aggregating work_order_parts.quantity from parts crosses a one-to-many link and fails validation. Starting from work_order_parts would drop parts with no usage, which is the case the question asks to include. The intent cannot express a zero-filled aggregate over parts without that fan-out.",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "holdout-v03.jsonl",
+      "issue_codes": [],
+      "item_id": "h3-063",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "Gross profit per usage line is quantity times (unit_price minus unit_cost). The intent's computed-value form combines only two fields and cannot nest, so the three-field expression quantity * (unit_price - unit_cost) cannot be written. A separate sum of quantity times price minus a sum of quantity times cost would need a metric subtraction, which is not supported.",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "holdout-v03.jsonl",
+      "issue_codes": [],
+      "item_id": "h3-065",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "wrong",
+      "refusal": null,
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "holdout-v03.jsonl",
+      "issue_codes": [],
+      "item_id": "h3-070",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "the fraction of each segment's total needs a segment-level total alongside each customer's row, which is a window-style share within a group and cannot be expressed in this intent",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "holdout-v03.jsonl",
+      "issue_codes": [],
+      "item_id": "h3-071",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "The fractional change from Q4 to Q1 is (Q1 minus Q4) divided by Q4. The intent can divide one metric by another but cannot subtract two metrics before dividing, so the change cannot be computed. The per-quarter billed amounts alone would not answer the question.",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "holdout-v03.jsonl",
+      "issue_codes": [],
+      "item_id": "h3-072",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "the question needs 'every site of the customer has a completed work order in the past 90 days', a per-site universal condition. The has-filter can only test whether a customer has related rows, not whether each related site has its own qualifying work order, and nested conditions are not supported.",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "holdout-v03.jsonl",
+      "issue_codes": [],
+      "item_id": "h3-073",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "The question compares each customer's total with the average customer total in that customer's own region. The intent's average comparison covers only one set of rows selected by the question's filters, not a per-region average. It also cannot express a per-customer total that counts customers with no invoices as zero, so the regional average cannot be computed.",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "holdout-v03.jsonl",
+      "issue_codes": [],
+      "item_id": "h3-074",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "The question needs each customer's first-ever completed job date (the earliest completed_at across their sites' work orders) compared row by row with that customer's created_at. The intent cannot take a per-customer minimum over a related table, nor compare a date on customers with a date on work_orders. Filters only allow a related-rows check with constant bounds, which would match any completed job in the window, not the first one.",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "holdout-v03.jsonl",
+      "issue_codes": [],
+      "item_id": "h3-075",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "The increase is the difference between two per-site counts (Q2 2026 minus Q1 2026). The intent has no way to subtract one aggregate metric from another, and ratios cannot express a difference, so the ranking by increase cannot be built. Per-site counts for each quarter could be shown separately, but not the increase or its top five.",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "holdout-v03.jsonl",
+      "issue_codes": [],
+      "item_id": "h3-076",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "the average gap between consecutive completion timestamps needs each job compared with the previous job at the same site, which is a window function (lag over completion order). The intent can only express days between two dates on the same row, so it cannot compute gaps between consecutive rows.",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "holdout-v03.jsonl",
+      "issue_codes": [],
+      "item_id": "h3-077",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "it needs the top site within each customer (a rank within groups, with a tie-break by name), which the intent cannot express. The intent can group invoices by customer or by site, but not return only each customer's largest site alongside that customer's total.",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "holdout-v03.jsonl",
+      "issue_codes": [],
+      "item_id": "h3-078",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "the follow-up share needs each repair matched to a later completed repair at the same site within 30 days, which compares work orders with each other. The intent cannot join a table to itself or express that per-row time-window match.",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "holdout-v03.jsonl",
+      "issue_codes": [],
+      "item_id": "h3-079",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "the question compares each technician's mean with a pooled mean of other technicians in the same home region, which is a comparison against a different set of rows (peers grouped by region) that the intent cannot express; it also needs a per-row days-between average filtered by a technician-region relation, which is outside the available comparison forms",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "holdout-v03.jsonl",
+      "issue_codes": [],
+      "item_id": "h3-080",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "it asks for a dense rank within each skill level, which is a window function and the intent cannot express it",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "holdout-v03.jsonl",
+      "issue_codes": [],
+      "item_id": "h3-081",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "computing the longest streak of consecutive calendar days with completed jobs needs window functions (gaps-and-islands over days), which the intent cannot express",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "holdout-v03.jsonl",
+      "issue_codes": [],
+      "item_id": "h3-082",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "The question ranks work orders by an absolute difference built from three aggregates over different tables: non-void invoice totals, labour (hours times rate), and a parts selling value summed over work_order_parts lines. The intent has no way to combine several aggregates into one computed difference for ordering, and work orders cannot reach their parts lines through the registered links, which run only from parts lines to work orders.",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "holdout-v03.jsonl",
+      "issue_codes": [],
+      "item_id": "h3-083",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "the intent has no median or percentile aggregate (only count, count_distinct, sum, avg, min, max), so the 50th and 90th percentile of opening-to-completion days cannot be expressed",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "holdout-v03.jsonl",
+      "issue_codes": [],
+      "item_id": "h3-084",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "it needs the single longest job within each opening quarter and job type, which is a ranking within groups (a window function), and the intent cannot express that.",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "holdout-v03.jsonl",
+      "issue_codes": [],
+      "item_id": "h3-085",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "The cumulative fraction across January through each month needs a running total (a window function), which this intent cannot express. The per-month counts and the within-seven-days fraction could be expressed, but the cumulative column cannot.",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "holdout-v03.jsonl",
+      "issue_codes": [],
+      "item_id": "h3-086",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "Each month's change needs the previous calendar month's revenue on the same row, which is a window function (a lag over months). The intent can compute monthly revenue or a ratio between two metrics of the same query, but it cannot pair each month with its predecessor.",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "holdout-v03.jsonl",
+      "issue_codes": [],
+      "item_id": "h3-087",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "It needs a per-customer mean followed by median and 90th-percentile aggregates across those customer means. The intent supports only count, count_distinct, sum, avg, min and max, with no percentile or nested aggregation, so it cannot express this.",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "holdout-v03.jsonl",
+      "issue_codes": [],
+      "item_id": "h3-088",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "The intent cannot express each customer's first-ever invoice month as a value to compare against each invoice's issue month. Filters cannot correlate a customer's earliest invoice with the month of the row being counted, so the 'first invoice in that same month' amount cannot be computed.",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "holdout-v03.jsonl",
+      "issue_codes": [],
+      "item_id": "h3-089",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "The cumulative portfolio fraction through each customer is a running total across the ranked rows (a window function), which this intent cannot express. The per-customer amount and its share of the unpaid-or-overdue total could be answered, but not the cumulative column.",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "holdout-v03.jsonl",
+      "issue_codes": [],
+      "item_id": "h3-090",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "it needs the top three parts within each category, which is a ranking within groups (a window function) that the intent cannot express",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "holdout-v03.jsonl",
+      "issue_codes": [],
+      "item_id": "h3-091",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "could not read the model's answer as an intent: the answer was cut off at the max_tokens limit",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "holdout-v03.jsonl",
+      "issue_codes": [],
+      "item_id": "h3-092",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "The question needs parts that appear in both quarters (a set intersection), per-category share denominators computed over all parts in each quarter, and a change between two shares. The intent cannot express set operations, cross-group share denominators, or differences between grouped ratios.",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "holdout-v03.jsonl",
+      "issue_codes": [],
+      "item_id": "h3-093",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "Counting pairs of parts that share a work order needs a self-join of the parts-used rows to itself, which this intent cannot express. It supports one base entity with joins along the listed relationships, not pairing rows of the same table.",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "holdout-v03.jsonl",
+      "issue_codes": [],
+      "item_id": "h3-094",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "The average parts cost per completed job needs each job's parts cost summed across its work_order_parts rows, with jobs that have no parts counted as zero. This intent joins only from the base entity to its parent links (work_orders to technicians and sites), not from a work order to its parts lines, so the per-job sum cannot be formed. The share of jobs that used any parts could be expressed, but the cost average cannot.",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "holdout-v03.jsonl",
+      "issue_codes": [],
+      "item_id": "h3-095",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "The fraction of each segment's total parts selling value needs a segment-level total computed alongside the segment-by-category groups. Ratio metrics only divide metrics that share the same grouping, so the intent cannot express a category's share of its segment's total.",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "holdout-v03.jsonl",
+      "issue_codes": [],
+      "item_id": "h3-096",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "the intent supports only count, count_distinct, sum, avg, min and max, so it cannot compute the continuous median or 90th percentile of units per job",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "holdout-v03.jsonl",
+      "issue_codes": [],
+      "item_id": "h3-005",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "wrong",
+      "refusal": null,
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 2
+    },
+    {
+      "error": null,
+      "gold": "holdout-v03.jsonl",
+      "issue_codes": [
+        "fan_out"
+      ],
+      "item_id": "h3-037",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "Counting sites per customer means aggregating across the one-to-many link from customers to sites, which the intent cannot express without double counting. Including customers with no sites also needs an outer join, which the intent does not support.",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 2
+    },
+    {
+      "error": null,
+      "gold": "holdout-v03.jsonl",
+      "issue_codes": [],
+      "item_id": "h3-038",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "wrong",
+      "refusal": null,
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 2
+    },
+    {
+      "error": null,
+      "gold": "holdout-v03.jsonl",
+      "issue_codes": [
+        "fan_out"
+      ],
+      "item_id": "h3-050",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "no valid query after 2 attempts (fan_out)",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 2
+    },
+    {
+      "error": null,
+      "gold": "holdout-v03.jsonl",
+      "issue_codes": [],
+      "item_id": "h3-058",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "could not read the model's answer as an intent: the answer was cut off at the max_tokens limit",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 2
+    },
+    {
+      "error": null,
+      "gold": "holdout-v03.jsonl",
+      "issue_codes": [
+        "fan_out"
+      ],
+      "item_id": "h3-060",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "Summing units from work_order_parts while keeping every catalogue part (including unused ones) needs the parts base to be joined one-to-many to its usage rows, which this intent cannot express without fan-out. Grouping work_order_parts by part would drop parts with zero usage.",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 2
+    },
+    {
+      "error": null,
+      "gold": "holdout-v03.jsonl",
+      "issue_codes": [],
+      "item_id": "h3-063",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "Gross profit is quantity times (unit_price minus unit_cost). The intent takes only one two-field arithmetic value, and it cannot nest. It cannot express a difference of two products, and it cannot subtract one metric from another.",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 2
+    },
+    {
+      "error": null,
+      "gold": "holdout-v03.jsonl",
+      "issue_codes": [],
+      "item_id": "h3-065",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "wrong",
+      "refusal": null,
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 2
+    },
+    {
+      "error": null,
+      "gold": "holdout-v03.jsonl",
+      "issue_codes": [],
+      "item_id": "h3-070",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "the fraction of each segment's total needs a share taken within a group (a partition total per segment), which the intent cannot express. The per-customer totals alone are expressible, but the segment-share column is not.",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 2
+    },
+    {
+      "error": null,
+      "gold": "holdout-v03.jsonl",
+      "issue_codes": [],
+      "item_id": "h3-071",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "The fractional change from Q4 to Q1 is (Q1 - Q4) / Q4. The intent can express a ratio of two metrics (Q1 / Q4) but not a difference of metrics, so it cannot compute the change itself.",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 2
+    },
+    {
+      "error": null,
+      "gold": "holdout-v03.jsonl",
+      "issue_codes": [],
+      "item_id": "h3-072",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "The condition 'a completed work order at each of their sites' is a universal test across sites (no site lacks a recent completed order). The intent's related-rows filter cannot nest a per-site 'has none' check inside a customer-level filter, so it cannot express this.",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 2
+    },
+    {
+      "error": null,
+      "gold": "holdout-v03.jsonl",
+      "issue_codes": [],
+      "item_id": "h3-073",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "The question compares each customer's billed total with the average customer total within that customer's own region. The intent can only compare a base field with one overall average, not with a per-region average, and it cannot express a per-customer total that counts customers with no invoices as zero.",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 2
+    },
+    {
+      "error": null,
+      "gold": "holdout-v03.jsonl",
+      "issue_codes": [],
+      "item_id": "h3-074",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "The question needs each customer's first completed job compared with that customer's account creation date (customers.created_at) plus 30 days. The intent cannot compare a related work order's completed_at against a base-entity date inside a has-filter, so 'first-ever completed job' cannot be isolated and tested against the signup date.",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 2
+    },
+    {
+      "error": null,
+      "gold": "holdout-v03.jsonl",
+      "issue_codes": [],
+      "item_id": "h3-075",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "The increase is the difference between two per-site counts (Q2 minus Q1), and the intent cannot subtract one aggregate metric from another, so it cannot rank sites by that increase or return the increase as a column.",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 2
+    },
+    {
+      "error": null,
+      "gold": "holdout-v03.jsonl",
+      "issue_codes": [],
+      "item_id": "h3-076",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "the average gap between consecutive completion timestamps per site needs a window function (comparing each job with the previous completed job at the same site), which the intent cannot express. The count of completed jobs per site and the site name are available, but the gap measure is not.",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 2
+    },
+    {
+      "error": null,
+      "gold": "holdout-v03.jsonl",
+      "issue_codes": [],
+      "item_id": "h3-077",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "it needs the top site per customer (a ranking within groups, with tie-breaking by name) and each site's share of its customer's total, which the intent cannot express. It can total invoices per customer or per site, but not pick a winning row within each customer.",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 2
+    },
+    {
+      "error": null,
+      "gold": "holdout-v03.jsonl",
+      "issue_codes": [],
+      "item_id": "h3-078",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "The fraction needs each repair matched to later completed repairs at the same site within 30 days. The intent can only relate rows through fixed links (such as a work order to its site or technician), not one work order to other work orders by site and completion date, so this self-matching cannot be expressed.",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 2
+    },
+    {
+      "error": null,
+      "gold": "holdout-v03.jsonl",
+      "issue_codes": [],
+      "item_id": "h3-079",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "the question compares each technician's mean with the pooled mean of other technicians in the same home region, which is a comparison against a different set of rows (peers) that the intent cannot express; it also requires a per-region pooled average of days across other technicians, not available in this intent",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 2
+    },
+    {
+      "error": null,
+      "gold": "holdout-v03.jsonl",
+      "issue_codes": [],
+      "item_id": "h3-080",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "ranking technicians within each skill level (dense rank) is a window function, which the intent cannot express",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 2
+    },
+    {
+      "error": null,
+      "gold": "holdout-v03.jsonl",
+      "issue_codes": [],
+      "item_id": "h3-081",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "computing the longest streak of consecutive calendar days with completed jobs needs window functions (gaps-and-islands over dates), which the intent cannot express",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 2
+    },
+    {
+      "error": null,
+      "gold": "holdout-v03.jsonl",
+      "issue_codes": [],
+      "item_id": "h3-082",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "The question needs an absolute difference between two per-work-order aggregates (non-void invoice total, and labour plus parts selling value). The intent has no way to subtract one aggregate from another or take an absolute value, and it cannot combine invoice totals with parts usage per work order without the joins multiplying each other's rows.",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 2
+    },
+    {
+      "error": null,
+      "gold": "holdout-v03.jsonl",
+      "issue_codes": [],
+      "item_id": "h3-083",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "the intent has no median or 90th percentile aggregate (only count, count_distinct, sum, avg, min, max), so continuous percentiles cannot be expressed",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 2
+    },
+    {
+      "error": null,
+      "gold": "holdout-v03.jsonl",
+      "issue_codes": [],
+      "item_id": "h3-084",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "Finding the single longest job within each opening quarter and job type, with ties broken by lowest ID, needs a rank within groups (a window function), which this intent cannot express. A grouped maximum would return the duration but not the work order ID that goes with it.",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 2
+    },
+    {
+      "error": null,
+      "gold": "holdout-v03.jsonl",
+      "issue_codes": [],
+      "item_id": "h3-085",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "The cumulative fraction across January through each month is a running total (a window function over months), which this intent cannot express. The per-month counts and fraction within seven days could be expressed, but the cumulative column cannot.",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 2
+    },
+    {
+      "error": null,
+      "gold": "holdout-v03.jsonl",
+      "issue_codes": [],
+      "item_id": "h3-086",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "The question needs each month's revenue compared with the preceding month's revenue (a lagged, period-over-period change). The intent cannot shift a period or compare one period's value with another's, and it has no window or lag operation.",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 2
+    },
+    {
+      "error": null,
+      "gold": "holdout-v03.jsonl",
+      "issue_codes": [],
+      "item_id": "h3-087",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "The question needs a two-stage aggregation: a mean per customer, then median and 90th-percentile statistics over those customer means. The intent supports only single-level aggregates (count, sum, avg, min, max, count_distinct), so it cannot take percentiles or medians of per-group values, and it cannot express continuous percentiles.",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 2
+    },
+    {
+      "error": null,
+      "gold": "holdout-v03.jsonl",
+      "issue_codes": [],
+      "item_id": "h3-088",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "Identifying each customer's first-ever invoice month requires a per-customer minimum issue date compared against each invoice's own month, which the intent cannot express. The related-rows filter cannot compare an invoice's month with the earliest invoice of its customer.",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 2
+    },
+    {
+      "error": null,
+      "gold": "holdout-v03.jsonl",
+      "issue_codes": [],
+      "item_id": "h3-089",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "the cumulative portfolio fraction through each customer is a running total (window function), which the intent cannot express",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 2
+    },
+    {
+      "error": null,
+      "gold": "holdout-v03.jsonl",
+      "issue_codes": [],
+      "item_id": "h3-090",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "picking the top three parts within each category is a rank within groups (a window function), which this intent cannot express",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 2
+    },
+    {
+      "error": null,
+      "gold": "holdout-v03.jsonl",
+      "issue_codes": [],
+      "item_id": "h3-091",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "could not read the model's answer as an intent: the answer was cut off at the max_tokens limit",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 2
+    },
+    {
+      "error": null,
+      "gold": "holdout-v03.jsonl",
+      "issue_codes": [],
+      "item_id": "h3-092",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "The question needs parts that appear in both quarters (a set intersection), and it needs each part's share of its category's units in each quarter, with the category denominator covering all parts in that quarter. The intent cannot express set operations or a share whose denominator spans a different group than the row, and it cannot compute the change between two such shares.",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 2
+    },
+    {
+      "error": null,
+      "gold": "holdout-v03.jsonl",
+      "issue_codes": [],
+      "item_id": "h3-093",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "finding pairs of parts that co-occur on the same work orders needs a self-join of work_order_parts and a distinct count of shared orders per pair, which this intent cannot express",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 2
+    },
+    {
+      "error": null,
+      "gold": "holdout-v03.jsonl",
+      "issue_codes": [],
+      "item_id": "h3-094",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "The question needs two things the intent cannot express. First, the average parts cost per completed job, including jobs with no parts, requires reaching from work orders down to their parts lines (a one-to-many link) and treating jobs with no lines as zero; only many-to-one joins are registered. Second, the fraction of completed jobs that used any parts needs a has-parts test inside a metric's own condition, and metric conditions cannot use related-rows filters.",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 2
+    },
+    {
+      "error": null,
+      "gold": "holdout-v03.jsonl",
+      "issue_codes": [],
+      "item_id": "h3-095",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "The fraction of each segment's total parts selling value needs a segment-level total computed across all part categories, which is a within-group share (a window-style calculation). The intent can only divide two metrics within the same row, so it cannot express that share. The per-segment, per-category usage and selling value could be answered, but not the requested fraction.",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 2
+    },
+    {
+      "error": null,
+      "gold": "holdout-v03.jsonl",
+      "issue_codes": [],
+      "item_id": "h3-096",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "The intent supports only count, count_distinct, sum, avg, min and max. It cannot express a continuous median or 90th percentile, nor a per-job total of units that is aggregated again per category.",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 2
+    },
+    {
+      "error": null,
+      "gold": "holdout-v03.jsonl",
+      "issue_codes": [
+        "fan_out"
+      ],
+      "item_id": "h3-037",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "Counting sites per customer, including customers with no sites, requires counting across the one-to-many link from customers to sites. The intent cannot express that count without fan-out, and basing the query on sites would drop customers that have no sites.",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 3
+    },
+    {
+      "error": null,
+      "gold": "holdout-v03.jsonl",
+      "issue_codes": [],
+      "item_id": "h3-050",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "The question needs a count of each technician's jobs taken from the technicians side, keeping technicians with zero matching jobs. The intent counts rows of one base entity and joins only many-to-one links, so grouping work orders by technician would drop technicians with no such jobs. Keeping those zero-count groups needs a one-to-many count from technicians, which the intent cannot express.",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 3
+    },
+    {
+      "error": null,
+      "gold": "holdout-v03.jsonl",
+      "issue_codes": [],
+      "item_id": "h3-058",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "wrong",
+      "refusal": null,
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 3
+    },
+    {
+      "error": null,
+      "gold": "holdout-v03.jsonl",
+      "issue_codes": [],
+      "item_id": "h3-060",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "The intent cannot list every catalogue part with a zero total. A units-used total has to be aggregated from work_order_parts, and parts with no usage rows would drop out of that aggregate. Keeping unused parts requires a left join from parts that the intent does not support.",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 3
+    },
+    {
+      "error": null,
+      "gold": "holdout-v03.jsonl",
+      "issue_codes": [],
+      "item_id": "h3-063",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "Gross profit per part is quantity times (unit price minus unit cost), which is a three-field expression. The intent allows only two fields in a computed value, and it cannot subtract one aggregated metric from another, so the profit figure cannot be expressed.",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 3
+    },
+    {
+      "error": null,
+      "gold": "holdout-v03.jsonl",
+      "issue_codes": [],
+      "item_id": "h3-065",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "wrong",
+      "refusal": null,
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 3
+    },
+    {
+      "error": null,
+      "gold": "holdout-v03.jsonl",
+      "issue_codes": [],
+      "item_id": "h3-070",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "the fraction of each segment's total needs a per-segment total computed alongside each customer's row (a window-style share within a group), which this intent cannot express; a single ratio can only divide two metrics of the same grouped query",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 3
+    },
+    {
+      "error": null,
+      "gold": "holdout-v03.jsonl",
+      "issue_codes": [],
+      "item_id": "h3-071",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "The fractional change from Q4 to Q1 is (Q1 billed minus Q4 billed) divided by Q4 billed. The intent can divide one metric by another but cannot subtract two metrics, so the change cannot be computed.",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 3
+    },
+    {
+      "error": null,
+      "gold": "holdout-v03.jsonl",
+      "issue_codes": [],
+      "item_id": "h3-072",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "The question needs a universal condition across sites (every site of the customer must have a completed work order in the past 90 days). That requires nesting a no-matching-rows check inside another related-rows check, and the intent cannot nest related-rows filters.",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 3
+    },
+    {
+      "error": null,
+      "gold": "holdout-v03.jsonl",
+      "issue_codes": [],
+      "item_id": "h3-073",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "The question compares each customer's billed total with the average of its own region, counting customers with no invoices as zero. The intent can only compare a field with one average over the selected rows, not a per-region average computed over a different set of customers, so it cannot express this comparison.",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 3
+    },
+    {
+      "error": null,
+      "gold": "holdout-v03.jsonl",
+      "issue_codes": [],
+      "item_id": "h3-074",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "The question needs each customer's first-ever completed job, which is a per-customer earliest completed_at, and then a check that it falls within 30 days of created_at. The intent cannot compute a per-customer minimum over joined work orders or compare that minimum with the customer's creation date.",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 3
+    },
+    {
+      "error": null,
+      "gold": "holdout-v03.jsonl",
+      "issue_codes": [],
+      "item_id": "h3-075",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "The intent cannot subtract one metric from another, so the increase between the Q1 2026 and Q2 2026 counts per site cannot be computed or sorted on. Per-site counts for each quarter could be given separately, but the top five by increase cannot be selected from them.",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 3
+    },
+    {
+      "error": null,
+      "gold": "holdout-v03.jsonl",
+      "issue_codes": [],
+      "item_id": "h3-076",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "The average gap between consecutive completion timestamps per site needs a window function (each job's completion compared with the previous one at the same site), which the intent cannot express. The registry has the completed_at and site fields, but not a way to pair each job with its predecessor.",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 3
+    },
+    {
+      "error": null,
+      "gold": "holdout-v03.jsonl",
+      "issue_codes": [],
+      "item_id": "h3-077",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "Finding each customer's top site by amount is a rank within groups (a window function), which the intent cannot express.",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 3
+    },
+    {
+      "error": null,
+      "gold": "holdout-v03.jsonl",
+      "issue_codes": [],
+      "item_id": "h3-078",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "the question needs to match each completed repair to a later completed repair at the same site within 30 days, which is a self-join across work orders that the intent cannot express",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 3
+    },
+    {
+      "error": null,
+      "gold": "holdout-v03.jsonl",
+      "issue_codes": [],
+      "item_id": "h3-079",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "the question compares each technician's mean against a pooled mean of other technicians in the same home region, which is a comparison against a different set of rows (peers) than the rows selected, and the intent can only compare a base field with its own average, minimum or maximum over the selected rows",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 3
+    },
+    {
+      "error": null,
+      "gold": "holdout-v03.jsonl",
+      "issue_codes": [],
+      "item_id": "h3-080",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "ranking technicians within each skill level requires a window function (dense rank within groups), which the intent cannot express",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 3
+    },
+    {
+      "error": null,
+      "gold": "holdout-v03.jsonl",
+      "issue_codes": [],
+      "item_id": "h3-081",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "computing the longest streak of consecutive calendar days with completed jobs needs window functions (gaps-and-islands over dates), which the intent cannot express",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 3
+    },
+    {
+      "error": null,
+      "gold": "holdout-v03.jsonl",
+      "issue_codes": [],
+      "item_id": "h3-082",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "The question needs per-work-order sums over two related sets, non-void invoice amounts and quantity times unit price across parts used, combined into an absolute difference and ranked by it. The intent cannot aggregate related rows as a row-level field, cannot compute differences between two aggregates, and cannot take an absolute value.",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 3
+    },
+    {
+      "error": null,
+      "gold": "holdout-v03.jsonl",
+      "issue_codes": [],
+      "item_id": "h3-083",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "the intent cannot express median or 90th percentile (continuous percentile) aggregates; only count, count_distinct, sum, avg, min and max are available",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 3
+    },
+    {
+      "error": null,
+      "gold": "holdout-v03.jsonl",
+      "issue_codes": [],
+      "item_id": "h3-084",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "Finding the longest job within each opening quarter and job type requires ranking rows within groups (a window function), which this intent cannot express.",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 3
+    },
+    {
+      "error": null,
+      "gold": "holdout-v03.jsonl",
+      "issue_codes": [],
+      "item_id": "h3-085",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "The cumulative fraction across January through each month needs a running total (a window function), which this intent cannot express. The monthly counts and fractions alone could be expressed, but the cumulative column cannot.",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 3
+    },
+    {
+      "error": null,
+      "gold": "holdout-v03.jsonl",
+      "issue_codes": [],
+      "item_id": "h3-086",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "The request needs each month's revenue placed next to the preceding month's revenue and a change computed between them. The intent has no way to offset one period against another (a lag or window comparison), and a ratio can only combine metrics from the same period, so the month-over-month change cannot be expressed.",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 3
+    },
+    {
+      "error": null,
+      "gold": "holdout-v03.jsonl",
+      "issue_codes": [],
+      "item_id": "h3-087",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "The question needs a two-level aggregation: a mean per customer, then median and 90th-percentile across those customer means. The intent supports only count, count_distinct, sum, avg, min and max over rows, with no percentile or median aggregate and no way to aggregate over per-customer results.",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 3
+    },
+    {
+      "error": null,
+      "gold": "holdout-v03.jsonl",
+      "issue_codes": [],
+      "item_id": "h3-088",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "The question needs each customer's first-ever invoice month, computed across all invoices, and then a filter that keeps only invoices whose customer's first month matches the invoice's own month. The intent has no way to compare an invoice against an earlier invoice of the same customer, and its aggregate comparisons only work over the selected rows, not per customer.",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 3
+    },
+    {
+      "error": null,
+      "gold": "holdout-v03.jsonl",
+      "issue_codes": [],
+      "item_id": "h3-089",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "The question asks for a cumulative portfolio fraction through each customer, which is a running total (a window function). The intent cannot express window functions, so it cannot produce that column.",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 3
+    },
+    {
+      "error": null,
+      "gold": "holdout-v03.jsonl",
+      "issue_codes": [],
+      "item_id": "h3-090",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "it needs the top three parts within each category, which is a rank within groups (a window function), and the intent cannot express that",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 3
+    },
+    {
+      "error": null,
+      "gold": "holdout-v03.jsonl",
+      "issue_codes": [],
+      "item_id": "h3-091",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "could not read the model's answer as an intent: the answer was cut off at the max_tokens limit",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 3
+    },
+    {
+      "error": null,
+      "gold": "holdout-v03.jsonl",
+      "issue_codes": [],
+      "item_id": "h3-092",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "The question needs two things the intent cannot express: it keeps only parts used in both quarters (a set intersection), and it compares each part's share of its category's units in Q1 and Q2, where the category denominator must cover every part used in that quarter, not only the parts that pass the intersection filter. The intent has no way to compute a per-category share across unfiltered rows or to difference shares between two periods.",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 3
+    },
+    {
+      "error": null,
+      "gold": "holdout-v03.jsonl",
+      "issue_codes": [],
+      "item_id": "h3-093",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "finding pairs of parts that co-occur on the same work orders requires a self-join of work_order_parts and a distinct count over pairs, which the intent cannot express (it has no pairing or set-intersection capability).",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 3
+    },
+    {
+      "error": null,
+      "gold": "holdout-v03.jsonl",
+      "issue_codes": [],
+      "item_id": "h3-094",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "could not read the model's answer as an intent: the answer was cut off at the max_tokens limit",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 3
+    },
+    {
+      "error": null,
+      "gold": "holdout-v03.jsonl",
+      "issue_codes": [],
+      "item_id": "h3-095",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "The fraction of each segment's total parts selling value needs a segment-level total computed alongside each category row. A ratio can only divide two metrics that share the same grouping, so the share within a segment cannot be expressed. The usage and selling-value figures alone could be grouped by segment and category, but the question asks for the share, so the whole request is out of reach.",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 3
+    },
+    {
+      "error": null,
+      "gold": "holdout-v03.jsonl",
+      "issue_codes": [],
+      "item_id": "h3-096",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "",
+      "outcome": "refused",
+      "refusal": "The intent supports only count, count_distinct, sum, avg, min and max. It cannot compute a continuous median or 90th percentile, nor the per-job unit totals those percentiles would be taken over.",
+      "schema": "fieldservice",
+      "tag": "untriaged",
+      "trial": 3
+    }
+  ],
+  "notes": [
+    "sql_agent baseline not run: needs a live model (multi-step tool calls can't be honestly simulated in one pass)."
+  ],
+  "question_level": [
+    {
+      "gold": "holdout-v03.jsonl",
+      "model": "anthropic:claude-haiku-5-5",
+      "right": {
+        "ci95": [
+          0.5462430234225731,
+          0.7342015967856051
+        ],
+        "n": 62,
+        "of": 96,
+        "rate": 0.6458333333333334
+      },
+      "schema": "fieldservice",
+      "system": "ledgerline"
+    },
+    {
+      "gold": "holdout-v03.jsonl",
+      "model": "anthropic:claude-haiku-5-5",
+      "right": {
+        "ci95": [
+          0.7229774574820691,
+          0.8779753001068837
+        ],
+        "n": 78,
+        "of": 96,
+        "rate": 0.8125
+      },
+      "schema": "fieldservice",
+      "system": "oneshot"
+    }
+  ],
+  "registry_hashes": {},
+  "run_id": "v03-holdout",
+  "simulation": null,
+  "spent_usd": 0.39980160000000065,
+  "status": "complete",
+  "table": [
+    {
+      "accuracy_given_attempted": {
+        "ci95": [
+          0.9203517672877869,
+          0.9788490467095935
+        ],
+        "n": 185,
+        "of": 193,
+        "rate": 0.9585492227979274
+      },
+      "coverage": {
+        "ci95": [
+          0.6139114669341444,
+          0.7218872931049857
+        ],
+        "n": 193,
+        "of": 288,
+        "rate": 0.6701388888888888
+      },
+      "execution_accuracy": {
+        "ci95": [
+          0.5854649551961857,
+          0.6955095174896173
+        ],
+        "n": 185,
+        "of": 288,
+        "rate": 0.6423611111111112
+      },
+      "execution_error_rate": {
+        "ci95": [
+          0.0,
+          0.010558056888693507
+        ],
+        "n": 0,
+        "of": 360,
+        "rate": 0.0
+      },
+      "false_refusal_rate": {
+        "ci95": [
+          0.27811270689501416,
+          0.3860885330658554
+        ],
+        "n": 95,
+        "of": 288,
+        "rate": 0.3298611111111111
+      },
+      "gold": "holdout-v03.jsonl",
+      "items": 360,
+      "mean_cost_usd": 0.0006423005555555556,
+      "model": "anthropic:claude-haiku-5-5",
+      "p50_latency_ms": 1505.4818954668008,
+      "pending": 0,
+      "refusal_recall": {
+        "ci95": [
+          0.9493488274035422,
+          1.0
+        ],
+        "n": 72,
+        "of": 72,
+        "rate": 1.0
+      },
+      "schema": "fieldservice",
+      "system": "ledgerline",
+      "trials": 3,
+      "wrong_answer_rate_given_answered": {
+        "ci95": [
+          0.021150953290406463,
+          0.0796482327122131
+        ],
+        "n": 8,
+        "of": 193,
+        "rate": 0.04145077720207254
+      }
+    },
+    {
+      "accuracy_given_attempted": {
+        "ci95": [
+          0.7709091922038784,
+          0.8595701123593866
+        ],
+        "n": 236,
+        "of": 288,
+        "rate": 0.8194444444444444
+      },
+      "coverage": {
+        "ci95": [
+          0.9868371723598931,
+          0.9999999999999999
+        ],
+        "n": 288,
+        "of": 288,
+        "rate": 1.0
+      },
+      "execution_accuracy": {
+        "ci95": [
+          0.7709091922038784,
+          0.8595701123593866
+        ],
+        "n": 236,
+        "of": 288,
+        "rate": 0.8194444444444444
+      },
+      "execution_error_rate": {
+        "ci95": [
+          0.06601637497444598,
+          0.12593937148465367
+        ],
+        "n": 33,
+        "of": 360,
+        "rate": 0.09166666666666666
+      },
+      "false_refusal_rate": {
+        "ci95": [
+          0.0,
+          0.013162827640106806
+        ],
+        "n": 0,
+        "of": 288,
+        "rate": 0.0
+      },
+      "gold": "holdout-v03.jsonl",
+      "items": 360,
+      "mean_cost_usd": 0.00046825944444444447,
+      "model": "anthropic:claude-haiku-5-5",
+      "p50_latency_ms": 1386.3576870062388,
+      "pending": 0,
+      "refusal_recall": {
+        "ci95": [
+          0.9493488274035422,
+          1.0
+        ],
+        "n": 72,
+        "of": 72,
+        "rate": 1.0
+      },
+      "schema": "fieldservice",
+      "system": "oneshot",
+      "trials": 3,
+      "wrong_answer_rate_given_answered": {
+        "ci95": [
+          0.04821651124168634,
+          0.11343247270133315
+        ],
+        "n": 19,
+        "of": 255,
+        "rate": 0.07450980392156863
+      }
+    }
+  ],
+  "trials": 3
+}

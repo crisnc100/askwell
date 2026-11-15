@@ -1,0 +1,244 @@
+{
+  "abort_reason": null,
+  "baseline_wins": [],
+  "deferred": {},
+  "floors": [
+    {
+      "cause": null,
+      "checks": [
+        {
+          "met": true,
+          "metric": "execution_accuracy",
+          "rate": {
+            "ci95": [
+              0.8922245499429776,
+              0.9734690446691078
+            ],
+            "n": 122,
+            "of": 129,
+            "rate": 0.9457364341085271
+          },
+          "rule": ">= 80%"
+        },
+        {
+          "met": true,
+          "metric": "wrong_answer_rate_given_answered",
+          "rate": {
+            "ci95": [
+              0.016931797475218995,
+              0.08885622220486222
+            ],
+            "n": 5,
+            "of": 127,
+            "rate": 0.03937007874015748
+          },
+          "rule": "<= 5%"
+        }
+      ],
+      "gold": null,
+      "met": true,
+      "model": "anthropic:claude-haiku-5-5",
+      "next": null,
+      "schema": "fieldservice",
+      "status_note": "with prompt interpret-v3"
+    }
+  ],
+  "gold_files": [
+    "fieldservice.jsonl"
+  ],
+  "misses": [
+    {
+      "error": null,
+      "gold": "fieldservice.jsonl",
+      "issue_codes": [],
+      "item_id": "fs-022",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "mistral-small (select-2026-11-11): Both intents had a placeholder reason and no group_by; the first also counted from parts, a fan-out. Grouping work_order_parts by part would answer it.",
+      "outcome": "wrong",
+      "refusal": null,
+      "schema": "fieldservice",
+      "tag": "misread",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "fieldservice.jsonl",
+      "issue_codes": [],
+      "item_id": "fs-024",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "Haiku 5.5 (v02-seen, v0.2 grammar): Wrong in 1 of 3 trials on the same ambiguous date as below. mistral-small (select-2026-11-11): Ambiguous date: \"did work for last month\" was read as completed last month; the gold uses opened last month. Both readings are defensible.",
+      "outcome": "wrong",
+      "refusal": null,
+      "schema": "fieldservice",
+      "tag": "gold_issue",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "fieldservice.jsonl",
+      "issue_codes": [],
+      "item_id": "fs-037",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "Haiku 5.5 (v02-seen, v0.2 grammar): Refused correctly in 3 of 3 trials. Haiku 5.5 (select-haiku-2026-11-11): Needs a distinct count of months in HAVING. Refused correctly. mistral-small (select-2026-11-11): Needs a distinct count of months in HAVING. Refused correctly.",
+      "outcome": "refused",
+      "refusal": "it needs a per-technician check that completions occurred in each month of last quarter, which requires counting distinct months per technician. The intent cannot express a distinct count of periods.",
+      "schema": "fieldservice",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "fieldservice.jsonl",
+      "issue_codes": [],
+      "item_id": "fs-022",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "mistral-small (select-2026-11-11): Both intents had a placeholder reason and no group_by; the first also counted from parts, a fan-out. Grouping work_order_parts by part would answer it.",
+      "outcome": "wrong",
+      "refusal": null,
+      "schema": "fieldservice",
+      "tag": "misread",
+      "trial": 2
+    },
+    {
+      "error": null,
+      "gold": "fieldservice.jsonl",
+      "issue_codes": [],
+      "item_id": "fs-034",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "Haiku 5.5 (v02-seen, v0.2 grammar): Wrong in 1 of 3 trials: grouped by customer id, not customer name. mistral-small (select-2026-11-11): The first intent was a row list from customers with filters on work orders; the retry grouped by customer with a year grain on an ID and filtered the same date twice.",
+      "outcome": "wrong",
+      "refusal": null,
+      "schema": "fieldservice",
+      "tag": "misread",
+      "trial": 2
+    },
+    {
+      "error": null,
+      "gold": "fieldservice.jsonl",
+      "issue_codes": [],
+      "item_id": "fs-037",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "Haiku 5.5 (v02-seen, v0.2 grammar): Refused correctly in 3 of 3 trials. Haiku 5.5 (select-haiku-2026-11-11): Needs a distinct count of months in HAVING. Refused correctly. mistral-small (select-2026-11-11): Needs a distinct count of months in HAVING. Refused correctly.",
+      "outcome": "refused",
+      "refusal": "it needs a distinct count of months per technician (every month of last quarter has at least one completed work order), and the intent cannot express a distinct count of periods",
+      "schema": "fieldservice",
+      "tag": "grammar_gap",
+      "trial": 2
+    },
+    {
+      "error": null,
+      "gold": "fieldservice.jsonl",
+      "issue_codes": [],
+      "item_id": "fs-034",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "Haiku 5.5 (v02-seen, v0.2 grammar): Wrong in 1 of 3 trials: grouped by customer id, not customer name. mistral-small (select-2026-11-11): The first intent was a row list from customers with filters on work orders; the retry grouped by customer with a year grain on an ID and filtered the same date twice.",
+      "outcome": "wrong",
+      "refusal": null,
+      "schema": "fieldservice",
+      "tag": "misread",
+      "trial": 3
+    }
+  ],
+  "notes": [
+    "sql_agent baseline not run: needs a live model (multi-step tool calls can't be honestly simulated in one pass)."
+  ],
+  "question_level": [
+    {
+      "gold": "fieldservice.jsonl",
+      "model": "anthropic:claude-haiku-5-5",
+      "right": {
+        "ci95": [
+          0.8139101309875801,
+          0.9759884104227855
+        ],
+        "n": 40,
+        "of": 43,
+        "rate": 0.9302325581395349
+      },
+      "schema": "fieldservice",
+      "system": "ledgerline"
+    }
+  ],
+  "registry_hashes": {},
+  "run_id": "v03-seen",
+  "simulation": null,
+  "spent_usd": 0.11499969999999997,
+  "status": "complete",
+  "table": [
+    {
+      "accuracy_given_attempted": {
+        "ci95": [
+          0.9111437777951378,
+          0.9830682025247811
+        ],
+        "n": 122,
+        "of": 127,
+        "rate": 0.9606299212598425
+      },
+      "coverage": {
+        "ci95": [
+          0.9452333688810886,
+          0.9957379296103084
+        ],
+        "n": 127,
+        "of": 129,
+        "rate": 0.9844961240310077
+      },
+      "execution_accuracy": {
+        "ci95": [
+          0.8922245499429776,
+          0.9734690446691078
+        ],
+        "n": 122,
+        "of": 129,
+        "rate": 0.9457364341085271
+      },
+      "execution_error_rate": {
+        "ci95": [
+          0.0,
+          0.01875332680605788
+        ],
+        "n": 0,
+        "of": 201,
+        "rate": 0.0
+      },
+      "false_refusal_rate": {
+        "ci95": [
+          0.004262070389691612,
+          0.05476663111891134
+        ],
+        "n": 2,
+        "of": 129,
+        "rate": 0.015503875968992248
+      },
+      "gold": "fieldservice.jsonl",
+      "items": 201,
+      "mean_cost_usd": 0.0005721378109452737,
+      "model": "anthropic:claude-haiku-5-5",
+      "p50_latency_ms": 1185.494666104205,
+      "pending": 0,
+      "refusal_recall": {
+        "ci95": [
+          0.9493488274035422,
+          1.0
+        ],
+        "n": 72,
+        "of": 72,
+        "rate": 1.0
+      },
+      "schema": "fieldservice",
+      "system": "ledgerline",
+      "trials": 3,
+      "wrong_answer_rate_given_answered": {
+        "ci95": [
+          0.016931797475218995,
+          0.08885622220486222
+        ],
+        "n": 5,
+        "of": 127,
+        "rate": 0.03937007874015748
+      }
+    }
+  ],
+  "trials": 3
+}
