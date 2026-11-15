@@ -20,57 +20,57 @@ Rates show the value, the Wilson 95% interval, and the counts. Trials are pooled
 
 ## Ledgerline misses
 
-- `spider:315` (spider_cre_Doc_Template_Mgt, spider_ids_v03.json, trial 1): refused — refused (unanswerable). Tag: **untriaged**
-- `spider:345` (spider_cre_Doc_Template_Mgt, spider_ids_v03.json, trial 1): refused — refused (unanswerable). Tag: **untriaged**
-- `spider:346` (spider_cre_Doc_Template_Mgt, spider_ids_v03.json, trial 1): refused — refused (unanswerable). Tag: **untriaged**
-- `spider:369` (spider_cre_Doc_Template_Mgt, spider_ids_v03.json, trial 1): refused — refused (fan_out). Tag: **untriaged**
-- `spider:520` (spider_student_transcripts_tracking, spider_ids_v03.json, trial 1): wrong — rows differ. Tag: **untriaged**
-- `spider:526` (spider_student_transcripts_tracking, spider_ids_v03.json, trial 1): refused — refused (unanswerable). Tag: **untriaged**
-- `spider:531` (spider_student_transcripts_tracking, spider_ids_v03.json, trial 1): wrong — rows differ. Tag: **untriaged**
-- `spider:533` (spider_student_transcripts_tracking, spider_ids_v03.json, trial 1): wrong — rows differ. Tag: **untriaged**
-- `spider:534` (spider_student_transcripts_tracking, spider_ids_v03.json, trial 1): wrong — rows differ. Tag: **untriaged**
-- `spider:535` (spider_student_transcripts_tracking, spider_ids_v03.json, trial 1): wrong — rows differ. Tag: **untriaged**
-- `spider:536` (spider_student_transcripts_tracking, spider_ids_v03.json, trial 1): wrong — rows differ. Tag: **untriaged**
-- `spider:537` (spider_student_transcripts_tracking, spider_ids_v03.json, trial 1): wrong — rows differ. Tag: **untriaged**
-- `spider:538` (spider_student_transcripts_tracking, spider_ids_v03.json, trial 1): wrong — unknown_field. Tag: **untriaged**
-- `spider:541` (spider_student_transcripts_tracking, spider_ids_v03.json, trial 1): wrong — rows differ. Tag: **untriaged**
-- `spider:549` (spider_student_transcripts_tracking, spider_ids_v03.json, trial 1): refused — refused (unanswerable). Tag: **untriaged**
-- `spider:550` (spider_student_transcripts_tracking, spider_ids_v03.json, trial 1): refused — refused (unanswerable). Tag: **untriaged**
-- `spider:557` (spider_student_transcripts_tracking, spider_ids_v03.json, trial 1): refused — refused (unanswerable). Tag: **untriaged**
-- `spider:563` (spider_student_transcripts_tracking, spider_ids_v03.json, trial 1): refused — refused (unanswerable). Tag: **untriaged**
-- `spider:567` (spider_student_transcripts_tracking, spider_ids_v03.json, trial 1): refused — refused (unanswerable). Tag: **untriaged**
-- `spider:575` (spider_student_transcripts_tracking, spider_ids_v03.json, trial 1): wrong — rows differ. Tag: **untriaged**
-- `spider:578` (spider_student_transcripts_tracking, spider_ids_v03.json, trial 1): refused — refused (ambiguous_path, invalid_order_by). Tag: **untriaged**
-- `spider:579` (spider_student_transcripts_tracking, spider_ids_v03.json, trial 1): wrong — rows differ. Tag: **untriaged**
-- `spider:581` (spider_student_transcripts_tracking, spider_ids_v03.json, trial 1): refused — refused (unanswerable). Tag: **untriaged**
-- `spider:583` (spider_student_transcripts_tracking, spider_ids_v03.json, trial 1): refused — refused (unanswerable). Tag: **untriaged**
-- `spider:584` (spider_student_transcripts_tracking, spider_ids_v03.json, trial 1): refused — refused (unanswerable). Tag: **untriaged**
-- `spider:623` (spider_tvshow, spider_ids_v03.json, trial 1): refused — refused (unknown_entity, unknown_field). Tag: **untriaged**
-- `spider:635` (spider_tvshow, spider_ids_v03.json, trial 1): refused — refused (unanswerable). Tag: **untriaged**
-- `spider:636` (spider_tvshow, spider_ids_v03.json, trial 1): refused — refused (unanswerable). Tag: **untriaged**
-- `spider:637` (spider_tvshow, spider_ids_v03.json, trial 1): wrong — invalid_order_by, unknown_field. Tag: **untriaged**
-- `spider:641` (spider_tvshow, spider_ids_v03.json, trial 1): refused — refused (unanswerable). Tag: **untriaged**
-- `spider:642` (spider_tvshow, spider_ids_v03.json, trial 1): refused — refused (unanswerable). Tag: **untriaged**
-- `spider:643` (spider_tvshow, spider_ids_v03.json, trial 1): refused — refused (unanswerable). Tag: **untriaged**
-- `spider:644` (spider_tvshow, spider_ids_v03.json, trial 1): refused — refused (unanswerable). Tag: **untriaged**
-- `spider:645` (spider_tvshow, spider_ids_v03.json, trial 1): refused — refused (unanswerable). Tag: **untriaged**
-- `spider:646` (spider_tvshow, spider_ids_v03.json, trial 1): refused — refused (unanswerable). Tag: **untriaged**
-- `spider:705` (spider_world_1, spider_ids_v03.json, trial 1): wrong — rows differ. Tag: **untriaged**
-- `spider:724` (spider_world_1, spider_ids_v03.json, trial 1): wrong — rows differ. Tag: **untriaged**
-- `spider:745` (spider_world_1, spider_ids_v03.json, trial 1): refused — refused (unanswerable). Tag: **untriaged**
-- `spider:758` (spider_world_1, spider_ids_v03.json, trial 1): wrong — rows differ. Tag: **untriaged**
-- `spider:759` (spider_world_1, spider_ids_v03.json, trial 1): refused — refused (unanswerable). Tag: **untriaged**
-- `spider:764` (spider_world_1, spider_ids_v03.json, trial 1): refused — refused (unanswerable). Tag: **untriaged**
-- `spider:765` (spider_world_1, spider_ids_v03.json, trial 1): refused — refused (unanswerable). Tag: **untriaged**
-- `spider:767` (spider_world_1, spider_ids_v03.json, trial 1): refused — refused (unanswerable). Tag: **untriaged**
-- `spider:773` (spider_world_1, spider_ids_v03.json, trial 1): refused — refused (unanswerable). Tag: **untriaged**
-- `spider:774` (spider_world_1, spider_ids_v03.json, trial 1): refused — refused (unanswerable). Tag: **untriaged**
-- `spider:775` (spider_world_1, spider_ids_v03.json, trial 1): refused — refused (unanswerable). Tag: **untriaged**
-- `spider:777` (spider_world_1, spider_ids_v03.json, trial 1): refused — refused (unanswerable). Tag: **untriaged**
-- `spider:783` (spider_world_1, spider_ids_v03.json, trial 1): refused — refused (unanswerable). Tag: **untriaged**
-- `spider:817` (spider_world_1, spider_ids_v03.json, trial 1): refused — refused (unanswerable). Tag: **untriaged**
-- `spider:818` (spider_world_1, spider_ids_v03.json, trial 1): refused — refused (unanswerable). Tag: **untriaged**
-- `spider:821` (spider_world_1, spider_ids_v03.json, trial 1): refused — refused (unanswerable). Tag: **untriaged**
+- `spider:315` (spider_cre_Doc_Template_Mgt, spider_ids_v03.json, trial 1): refused — refused (unanswerable). Tag: **grammar_gap**. Before: refused (has none was not in the grammar). After: right with has none.
+- `spider:345` (spider_cre_Doc_Template_Mgt, spider_ids_v03.json, trial 1): refused — refused (unanswerable). Tag: **validator_false_reject**. Askwell right with has none. CSV path refused: the template-type link is not drawn from the uploaded files (a code column, not <name>_id). Before: both refused.
+- `spider:346` (spider_cre_Doc_Template_Mgt, spider_ids_v03.json, trial 1): refused — refused (unanswerable). Tag: **validator_false_reject**. Askwell right with has none. CSV path refused: the template-type link is not drawn from the uploaded files. Before: both refused.
+- `spider:369` (spider_cre_Doc_Template_Mgt, spider_ids_v03.json, trial 1): refused — refused (fan_out). Tag: **misread**. CSV path refused for fan_out after putting the count on the wrong side; Askwell right counting from the many side. Before: Askwell refused, CSV right.
+- `spider:520` (spider_student_transcripts_tracking, spider_ids_v03.json, trial 1): wrong — rows differ. Tag: **misread**. Before: wrong, counting distinct program ids where the gold counts distinct summary names. After: right.
+- `spider:526` (spider_student_transcripts_tracking, spider_ids_v03.json, trial 1): refused — refused (unanswerable). Tag: **misread**. Both refused (Askwell after fan_out): counting sections grouped by course answers it, as the gold does. Before: both refused.
+- `spider:531` (spider_student_transcripts_tracking, spider_ids_v03.json, trial 1): wrong — rows differ. Tag: **misread**. Both wrong: the substring kept a leading word of the question, where the gold matches only the key word. Before: both wrong.
+- `spider:533` (spider_student_transcripts_tracking, spider_ids_v03.json, trial 1): wrong — rows differ. Tag: **gold_issue**. Askwell grouped enrolments by student and semester, as the question says; the gold counts a student's enrolments across all semesters. Before: both systems wrong, grouped the same way.
+- `spider:534` (spider_student_transcripts_tracking, spider_ids_v03.json, trial 1): wrong — rows differ. Tag: **gold_issue**. Askwell and the CSV path grouped by student and semester, as the question says; the gold ignores the semester. Before: both wrong.
+- `spider:535` (spider_student_transcripts_tracking, spider_ids_v03.json, trial 1): wrong — rows differ. Tag: **grammar_gap**. Both list one row per enrolment, so names repeat; the gold asks for distinct rows, which row lists cannot. Before: both wrong.
+- `spider:536` (spider_student_transcripts_tracking, spider_ids_v03.json, trial 1): wrong — rows differ. Tag: **grammar_gap**. Same as spider:535: the gold needs distinct rows. Before: both wrong.
+- `spider:537` (spider_student_transcripts_tracking, spider_ids_v03.json, trial 1): wrong — rows differ. Tag: **misread**. Before: wrong, counting distinct students where the gold counts enrolment rows. After: right.
+- `spider:538` (spider_student_transcripts_tracking, spider_ids_v03.json, trial 1): wrong — unknown_field. Tag: **misread**. Same as spider:537. Before: wrong. After: right.
+- `spider:541` (spider_student_transcripts_tracking, spider_ids_v03.json, trial 1): wrong — rows differ. Tag: **gold_issue**. Two students tie for the most enrolments; the gold's single row is one of the tie, by table order. Before: both wrong.
+- `spider:549` (spider_student_transcripts_tracking, spider_ids_v03.json, trial 1): refused — refused (unanswerable). Tag: **validator_false_reject**. Askwell right with a named link and has none. CSV path refused: the current-address column does not follow the <name>_id rule, so no link to addresses is drawn. Before: both refused.
+- `spider:550` (spider_student_transcripts_tracking, spider_ids_v03.json, trial 1): refused — refused (unanswerable). Tag: **validator_false_reject**. Same as spider:549. Before: both refused.
+- `spider:557` (spider_student_transcripts_tracking, spider_ids_v03.json, trial 1): refused — refused (unanswerable). Tag: **misread**. Both refused, reading the question as asking for a status the data lacks; the gold reads it as the earliest leaving date. Before: both refused.
+- `spider:563` (spider_student_transcripts_tracking, spider_ids_v03.json, trial 1): refused — refused (unanswerable). Tag: **grammar_gap**. The gold averages a datetime column (SQLite returns a number); the intent averages numeric fields only. Before: both refused.
+- `spider:567` (spider_student_transcripts_tracking, spider_ids_v03.json, trial 1): refused — refused (unanswerable). Tag: **misread**. Both refused because no field marks a transcript as released; the gold counts every transcript. Before: both refused.
+- `spider:575` (spider_student_transcripts_tracking, spider_ids_v03.json, trial 1): wrong — rows differ. Tag: **misread**. Both refused as a set intersection; two has filters on semesters, as spider:379's CSV answer did, could likely express it. Before: both wrong.
+- `spider:578` (spider_student_transcripts_tracking, spider_ids_v03.json, trial 1): refused — refused (ambiguous_path, invalid_order_by). Tag: **gold_issue**. Askwell listed the addresses that have students (the question asks which ones); the gold returns only their count. CSV path refused: the address links are not drawn from the files. Before: both refused.
+- `spider:579` (spider_student_transcripts_tracking, spider_ids_v03.json, trial 1): wrong — rows differ. Tag: **misread**. Both ordered by last name and selected every column; the gold sorts and returns the one free-text details column. Before: both wrong.
+- `spider:581` (spider_student_transcripts_tracking, spider_ids_v03.json, trial 1): refused — refused (unanswerable). Tag: **misread**. Askwell right. CSV path refused, saying no section was named. Before: both refused.
+- `spider:583` (spider_student_transcripts_tracking, spider_ids_v03.json, trial 1): refused — refused (unanswerable). Tag: **gold_issue**. Askwell compared the country as written in the data; the gold compares a lowercased value that matches no row, so only the phone match remains. CSV path refused: no address link drawn. Before: both refused.
+- `spider:584` (spider_student_transcripts_tracking, spider_ids_v03.json, trial 1): refused — refused (unanswerable). Tag: **gold_issue**. Same as spider:583. Before: both refused.
+- `spider:623` (spider_tvshow, spider_ids_v03.json, trial 1): refused — refused (unknown_entity, unknown_field). Tag: **validator_false_reject**. Askwell right. CSV path refused: the channel column does not follow the <name>_id rule, so no link to the channel table is drawn from the files. Before: both refused.
+- `spider:635` (spider_tvshow, spider_ids_v03.json, trial 1): refused — refused (unanswerable). Tag: **misread**. Askwell wrong (has none): it listed channels without such a cartoon, where the gold keeps countries none of whose channels play one. CSV path refused: no channel link drawn. Before: both refused.
+- `spider:636` (spider_tvshow, spider_ids_v03.json, trial 1): refused — refused (unanswerable). Tag: **misread**. Same as spider:635, counted per country. CSV path refused: no channel link. Before: both refused.
+- `spider:637` (spider_tvshow, spider_ids_v03.json, trial 1): wrong — invalid_order_by, unknown_field. Tag: **misread**. Askwell wrong: it read a question needing both directors as either director (an in-list); two has filters, as in its own right answer to spider:638, give the channels with both. CSV path refused: no channel link. Before: Askwell wrong, CSV refused.
+- `spider:641` (spider_tvshow, spider_ids_v03.json, trial 1): refused — refused (unanswerable). Tag: **gold_issue**. Both refused: it filters channels by a per-country count applied back to each row. The gold groups by country and returns one arbitrary id per country. Before: both refused.
+- `spider:642` (spider_tvshow, spider_ids_v03.json, trial 1): refused — refused (unanswerable). Tag: **gold_issue**. Same gold as spider:641, with a question that reads as channels containing channels. Before: both refused.
+- `spider:643` (spider_tvshow, spider_ids_v03.json, trial 1): refused — refused (unanswerable). Tag: **validator_false_reject**. Askwell right. CSV path refused: the channel column does not follow the <name>_id rule, so no link to the channel table is drawn from the files. Before: both refused.
+- `spider:644` (spider_tvshow, spider_ids_v03.json, trial 1): refused — refused (unanswerable). Tag: **validator_false_reject**. Askwell right. CSV path refused: the channel column does not follow the <name>_id rule, so no link to the channel table is drawn from the files. Before: both refused.
+- `spider:645` (spider_tvshow, spider_ids_v03.json, trial 1): refused — refused (unanswerable). Tag: **validator_false_reject**. Askwell right. CSV path refused: the channel column does not follow the <name>_id rule, so no link to the channel table is drawn from the files. Before: both refused.
+- `spider:646` (spider_tvshow, spider_ids_v03.json, trial 1): refused — refused (unanswerable). Tag: **validator_false_reject**. Askwell right. CSV path refused: the channel column does not follow the <name>_id rule, so no link to the channel table is drawn from the files. Before: both refused.
+- `spider:705` (spider_world_1, spider_ids_v03.json, trial 1): wrong — rows differ. Tag: **misread**. Both wrong: they counted every government form that includes the key word; the gold counts only the form that is exactly that word. A defensible reading the gold does not take. Before: Askwell wrong, CSV refused (files did not load).
+- `spider:724` (spider_world_1, spider_ids_v03.json, trial 1): wrong — rows differ. Tag: **misread**. Both wrong: every government form including the key word counted, where the gold takes only the exact form, as in spider:705. Before: Askwell wrong, CSV refused.
+- `spider:745` (spider_world_1, spider_ids_v03.json, trial 1): refused — refused (unanswerable). Tag: **validator_false_reject**. Askwell right. CSV path refused: the language table's country-code column does not follow the <name>_id rule, so no link to the country table is drawn from the files. Before: both refused.
+- `spider:758` (spider_world_1, spider_ids_v03.json, trial 1): wrong — rows differ. Tag: **misread**. Askwell wrong: every government form including the key word counted, as in spider:705, where the gold takes the exact form. CSV path refused: no country link drawn. Before: Askwell wrong, CSV refused.
+- `spider:759` (spider_world_1, spider_ids_v03.json, trial 1): refused — refused (unanswerable). Tag: **misread**. Both refused, reasoning that the count must be taken before the government-form filter; the gold filters first, then counts. Before: both refused.
+- `spider:764` (spider_world_1, spider_ids_v03.json, trial 1): refused — refused (unanswerable). Tag: **validator_false_reject**. Askwell right with has none. CSV path refused: the drafted registry lists no values for the official-language flag, so the model would not guess its coding. Before: both refused.
+- `spider:765` (spider_world_1, spider_ids_v03.json, trial 1): refused — refused (unanswerable). Tag: **validator_false_reject**. Askwell right. CSV path refused: the language table's country-code column does not follow the <name>_id rule, so no link to the country table is drawn from the files. Before: both refused.
+- `spider:767` (spider_world_1, spider_ids_v03.json, trial 1): refused — refused (unanswerable). Tag: **validator_false_reject**. Askwell right. CSV path refused: the language table's country-code column does not follow the <name>_id rule, so no link to the country table is drawn from the files. Before: both refused.
+- `spider:773` (spider_world_1, spider_ids_v03.json, trial 1): refused — refused (unanswerable). Tag: **grammar_gap**. Both refused: it compares with an aggregate over a different set of rows (another continent), which compare-with-an-aggregate refuses by design. Before: both refused.
+- `spider:774` (spider_world_1, spider_ids_v03.json, trial 1): refused — refused (unanswerable). Tag: **grammar_gap**. Same as spider:773. Before: both refused.
+- `spider:775` (spider_world_1, spider_ids_v03.json, trial 1): refused — refused (unanswerable). Tag: **grammar_gap**. Same as spider:773. Before: both refused.
+- `spider:777` (spider_world_1, spider_ids_v03.json, trial 1): refused — refused (unanswerable). Tag: **grammar_gap**. Same as spider:773. Before: both refused.
+- `spider:783` (spider_world_1, spider_ids_v03.json, trial 1): refused — refused (unanswerable). Tag: **misread**. Askwell wrong: the has none part is right, but it excluded every government form including the key word where the gold excludes only the exact form, as in spider:705. CSV path refused: no country link drawn. Before: both refused.
+- `spider:817` (spider_world_1, spider_ids_v03.json, trial 1): refused — refused (unanswerable). Tag: **grammar_gap**. Both refused: the top language within each country is a rank within groups. Before: both refused.
+- `spider:818` (spider_world_1, spider_ids_v03.json, trial 1): refused — refused (unanswerable). Tag: **gold_issue**. Both refused (a rank within groups); the gold returns a count of one per country that speaks the language, not the countries where it leads. Before: both refused.
+- `spider:821` (spider_world_1, spider_ids_v03.json, trial 1): refused — refused (unanswerable). Tag: **gold_issue**. Both refused (a rank within groups); the gold returns every country where the language is spoken, not where it leads. Before: both refused.
 
 ## Where a baseline beat Ledgerline
 

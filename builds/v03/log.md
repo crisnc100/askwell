@@ -495,3 +495,10 @@ ADR-008, with counted-right figures beside the official ones.
   same run id are left out), with the same numbers. Every other v0.3 report was rebuilt
   in replay mode, numbers unchanged.
 - Four notes quoted Spider question wording; they now paraphrase it.
+- The three before reports (`v03-holdout-before`, `v03-spider-new-before`,
+  `v03-csv-new-before`) were rebuilt from their own checkpoints with this branch's report
+  code (`paired.load_run`, then `report.write`; no model call), so they carry the
+  question-level figures (held-out before: Askwell 51 of 96, one-shot 78 of 96), every
+  miss with its triage note (51 and 106), and the five tables `v03-csv-new-before` could
+  not load (`no_id_column`). Status, spend and every table row are unchanged. spider:533's
+  note now says the CSV path refused it in `v03-csv-new`, with no SQL.

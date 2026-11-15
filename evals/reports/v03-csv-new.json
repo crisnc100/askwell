@@ -155,12 +155,12 @@
       "issue_codes": [],
       "item_id": "spider:533",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "Both systems grouped enrolments by student and semester, as the question says; the gold counts a student's enrolments across all semesters. Before: both wrong.",
+      "note": "v03-csv-new: CSV path refused it as unsupported, with no SQL; the question is expressible, as Askwell's grouped answer shows (which the gold still scores wrong).",
       "outcome": "refused",
       "refusal": "refused (unanswerable)",
       "schema": "spider_student_transcripts_tracking",
       "system": "askwell_csv",
-      "tag": "gold_issue",
+      "tag": "misread",
       "trial": 1
     },
     {

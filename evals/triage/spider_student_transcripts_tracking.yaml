@@ -16,9 +16,12 @@ spider:531:
     key word. Before: both wrong.'
   tag: misread
 spider:533:
-  note: 'Both systems grouped enrolments by student and semester, as the question says; the gold counts
-    a student''s enrolments across all semesters. Before: both wrong.'
+  note: 'Askwell grouped enrolments by student and semester, as the question says; the gold counts a student''s enrolments across all semesters. Before: both systems wrong, grouped the same way.'
   tag: gold_issue
+  runs:
+    v03-csv-new:
+      tag: misread
+      note: 'v03-csv-new: CSV path refused it as unsupported, with no SQL; the question is expressible, as Askwell''s grouped answer shows (which the gold still scores wrong).'
 spider:534:
   note: 'Askwell and the CSV path grouped by student and semester, as the question says; the gold ignores
     the semester. Before: both wrong.'

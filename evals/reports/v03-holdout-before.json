@@ -699,7 +699,47 @@
     }
   ],
   "deferred": {},
-  "floors": [],
+  "floors": [
+    {
+      "cause": null,
+      "checks": [
+        {
+          "met": false,
+          "metric": "execution_accuracy",
+          "rate": {
+            "ci95": [
+              0.4701348873220347,
+              0.5846894000312924
+            ],
+            "n": 152,
+            "of": 288,
+            "rate": 0.5277777777777778
+          },
+          "rule": ">= 80%"
+        },
+        {
+          "met": false,
+          "metric": "wrong_answer_rate_given_answered",
+          "rate": {
+            "ci95": [
+              0.04234929780136655,
+              0.12353021144692526
+            ],
+            "n": 12,
+            "of": 164,
+            "rate": 0.07317073170731707
+          },
+          "rule": "<= 5%"
+        }
+      ],
+      "gold": "holdout-v03.jsonl",
+      "met": false,
+      "model": "anthropic:claude-haiku-5-5",
+      "next": null,
+      "schema": "fieldservice",
+      "status_note": "with prompt interpret-v2"
+    }
+  ],
   "gold_files": [
     "holdout-v03.jsonl"
   ],
@@ -710,11 +750,12 @@
       "issue_codes": [],
       "item_id": "h3-005",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Wrong in 2 of 3 trials (3 of 3 before): asked for a fraction, it returned a percentage (ratio with as_percent), where the gold returns the fraction.",
       "outcome": "wrong",
       "refusal": null,
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "misread",
       "trial": 1
     },
     {
@@ -723,11 +764,12 @@
       "issue_codes": [],
       "item_id": "h3-022",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Needs a duration between two dates. Before: refused in every trial. After: right with durations.",
       "outcome": "refused",
       "refusal": "it needs a duration between two dates (opened_at to completed_at), which the intent cannot express",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 1
     },
     {
@@ -736,11 +778,12 @@
       "issue_codes": [],
       "item_id": "h3-026",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Needs a duration between two dates. Before: refused in every trial. After: right with durations.",
       "outcome": "refused",
       "refusal": "it needs a duration between two dates (invoices.issued_at to invoices.paid_at), which the intent cannot express",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 1
     },
     {
@@ -749,11 +792,12 @@
       "issue_codes": [],
       "item_id": "h3-031",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Needs a difference of two fields. Before: refused in every trial. After: right with computed.",
       "outcome": "refused",
       "refusal": "dollar markup per unit is unit_price minus unit_cost for each part, and the intent cannot express a difference between two fields. Averaging unit_price and unit_cost separately and subtracting is not available either, since ratios are the only way to combine two metrics.",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 1
     },
     {
@@ -762,11 +806,12 @@
       "issue_codes": [],
       "item_id": "h3-037",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Refused in every trial, before and after: it needs a count per customer that keeps customers with no sites (zero rows), which needs the count on the one side without a fan-out, which the intent cannot express.",
       "outcome": "refused",
       "refusal": "it asks for customers that have no related sites (zero-site customers must appear with a count of 0), and this intent cannot express 'has none' questions over the sites relationship",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 1
     },
     {
@@ -775,11 +820,12 @@
       "issue_codes": [],
       "item_id": "h3-038",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Wrong in 1 of 3 trials (3 of 3 before): it grouped by the customer id alone, without the customer name the gold returns.",
       "outcome": "wrong",
       "refusal": null,
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "misread",
       "trial": 1
     },
     {
@@ -788,11 +834,12 @@
       "issue_codes": [],
       "item_id": "h3-040",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Before: wrong in every trial, grouping by customer name merged customers who share a name. After: right; v0.3 groups by the id and the name (PR-1).",
       "outcome": "wrong",
       "refusal": null,
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "builder_bug",
       "trial": 1
     },
     {
@@ -801,11 +848,12 @@
       "issue_codes": [],
       "item_id": "h3-041",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Before: wrong in every trial for the same name merge as h3-040. After: right.",
       "outcome": "wrong",
       "refusal": null,
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "builder_bug",
       "trial": 1
     },
     {
@@ -814,11 +862,12 @@
       "issue_codes": [],
       "item_id": "h3-047",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Needs a duration between two dates. Before: refused in every trial. After: right with durations.",
       "outcome": "refused",
       "refusal": "it needs a duration between two dates (opened_at to completed_at) in days, which the intent cannot express",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 1
     },
     {
@@ -827,11 +876,12 @@
       "issue_codes": [],
       "item_id": "h3-049",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Needs a product of two fields. Before: refused in every trial. After: right with computed.",
       "outcome": "refused",
       "refusal": "the estimated labour charge needs a product of two fields (labor_hours times the technician's hourly_rate), which the intent cannot express",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 1
     },
     {
@@ -840,11 +890,12 @@
       "issue_codes": [],
       "item_id": "h3-050",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Refused in every trial, before and after: it needs a count per technician that keeps technicians with none (zero rows); grouping from the jobs side drops them and the other side fans out, which the intent cannot express.",
       "outcome": "refused",
       "refusal": "The question needs every technician listed, including those with zero jobs. Joins only run from work orders to technicians (many-to-one), so a technician with no work orders cannot appear in a grouped count. This is a 'has none' case, which the intent cannot express.",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 1
     },
     {
@@ -853,11 +904,12 @@
       "issue_codes": [],
       "item_id": "h3-058",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Refused in 2 of 3 trials, wrong in 1 (refused in every trial before): it needs one row per computed age bucket; the wrong trial put the buckets in columns of one row.",
       "outcome": "refused",
       "refusal": "Age buckets need days past due, which is a duration between invoices.due_at and today. The intent cannot express a duration or group rows into custom ranges, so it cannot produce the four buckets in one result.",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 1
     },
     {
@@ -866,11 +918,12 @@
       "issue_codes": [],
       "item_id": "h3-060",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Refused in every trial, before and after: it needs every catalogue part including unused ones with zero units, a count that keeps zero rows, which the intent cannot express.",
       "outcome": "refused",
       "refusal": "The registry only defines work_order_parts -> parts as many-to-one, so a summed usage quantity cannot be attached to each part from the parts side. Grouping from work_order_parts would drop parts with no usage rows, so the required zero rows for unused parts cannot be produced.",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 1
     },
     {
@@ -879,11 +932,12 @@
       "issue_codes": [],
       "item_id": "h3-061",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Needs a product of two fields. Before: refused in every trial. After: right with computed.",
       "outcome": "refused",
       "refusal": "The extended selling value needs quantity multiplied by unit_price for each part line, and the intent cannot express a product of two fields. Summing units used and summing unit prices separately would not give that value.",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 1
     },
     {
@@ -892,11 +946,12 @@
       "issue_codes": [],
       "item_id": "h3-063",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Refused in every trial, before and after: it needs quantity times (price minus cost), a computed value of three fields, which the intent cannot express.",
       "outcome": "refused",
       "refusal": "gross profit per part requires a product of two fields (quantity times the difference of unit_price and unit_cost), and the intent cannot express a product of fields",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 1
     },
     {
@@ -905,11 +960,12 @@
       "issue_codes": [],
       "item_id": "h3-065",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Wrong in every trial after (refused before), but the answer is the gold's: the gold returns 3,649 rows with no order, past the 1,000-row cap; Askwell returns the first 1,000 by work order, all with the gold's values, while the unordered gold cut to the same cap keeps other rows.",
       "outcome": "refused",
       "refusal": "it needs a product of two fields (work_order_parts.quantity times parts.unit_cost), which the intent cannot express",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "gold_issue",
       "trial": 1
     },
     {
@@ -918,11 +974,12 @@
       "issue_codes": [],
       "item_id": "h3-068",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Needs has none. Before: refused in every trial. After: right with has.",
       "outcome": "refused",
       "refusal": "it asks for work orders that have no related parts-usage rows (a 'has none' question), which the intent cannot express",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 1
     },
     {
@@ -931,11 +988,12 @@
       "issue_codes": [],
       "item_id": "h3-069",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Needs a product of two fields. Before: refused in every trial. After: right with computed.",
       "outcome": "refused",
       "refusal": "the question needs the product of work_order_parts.quantity and parts.unit_price (the selling value of each line), and the intent cannot express a product of two fields. Summing parts.unit_price or quantity separately would not give the value.",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 1
     },
     {
@@ -944,11 +1002,12 @@
       "issue_codes": [],
       "item_id": "h3-070",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Refused in every trial, before and after: it needs a segment total beside each customer's total, which the intent cannot express.",
       "outcome": "refused",
       "refusal": "the question needs each customer's invoiced total divided by its segment's total on the same row, which requires a share-of-group (window) calculation. A ratio can only divide metrics within the same grouped query, so the segment-level total cannot be computed alongside each customer's total.",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 1
     },
     {
@@ -957,11 +1016,12 @@
       "issue_codes": [],
       "item_id": "h3-071",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Refused in every trial, before and after: it needs the change between two quarters' totals per customer, which the intent cannot express.",
       "outcome": "refused",
       "refusal": "The fractional change from Q4 to Q1 requires computing (Q1 billed minus Q4 billed) divided by Q4 billed. The intent can only divide one metric by another, so it cannot express the subtraction. The per-quarter billed amounts and the both-quarters filter alone would answer a different question.",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 1
     },
     {
@@ -970,11 +1030,12 @@
       "issue_codes": [],
       "item_id": "h3-072",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Refused in every trial, before and after: it needs \"every site has\" a recent completed job (a universal condition over related rows), which the intent cannot express.",
       "outcome": "refused",
       "refusal": "The question requires that every site of a customer has a completed work order in the past 90 days. That is a 'for all' condition across related rows, which this intent cannot express. Filtering on sites and work orders only gives customers with at least one matching work order, not customers where every site matches.",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 1
     },
     {
@@ -983,11 +1044,12 @@
       "issue_codes": [],
       "item_id": "h3-073",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Refused in every trial, before and after: it needs a comparison with the average per segment; compare-with-an-aggregate refuses grouped comparisons by design, which the intent cannot express.",
       "outcome": "refused",
       "refusal": "the question compares each customer's billed total against an average taken over all customers in their region, including zero-total customers. That needs a per-customer aggregate (through invoices, work_orders and sites) used as a value inside another aggregate, and a regional average over customers with no invoices counted as zero. The intent can only aggregate base rows with one grouping level, so it cannot express this comparison or the zero-filled average.",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 1
     },
     {
@@ -996,11 +1058,12 @@
       "issue_codes": [],
       "item_id": "h3-074",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Refused in every trial, before and after: it needs each customer's first completed job date as a value to group by, which the intent cannot express.",
       "outcome": "refused",
       "refusal": "The question needs each customer's first completed job date compared with the account creation date plus 30 days. The intent can't express a duration between two dates, and it can't compare a per-customer earliest completion against another date field (customers.created_at plus 30 days), so the 'within 30 days' fraction cannot be computed.",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 1
     },
     {
@@ -1009,11 +1072,12 @@
       "issue_codes": [],
       "item_id": "h3-075",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Refused in every trial, before and after: it needs the difference between two grouped counts per site, which the intent cannot express.",
       "outcome": "refused",
       "refusal": "the increase is a difference between two counts (Q2 2026 minus Q1 2026) for each site, and the intent has no way to subtract one metric from another. It supports only ratios, so it cannot rank sites by that change.",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 1
     },
     {
@@ -1022,11 +1086,12 @@
       "issue_codes": [],
       "item_id": "h3-076",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Refused in every trial, before and after: it needs the gap between consecutive jobs (a window function), which the intent cannot express.",
       "outcome": "refused",
       "refusal": "computing the average gap in days between consecutive completion timestamps needs a duration between rows (lag over completed_at per site), which the intent cannot express; the completed-job count with a per-site having filter could be answered alone, but the gap metric cannot be",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 1
     },
     {
@@ -1035,11 +1100,12 @@
       "issue_codes": [],
       "item_id": "h3-077",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Refused in every trial, before and after: it needs the top site within each customer (a rank within groups), which the intent cannot express.",
       "outcome": "refused",
       "refusal": "The question needs the top site per customer (a per-group maximum with a tie-break), and the intent has no way to pick the highest row within each customer. Its limit applies to the whole result, not per customer. It also needs each customer's total next to each site's amount for the fraction, and that per-customer comparison is not expressible either.",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 1
     },
     {
@@ -1048,11 +1114,12 @@
       "issue_codes": [],
       "item_id": "h3-078",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Refused in every trial, before and after: it needs each repair matched to a later repair at the same site, which the intent cannot express.",
       "outcome": "refused",
       "refusal": "the question needs to match each completed repair to a later completed repair at the same site within 30 days of its completion, which requires a duration between two dates and a self-join of work orders; the intent cannot express either",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 1
     },
     {
@@ -1061,11 +1128,12 @@
       "issue_codes": [],
       "item_id": "h3-079",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Refused in every trial, before and after: it needs each technician compared with a pooled mean of the others, which the intent cannot express.",
       "outcome": "refused",
       "refusal": "computing opening-to-completion duration (completed_at minus opened_at) in days needs a duration between two dates, which the intent cannot express; a pooled peer mean within each region compared against each technician's own mean is also not expressible",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 1
     },
     {
@@ -1074,11 +1142,12 @@
       "issue_codes": [],
       "item_id": "h3-080",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Refused in every trial, before and after: it needs a dense rank within each skill level (a window function), which the intent cannot express.",
       "outcome": "refused",
       "refusal": "The intent has no ranking or window function, so it cannot produce a dense rank within each skill level. It also cannot keep technicians with zero invoiced totals, because the amounts must start from invoices and the join runs only from invoices to work orders to technicians, which drops technicians with no invoices.",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 1
     },
     {
@@ -1087,11 +1156,12 @@
       "issue_codes": [],
       "item_id": "h3-081",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Refused in every trial, before and after: it needs the longest streak of consecutive days (a window function), which the intent cannot express.",
       "outcome": "refused",
       "refusal": "computing the longest streak of consecutive calendar days requires gap-and-island logic over dates, which the intent cannot express; it also needs a per-technician consecutive-day count, not available as a metric",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 1
     },
     {
@@ -1100,11 +1170,12 @@
       "issue_codes": [],
       "item_id": "h3-082",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Refused in every trial, before and after: it needs a ranking by a difference of three aggregates, which the intent cannot express.",
       "outcome": "refused",
       "refusal": "the request needs products of fields (labor_hours times hourly_rate, and quantity times unit_price), an absolute difference between computed values, and a per-work-order comparison of those results. The intent can only aggregate single fields and cannot compute row-level products or differences, so it cannot express the ranking.",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 1
     },
     {
@@ -1113,11 +1184,12 @@
       "issue_codes": [],
       "item_id": "h3-083",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Refused in every trial, before and after: it needs a median and percentiles, which the intent cannot express.",
       "outcome": "refused",
       "refusal": "it needs a duration between two dates (opened_at to completed_at) and percentile aggregates (median and 90th percentile), which the intent cannot express; the registry offers only count, count_distinct, sum, avg, min and max",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 1
     },
     {
@@ -1126,11 +1198,12 @@
       "issue_codes": [],
       "item_id": "h3-084",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Refused in every trial, before and after: it needs the longest job within each quarter and type (a rank within groups), which the intent cannot express.",
       "outcome": "refused",
       "refusal": "it needs a duration between two dates (opened_at to completed_at) in days, which the intent cannot express. It also needs the single longest job within each quarter and job-type group with a tie-break by work order ID, which the intent cannot express either.",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 1
     },
     {
@@ -1139,11 +1212,12 @@
       "issue_codes": [],
       "item_id": "h3-085",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Refused in every trial, before and after: it needs a running total across months (a window function), which the intent cannot express.",
       "outcome": "refused",
       "refusal": "The question needs the duration between opened_at and completed_at (completed within seven days of opening), and the intent cannot express a duration between two dates. It also needs a cumulative fraction across months, which the intent has no way to compute.",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 1
     },
     {
@@ -1152,11 +1226,12 @@
       "issue_codes": [],
       "item_id": "h3-086",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Refused in every trial, before and after: it needs the previous month's revenue on each row (a window function), which the intent cannot express.",
       "outcome": "refused",
       "refusal": "The intent cannot compare each month with the preceding calendar month. A ratio can only divide metrics within the same row, so the month-over-month fractional change (and the Dec 2025 comparison for January) has no way to be expressed. The per-month non-void revenue by issue date is expressible, but the change column is not.",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 1
     },
     {
@@ -1165,11 +1240,12 @@
       "issue_codes": [],
       "item_id": "h3-087",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Refused in every trial, before and after: it needs a median and a percentile over per-customer means, which the intent cannot express.",
       "outcome": "refused",
       "refusal": "the question needs a duration between two dates (issued_at to paid_at), which the intent cannot express; it also needs a per-customer mean of that duration and then median and 90th percentile across customers, which are not expressible",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 1
     },
     {
@@ -1178,11 +1254,12 @@
       "issue_codes": [],
       "item_id": "h3-088",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Refused in every trial, before and after: it needs each customer's first invoice month as a value to compare, which the intent cannot express.",
       "outcome": "refused",
       "refusal": "the question needs each customer's first-ever invoice date, computed across all invoices, and then compared with each invoice's issue month. The intent has no way to derive a per-customer minimum date or to filter invoices against it, so the 'first invoice month' cohort cannot be expressed.",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 1
     },
     {
@@ -1191,11 +1268,12 @@
       "issue_codes": [],
       "item_id": "h3-089",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Refused in every trial, before and after: it needs a running total across the ranked customers, which the intent cannot express.",
       "outcome": "refused",
       "refusal": "the cumulative portfolio fraction through each customer is a running total across the ranked rows, which the intent cannot express. The intent can give each customer's amount and share of the portfolio, but not a running share in displayed order.",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 1
     },
     {
@@ -1204,11 +1282,12 @@
       "issue_codes": [],
       "item_id": "h3-090",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Refused in every trial, before and after: it needs the top three parts within each category (a rank within groups), which the intent cannot express.",
       "outcome": "refused",
       "refusal": "The question needs the top three parts within each category, but the intent has only one overall limit and cannot rank rows within a group. It also needs zero-usage parts kept while filtering usage to jobs completed year to date, which the intent cannot express.",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 1
     },
     {
@@ -1217,11 +1296,12 @@
       "issue_codes": [],
       "item_id": "h3-091",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Refused in every trial: after, the answer was cut off at the completion limit each time, so it could not be read as an intent. Refused in every trial before.",
       "outcome": "refused",
       "refusal": "The question needs two things the intent cannot express. First, it asks for parts used on work orders of all four job types, which is an intersection across job types, not a filter the intent supports. Second, the fraction needs the full catalogue count per category from the parts table, while the usage count runs from work_order_parts. Joins only follow many-to-one relationships, so parts cannot be the base entity with a count of its related work_order_parts rows, and the intent has no way to combine the two counts.",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "misread",
       "trial": 1
     },
     {
@@ -1230,11 +1310,12 @@
       "issue_codes": [],
       "item_id": "h3-092",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Refused in every trial, before and after: it needs parts used in both quarters (a set intersection), which the intent cannot express.",
       "outcome": "refused",
       "refusal": "The intent cannot express the change in each part's share of its category's units. That needs category-level denominators computed over all parts, and a difference between two share values. Restricting to parts that appear in both quarters also needs a cross-period condition, which the filters and having clauses cannot express.",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 1
     },
     {
@@ -1243,11 +1324,12 @@
       "issue_codes": [],
       "item_id": "h3-093",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Refused in every trial, before and after: it needs pairs of parts on the same job (a self-join), which the intent cannot express.",
       "outcome": "refused",
       "refusal": "pairing parts that occur together on the same work order requires a self-join of work_order_parts on work_order_id and counting distinct work orders per pair, which the intent cannot express",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 1
     },
     {
@@ -1256,11 +1338,12 @@
       "issue_codes": [],
       "item_id": "h3-094",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Refused in every trial, before and after: it needs each job's parts cost summed, then averaged per technician (an aggregate of an aggregate); one trial was cut off at the completion limit, which the intent cannot express.",
       "outcome": "refused",
       "refusal": "The average parts cost per job needs extended cost per line (quantity times unit_cost), which is a product of two fields and cannot be expressed. Including jobs with no recorded parts also requires counting work orders that have no related parts rows, which is a 'has none' question the intent cannot express.",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 1
     },
     {
@@ -1269,11 +1352,12 @@
       "issue_codes": [],
       "item_id": "h3-095",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Refused in every trial, before and after: it needs a segment total beside each part category's value, which the intent cannot express.",
       "outcome": "refused",
       "refusal": "The selling value of parts used needs quantity times unit_price (work_order_parts.quantity x parts.unit_price), a product of two fields, which this intent cannot express. Without it, the per-category selling value and its share of the segment total cannot be computed. Usage counts alone are answerable, but the question asks for the value measure too.",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 1
     },
     {
@@ -1282,11 +1366,12 @@
       "issue_codes": [],
       "item_id": "h3-096",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Refused in every trial, before and after: it needs a median, which the intent cannot express.",
       "outcome": "refused",
       "refusal": "the continuous median and 90th percentile of units per job are not available: the only aggregates are count, count_distinct, sum, avg, min and max, so percentiles and medians cannot be computed.",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 1
     },
     {
@@ -1295,11 +1380,12 @@
       "issue_codes": [],
       "item_id": "h3-005",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Wrong in 2 of 3 trials (3 of 3 before): asked for a fraction, it returned a percentage (ratio with as_percent), where the gold returns the fraction.",
       "outcome": "wrong",
       "refusal": null,
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "misread",
       "trial": 2
     },
     {
@@ -1308,11 +1394,12 @@
       "issue_codes": [],
       "item_id": "h3-022",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Needs a duration between two dates. Before: refused in every trial. After: right with durations.",
       "outcome": "refused",
       "refusal": "it needs a duration between two dates (opened_at to completed_at), which the intent cannot express",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 2
     },
     {
@@ -1321,11 +1408,12 @@
       "issue_codes": [],
       "item_id": "h3-026",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Needs a duration between two dates. Before: refused in every trial. After: right with durations.",
       "outcome": "refused",
       "refusal": "it needs a duration between two dates (invoices.issued_at to invoices.paid_at), which the intent cannot express",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 2
     },
     {
@@ -1334,11 +1422,12 @@
       "issue_codes": [],
       "item_id": "h3-031",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Needs a difference of two fields. Before: refused in every trial. After: right with computed.",
       "outcome": "refused",
       "refusal": "dollar markup per unit is unit_price minus unit_cost, a difference between two fields, which the intent cannot express. Ratios would give a percentage markup, not a dollar figure.",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 2
     },
     {
@@ -1347,11 +1436,12 @@
       "issue_codes": [],
       "item_id": "h3-037",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Refused in every trial, before and after: it needs a count per customer that keeps customers with no sites (zero rows), which needs the count on the one side without a fan-out, which the intent cannot express.",
       "outcome": "refused",
       "refusal": "Counting sites per customer, including customers with no sites, needs the one-to-many relationship from customers to sites kept even when a customer has no matching rows. The registry only joins many-to-one from the base entity, so a customer with zero sites cannot appear in the result.",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 2
     },
     {
@@ -1360,11 +1450,12 @@
       "issue_codes": [],
       "item_id": "h3-038",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Wrong in 1 of 3 trials (3 of 3 before): it grouped by the customer id alone, without the customer name the gold returns.",
       "outcome": "wrong",
       "refusal": null,
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "misread",
       "trial": 2
     },
     {
@@ -1373,11 +1464,12 @@
       "issue_codes": [],
       "item_id": "h3-040",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Before: wrong in every trial, grouping by customer name merged customers who share a name. After: right; v0.3 groups by the id and the name (PR-1).",
       "outcome": "wrong",
       "refusal": null,
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "builder_bug",
       "trial": 2
     },
     {
@@ -1386,11 +1478,12 @@
       "issue_codes": [],
       "item_id": "h3-041",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Before: wrong in every trial for the same name merge as h3-040. After: right.",
       "outcome": "wrong",
       "refusal": null,
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "builder_bug",
       "trial": 2
     },
     {
@@ -1399,11 +1492,12 @@
       "issue_codes": [],
       "item_id": "h3-047",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Needs a duration between two dates. Before: refused in every trial. After: right with durations.",
       "outcome": "refused",
       "refusal": "it needs a duration between two dates (opened_at to completed_at) in days, which the intent cannot express",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 2
     },
     {
@@ -1412,11 +1506,12 @@
       "issue_codes": [],
       "item_id": "h3-049",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Needs a product of two fields. Before: refused in every trial. After: right with computed.",
       "outcome": "refused",
       "refusal": "it needs a product of two fields (labor_hours times the technician's hourly_rate), which the intent cannot express. The registry has no computed labour-charge field.",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 2
     },
     {
@@ -1425,11 +1520,12 @@
       "issue_codes": [],
       "item_id": "h3-050",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Refused in every trial, before and after: it needs a count per technician that keeps technicians with none (zero rows); grouping from the jobs side drops them and the other side fans out, which the intent cannot express.",
       "outcome": "refused",
       "refusal": "Listing every technician, including those with zero matching jobs, needs a one-to-many join from technicians to work_orders. The registry joins only run many-to-one (work_orders to technicians), so a grouped count over work_orders would leave out technicians with no open, scheduled or in-progress jobs. This is a 'has none' style question that the intent cannot express.",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 2
     },
     {
@@ -1440,11 +1536,12 @@
       ],
       "item_id": "h3-057",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Before: refused in 1 of 3 trials, right in the others. After: right in every trial.",
       "outcome": "refused",
       "refusal": "The customer sales region (customers.region) is not reachable from invoices. Invoices links only to work_orders, and the path to customers runs through work_orders, sites and customers. The registry has no way to express that multi-hop join, and no other field on invoices, work_orders or sites carries a sales region.",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "misread",
       "trial": 2
     },
     {
@@ -1453,11 +1550,12 @@
       "issue_codes": [],
       "item_id": "h3-058",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Refused in 2 of 3 trials, wrong in 1 (refused in every trial before): it needs one row per computed age bucket; the wrong trial put the buckets in columns of one row.",
       "outcome": "refused",
       "refusal": "Bucketing by days past due needs a duration between due_at and today, which the intent cannot express. Grouping by age bucket also needs a computed field, and the registry has none.",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 2
     },
     {
@@ -1466,11 +1564,12 @@
       "issue_codes": [],
       "item_id": "h3-060",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Refused in every trial, before and after: it needs every catalogue part including unused ones with zero units, a count that keeps zero rows, which the intent cannot express.",
       "outcome": "refused",
       "refusal": "Listing parts with zero units used requires starting from the parts catalogue and keeping parts that have no work_order_parts rows. The intent always starts from a base entity that has many-to-one joins, so it cannot keep unmatched catalogue parts. Starting from work_order_parts would drop unused parts.",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 2
     },
     {
@@ -1479,11 +1578,12 @@
       "issue_codes": [],
       "item_id": "h3-061",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Needs a product of two fields. Before: refused in every trial. After: right with computed.",
       "outcome": "refused",
       "refusal": "the extended value needs a product of two fields (work_order_parts.quantity times parts.unit_price), which the intent cannot express",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 2
     },
     {
@@ -1492,11 +1592,12 @@
       "issue_codes": [],
       "item_id": "h3-063",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Refused in every trial, before and after: it needs quantity times (price minus cost), a computed value of three fields, which the intent cannot express.",
       "outcome": "refused",
       "refusal": "gross profit per part requires multiplying quantity by unit price minus unit cost, which is a product of fields and cannot be expressed in this intent",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 2
     },
     {
@@ -1505,11 +1606,12 @@
       "issue_codes": [],
       "item_id": "h3-065",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Wrong in every trial after (refused before), but the answer is the gold's: the gold returns 3,649 rows with no order, past the 1,000-row cap; Askwell returns the first 1,000 by work order, all with the gold's values, while the unordered gold cut to the same cap keeps other rows.",
       "outcome": "refused",
       "refusal": "the question needs a product of two fields (quantity times parts.unit_cost per line), which the intent cannot express; only sums of single fields are supported",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "gold_issue",
       "trial": 2
     },
     {
@@ -1518,11 +1620,12 @@
       "issue_codes": [],
       "item_id": "h3-068",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Needs has none. Before: refused in every trial. After: right with has.",
       "outcome": "refused",
       "refusal": "it asks for work orders with no related parts usage rows (a 'has none' question), which the intent cannot express",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 2
     },
     {
@@ -1531,11 +1634,12 @@
       "issue_codes": [],
       "item_id": "h3-069",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Needs a product of two fields. Before: refused in every trial. After: right with computed.",
       "outcome": "refused",
       "refusal": "The question needs the product of quantity (work_order_parts) and unit_price (parts) per line, and the intent cannot express a product of two fields. Summing unit_price alone would ignore how many units were used.",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 2
     },
     {
@@ -1544,11 +1648,12 @@
       "issue_codes": [],
       "item_id": "h3-070",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Refused in every trial, before and after: it needs a segment total beside each customer's total, which the intent cannot express.",
       "outcome": "refused",
       "refusal": "the question needs each customer's total divided by its segment's total. The intent can only divide metrics computed within the same grouping, and it cannot compare a customer's total against a segment-level total in the same result.",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 2
     },
     {
@@ -1557,11 +1662,12 @@
       "issue_codes": [],
       "item_id": "h3-071",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Refused in every trial, before and after: it needs the change between two quarters' totals per customer, which the intent cannot express.",
       "outcome": "refused",
       "refusal": "The fractional change from Q4 to Q1 is (Q1 - Q4) / Q4. The intent can divide one metric by another but cannot subtract one metric from another, so the change cannot be expressed. The per-quarter billed amounts and the both-quarters filter could be expressed, but the change cannot.",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 2
     },
     {
@@ -1570,11 +1676,12 @@
       "issue_codes": [],
       "item_id": "h3-072",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Refused in every trial, before and after: it needs \"every site has\" a recent completed job (a universal condition over related rows), which the intent cannot express.",
       "outcome": "refused",
       "refusal": "the question requires every site of a customer to have a completed work order in the past 90 days (a for-all condition across related rows), which the intent cannot express. It can only express 'at least one' completed work order, not 'at each site'.",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 2
     },
     {
@@ -1583,11 +1690,12 @@
       "issue_codes": [],
       "item_id": "h3-073",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Refused in every trial, before and after: it needs a comparison with the average per segment; compare-with-an-aggregate refuses grouped comparisons by design, which the intent cannot express.",
       "outcome": "refused",
       "refusal": "the question compares each customer's total to the average of all customers in their own region, which needs a per-row comparison against a group-level average (a window or self-join), and the intent cannot express filtering on a regional average or counting customers with no invoices as zero in that average",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 2
     },
     {
@@ -1596,11 +1704,12 @@
       "issue_codes": [],
       "item_id": "h3-074",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Refused in every trial, before and after: it needs each customer's first completed job date as a value to group by, which the intent cannot express.",
       "outcome": "refused",
       "refusal": "it needs the gap between each customer's created_at and their first completed job's completed_at, compared to a 30-day window; the intent cannot express a duration between two dates, and it cannot compute a per-customer first completion through the customer-site-work order path",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 2
     },
     {
@@ -1609,11 +1718,12 @@
       "issue_codes": [],
       "item_id": "h3-075",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Refused in every trial, before and after: it needs the difference between two grouped counts per site, which the intent cannot express.",
       "outcome": "refused",
       "refusal": "the intent can count work orders per site for Q1 2026 and for Q2 2026 (with metric-level where conditions), but it cannot subtract one count from the other, so the increase and its ranking cannot be expressed",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 2
     },
     {
@@ -1622,11 +1732,12 @@
       "issue_codes": [],
       "item_id": "h3-076",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Refused in every trial, before and after: it needs the gap between consecutive jobs (a window function), which the intent cannot express.",
       "outcome": "refused",
       "refusal": "the question needs a duration between consecutive completion timestamps per site (the gap in days between successive completed_at values), which requires comparing rows to their neighbours and computing date differences; the intent cannot express durations or per-row sequence comparisons",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 2
     },
     {
@@ -1635,11 +1746,12 @@
       "issue_codes": [],
       "item_id": "h3-077",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Refused in every trial, before and after: it needs the top site within each customer (a rank within groups), which the intent cannot express.",
       "outcome": "refused",
       "refusal": "The intent can total invoice amounts per customer and per site, but it cannot pick the single highest-amount site within each customer, apply a name tie-break to that choice, or compute each winning site's share of its customer's total in one result. Those per-group top-1 and within-group share calculations are not expressible here.",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 2
     },
     {
@@ -1648,11 +1760,12 @@
       "issue_codes": [],
       "item_id": "h3-078",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Refused in every trial, before and after: it needs each repair matched to a later repair at the same site, which the intent cannot express.",
       "outcome": "refused",
       "refusal": "the question needs to match each completed repair to a later completed repair at the same site within 30 days, which requires a self-join on work orders and a duration between two dates; the intent cannot express either",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 2
     },
     {
@@ -1661,11 +1774,12 @@
       "issue_codes": [],
       "item_id": "h3-079",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Refused in every trial, before and after: it needs each technician compared with a pooled mean of the others, which the intent cannot express.",
       "outcome": "refused",
       "refusal": "computing opening-to-completion duration (completed_at minus opened_at) in days needs a duration between two dates, which the intent cannot express; comparing each technician to a pooled peer mean in the same region would also need a per-region peer aggregate that the intent cannot express",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 2
     },
     {
@@ -1674,11 +1788,12 @@
       "issue_codes": [],
       "item_id": "h3-080",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Refused in every trial, before and after: it needs a dense rank within each skill level (a window function), which the intent cannot express.",
       "outcome": "refused",
       "refusal": "The request needs a dense rank computed within each skill level, which the intent cannot express (there is no ranking or window operation). It also needs every active technician listed, including those with zero invoices, and the join path from technicians to invoices runs one-to-many through work orders, so zero-total technicians cannot be kept reliably.",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 2
     },
     {
@@ -1687,11 +1802,12 @@
       "issue_codes": [],
       "item_id": "h3-081",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Refused in every trial, before and after: it needs the longest streak of consecutive days (a window function), which the intent cannot express.",
       "outcome": "refused",
       "refusal": "computing the longest streak of consecutive days with completed jobs needs gap-and-island logic over calendar dates, which this intent cannot express; it has no way to measure runs of consecutive dates per technician.",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 2
     },
     {
@@ -1700,11 +1816,12 @@
       "issue_codes": [],
       "item_id": "h3-082",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Refused in every trial, before and after: it needs a ranking by a difference of three aggregates, which the intent cannot express.",
       "outcome": "refused",
       "refusal": "the question needs products of two fields (labour_hours times technicians.hourly_rate, and quantity times parts.unit_price) and an absolute difference between computed values, which the intent cannot express",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 2
     },
     {
@@ -1713,11 +1830,12 @@
       "issue_codes": [],
       "item_id": "h3-083",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Refused in every trial, before and after: it needs a median and percentiles, which the intent cannot express.",
       "outcome": "refused",
       "refusal": "the question needs a duration between opened_at and completed_at, and median and 90th percentile aggregates, which the intent cannot express (only count, count_distinct, sum, avg, min and max are available)",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 2
     },
     {
@@ -1726,11 +1844,12 @@
       "issue_codes": [],
       "item_id": "h3-084",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Refused in every trial, before and after: it needs the longest job within each quarter and type (a rank within groups), which the intent cannot express.",
       "outcome": "refused",
       "refusal": "the question needs the duration in days between opened_at and completed_at, which the intent cannot express (no date difference), and it needs a per-group top-1 selection with tie-breaking by work order ID, which the intent cannot express either",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 2
     },
     {
@@ -1739,11 +1858,12 @@
       "issue_codes": [],
       "item_id": "h3-085",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Refused in every trial, before and after: it needs a running total across months (a window function), which the intent cannot express.",
       "outcome": "refused",
       "refusal": "The question needs the number of days between opened_at and completed_at (completed within seven days of opening), which is a duration between two dates and cannot be expressed. The cumulative fraction across months would also need a running total, which the intent cannot express.",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 2
     },
     {
@@ -1752,11 +1872,12 @@
       "issue_codes": [],
       "item_id": "h3-086",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Refused in every trial, before and after: it needs the previous month's revenue on each row (a window function), which the intent cannot express.",
       "outcome": "refused",
       "refusal": "The intent cannot compare each month with the preceding calendar month. It has no lag or previous-period value per row, and no ratio across periods, so the fractional change (and the blank change where the prior month is zero) cannot be computed. Its date_series can show monthly non-void revenue by issue date, but a series takes one date range for all series, so it cannot bring in December 2025 for the January comparison.",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 2
     },
     {
@@ -1765,11 +1886,12 @@
       "issue_codes": [],
       "item_id": "h3-087",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Refused in every trial, before and after: it needs a median and a percentile over per-customer means, which the intent cannot express.",
       "outcome": "refused",
       "refusal": "computing issue-to-payment days needs a duration between two dates (issued_at to paid_at), which the intent cannot express; and per-customer means followed by segment median and 90th percentile would need a second aggregation level and percentile metrics, which are not available",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 2
     },
     {
@@ -1778,11 +1900,12 @@
       "issue_codes": [],
       "item_id": "h3-088",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Refused in every trial, before and after: it needs each customer's first invoice month as a value to compare, which the intent cannot express.",
       "outcome": "refused",
       "refusal": "The question needs each customer's first-ever invoice month, which is a per-customer minimum over all invoices. The registry has no such field, and filters cannot compare an invoice date against a customer's earliest invoice date. The intent cannot express that condition, so the 'first invoice month' cohort split cannot be built.",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 2
     },
     {
@@ -1791,11 +1914,12 @@
       "issue_codes": [],
       "item_id": "h3-089",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Refused in every trial, before and after: it needs a running total across the ranked customers, which the intent cannot express.",
       "outcome": "refused",
       "refusal": "The question asks for a cumulative portfolio fraction (a running total across the ranked customers). The intent cannot express running totals or window calculations, and it cannot divide each customer's amount by the portfolio total in the same grouped row.",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 2
     },
     {
@@ -1804,11 +1928,12 @@
       "issue_codes": [],
       "item_id": "h3-090",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Refused in every trial, before and after: it needs the top three parts within each category (a rank within groups), which the intent cannot express.",
       "outcome": "refused",
       "refusal": "The request needs the top three parts within each category. The intent's limit applies to the whole result, not per category, so it cannot return a per-group top-three. It would also need zero-usage parts kept while filtering usage to completed work orders year to date, which the intent cannot express cleanly.",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 2
     },
     {
@@ -1817,11 +1942,12 @@
       "issue_codes": [],
       "item_id": "h3-091",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Refused in every trial: after, the answer was cut off at the completion limit each time, so it could not be read as an intent. Refused in every trial before.",
       "outcome": "refused",
       "refusal": "The question asks to keep categories with zero used parts (a 'has none' case), which needs unmatched catalogue parts kept in the results. The intent cannot express that. It also needs the full catalogue count per category alongside the count of parts used in 2025, and the intent cannot join both without restricting the catalogue to parts that were used.",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "misread",
       "trial": 2
     },
     {
@@ -1830,11 +1956,12 @@
       "issue_codes": [],
       "item_id": "h3-092",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Refused in every trial, before and after: it needs parts used in both quarters (a set intersection), which the intent cannot express.",
       "outcome": "refused",
       "refusal": "The question needs a per-part share of category units in each quarter, with the category denominator taken over all parts used in that quarter, and then the change between quarters. A ratio can only divide metrics computed on the same row, and the intent has one date range per query, so it cannot form category-level totals for each quarter alongside part-level units. It also cannot restrict results to parts that appear in both quarters, which needs an intersection across two date windows.",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 2
     },
     {
@@ -1843,11 +1970,12 @@
       "issue_codes": [],
       "item_id": "h3-093",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Refused in every trial, before and after: it needs pairs of parts on the same job (a self-join), which the intent cannot express.",
       "outcome": "refused",
       "refusal": "it needs pairs of parts that occur on the same work order (a self-join of work_order_parts with distinct work-order counts per pair), which the intent cannot express",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 2
     },
     {
@@ -1856,11 +1984,12 @@
       "issue_codes": [],
       "item_id": "h3-094",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Refused in every trial, before and after: it needs each job's parts cost summed, then averaged per technician (an aggregate of an aggregate); one trial was cut off at the completion limit, which the intent cannot express.",
       "outcome": "refused",
       "refusal": "The cost per job needs the parts cost, which is unit_cost times quantity per work_order_parts line. That is a product of two fields, which the intent cannot express. The fraction of completed jobs that used any parts also needs a count of jobs that have related part lines, and the registry only joins from work_order_parts up to work_orders, not down from work_orders to its part lines.",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 2
     },
     {
@@ -1869,11 +1998,12 @@
       "issue_codes": [],
       "item_id": "h3-095",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Refused in every trial, before and after: it needs a segment total beside each part category's value, which the intent cannot express.",
       "outcome": "refused",
       "refusal": "The selling value of parts used needs quantity times unit_price (work_order_parts.quantity x parts.unit_price), and the intent cannot express a product of two fields. Summing unit_price alone would ignore quantity, so the value metric and the segment share cannot be computed.",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 2
     },
     {
@@ -1882,11 +2012,12 @@
       "issue_codes": [],
       "item_id": "h3-096",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Refused in every trial, before and after: it needs a median, which the intent cannot express.",
       "outcome": "refused",
       "refusal": "the intent supports only count, count_distinct, sum, avg, min and max, so a continuous median and a 90th percentile of units per job cannot be computed",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 2
     },
     {
@@ -1895,11 +2026,12 @@
       "issue_codes": [],
       "item_id": "h3-005",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Wrong in 2 of 3 trials (3 of 3 before): asked for a fraction, it returned a percentage (ratio with as_percent), where the gold returns the fraction.",
       "outcome": "wrong",
       "refusal": null,
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "misread",
       "trial": 3
     },
     {
@@ -1908,11 +2040,12 @@
       "issue_codes": [],
       "item_id": "h3-022",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Needs a duration between two dates. Before: refused in every trial. After: right with durations.",
       "outcome": "refused",
       "refusal": "it needs a duration between two dates (opened_at to completed_at), which the intent cannot express",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 3
     },
     {
@@ -1921,11 +2054,12 @@
       "issue_codes": [],
       "item_id": "h3-026",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Needs a duration between two dates. Before: refused in every trial. After: right with durations.",
       "outcome": "refused",
       "refusal": "it needs a duration between two dates (invoices.issued_at to invoices.paid_at), which the intent cannot express",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 3
     },
     {
@@ -1934,11 +2068,12 @@
       "issue_codes": [],
       "item_id": "h3-031",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Needs a difference of two fields. Before: refused in every trial. After: right with computed.",
       "outcome": "refused",
       "refusal": "the markup per unit is unit_price minus unit_cost, a difference between two fields, and the intent cannot compute a difference or combine two fields in one metric",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 3
     },
     {
@@ -1947,11 +2082,12 @@
       "issue_codes": [],
       "item_id": "h3-037",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Refused in every trial, before and after: it needs a count per customer that keeps customers with no sites (zero rows), which needs the count on the one side without a fan-out, which the intent cannot express.",
       "outcome": "refused",
       "refusal": "Listing every customer including those with zero sites needs the customers table kept even when it has no matching sites. The registry only joins sites to customers from the sites side, so a site count per customer would drop customers with no sites, and the intent cannot express keeping unmatched rows.",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 3
     },
     {
@@ -1960,11 +2096,12 @@
       "issue_codes": [],
       "item_id": "h3-038",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Wrong in 1 of 3 trials (3 of 3 before): it grouped by the customer id alone, without the customer name the gold returns.",
       "outcome": "wrong",
       "refusal": null,
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "misread",
       "trial": 3
     },
     {
@@ -1973,11 +2110,12 @@
       "issue_codes": [],
       "item_id": "h3-040",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Before: wrong in every trial, grouping by customer name merged customers who share a name. After: right; v0.3 groups by the id and the name (PR-1).",
       "outcome": "wrong",
       "refusal": null,
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "builder_bug",
       "trial": 3
     },
     {
@@ -1989,11 +2127,12 @@
       ],
       "item_id": "h3-041",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Before: wrong in every trial for the same name merge as h3-040. After: right.",
       "outcome": "wrong",
       "refusal": null,
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "builder_bug",
       "trial": 3
     },
     {
@@ -2002,11 +2141,12 @@
       "issue_codes": [],
       "item_id": "h3-047",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Needs a duration between two dates. Before: refused in every trial. After: right with durations.",
       "outcome": "refused",
       "refusal": "it needs a duration between two dates (opened_at to completed_at) per technician, which the intent cannot express",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 3
     },
     {
@@ -2015,11 +2155,12 @@
       "issue_codes": [],
       "item_id": "h3-049",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Needs a product of two fields. Before: refused in every trial. After: right with computed.",
       "outcome": "refused",
       "refusal": "the estimated labour charge needs a product of two fields (labor_hours times technicians.hourly_rate), which the intent cannot express",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 3
     },
     {
@@ -2028,11 +2169,12 @@
       "issue_codes": [],
       "item_id": "h3-050",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Refused in every trial, before and after: it needs a count per technician that keeps technicians with none (zero rows); grouping from the jobs side drops them and the other side fans out, which the intent cannot express.",
       "outcome": "refused",
       "refusal": "The question needs every technician listed, including those with zero matching jobs. A grouped count can only start from work_orders and joins to technicians, so technicians with no open, scheduled or in-progress jobs would be dropped. The intent has no way to keep unmatched technicians with a zero count, and the registry has no reverse relationship from technicians to work_orders.",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 3
     },
     {
@@ -2041,11 +2183,12 @@
       "issue_codes": [],
       "item_id": "h3-058",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Refused in 2 of 3 trials, wrong in 1 (refused in every trial before): it needs one row per computed age bucket; the wrong trial put the buckets in columns of one row.",
       "outcome": "refused",
       "refusal": "Age buckets need the number of days between each invoice's due_at and today, which is a duration between two dates. The intent cannot express that, and it cannot filter on computed day ranges.",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 3
     },
     {
@@ -2054,11 +2197,12 @@
       "issue_codes": [],
       "item_id": "h3-060",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Refused in every trial, before and after: it needs every catalogue part including unused ones with zero units, a count that keeps zero rows, which the intent cannot express.",
       "outcome": "refused",
       "refusal": "Listing every part including those with zero usage needs the parts table to keep rows that have no matching work_order_parts rows. The intent joins work_order_parts from the parts side only as a related-rows aggregate, and cannot express 'has none' or keep unmatched items with a zero total.",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 3
     },
     {
@@ -2067,11 +2211,12 @@
       "issue_codes": [],
       "item_id": "h3-061",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Needs a product of two fields. Before: refused in every trial. After: right with computed.",
       "outcome": "refused",
       "refusal": "The extended selling value needs quantity multiplied by unit_price for each line, which is a product of two fields. The intent cannot express a product of two fields, so the per-category value cannot be computed.",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 3
     },
     {
@@ -2080,11 +2225,12 @@
       "issue_codes": [],
       "item_id": "h3-063",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Refused in every trial, before and after: it needs quantity times (price minus cost), a computed value of three fields, which the intent cannot express.",
       "outcome": "refused",
       "refusal": "gross profit per part requires the product of quantity and the difference between unit_price and unit_cost, and the intent cannot express a product of two fields (or a difference of two fields inside a sum).",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 3
     },
     {
@@ -2093,11 +2239,12 @@
       "issue_codes": [],
       "item_id": "h3-065",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Wrong in every trial after (refused before), but the answer is the gold's: the gold returns 3,649 rows with no order, past the 1,000-row cap; Askwell returns the first 1,000 by work order, all with the gold's values, while the unordered gold cut to the same cap keeps other rows.",
       "outcome": "refused",
       "refusal": "the question needs a product of two fields (quantity times unit_cost), which the intent cannot express; quantity and unit_cost can only be summed separately",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "gold_issue",
       "trial": 3
     },
     {
@@ -2106,11 +2253,12 @@
       "issue_codes": [],
       "item_id": "h3-068",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Needs has none. Before: refused in every trial. After: right with has.",
       "outcome": "refused",
       "refusal": "it asks for work orders with no related parts-usage rows (a 'has none' question), which the intent cannot express",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 3
     },
     {
@@ -2119,11 +2267,12 @@
       "issue_codes": [],
       "item_id": "h3-069",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Needs a product of two fields. Before: refused in every trial. After: right with computed.",
       "outcome": "refused",
       "refusal": "The value of parts used needs unit_price multiplied by quantity on each usage line, and the intent cannot express a product of two fields. Summing parts.unit_price alone would ignore quantity, so the question cannot be answered faithfully.",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 3
     },
     {
@@ -2132,11 +2281,12 @@
       "issue_codes": [],
       "item_id": "h3-070",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Refused in every trial, before and after: it needs a segment total beside each customer's total, which the intent cannot express.",
       "outcome": "refused",
       "refusal": "the question asks for each customer's share of their segment's total, which needs a segment-level total computed alongside each customer row. The intent has no way to divide a per-customer metric by a per-segment metric in the same result. The per-customer name, segment and non-void invoiced total are answerable on their own, but the fraction is not.",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 3
     },
     {
@@ -2145,11 +2295,12 @@
       "issue_codes": [],
       "item_id": "h3-071",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Refused in every trial, before and after: it needs the change between two quarters' totals per customer, which the intent cannot express.",
       "outcome": "refused",
       "refusal": "The fractional change from Q4 to Q1 needs a difference between two quarterly totals, ((Q1 - Q4) / Q4). The intent can compute each quarter's billed amount per customer and a ratio of one total to another, but it cannot subtract one metric from another. A ratio of Q1 to Q4 would not be the requested change.",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 3
     },
     {
@@ -2158,11 +2309,12 @@
       "issue_codes": [],
       "item_id": "h3-072",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Refused in every trial, before and after: it needs \"every site has\" a recent completed job (a universal condition over related rows), which the intent cannot express.",
       "outcome": "refused",
       "refusal": "The question needs a universal condition: each customer's sites must all have a completed work order in the last 90 days. The intent can filter rows and count or sum them, but it cannot express 'every site of the customer' (a for-all check across related sites), so it cannot be answered faithfully.",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 3
     },
     {
@@ -2171,11 +2323,12 @@
       "issue_codes": [],
       "item_id": "h3-073",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Refused in every trial, before and after: it needs a comparison with the average per segment; compare-with-an-aggregate refuses grouped comparisons by design, which the intent cannot express.",
       "outcome": "refused",
       "refusal": "the question compares each customer's total against an average across other customers in the same region (a per-region average joined back to each customer), which the intent cannot express; it also needs customers with no invoices counted as zero, which is a has-none style calculation.",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 3
     },
     {
@@ -2184,11 +2337,12 @@
       "issue_codes": [],
       "item_id": "h3-074",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Refused in every trial, before and after: it needs each customer's first completed job date as a value to group by, which the intent cannot express.",
       "outcome": "refused",
       "refusal": "the question needs a duration between two dates (each customer's account creation and the completion of their first-ever completed job, within 30 days). The intent has no way to express a date difference or a per-customer first-completion date, so it cannot be computed.",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 3
     },
     {
@@ -2197,11 +2351,12 @@
       "issue_codes": [],
       "item_id": "h3-075",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Refused in every trial, before and after: it needs the difference between two grouped counts per site, which the intent cannot express.",
       "outcome": "refused",
       "refusal": "the increase is the difference between two per-site counts (Q2 2026 minus Q1 2026), and the intent has no way to subtract one metric from another. Only ratios of metrics are supported, so the increase, and therefore the top five by increase, cannot be expressed.",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 3
     },
     {
@@ -2210,11 +2365,12 @@
       "issue_codes": [],
       "item_id": "h3-076",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Refused in every trial, before and after: it needs the gap between consecutive jobs (a window function), which the intent cannot express.",
       "outcome": "refused",
       "refusal": "it needs the gap in days between consecutive completion timestamps per site, which is a duration between dates (and a per-row previous-value comparison) that the intent cannot express",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 3
     },
     {
@@ -2223,11 +2379,12 @@
       "issue_codes": [],
       "item_id": "h3-077",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Refused in every trial, before and after: it needs the top site within each customer (a rank within groups), which the intent cannot express.",
       "outcome": "refused",
       "refusal": "The question needs the top site within each customer (a per-customer ranking with a tie-break). The intent's limit and order_by apply to the whole result, not per customer, so it cannot pick one winning site for each customer.",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 3
     },
     {
@@ -2236,11 +2393,12 @@
       "issue_codes": [],
       "item_id": "h3-078",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Refused in every trial, before and after: it needs each repair matched to a later repair at the same site, which the intent cannot express.",
       "outcome": "refused",
       "refusal": "the question needs to match each completed repair to another completed repair at the same site within 30 days after it, which compares rows of the same table by date and site; the intent can only filter and aggregate single rows and cannot express a self-match or a duration between two dates",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 3
     },
     {
@@ -2249,11 +2407,12 @@
       "issue_codes": [],
       "item_id": "h3-079",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Refused in every trial, before and after: it needs each technician compared with a pooled mean of the others, which the intent cannot express.",
       "outcome": "refused",
       "refusal": "computing opening-to-completion duration (completed_at minus opened_at) in days needs a duration between two dates, which the intent cannot express; comparing each technician to a pooled peer mean in the same region also needs a per-region peer aggregate that cannot be expressed",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 3
     },
     {
@@ -2262,11 +2421,12 @@
       "issue_codes": [],
       "item_id": "h3-080",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Refused in every trial, before and after: it needs a dense rank within each skill level (a window function), which the intent cannot express.",
       "outcome": "refused",
       "refusal": "the intent has no way to compute a dense rank within each skill level (a window ranking over grouped totals), and it has no option to keep technicians with zero totals. Ordering by amount is possible, but the per-skill-level rank column is not expressible.",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 3
     },
     {
@@ -2275,11 +2435,12 @@
       "issue_codes": [],
       "item_id": "h3-081",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Refused in every trial, before and after: it needs the longest streak of consecutive days (a window function), which the intent cannot express.",
       "outcome": "refused",
       "refusal": "computing the longest streak of consecutive calendar days with completed jobs needs gap-and-island logic over dates, which this intent cannot express; it has no way to count consecutive days or compute a duration between dates.",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 3
     },
     {
@@ -2288,11 +2449,12 @@
       "issue_codes": [],
       "item_id": "h3-082",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Refused in every trial, before and after: it needs a ranking by a difference of three aggregates, which the intent cannot express.",
       "outcome": "refused",
       "refusal": "the question needs products of two fields (labour_hours times technicians.hourly_rate, and work_order_parts.quantity times parts.unit_price) and an absolute difference between computed values, which the intent cannot express",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 3
     },
     {
@@ -2301,11 +2463,12 @@
       "issue_codes": [],
       "item_id": "h3-083",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Refused in every trial, before and after: it needs a median and percentiles, which the intent cannot express.",
       "outcome": "refused",
       "refusal": "the question needs the number of days between opened_at and completed_at (a duration between two dates) and median and 90th-percentile aggregates; the intent supports only count, count_distinct, sum, avg, min and max, and cannot express either.",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 3
     },
     {
@@ -2314,11 +2477,12 @@
       "issue_codes": [],
       "item_id": "h3-084",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Refused in every trial, before and after: it needs the longest job within each quarter and type (a rank within groups), which the intent cannot express.",
       "outcome": "refused",
       "refusal": "it needs a duration between two dates (opened_at to completed_at), which the intent cannot express, so the longest job per quarter and type cannot be computed",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 3
     },
     {
@@ -2327,11 +2491,12 @@
       "issue_codes": [],
       "item_id": "h3-085",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Refused in every trial, before and after: it needs a running total across months (a window function), which the intent cannot express.",
       "outcome": "refused",
       "refusal": "Counting jobs completed within seven days of opening needs a duration between opened_at and completed_at, which the intent cannot express. Comparing two fields only supports direct comparison, not a date difference of seven days.",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 3
     },
     {
@@ -2340,11 +2505,12 @@
       "issue_codes": [],
       "item_id": "h3-086",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Refused in every trial, before and after: it needs the previous month's revenue on each row (a window function), which the intent cannot express.",
       "outcome": "refused",
       "refusal": "The request needs a period-over-period comparison: each month's revenue divided into the preceding month's revenue, with the change as a fraction. The intent has no way to reference the previous period's value or compute a ratio between periods. A date_series can show monthly non-void revenue, but it cannot add a lagged column or the change, and a ratio can only combine metrics within the same intent.",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 3
     },
     {
@@ -2353,11 +2519,12 @@
       "issue_codes": [],
       "item_id": "h3-087",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Refused in every trial, before and after: it needs a median and a percentile over per-customer means, which the intent cannot express.",
       "outcome": "refused",
       "refusal": "the question needs a duration between two dates (issued_at to paid_at), which the intent cannot express; it also needs a per-customer mean of that duration and then median and 90th-percentile statistics over those means, which no metric aggregation supports",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 3
     },
     {
@@ -2366,11 +2533,12 @@
       "issue_codes": [],
       "item_id": "h3-088",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Refused in every trial, before and after: it needs each customer's first invoice month as a value to compare, which the intent cannot express.",
       "outcome": "refused",
       "refusal": "The question needs each customer's first-ever invoice date (the minimum issued_at across all statuses) and then a comparison of each invoice's issue month against that date. The intent cannot compute a per-customer minimum date or compare it to a row's month, so the new-customer amount and its share cannot be expressed.",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 3
     },
     {
@@ -2379,11 +2547,12 @@
       "issue_codes": [],
       "item_id": "h3-089",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Refused in every trial, before and after: it needs a running total across the ranked customers, which the intent cannot express.",
       "outcome": "refused",
       "refusal": "the question asks for a running cumulative share across the ranked customers, which the intent cannot express. It supports per-customer totals and ratios against a total, but not a running sum over the displayed order.",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 3
     },
     {
@@ -2392,11 +2561,12 @@
       "issue_codes": [],
       "item_id": "h3-090",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Refused in every trial, before and after: it needs the top three parts within each category (a rank within groups), which the intent cannot express.",
       "outcome": "refused",
       "refusal": "The intent cannot take the top three parts within each category, because it only supports a single overall limit, not a per-group ranking. It also cannot keep zero-usage parts while filtering usage to work orders completed year to date, since that date filter would drop parts with no matching usage rows.",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 3
     },
     {
@@ -2405,11 +2575,12 @@
       "issue_codes": [],
       "item_id": "h3-091",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Refused in every trial: after, the answer was cut off at the completion limit each time, so it could not be read as an intent. Refused in every trial before.",
       "outcome": "refused",
       "refusal": "The question needs two things the intent cannot combine. The denominator (the full catalogue count per category) comes from parts, while the numerator (distinct parts used) needs work_order_parts, and joins only run many-to-one from work_order_parts to parts, so a ratio across both cannot be built. It also asks for categories with no usage, which is a has-none question, and it requires that each part was used across all four job types, which is a per-part condition the intent cannot express.",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "misread",
       "trial": 3
     },
     {
@@ -2418,11 +2589,12 @@
       "issue_codes": [],
       "item_id": "h3-092",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Refused in every trial, before and after: it needs parts used in both quarters (a set intersection), which the intent cannot express.",
       "outcome": "refused",
       "refusal": "The intent cannot express a per-part share of category units whose denominator covers all parts in each quarter, nor a change between two quarters' shares. It also cannot restrict parts to those used in both quarters. Ratios only divide metrics from the same grouping, and there is no way to compare two period columns or to compute a category total alongside each part row.",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 3
     },
     {
@@ -2431,11 +2603,12 @@
       "issue_codes": [],
       "item_id": "h3-093",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Refused in every trial, before and after: it needs pairs of parts on the same job (a self-join), which the intent cannot express.",
       "outcome": "refused",
       "refusal": "it needs pairs of parts that appear on the same work order, which means joining work_order_parts to itself on work_order_id. The intent can only join each base row to related entities, not match one line item against another, so it cannot count shared work orders per part pair.",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 3
     },
     {
@@ -2444,11 +2617,12 @@
       "issue_codes": [],
       "item_id": "h3-094",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Refused in every trial, before and after: it needs each job's parts cost summed, then averaged per technician (an aggregate of an aggregate); one trial was cut off at the completion limit, which the intent cannot express.",
       "outcome": "refused",
       "refusal": "the average parts cost per completed job needs the product of quantity and unit_cost on work_order_parts, and the intent cannot express a product of two fields. The 'no recorded parts' zero-cost jobs also require counting jobs that have no related parts rows, which is not supported.",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 3
     },
     {
@@ -2457,11 +2631,12 @@
       "issue_codes": [],
       "item_id": "h3-095",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Refused in every trial, before and after: it needs a segment total beside each part category's value, which the intent cannot express.",
       "outcome": "refused",
       "refusal": "The selling value of parts used needs quantity times unit_price, which is a product of two fields and cannot be expressed. The share of each segment's total also needs a within-segment total alongside each category row, which the intent cannot express. Usage counts alone could be answered, but not the value or the fraction.",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 3
     },
     {
@@ -2470,16 +2645,49 @@
       "issue_codes": [],
       "item_id": "h3-096",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Refused in every trial, before and after: it needs a median, which the intent cannot express.",
       "outcome": "refused",
       "refusal": "the intent supports only count, count_distinct, sum, avg, min and max metrics, so it cannot express a continuous median or a 90th percentile of units per job",
       "schema": "fieldservice",
-      "tag": "untriaged",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 3
     }
   ],
   "notes": [
     "sql_agent baseline not run: needs a live model (multi-step tool calls can't be honestly simulated in one pass)."
+  ],
+  "question_level": [
+    {
+      "gold": "holdout-v03.jsonl",
+      "model": "anthropic:claude-haiku-5-5",
+      "right": {
+        "ci95": [
+          0.4321560201442166,
+          0.6279392556146787
+        ],
+        "n": 51,
+        "of": 96,
+        "rate": 0.53125
+      },
+      "schema": "fieldservice",
+      "system": "ledgerline"
+    },
+    {
+      "gold": "holdout-v03.jsonl",
+      "model": "anthropic:claude-haiku-5-5",
+      "right": {
+        "ci95": [
+          0.7229774574820691,
+          0.8779753001068837
+        ],
+        "n": 78,
+        "of": 96,
+        "rate": 0.8125
+      },
+      "schema": "fieldservice",
+      "system": "oneshot"
+    }
   ],
   "registry_hashes": {},
   "run_id": "v03-holdout-before",

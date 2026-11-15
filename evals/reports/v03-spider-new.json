@@ -72,7 +72,7 @@
       "issue_codes": [],
       "item_id": "spider:533",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "Both systems grouped enrolments by student and semester, as the question says; the gold counts a student's enrolments across all semesters. Before: both wrong.",
+      "note": "Askwell grouped enrolments by student and semester, as the question says; the gold counts a student's enrolments across all semesters. Before: both systems wrong, grouped the same way.",
       "outcome": "wrong",
       "refusal": null,
       "schema": "spider_student_transcripts_tracking",
