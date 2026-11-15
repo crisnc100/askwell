@@ -111,3 +111,10 @@ spider:917:
   note: 'Two foreign keys link the same pair of tables. The intent has no way to say which join to use,
     so it refuses rather than guess. Before and after: refused.'
   tag: grammar_gap
+spider:878:
+  note: 'v03-spider-seen: every grade has the same count, so the gold''s single row is one of a four-way
+    tie.'
+  tag: gold_issue
+spider:879:
+  note: Same tie as spider:878.
+  tag: gold_issue

@@ -95,3 +95,10 @@ spider:96:
   note: 'The column is declared TEXT but holds numbers. Registry init keeps the declared type, so the
     validator rejects the arithmetic. Before: right. After: refused.'
   tag: validator_false_reject
+spider:154:
+  note: 'v03-spider-seen: refused as a set intersection; the gold is one range filter on weight.'
+  tag: misread
+spider:155:
+  note: 'v03-spider-seen: same value as the gold; the gold reads a number stored as text and returns the
+    text; v0.3 reads it as a number (numeric_text), and the scorer counts the types as different.'
+  tag: gold_issue

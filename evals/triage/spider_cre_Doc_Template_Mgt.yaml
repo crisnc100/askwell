@@ -36,3 +36,6 @@ spider:379:
   note: 'Askwell wrong: it read "both values" as either value (an in-list), where two has filters, as
     the CSV path wrote, give the documents with both. Before: both right.'
   tag: misread
+spider:315:
+  note: 'Before: refused (has none was not in the grammar). After: right with has none.'
+  tag: grammar_gap

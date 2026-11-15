@@ -87,3 +87,13 @@ spider:583:
 spider:584:
   note: 'Same as spider:583. Before: both refused.'
   tag: gold_issue
+spider:520:
+  note: 'Before: wrong, counting distinct program ids where the gold counts distinct summary names. After:
+    right.'
+  tag: misread
+spider:537:
+  note: 'Before: wrong, counting distinct students where the gold counts enrolment rows. After: right.'
+  tag: misread
+spider:538:
+  note: 'Same as spider:537. Before: wrong. After: right.'
+  tag: misread

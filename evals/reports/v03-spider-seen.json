@@ -130,11 +130,11 @@
       "issue_codes": [],
       "item_id": "spider:154",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "v03-spider-seen: refused as a set intersection; the gold is one range filter on weight.",
       "outcome": "refused",
       "refusal": "refused (unanswerable)",
       "schema": "spider_car_1",
-      "tag": "untriaged",
+      "tag": "misread",
       "trial": 1
     },
     {
@@ -143,11 +143,11 @@
       "issue_codes": [],
       "item_id": "spider:155",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "v03-spider-seen: same value as the gold; the gold reads a number stored as text and returns the text; v0.3 reads it as a number (numeric_text), and the scorer counts the types as different.",
       "outcome": "wrong",
       "refusal": null,
       "schema": "spider_car_1",
-      "tag": "untriaged",
+      "tag": "gold_issue",
       "trial": 1
     },
     {
@@ -496,11 +496,11 @@
       "issue_codes": [],
       "item_id": "spider:976",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "v03-spider-seen: refused as a comparison with the top row; a row list sorted by date with a limit of one answers it.",
       "outcome": "refused",
       "refusal": "refused (unanswerable)",
       "schema": "spider_dog_kennels",
-      "tag": "untriaged",
+      "tag": "misread",
       "trial": 1
     },
     {
@@ -509,11 +509,11 @@
       "issue_codes": [],
       "item_id": "spider:984",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "v03-spider-seen: same rows and values as the gold; the gold reads a number stored as text and returns the text; v0.3 reads it as a number (numeric_text), and the scorer counts the types as different.",
       "outcome": "wrong",
       "refusal": null,
       "schema": "spider_dog_kennels",
-      "tag": "untriaged",
+      "tag": "gold_issue",
       "trial": 1
     },
     {
@@ -522,11 +522,11 @@
       "issue_codes": [],
       "item_id": "spider:985",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Same as spider:984.",
       "outcome": "wrong",
       "refusal": null,
       "schema": "spider_dog_kennels",
-      "tag": "untriaged",
+      "tag": "gold_issue",
       "trial": 1
     },
     {
@@ -535,11 +535,11 @@
       "issue_codes": [],
       "item_id": "spider:988",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "v03-spider-seen: same value as the gold; the gold reads a number stored as text and returns the text; v0.3 reads it as a number (numeric_text), and the scorer counts the types as different.",
       "outcome": "wrong",
       "refusal": null,
       "schema": "spider_dog_kennels",
-      "tag": "untriaged",
+      "tag": "gold_issue",
       "trial": 1
     },
     {
@@ -678,11 +678,11 @@
       "issue_codes": [],
       "item_id": "spider:878",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "v03-spider-seen: every grade has the same count, so the gold's single row is one of a four-way tie.",
       "outcome": "wrong",
       "refusal": null,
       "schema": "spider_network_1",
-      "tag": "untriaged",
+      "tag": "gold_issue",
       "trial": 1
     },
     {
@@ -691,11 +691,11 @@
       "issue_codes": [],
       "item_id": "spider:879",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "Same tie as spider:878.",
       "outcome": "wrong",
       "refusal": null,
       "schema": "spider_network_1",
-      "tag": "untriaged",
+      "tag": "gold_issue",
       "trial": 1
     },
     {
@@ -732,11 +732,11 @@
       "issue_codes": [],
       "item_id": "spider:439",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "v03-spider-seen: took the largest rank number, where the highest rank is the smallest number, as the gold reads it.",
       "outcome": "wrong",
       "refusal": null,
       "schema": "spider_wta_1",
-      "tag": "untriaged",
+      "tag": "misread",
       "trial": 1
     },
     {
@@ -745,11 +745,11 @@
       "issue_codes": [],
       "item_id": "spider:447",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "v03-spider-seen: the right players through two has filters, but as first and last name in two columns, where the gold returns the one name column of the matches table.",
       "outcome": "wrong",
       "refusal": null,
       "schema": "spider_wta_1",
-      "tag": "untriaged",
+      "tag": "misread",
       "trial": 1
     },
     {
@@ -771,11 +771,11 @@
       "issue_codes": [],
       "item_id": "spider:459",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "",
+      "note": "v03-spider-seen: summed tours over every ranking row per player, where the gold takes the single ranking row with the most tours.",
       "outcome": "wrong",
       "refusal": null,
       "schema": "spider_wta_1",
-      "tag": "untriaged",
+      "tag": "misread",
       "trial": 1
     },
     {

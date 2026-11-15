@@ -114,3 +114,18 @@ spider:998:
 spider:999:
   note: 'Same as spider:998: needs DISTINCT rows. Before and after: a wrong answer.'
   tag: grammar_gap
+spider:976:
+  note: 'v03-spider-seen: refused as a comparison with the top row; a row list sorted by date with a limit
+    of one answers it.'
+  tag: misread
+spider:984:
+  note: 'v03-spider-seen: same rows and values as the gold; the gold reads a number stored as text and
+    returns the text; v0.3 reads it as a number (numeric_text), and the scorer counts the types as different.'
+  tag: gold_issue
+spider:985:
+  note: Same as spider:984.
+  tag: gold_issue
+spider:988:
+  note: 'v03-spider-seen: same value as the gold; the gold reads a number stored as text and returns the
+    text; v0.3 reads it as a number (numeric_text), and the scorer counts the types as different.'
+  tag: gold_issue

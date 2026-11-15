@@ -38,3 +38,15 @@ spider:488:
   note: 'Two foreign keys link the same pair of tables. The intent has no way to say which join to use,
     so it refuses rather than guess. Before and after: refused.'
   tag: grammar_gap
+spider:439:
+  note: 'v03-spider-seen: took the largest rank number, where the highest rank is the smallest number,
+    as the gold reads it.'
+  tag: misread
+spider:447:
+  note: 'v03-spider-seen: the right players through two has filters, but as first and last name in two
+    columns, where the gold returns the one name column of the matches table.'
+  tag: misread
+spider:459:
+  note: 'v03-spider-seen: summed tours over every ranking row per player, where the gold takes the single
+    ranking row with the most tours.'
+  tag: misread
