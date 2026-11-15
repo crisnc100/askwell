@@ -81,6 +81,8 @@ class Miss(_Strict):
     """An Askwell item that was not answered correctly, with its triage tag."""
 
     schema_: str = Field(alias="schema")
+    # Reports made before the CSV path's misses were listed carry no system: Askwell's.
+    system: Literal["ledgerline", "askwell_csv"] = "ledgerline"
     gold: str | None = None
     item_id: str
     trial: int = Field(ge=1)

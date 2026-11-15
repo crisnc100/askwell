@@ -35,6 +35,7 @@ interface Floor {
 
 interface Miss {
   schema: string;
+  system?: string;
   item_id: string;
   trial: number;
   outcome: string;
@@ -222,7 +223,7 @@ function missList(misses: Miss[]): HTMLElement {
         "tbody",
         {},
         ...misses.map((m) =>
-          h("tr", {}, h("td", {}, h("code", {}, m.item_id)), h("td", {}, m.outcome), h("td", {}, m.tag), h("td", {}, m.note)),
+          h("tr", {}, h("td", {}, h("code", {}, m.item_id)), h("td", {}, m.system === "askwell_csv" ? `${m.outcome} (CSV upload)` : m.outcome), h("td", {}, m.tag), h("td", {}, m.note)),
         ),
       ),
     ),

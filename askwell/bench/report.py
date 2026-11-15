@@ -36,16 +36,38 @@ METRIC_LABELS = {
 TRIAGE_TAGS = ("grammar_gap", "misread", "validator_false_reject", "builder_bug", "gold_issue")
 
 
-def load_triage(schema_id: str) -> dict[str, dict[str, str]]:
-    """`evals/triage/<schema>.yaml`: item id -> {tag, note}, written after a run."""
+# Askwell's own systems: the registry path and the CSV upload path. Their misses are
+# listed and triaged; a baseline's are not.
+ASKWELL_SYSTEMS = ("ledgerline", "askwell_csv")
+
+
+def load_triage(schema_id: str) -> dict[str, dict[str, Any]]:
+    """`evals/triage/<schema>.yaml`: item id -> {tag, note}, written after a run. An entry
+    may also hold `runs: {run id: {tag, note}}`, notes written for one run only, since a
+    question can miss for a different reason in each run."""
     path = TRIAGE_DIR / f"{schema_id}.yaml"
     if not path.exists():
         return {}
-    data: dict[str, dict[str, str]] = yaml.safe_load(path.read_text()) or {}
+    data: dict[str, dict[str, Any]] = yaml.safe_load(path.read_text()) or {}
     for item_id, entry in data.items():
-        if entry.get("tag") not in TRIAGE_TAGS:
-            raise ValueError(f"{path.name}: {item_id} has tag {entry.get('tag')!r}")
+        runs: dict[str, dict[str, str]] = entry.get("runs") or {}
+        tags = [(item_id, entry.get("tag"))] if "tag" in entry or not runs else []
+        tags += [(f"{item_id} in {run}", e.get("tag")) for run, e in runs.items()]
+        for where, tag in tags:
+            if tag not in TRIAGE_TAGS:
+                raise ValueError(f"{path.name}: {where} has tag {tag!r}")
     return data
+
+
+def triage_for(entry: dict[str, Any], run_id: str) -> tuple[str, str]:
+    """The tag and note for one run's miss: the note written for that run if there is one,
+    otherwise the entry's general note, otherwise untriaged."""
+    own = (entry.get("runs") or {}).get(run_id)
+    if own is not None:
+        return str(own["tag"]), str(own.get("note", ""))
+    if "tag" in entry:
+        return str(entry["tag"]), str(entry.get("note", ""))
+    return "untriaged", ""
 
 
 def floor_checks(
@@ -216,14 +238,17 @@ def build(result: RunResult) -> dict[str, Any]:
 
     misses = []
     for record in result.records:
-        if record["system"] != "ledgerline" or record["outcome"] == "correct":
+        if record["system"] not in ASKWELL_SYSTEMS or record["outcome"] == "correct":
             continue
         if record["category"] != "in_schema" and record["outcome"] == "refused":
             continue
-        triage = load_triage(record["schema_id"]).get(record["item_id"], {})
+        tag, note = triage_for(
+            load_triage(record["schema_id"]).get(record["item_id"], {}), result.run_id
+        )
         misses.append(
             {
                 "schema": record["schema_id"],
+                "system": record["system"],
                 "gold": _gold(record),
                 "item_id": record["item_id"],
                 "trial": record["trial"],
@@ -232,8 +257,8 @@ def build(result: RunResult) -> dict[str, Any]:
                 "issue_codes": record["detail"].get("issue_codes", []),
                 "refusal": _public_refusal(record),
                 "error": _public_error(record),
-                "tag": triage.get("tag", "untriaged"),
-                "note": triage.get("note", ""),
+                "tag": tag,
+                "note": note,
             }
         )
 
@@ -371,7 +396,8 @@ def render_markdown(report: dict[str, Any]) -> str:
     for miss in report["misses"]:
         why = miss["refusal"] or miss["error"] or ", ".join(miss["issue_codes"]) or "rows differ"
         lines.append(
-            f"- `{miss['item_id']}` ({miss['schema']}, {miss['gold']}, trial {miss['trial']}): "
+            f"- `{miss['item_id']}` ({miss['schema']}, {miss['gold']}, trial {miss['trial']}"
+            f"{'' if miss['system'] == 'ledgerline' else ', ' + miss['system']}): "
             f"{miss['outcome']}"
             f" — {why}. Tag: **{miss['tag']}**{'. ' + miss['note'] if miss['note'] else ''}"
         )

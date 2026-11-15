@@ -235,6 +235,15 @@
           "title": "Schema",
           "type": "string"
         },
+        "system": {
+          "default": "ledgerline",
+          "enum": [
+            "ledgerline",
+            "askwell_csv"
+          ],
+          "title": "System",
+          "type": "string"
+        },
         "tag": {
           "enum": [
             "grammar_gap",
