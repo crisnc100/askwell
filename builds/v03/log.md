@@ -354,7 +354,8 @@ questions and gives the exact McNemar p-value. One-trial reports keep their old 
   listed file. Revision 8 (0fe226a) freezes it with the revision-7 hash, 5c4b6fca…7342.
 - `python -m askwell.bench.paired <before> <after> [--out <name>]` rebuilds two runs
   from `evals/runs/` and prints the question-level pairing with McNemar's p and each
-  run's wrong answers among answered, per trial. No model call.
+  run's wrong answers among answered, per trial; `--out` writes `evals/paired/`. No
+  model call.
 
 **Runs** (anthropic:claude-haiku-5-5, record mode, every switch on):
 

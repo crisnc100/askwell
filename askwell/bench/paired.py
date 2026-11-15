@@ -4,8 +4,9 @@
 
 Per schema, gold, system and model present in both runs: the question-level pairing
 (`report.compare_runs`, with its exact McNemar p-value) and each run's wrong answers
-among answered, per trial and pooled. `--out` also writes evals/reports/<name>.md and
-.json. It reads evals/runs/<id>/ only and makes no model call.
+among answered, per trial and pooled. `--out` also writes evals/paired/<name>.md and
+.json, apart from evals/reports/, whose files are all eval reports. It reads
+evals/runs/<id>/ only and makes no model call.
 """
 
 from __future__ import annotations
@@ -18,9 +19,11 @@ from typing import Any
 
 from askwell.bench.items import ROOT
 from askwell.bench.metrics import ItemOutcome, summarise
-from askwell.bench.report import REPORTS_DIR, compare_runs
+from askwell.bench.report import compare_runs
 from askwell.bench.run import RUNS_DIR, RunResult, items_for, trials_for
 from askwell.llm.budget import Checkpoint
+
+PAIRED_DIR = ROOT / "evals" / "paired"
 
 
 def load_run(run_id: str, runs_dir: Path = RUNS_DIR) -> RunResult:
@@ -149,8 +152,9 @@ def main(argv: list[str]) -> int:
     text = render(data)
     print(text, end="")
     if out is not None:
-        (REPORTS_DIR / f"{out}.md").write_text(text, encoding="utf-8")
-        (REPORTS_DIR / f"{out}.json").write_text(
+        PAIRED_DIR.mkdir(parents=True, exist_ok=True)
+        (PAIRED_DIR / f"{out}.md").write_text(text, encoding="utf-8")
+        (PAIRED_DIR / f"{out}.json").write_text(
             json.dumps(data, indent=2, sort_keys=True, default=str) + "\n", encoding="utf-8"
         )
     return 0

@@ -112,7 +112,7 @@ Seen questions, so neither is a measurement of accuracy.
 Measured 2026-11-15 on `anthropic:claude-haiku-5-5`, record mode, every switch on. The
 before code is branch `v03-before`: main at `4014aa0` plus only the eval files these runs
 read (never merged). Reports are in `evals/reports/`; before and after are paired with
-`python -m askwell.bench.paired` (`v03-paired-*.md`). Spend $1.4334, plus $0.0720 for the
+`python -m askwell.bench.paired` (`evals/paired/`). Spend $1.4334, plus $0.0720 for the
 interpret-v3 re-record: $1.5054 of the $4 cap.
 
 ### The deploy gate: failed on the untriaged Spider set
