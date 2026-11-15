@@ -59,6 +59,10 @@ spider:226:
   note: 'The gold returns no rows: airport codes and cities are stored with trailing spaces, so the gold''s
     equality joins and filters match nothing. Before: a wrong answer. After: refused.'
   tag: gold_issue
+  runs:
+    v03-spider-seen:
+      tag: gold_issue
+      note: 'v03-spider-seen: wrong, the gold returns no rows (codes stored with a leading space); the answer counts one side of the flights only.'
 spider:228:
   note: 'The gold returns no rows: airport codes and cities are stored with trailing spaces, so the gold''s
     equality joins and filters match nothing. Before: a wrong answer. After: refused.'
@@ -67,10 +71,18 @@ spider:229:
   note: 'Registry gap: flights.airline has no declared or inferred link to airlines, so airline names
     cannot be reached. Before: a wrong answer. After: refused.'
   tag: grammar_gap
+  runs:
+    v03-spider-seen:
+      tag: gold_issue
+      note: 'v03-spider-seen: wrong, every airline ties on the count, and the gold''s single row is one of the tie; the answer also returns the count.'
 spider:230:
   note: 'Registry gap: flights.airline has no declared or inferred link to airlines, so airline names
     cannot be reached. Before: a wrong answer. After: refused.'
   tag: grammar_gap
+  runs:
+    v03-spider-seen:
+      tag: gold_issue
+      note: 'v03-spider-seen: wrong, as spider:229.'
 spider:231:
   note: 'Registry gap: registry init found no link between these tables, so the needed join does not exist.
     Before and after: refused.'

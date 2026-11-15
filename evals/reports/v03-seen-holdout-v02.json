@@ -57,6 +57,7 @@
       "outcome": "refused",
       "refusal": "Markup needs (unit_price - unit_cost) times quantity, which is three fields in one expression. A computed value takes exactly two fields and cannot nest, and the intent cannot subtract one aggregate from another, so the total cannot be expressed.",
       "schema": "fieldservice",
+      "system": "ledgerline",
       "tag": "grammar_gap",
       "trial": 1
     },
@@ -70,6 +71,7 @@
       "outcome": "refused",
       "refusal": "it needs a distinct count of months per region, which the intent cannot express (distinct count of periods is not supported)",
       "schema": "fieldservice",
+      "system": "ledgerline",
       "tag": "grammar_gap",
       "trial": 1
     },
@@ -83,6 +85,7 @@
       "outcome": "wrong",
       "refusal": null,
       "schema": "fieldservice",
+      "system": "ledgerline",
       "tag": "grammar_gap",
       "trial": 2
     },
@@ -96,6 +99,7 @@
       "outcome": "refused",
       "refusal": "The markup is (unit_price minus unit_cost) times quantity, which combines three fields in one row-level expression. The intent allows only one two-field computation and cannot nest it, so it cannot express the dollar markup per line.",
       "schema": "fieldservice",
+      "system": "ledgerline",
       "tag": "grammar_gap",
       "trial": 2
     },
@@ -109,6 +113,7 @@
       "outcome": "refused",
       "refusal": "it needs a distinct count of months per region, and a distinct count of periods is not expressible in this intent",
       "schema": "fieldservice",
+      "system": "ledgerline",
       "tag": "grammar_gap",
       "trial": 2
     },
@@ -122,6 +127,7 @@
       "outcome": "wrong",
       "refusal": null,
       "schema": "fieldservice",
+      "system": "ledgerline",
       "tag": "grammar_gap",
       "trial": 2
     },
@@ -135,6 +141,7 @@
       "outcome": "refused",
       "refusal": "Markup is (unit_price minus unit_cost) times quantity, which combines three fields. A computed value takes exactly two fields and cannot nest, and the intent cannot subtract one aggregate from another (revenue at price minus cost at cost), so this cannot be expressed.",
       "schema": "fieldservice",
+      "system": "ledgerline",
       "tag": "grammar_gap",
       "trial": 3
     },
@@ -148,6 +155,7 @@
       "outcome": "refused",
       "refusal": "it needs a distinct count of months per region, and the intent cannot express a distinct count of periods",
       "schema": "fieldservice",
+      "system": "ledgerline",
       "tag": "grammar_gap",
       "trial": 3
     },
@@ -161,6 +169,7 @@
       "outcome": "wrong",
       "refusal": null,
       "schema": "fieldservice",
+      "system": "ledgerline",
       "tag": "grammar_gap",
       "trial": 3
     }

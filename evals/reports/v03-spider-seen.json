@@ -13,11 +13,12 @@
       "issue_codes": [],
       "item_id": "spider:95",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "The column is declared TEXT but holds numbers. Registry init keeps the declared type, so the validator rejects the arithmetic. Before: right. After: refused.",
+      "note": "v03-spider-seen: wrong, answered through numeric_text, which reads the column's text as numbers; the gold computes on the text itself (sorting by characters), so the values differ.",
       "outcome": "wrong",
       "refusal": null,
       "schema": "spider_car_1",
-      "tag": "validator_false_reject",
+      "system": "ledgerline",
+      "tag": "gold_issue",
       "trial": 1
     },
     {
@@ -26,11 +27,12 @@
       "issue_codes": [],
       "item_id": "spider:96",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "The column is declared TEXT but holds numbers. Registry init keeps the declared type, so the validator rejects the arithmetic. Before: right. After: refused.",
+      "note": "v03-spider-seen: wrong, answered through numeric_text, which reads the column's text as numbers; the gold computes on the text itself (sorting by characters), so the values differ.",
       "outcome": "wrong",
       "refusal": null,
       "schema": "spider_car_1",
-      "tag": "validator_false_reject",
+      "system": "ledgerline",
+      "tag": "gold_issue",
       "trial": 1
     },
     {
@@ -39,11 +41,12 @@
       "issue_codes": [],
       "item_id": "spider:117",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "The column is declared TEXT but holds numbers. Registry init keeps the declared type, so the validator rejects the arithmetic. Before and after: refused.",
+      "note": "v03-spider-seen: wrong, answered through numeric_text, which reads the column's text as numbers; the gold computes on the text itself (averaging text placeholders as 0), so the values differ.",
       "outcome": "wrong",
       "refusal": null,
       "schema": "spider_car_1",
-      "tag": "validator_false_reject",
+      "system": "ledgerline",
+      "tag": "gold_issue",
       "trial": 1
     },
     {
@@ -52,11 +55,12 @@
       "issue_codes": [],
       "item_id": "spider:126",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "The column is declared TEXT but holds numbers. Registry init keeps the declared type, so the validator rejects the arithmetic. Before and after: refused.",
+      "note": "v03-spider-seen: wrong, answered through numeric_text, which reads the column's text as numbers; the gold computes on the text itself (comparing by characters), so the values differ.",
       "outcome": "wrong",
       "refusal": null,
       "schema": "spider_car_1",
-      "tag": "validator_false_reject",
+      "system": "ledgerline",
+      "tag": "gold_issue",
       "trial": 1
     },
     {
@@ -65,11 +69,12 @@
       "issue_codes": [],
       "item_id": "spider:132",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "The column is declared TEXT but holds numbers. Registry init keeps the declared type, so the validator rejects the arithmetic. Before: right. After: refused.",
+      "note": "v03-spider-seen: wrong, answered through numeric_text, which reads the column's text as numbers; the gold computes on the text itself (sorting by characters), so the values differ.",
       "outcome": "wrong",
       "refusal": null,
       "schema": "spider_car_1",
-      "tag": "validator_false_reject",
+      "system": "ledgerline",
+      "tag": "gold_issue",
       "trial": 1
     },
     {
@@ -78,11 +83,12 @@
       "issue_codes": [],
       "item_id": "spider:135",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "The column is declared TEXT but holds numbers. Registry init keeps the declared type, so the validator rejects the arithmetic. Before and after: refused.",
+      "note": "v03-spider-seen: wrong, answered through numeric_text, which reads the column's text as numbers; the gold computes on the text itself (averaging text placeholders as 0), so the values differ.",
       "outcome": "wrong",
       "refusal": null,
       "schema": "spider_car_1",
-      "tag": "validator_false_reject",
+      "system": "ledgerline",
+      "tag": "gold_issue",
       "trial": 1
     },
     {
@@ -91,11 +97,12 @@
       "issue_codes": [],
       "item_id": "spider:136",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "The column is declared TEXT but holds numbers. Registry init keeps the declared type, so the validator rejects the arithmetic. Before and after: refused.",
+      "note": "v03-spider-seen: wrong, answered through numeric_text, which reads the column's text as numbers; the gold computes on the text itself (averaging text placeholders as 0), so the values differ.",
       "outcome": "wrong",
       "refusal": null,
       "schema": "spider_car_1",
-      "tag": "validator_false_reject",
+      "system": "ledgerline",
+      "tag": "gold_issue",
       "trial": 1
     },
     {
@@ -104,10 +111,11 @@
       "issue_codes": [],
       "item_id": "spider:150",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "The model returned the maker's short code column, not the full name the question asks for. Before: a wrong answer. After: right.",
+      "note": "v03-spider-seen: wrong, it returned the maker's short code, the id and a count, where the gold returns the full name and the id.",
       "outcome": "wrong",
       "refusal": null,
       "schema": "spider_car_1",
+      "system": "ledgerline",
       "tag": "misread",
       "trial": 1
     },
@@ -117,11 +125,12 @@
       "issue_codes": [],
       "item_id": "spider:152",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "Registry gap: registry init found no link between these tables, so the needed join does not exist. Before and after: refused.",
+      "note": "v03-spider-seen: wrong, it filtered the maker by its short code instead of the full name and added a count column; one row more than the gold.",
       "outcome": "wrong",
       "refusal": null,
       "schema": "spider_car_1",
-      "tag": "grammar_gap",
+      "system": "ledgerline",
+      "tag": "misread",
       "trial": 1
     },
     {
@@ -134,6 +143,7 @@
       "outcome": "refused",
       "refusal": "refused (unanswerable)",
       "schema": "spider_car_1",
+      "system": "ledgerline",
       "tag": "misread",
       "trial": 1
     },
@@ -147,6 +157,7 @@
       "outcome": "wrong",
       "refusal": null,
       "schema": "spider_car_1",
+      "system": "ledgerline",
       "tag": "gold_issue",
       "trial": 1
     },
@@ -160,6 +171,7 @@
       "outcome": "refused",
       "refusal": "refused (unanswerable)",
       "schema": "spider_car_1",
+      "system": "ledgerline",
       "tag": "grammar_gap",
       "trial": 1
     },
@@ -173,6 +185,7 @@
       "outcome": "refused",
       "refusal": "refused (unanswerable)",
       "schema": "spider_car_1",
+      "system": "ledgerline",
       "tag": "grammar_gap",
       "trial": 1
     },
@@ -182,11 +195,12 @@
       "issue_codes": [],
       "item_id": "spider:165",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "The column is declared TEXT but holds numbers. Registry init keeps the declared type, so the validator rejects the arithmetic. Before: right. After: refused.",
+      "note": "v03-spider-seen: wrong, answered through numeric_text, which reads the column's text as numbers; the gold computes on the text itself (sorting by characters), so the values differ.",
       "outcome": "wrong",
       "refusal": null,
       "schema": "spider_car_1",
-      "tag": "validator_false_reject",
+      "system": "ledgerline",
+      "tag": "gold_issue",
       "trial": 1
     },
     {
@@ -195,11 +209,12 @@
       "issue_codes": [],
       "item_id": "spider:167",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "Needs a subquery, set operation or anti-join. The intent grammar has none of these. Before and after: refused.",
+      "note": "v03-spider-seen: wrong, answered with a comparison to the minimum through numeric_text; the gold compares the column's text by characters, so the rows differ.",
       "outcome": "wrong",
       "refusal": null,
       "schema": "spider_car_1",
-      "tag": "grammar_gap",
+      "system": "ledgerline",
+      "tag": "gold_issue",
       "trial": 1
     },
     {
@@ -208,11 +223,12 @@
       "issue_codes": [],
       "item_id": "spider:168",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "Needs a subquery, set operation or anti-join. The intent grammar has none of these. Before and after: refused.",
+      "note": "v03-spider-seen: wrong, it compared with not-equal where the gold uses greater-than; numeric_text also reads the column's text as numbers where the gold compares characters.",
       "outcome": "wrong",
       "refusal": null,
       "schema": "spider_car_1",
-      "tag": "grammar_gap",
+      "system": "ledgerline",
+      "tag": "misread",
       "trial": 1
     },
     {
@@ -221,11 +237,12 @@
       "issue_codes": [],
       "item_id": "spider:170",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "The column is declared TEXT but holds numbers. Registry init keeps the declared type, so the validator rejects the arithmetic. Before and after: refused.",
+      "note": "v03-spider-seen: wrong, answered through numeric_text, which reads the column's text as numbers; the gold computes on the text itself (its max is a text placeholder), so the values differ.",
       "outcome": "wrong",
       "refusal": null,
       "schema": "spider_car_1",
-      "tag": "validator_false_reject",
+      "system": "ledgerline",
+      "tag": "gold_issue",
       "trial": 1
     },
     {
@@ -240,6 +257,7 @@
       "outcome": "refused",
       "refusal": "refused (has_link)",
       "schema": "spider_car_1",
+      "system": "ledgerline",
       "tag": "grammar_gap",
       "trial": 1
     },
@@ -253,6 +271,7 @@
       "outcome": "refused",
       "refusal": "refused (unanswerable)",
       "schema": "spider_car_1",
+      "system": "ledgerline",
       "tag": "grammar_gap",
       "trial": 1
     },
@@ -266,6 +285,7 @@
       "outcome": "refused",
       "refusal": "refused (unanswerable)",
       "schema": "spider_car_1",
+      "system": "ledgerline",
       "tag": "grammar_gap",
       "trial": 1
     },
@@ -279,6 +299,7 @@
       "outcome": "refused",
       "refusal": "refused (unanswerable)",
       "schema": "spider_dog_kennels",
+      "system": "ledgerline",
       "tag": "grammar_gap",
       "trial": 1
     },
@@ -292,6 +313,7 @@
       "outcome": "refused",
       "refusal": "refused (unanswerable)",
       "schema": "spider_dog_kennels",
+      "system": "ledgerline",
       "tag": "grammar_gap",
       "trial": 1
     },
@@ -305,6 +327,7 @@
       "outcome": "refused",
       "refusal": "refused (unanswerable)",
       "schema": "spider_dog_kennels",
+      "system": "ledgerline",
       "tag": "grammar_gap",
       "trial": 1
     },
@@ -318,6 +341,7 @@
       "outcome": "refused",
       "refusal": "refused (unanswerable)",
       "schema": "spider_dog_kennels",
+      "system": "ledgerline",
       "tag": "grammar_gap",
       "trial": 1
     },
@@ -331,6 +355,7 @@
       "outcome": "refused",
       "refusal": "refused (unanswerable)",
       "schema": "spider_dog_kennels",
+      "system": "ledgerline",
       "tag": "grammar_gap",
       "trial": 1
     },
@@ -344,6 +369,7 @@
       "outcome": "refused",
       "refusal": "refused (unanswerable)",
       "schema": "spider_dog_kennels",
+      "system": "ledgerline",
       "tag": "grammar_gap",
       "trial": 1
     },
@@ -357,6 +383,7 @@
       "outcome": "refused",
       "refusal": "refused (unanswerable)",
       "schema": "spider_dog_kennels",
+      "system": "ledgerline",
       "tag": "validator_false_reject",
       "trial": 1
     },
@@ -370,6 +397,7 @@
       "outcome": "refused",
       "refusal": "refused (unanswerable)",
       "schema": "spider_dog_kennels",
+      "system": "ledgerline",
       "tag": "validator_false_reject",
       "trial": 1
     },
@@ -383,6 +411,7 @@
       "outcome": "wrong",
       "refusal": null,
       "schema": "spider_dog_kennels",
+      "system": "ledgerline",
       "tag": "gold_issue",
       "trial": 1
     },
@@ -396,6 +425,7 @@
       "outcome": "wrong",
       "refusal": null,
       "schema": "spider_dog_kennels",
+      "system": "ledgerline",
       "tag": "gold_issue",
       "trial": 1
     },
@@ -405,11 +435,12 @@
       "issue_codes": [],
       "item_id": "spider:944",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "Needs a subquery, set operation or anti-join. The intent grammar has none of these. Before and after: refused.",
+      "note": "v03-spider-seen: wrong, answered with a comparison to the average; the gold joins the two tables with no join condition, so it lists every professional, where the answer lists only those with a cheaper treatment.",
       "outcome": "wrong",
       "refusal": null,
       "schema": "spider_dog_kennels",
-      "tag": "grammar_gap",
+      "system": "ledgerline",
+      "tag": "gold_issue",
       "trial": 1
     },
     {
@@ -418,11 +449,12 @@
       "issue_codes": [],
       "item_id": "spider:945",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "Needs a subquery, set operation or anti-join. The intent grammar has none of these. Before and after: refused.",
+      "note": "v03-spider-seen: wrong, as spider:944.",
       "outcome": "wrong",
       "refusal": null,
       "schema": "spider_dog_kennels",
-      "tag": "grammar_gap",
+      "system": "ledgerline",
+      "tag": "gold_issue",
       "trial": 1
     },
     {
@@ -435,6 +467,7 @@
       "outcome": "refused",
       "refusal": "refused (unanswerable)",
       "schema": "spider_dog_kennels",
+      "system": "ledgerline",
       "tag": "grammar_gap",
       "trial": 1
     },
@@ -448,6 +481,7 @@
       "outcome": "refused",
       "refusal": "refused (unanswerable)",
       "schema": "spider_dog_kennels",
+      "system": "ledgerline",
       "tag": "grammar_gap",
       "trial": 1
     },
@@ -461,6 +495,7 @@
       "outcome": "wrong",
       "refusal": null,
       "schema": "spider_dog_kennels",
+      "system": "ledgerline",
       "tag": "gold_issue",
       "trial": 1
     },
@@ -474,6 +509,7 @@
       "outcome": "refused",
       "refusal": "refused (unanswerable)",
       "schema": "spider_dog_kennels",
+      "system": "ledgerline",
       "tag": "validator_false_reject",
       "trial": 1
     },
@@ -487,6 +523,7 @@
       "outcome": "refused",
       "refusal": "refused (unanswerable)",
       "schema": "spider_dog_kennels",
+      "system": "ledgerline",
       "tag": "validator_false_reject",
       "trial": 1
     },
@@ -500,6 +537,7 @@
       "outcome": "refused",
       "refusal": "refused (unanswerable)",
       "schema": "spider_dog_kennels",
+      "system": "ledgerline",
       "tag": "misread",
       "trial": 1
     },
@@ -513,6 +551,7 @@
       "outcome": "wrong",
       "refusal": null,
       "schema": "spider_dog_kennels",
+      "system": "ledgerline",
       "tag": "gold_issue",
       "trial": 1
     },
@@ -522,10 +561,11 @@
       "issue_codes": [],
       "item_id": "spider:985",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "Same as spider:984.",
+      "note": "v03-spider-seen: wrong, same values as the gold; the gold returns numbers stored as text, numeric_text returns numbers, and the scorer counts the types as different.",
       "outcome": "wrong",
       "refusal": null,
       "schema": "spider_dog_kennels",
+      "system": "ledgerline",
       "tag": "gold_issue",
       "trial": 1
     },
@@ -539,6 +579,7 @@
       "outcome": "wrong",
       "refusal": null,
       "schema": "spider_dog_kennels",
+      "system": "ledgerline",
       "tag": "gold_issue",
       "trial": 1
     },
@@ -552,6 +593,7 @@
       "outcome": "refused",
       "refusal": "refused (unanswerable)",
       "schema": "spider_dog_kennels",
+      "system": "ledgerline",
       "tag": "validator_false_reject",
       "trial": 1
     },
@@ -565,6 +607,7 @@
       "outcome": "refused",
       "refusal": "refused (unanswerable)",
       "schema": "spider_dog_kennels",
+      "system": "ledgerline",
       "tag": "validator_false_reject",
       "trial": 1
     },
@@ -578,6 +621,7 @@
       "outcome": "wrong",
       "refusal": null,
       "schema": "spider_dog_kennels",
+      "system": "ledgerline",
       "tag": "grammar_gap",
       "trial": 1
     },
@@ -591,6 +635,7 @@
       "outcome": "wrong",
       "refusal": null,
       "schema": "spider_dog_kennels",
+      "system": "ledgerline",
       "tag": "grammar_gap",
       "trial": 1
     },
@@ -604,6 +649,7 @@
       "outcome": "wrong",
       "refusal": null,
       "schema": "spider_flight_2",
+      "system": "ledgerline",
       "tag": "gold_issue",
       "trial": 1
     },
@@ -613,10 +659,11 @@
       "issue_codes": [],
       "item_id": "spider:226",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "The gold returns no rows: airport codes and cities are stored with trailing spaces, so the gold's equality joins and filters match nothing. Before: a wrong answer. After: refused.",
+      "note": "v03-spider-seen: wrong, the gold returns no rows (codes stored with a leading space); the answer counts one side of the flights only.",
       "outcome": "wrong",
       "refusal": null,
       "schema": "spider_flight_2",
+      "system": "ledgerline",
       "tag": "gold_issue",
       "trial": 1
     },
@@ -630,6 +677,7 @@
       "outcome": "refused",
       "refusal": "refused (unanswerable)",
       "schema": "spider_flight_2",
+      "system": "ledgerline",
       "tag": "gold_issue",
       "trial": 1
     },
@@ -639,11 +687,12 @@
       "issue_codes": [],
       "item_id": "spider:229",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "Registry gap: flights.airline has no declared or inferred link to airlines, so airline names cannot be reached. Before: a wrong answer. After: refused.",
+      "note": "v03-spider-seen: wrong, every airline ties on the count, and the gold's single row is one of the tie; the answer also returns the count.",
       "outcome": "wrong",
       "refusal": null,
       "schema": "spider_flight_2",
-      "tag": "grammar_gap",
+      "system": "ledgerline",
+      "tag": "gold_issue",
       "trial": 1
     },
     {
@@ -652,11 +701,12 @@
       "issue_codes": [],
       "item_id": "spider:230",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "Registry gap: flights.airline has no declared or inferred link to airlines, so airline names cannot be reached. Before: a wrong answer. After: refused.",
+      "note": "v03-spider-seen: wrong, as spider:229.",
       "outcome": "wrong",
       "refusal": null,
       "schema": "spider_flight_2",
-      "tag": "grammar_gap",
+      "system": "ledgerline",
+      "tag": "gold_issue",
       "trial": 1
     },
     {
@@ -669,6 +719,7 @@
       "outcome": "refused",
       "refusal": "refused (unanswerable)",
       "schema": "spider_flight_2",
+      "system": "ledgerline",
       "tag": "grammar_gap",
       "trial": 1
     },
@@ -682,6 +733,7 @@
       "outcome": "wrong",
       "refusal": null,
       "schema": "spider_network_1",
+      "system": "ledgerline",
       "tag": "gold_issue",
       "trial": 1
     },
@@ -691,10 +743,11 @@
       "issue_codes": [],
       "item_id": "spider:879",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "Same tie as spider:878.",
+      "note": "v03-spider-seen: wrong, four grades tie on the count, and the gold's single row is one of the tie; the answer also returns the count.",
       "outcome": "wrong",
       "refusal": null,
       "schema": "spider_network_1",
+      "system": "ledgerline",
       "tag": "gold_issue",
       "trial": 1
     },
@@ -710,6 +763,7 @@
       "outcome": "wrong",
       "refusal": null,
       "schema": "spider_network_1",
+      "system": "ledgerline",
       "tag": "grammar_gap",
       "trial": 1
     },
@@ -723,6 +777,7 @@
       "outcome": "refused",
       "refusal": "refused (unanswerable)",
       "schema": "spider_network_1",
+      "system": "ledgerline",
       "tag": "grammar_gap",
       "trial": 1
     },
@@ -736,6 +791,7 @@
       "outcome": "wrong",
       "refusal": null,
       "schema": "spider_wta_1",
+      "system": "ledgerline",
       "tag": "misread",
       "trial": 1
     },
@@ -749,6 +805,7 @@
       "outcome": "wrong",
       "refusal": null,
       "schema": "spider_wta_1",
+      "system": "ledgerline",
       "tag": "misread",
       "trial": 1
     },
@@ -762,6 +819,7 @@
       "outcome": "refused",
       "refusal": "refused (unanswerable)",
       "schema": "spider_wta_1",
+      "system": "ledgerline",
       "tag": "grammar_gap",
       "trial": 1
     },
@@ -775,6 +833,7 @@
       "outcome": "wrong",
       "refusal": null,
       "schema": "spider_wta_1",
+      "system": "ledgerline",
       "tag": "misread",
       "trial": 1
     },
@@ -788,6 +847,7 @@
       "outcome": "wrong",
       "refusal": null,
       "schema": "spider_wta_1",
+      "system": "ledgerline",
       "tag": "gold_issue",
       "trial": 1
     },
@@ -801,6 +861,7 @@
       "outcome": "wrong",
       "refusal": null,
       "schema": "spider_wta_1",
+      "system": "ledgerline",
       "tag": "gold_issue",
       "trial": 1
     },
@@ -810,10 +871,11 @@
       "issue_codes": [],
       "item_id": "spider:470",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "The gold's rows are cut by the row cap, and the answer's sort keeps a different set at the cut. Before: a wrong answer. After: right.",
+      "note": "v03-spider-seen: wrong, the gold groups by first name and passes the row cap; the answer groups by player and adds the id, so the rows differ.",
       "outcome": "wrong",
       "refusal": null,
       "schema": "spider_wta_1",
+      "system": "ledgerline",
       "tag": "gold_issue",
       "trial": 1
     }

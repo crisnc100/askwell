@@ -45,15 +45,26 @@ spider:549:
   note: 'Askwell right with a named link and has none. CSV path refused: the current-address column does
     not follow the <name>_id rule, so no link to addresses is drawn. Before: both refused.'
   tag: validator_false_reject
+  runs:
+    v03-spider-new-gated:
+      tag: grammar_gap
+      note: 'v03-spider-new-gated: refused. The first run''s answer used `has` and `link_roles`, which is off here.'
 spider:550:
   note: 'Same as spider:549. Before: both refused.'
   tag: validator_false_reject
+  runs:
+    v03-spider-new-gated:
+      tag: grammar_gap
+      note: 'v03-spider-new-gated: refused. The first run''s answer used `has` and `link_roles`, which is off here.'
 spider:552:
-  note: 'Askwell right; wrong in v03-spider-new-gated, where it grouped the date by day and added a count column the gold does not return. CSV path wrong: it counted distinct courses and grouped the date by day, where
-    the gold counts rows per transcript. Before: Askwell right, CSV refused.'
+  note: 'Askwell right. CSV path wrong: it counted distinct courses and grouped the date by day, where the gold counts rows per transcript. Before: Askwell right, CSV refused.'
   tag: misread
+  runs:
+    v03-spider-new-gated:
+      tag: misread
+      note: 'v03-spider-new-gated: wrong, it grouped the date by day and added a count column the gold does not return.'
 spider:557:
-  note: 'Both refused, reading "graduate" as a status the data lacks; the gold reads it as the earliest
+  note: 'Both refused, reading the question as asking for a status the data lacks; the gold reads it as the earliest
     leaving date. Before: both refused.'
   tag: misread
 spider:563:
@@ -72,6 +83,10 @@ spider:578:
   note: 'Askwell listed the addresses that have students (the question asks which ones); the gold returns
     only their count. CSV path refused: the address links are not drawn from the files. Before: both refused.'
   tag: gold_issue
+  runs:
+    v03-spider-new-gated:
+      tag: grammar_gap
+      note: 'v03-spider-new-gated: refused. The first run''s answer used `has` and `link_roles`, which is off here.'
 spider:579:
   note: 'Both ordered by last name and selected every column; the gold sorts and returns the one free-text
     details column. Before: both wrong.'
@@ -79,14 +94,26 @@ spider:579:
 spider:581:
   note: 'Askwell right. CSV path refused, saying no section was named. Before: both refused.'
   tag: misread
+  runs:
+    v03-spider-new-gated:
+      tag: misread
+      note: 'v03-spider-new-gated: refused, though the first run answered it right without any switch.'
 spider:583:
   note: 'Askwell compared the country as written in the data; the gold compares a lowercased value that
     matches no row, so only the phone match remains. CSV path refused: no address link drawn. Before:
     both refused.'
   tag: gold_issue
+  runs:
+    v03-spider-new-gated:
+      tag: grammar_gap
+      note: 'v03-spider-new-gated: refused. The first run''s answer used `link_roles`, which is off here.'
 spider:584:
   note: 'Same as spider:583. Before: both refused.'
   tag: gold_issue
+  runs:
+    v03-spider-new-gated:
+      tag: grammar_gap
+      note: 'v03-spider-new-gated: refused. The first run''s answer used `link_roles`, which is off here.'
 spider:520:
   note: 'Before: wrong, counting distinct program ids where the gold counts distinct summary names. After:
     right.'
@@ -98,27 +125,27 @@ spider:538:
   note: 'Same as spider:537. Before: wrong. After: right.'
   tag: misread
 spider:513:
-  note: 'v03-csv-new-before: CSV path refused because `addresses` failed the upload check (no_id_column)
-    and did not load. Right on the CSV path after (numbered rows, O11) and right for Askwell before and
-    after.'
-  tag: validator_false_reject
+  runs:
+    v03-csv-new-before:
+      tag: validator_false_reject
+      note: 'v03-csv-new-before: CSV path refused because `addresses` failed the upload check (no_id_column) and did not load. Right on the CSV path after (numbered rows, O11) and right for Askwell before and after.'
 spider:514:
-  note: 'v03-csv-new-before: CSV path refused because `addresses` failed the upload check (no_id_column)
-    and did not load. Right on the CSV path after (numbered rows, O11) and right for Askwell before and
-    after.'
-  tag: validator_false_reject
+  runs:
+    v03-csv-new-before:
+      tag: validator_false_reject
+      note: 'v03-csv-new-before: CSV path refused because `addresses` failed the upload check (no_id_column) and did not load. Right on the CSV path after (numbered rows, O11) and right for Askwell before and after.'
 spider:571:
-  note: 'v03-csv-new-before: CSV path refused because `transcript_contents` failed the upload check (no_id_column)
-    and did not load. Right on the CSV path after (numbered rows, O11) and right for Askwell before and
-    after.'
-  tag: validator_false_reject
+  runs:
+    v03-csv-new-before:
+      tag: validator_false_reject
+      note: 'v03-csv-new-before: CSV path refused because `transcript_contents` failed the upload check (no_id_column) and did not load. Right on the CSV path after (numbered rows, O11) and right for Askwell before and after.'
 spider:573:
-  note: 'v03-csv-new-before: CSV path refused because `transcript_contents` failed the upload check (no_id_column)
-    and did not load. Right on the CSV path after (numbered rows, O11) and right for Askwell before and
-    after.'
-  tag: validator_false_reject
+  runs:
+    v03-csv-new-before:
+      tag: validator_false_reject
+      note: 'v03-csv-new-before: CSV path refused because `transcript_contents` failed the upload check (no_id_column) and did not load. Right on the CSV path after (numbered rows, O11) and right for Askwell before and after.'
 spider:574:
-  note: 'v03-csv-new-before: CSV path refused because `transcript_contents` failed the upload check (no_id_column)
-    and did not load. Right on the CSV path after (numbered rows, O11) and right for Askwell before and
-    after.'
-  tag: validator_false_reject
+  runs:
+    v03-csv-new-before:
+      tag: validator_false_reject
+      note: 'v03-csv-new-before: CSV path refused because `transcript_contents` failed the upload check (no_id_column) and did not load. Right on the CSV path after (numbered rows, O11) and right for Askwell before and after.'

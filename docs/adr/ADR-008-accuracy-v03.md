@@ -105,8 +105,8 @@ Seen questions, so neither is a measurement of accuracy.
   of all of them. No gold was changed.
 - **Link-role gate (prediction 7, as amended): failed.** `evals/reports/v03-roles-seen.md`,
   26 questions, 3 trials, $0.043. Wrong among answered per trial: 1 of 19 (5.3%), 1 of 19
-  (5.3%), 0 of 18. spider:906 was wrong in 2 of 3 trials: asked who "has the greatest
-  number of likes", the model counted likes received (`highschooler@liked_id`), the
+  (5.3%), 0 of 18. spider:906 was wrong in 2 of 3 trials: asked for the student with the most
+  likes, the model counted likes received (`highschooler@liked_id`), the
   gold counts likes given. So `link_roles` ships switched off (`compose.prod.yaml`), as
   the plan says; with it off those questions are refused as before.
 

@@ -57,6 +57,7 @@
       "outcome": "wrong",
       "refusal": null,
       "schema": "fieldservice",
+      "system": "ledgerline",
       "tag": "misread",
       "trial": 1
     },
@@ -70,6 +71,7 @@
       "outcome": "wrong",
       "refusal": null,
       "schema": "fieldservice",
+      "system": "ledgerline",
       "tag": "gold_issue",
       "trial": 1
     },
@@ -83,6 +85,7 @@
       "outcome": "refused",
       "refusal": "it needs a per-technician check that completions occurred in each month of last quarter, which requires counting distinct months per technician. The intent cannot express a distinct count of periods.",
       "schema": "fieldservice",
+      "system": "ledgerline",
       "tag": "grammar_gap",
       "trial": 1
     },
@@ -96,6 +99,7 @@
       "outcome": "wrong",
       "refusal": null,
       "schema": "fieldservice",
+      "system": "ledgerline",
       "tag": "misread",
       "trial": 2
     },
@@ -109,6 +113,7 @@
       "outcome": "wrong",
       "refusal": null,
       "schema": "fieldservice",
+      "system": "ledgerline",
       "tag": "misread",
       "trial": 2
     },
@@ -122,6 +127,7 @@
       "outcome": "refused",
       "refusal": "it needs a distinct count of months per technician (every month of last quarter has at least one completed work order), and the intent cannot express a distinct count of periods",
       "schema": "fieldservice",
+      "system": "ledgerline",
       "tag": "grammar_gap",
       "trial": 2
     },
@@ -135,6 +141,7 @@
       "outcome": "wrong",
       "refusal": null,
       "schema": "fieldservice",
+      "system": "ledgerline",
       "tag": "misread",
       "trial": 3
     }

@@ -13,10 +13,11 @@
       "issue_codes": [],
       "item_id": "spider:379",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "Askwell wrong: it read \"both values\" as either value (an in-list), where two has filters, as the CSV path wrote, give the documents with both. Before: both right.",
+      "note": "Askwell wrong: it read a question needing both values as either value (an in-list), where two has filters, as the CSV path wrote, give the documents with both. Before: both right.",
       "outcome": "wrong",
       "refusal": null,
       "schema": "spider_cre_Doc_Template_Mgt",
+      "system": "ledgerline",
       "tag": "misread",
       "trial": 1
     },
@@ -30,6 +31,7 @@
       "outcome": "refused",
       "refusal": "refused (unanswerable)",
       "schema": "spider_student_transcripts_tracking",
+      "system": "ledgerline",
       "tag": "misread",
       "trial": 1
     },
@@ -46,6 +48,7 @@
       "outcome": "refused",
       "refusal": "refused (fan_out, unknown_metric)",
       "schema": "spider_student_transcripts_tracking",
+      "system": "ledgerline",
       "tag": "misread",
       "trial": 1
     },
@@ -59,6 +62,7 @@
       "outcome": "wrong",
       "refusal": null,
       "schema": "spider_student_transcripts_tracking",
+      "system": "ledgerline",
       "tag": "misread",
       "trial": 1
     },
@@ -72,6 +76,7 @@
       "outcome": "wrong",
       "refusal": null,
       "schema": "spider_student_transcripts_tracking",
+      "system": "ledgerline",
       "tag": "gold_issue",
       "trial": 1
     },
@@ -85,6 +90,7 @@
       "outcome": "wrong",
       "refusal": null,
       "schema": "spider_student_transcripts_tracking",
+      "system": "ledgerline",
       "tag": "gold_issue",
       "trial": 1
     },
@@ -100,6 +106,7 @@
       "outcome": "wrong",
       "refusal": null,
       "schema": "spider_student_transcripts_tracking",
+      "system": "ledgerline",
       "tag": "grammar_gap",
       "trial": 1
     },
@@ -113,6 +120,7 @@
       "outcome": "wrong",
       "refusal": null,
       "schema": "spider_student_transcripts_tracking",
+      "system": "ledgerline",
       "tag": "grammar_gap",
       "trial": 1
     },
@@ -126,6 +134,7 @@
       "outcome": "wrong",
       "refusal": null,
       "schema": "spider_student_transcripts_tracking",
+      "system": "ledgerline",
       "tag": "gold_issue",
       "trial": 1
     },
@@ -139,6 +148,7 @@
       "outcome": "wrong",
       "refusal": null,
       "schema": "spider_student_transcripts_tracking",
+      "system": "ledgerline",
       "tag": "gold_issue",
       "trial": 1
     },
@@ -152,6 +162,7 @@
       "outcome": "wrong",
       "refusal": null,
       "schema": "spider_student_transcripts_tracking",
+      "system": "ledgerline",
       "tag": "gold_issue",
       "trial": 1
     },
@@ -161,10 +172,11 @@
       "issue_codes": [],
       "item_id": "spider:557",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "Both refused, reading \"graduate\" as a status the data lacks; the gold reads it as the earliest leaving date. Before: both refused.",
+      "note": "Both refused, reading the question as asking for a status the data lacks; the gold reads it as the earliest leaving date. Before: both refused.",
       "outcome": "refused",
       "refusal": "refused (unanswerable)",
       "schema": "spider_student_transcripts_tracking",
+      "system": "ledgerline",
       "tag": "misread",
       "trial": 1
     },
@@ -180,6 +192,7 @@
       "outcome": "refused",
       "refusal": "refused (aggregate_type)",
       "schema": "spider_student_transcripts_tracking",
+      "system": "ledgerline",
       "tag": "grammar_gap",
       "trial": 1
     },
@@ -193,6 +206,7 @@
       "outcome": "refused",
       "refusal": "refused (unanswerable)",
       "schema": "spider_student_transcripts_tracking",
+      "system": "ledgerline",
       "tag": "misread",
       "trial": 1
     },
@@ -206,6 +220,7 @@
       "outcome": "refused",
       "refusal": "refused (unanswerable)",
       "schema": "spider_student_transcripts_tracking",
+      "system": "ledgerline",
       "tag": "misread",
       "trial": 1
     },
@@ -219,6 +234,7 @@
       "outcome": "wrong",
       "refusal": null,
       "schema": "spider_student_transcripts_tracking",
+      "system": "ledgerline",
       "tag": "gold_issue",
       "trial": 1
     },
@@ -232,6 +248,7 @@
       "outcome": "wrong",
       "refusal": null,
       "schema": "spider_student_transcripts_tracking",
+      "system": "ledgerline",
       "tag": "misread",
       "trial": 1
     },
@@ -245,6 +262,7 @@
       "outcome": "wrong",
       "refusal": null,
       "schema": "spider_student_transcripts_tracking",
+      "system": "ledgerline",
       "tag": "gold_issue",
       "trial": 1
     },
@@ -258,6 +276,7 @@
       "outcome": "wrong",
       "refusal": null,
       "schema": "spider_student_transcripts_tracking",
+      "system": "ledgerline",
       "tag": "gold_issue",
       "trial": 1
     },
@@ -271,6 +290,7 @@
       "outcome": "wrong",
       "refusal": null,
       "schema": "spider_tvshow",
+      "system": "ledgerline",
       "tag": "misread",
       "trial": 1
     },
@@ -284,6 +304,7 @@
       "outcome": "wrong",
       "refusal": null,
       "schema": "spider_tvshow",
+      "system": "ledgerline",
       "tag": "gold_issue",
       "trial": 1
     },
@@ -297,6 +318,7 @@
       "outcome": "wrong",
       "refusal": null,
       "schema": "spider_tvshow",
+      "system": "ledgerline",
       "tag": "gold_issue",
       "trial": 1
     },
@@ -310,6 +332,7 @@
       "outcome": "wrong",
       "refusal": null,
       "schema": "spider_tvshow",
+      "system": "ledgerline",
       "tag": "misread",
       "trial": 1
     },
@@ -323,6 +346,7 @@
       "outcome": "wrong",
       "refusal": null,
       "schema": "spider_tvshow",
+      "system": "ledgerline",
       "tag": "misread",
       "trial": 1
     },
@@ -332,10 +356,11 @@
       "issue_codes": [],
       "item_id": "spider:637",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "Askwell wrong: it read \"directed by A and B\" as either director (an in-list); two has filters, as in its own right answer to spider:638, give the channels with both. CSV path refused: no channel link. Before: Askwell wrong, CSV refused.",
+      "note": "Askwell wrong: it read a question needing both directors as either director (an in-list); two has filters, as in its own right answer to spider:638, give the channels with both. CSV path refused: no channel link. Before: Askwell wrong, CSV refused.",
       "outcome": "wrong",
       "refusal": null,
       "schema": "spider_tvshow",
+      "system": "ledgerline",
       "tag": "misread",
       "trial": 1
     },
@@ -349,6 +374,7 @@
       "outcome": "refused",
       "refusal": "refused (unanswerable)",
       "schema": "spider_tvshow",
+      "system": "ledgerline",
       "tag": "gold_issue",
       "trial": 1
     },
@@ -362,6 +388,7 @@
       "outcome": "refused",
       "refusal": "refused (unanswerable)",
       "schema": "spider_tvshow",
+      "system": "ledgerline",
       "tag": "gold_issue",
       "trial": 1
     },
@@ -375,6 +402,7 @@
       "outcome": "wrong",
       "refusal": null,
       "schema": "spider_world_1",
+      "system": "ledgerline",
       "tag": "misread",
       "trial": 1
     },
@@ -388,6 +416,7 @@
       "outcome": "wrong",
       "refusal": null,
       "schema": "spider_world_1",
+      "system": "ledgerline",
       "tag": "misread",
       "trial": 1
     },
@@ -401,6 +430,7 @@
       "outcome": "wrong",
       "refusal": null,
       "schema": "spider_world_1",
+      "system": "ledgerline",
       "tag": "gold_issue",
       "trial": 1
     },
@@ -414,6 +444,7 @@
       "outcome": "wrong",
       "refusal": null,
       "schema": "spider_world_1",
+      "system": "ledgerline",
       "tag": "gold_issue",
       "trial": 1
     },
@@ -427,6 +458,7 @@
       "outcome": "wrong",
       "refusal": null,
       "schema": "spider_world_1",
+      "system": "ledgerline",
       "tag": "misread",
       "trial": 1
     },
@@ -440,6 +472,7 @@
       "outcome": "refused",
       "refusal": "refused (unanswerable)",
       "schema": "spider_world_1",
+      "system": "ledgerline",
       "tag": "misread",
       "trial": 1
     },
@@ -453,6 +486,7 @@
       "outcome": "refused",
       "refusal": "refused (unanswerable)",
       "schema": "spider_world_1",
+      "system": "ledgerline",
       "tag": "grammar_gap",
       "trial": 1
     },
@@ -466,6 +500,7 @@
       "outcome": "refused",
       "refusal": "refused (unanswerable)",
       "schema": "spider_world_1",
+      "system": "ledgerline",
       "tag": "grammar_gap",
       "trial": 1
     },
@@ -479,6 +514,7 @@
       "outcome": "refused",
       "refusal": "refused (unanswerable)",
       "schema": "spider_world_1",
+      "system": "ledgerline",
       "tag": "grammar_gap",
       "trial": 1
     },
@@ -492,6 +528,7 @@
       "outcome": "refused",
       "refusal": "refused (unanswerable)",
       "schema": "spider_world_1",
+      "system": "ledgerline",
       "tag": "grammar_gap",
       "trial": 1
     },
@@ -505,6 +542,7 @@
       "outcome": "wrong",
       "refusal": null,
       "schema": "spider_world_1",
+      "system": "ledgerline",
       "tag": "misread",
       "trial": 1
     },
@@ -518,6 +556,7 @@
       "outcome": "refused",
       "refusal": "refused (unanswerable)",
       "schema": "spider_world_1",
+      "system": "ledgerline",
       "tag": "grammar_gap",
       "trial": 1
     },
@@ -531,6 +570,7 @@
       "outcome": "refused",
       "refusal": "refused (unanswerable)",
       "schema": "spider_world_1",
+      "system": "ledgerline",
       "tag": "gold_issue",
       "trial": 1
     },
@@ -544,6 +584,7 @@
       "outcome": "refused",
       "refusal": "refused (unanswerable)",
       "schema": "spider_world_1",
+      "system": "ledgerline",
       "tag": "gold_issue",
       "trial": 1
     }

@@ -178,7 +178,7 @@ uv run askwell eval --schema spider_network_1 --schema spider_wta_1 --systems le
 | 3 | 18 | 0 | 8 | 0 of 18 |
 
 - Both bars fail: two trials are above 5%, and spider:906 is wrong in 2 of 3.
-- spider:906 asks who "has the greatest number of likes". In trials 1 and 2 the model
+- spider:906 asks for the student with the most likes. In trials 1 and 2 the model
   grouped by `highschooler@liked_id` (likes received); the gold groups by `student_id`
   (likes given). Its rephrasing, spider:907, was right in all three. Every student in
   `likes` gives exactly one like, so the gold's top row is also an arbitrary pick from a
@@ -476,3 +476,22 @@ ADR-008, with counted-right figures beside the official ones.
 - The 28 CSV refusals of `v03-csv-new-before` without a triage entry now have one (IDs
   only): 27 were tables that failed the upload check, 1 a refusal the grammar could not
   express then. All 28 are right after.
+
+**Report review fixes (7e5a71, f50064).**
+- The CSV path's misses never reached the report: it listed misses from the `ledgerline`
+  system only, so `v03-csv-new` showed none against 76 in its checkpoint. Misses now come
+  from both Askwell systems and carry their `system`; the Results page marks the CSV
+  upload ones. Test first (`tests/bench/test_report_misses.py`).
+- A triage note is keyed by question, so a note written for one run showed on another
+  where the question missed differently (spider:95 in `v03-spider-seen` carried v0.2's
+  "refused" note though it was answered and wrong). An entry may now hold `runs: {run
+  id: {tag, note}}`, used for that run ahead of its general note. Run-specific notes
+  were written for every miss whose outcome differs from the run its general note
+  describes: 22 in `v03-spider-seen` (the nine numeric-text answers on car_1 among them),
+  26 in `v03-spider-new-gated`, and 10 questions in `v03-roles-seen`; the 28
+  `v03-csv-new-before` notes moved under that run.
+- `v03-roles-seen` was recorded with interpret-v2, so it cannot be replayed; its report
+  was rebuilt from its own 78 checkpoint entries (24 later interpret-v3 entries under the
+  same run id are left out), with the same numbers. Every other v0.3 report was rebuilt
+  in replay mode, numbers unchanged.
+- Four notes quoted Spider question wording; they now paraphrase it.

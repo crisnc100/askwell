@@ -37,6 +37,10 @@ spider:629:
     reads it as an integer, so the scorer counts it as different. Askwell right. Before: Askwell right,
     CSV wrong.'
   tag: gold_issue
+  runs:
+    v03-spider-new-gated:
+      tag: misread
+      note: 'v03-spider-new-gated: refused, though the first run answered it right without any switch.'
 spider:633:
   note: 'Askwell right. CSV path refused: the channel column does not follow the <name>_id rule, so no
     link to the channel table is drawn from the files. Before: Askwell right, CSV refused.'
@@ -49,18 +53,34 @@ spider:635:
   note: 'Askwell wrong (has none): it listed channels without such a cartoon, where the gold keeps countries
     none of whose channels play one. CSV path refused: no channel link drawn. Before: both refused.'
   tag: misread
+  runs:
+    v03-spider-new-gated:
+      tag: grammar_gap
+      note: 'v03-spider-new-gated: refused. The first run''s answer used `has`, which is off here.'
 spider:636:
   note: 'Same as spider:635, counted per country. CSV path refused: no channel link. Before: both refused.'
   tag: misread
+  runs:
+    v03-spider-new-gated:
+      tag: grammar_gap
+      note: 'v03-spider-new-gated: refused. The first run''s answer used `has`, which is off here.'
 spider:637:
-  note: 'Askwell wrong: it read "directed by A and B" as either director (an in-list); two has filters,
+  note: 'Askwell wrong: it read a question needing both directors as either director (an in-list); two has filters,
     as in its own right answer to spider:638, give the channels with both. CSV path refused: no channel
     link. Before: Askwell wrong, CSV refused.'
   tag: misread
+  runs:
+    v03-spider-new-gated:
+      tag: grammar_gap
+      note: 'v03-spider-new-gated: refused. The first run''s answer used `has`, which is off here.'
 spider:638:
   note: 'Askwell right. CSV path refused: the channel column does not follow the <name>_id rule, so no
     link to the channel table is drawn from the files. Before: Askwell right, CSV refused.'
   tag: validator_false_reject
+  runs:
+    v03-spider-new-gated:
+      tag: grammar_gap
+      note: 'v03-spider-new-gated: refused. The first run''s answer used `has`, which is off here.'
 spider:641:
   note: 'Both refused: it filters channels by a per-country count applied back to each row. The gold groups
     by country and returns one arbitrary id per country. Before: both refused.'
@@ -73,15 +93,32 @@ spider:643:
   note: 'Askwell right. CSV path refused: the channel column does not follow the <name>_id rule, so no
     link to the channel table is drawn from the files. Before: both refused.'
   tag: validator_false_reject
+  runs:
+    v03-spider-new-gated:
+      tag: grammar_gap
+      note: 'v03-spider-new-gated: refused. The first run''s answer used `has`, which is off here.'
 spider:644:
   note: 'Askwell right. CSV path refused: the channel column does not follow the <name>_id rule, so no
     link to the channel table is drawn from the files. Before: both refused.'
   tag: validator_false_reject
+  runs:
+    v03-spider-new-gated:
+      tag: grammar_gap
+      note: 'v03-spider-new-gated: refused. The first run''s answer used `has`, which is off here.'
 spider:645:
   note: 'Askwell right. CSV path refused: the channel column does not follow the <name>_id rule, so no
     link to the channel table is drawn from the files. Before: both refused.'
   tag: validator_false_reject
+  runs:
+    v03-spider-new-gated:
+      tag: grammar_gap
+      note: 'v03-spider-new-gated: refused. The first run''s answer used `has`, which is off here.'
 spider:646:
   note: 'Askwell right. CSV path refused: the channel column does not follow the <name>_id rule, so no
     link to the channel table is drawn from the files. Before: both refused.'
   tag: validator_false_reject
+
+  runs:
+    v03-spider-new-gated:
+      tag: grammar_gap
+      note: 'v03-spider-new-gated: refused. The first run''s answer used `has`, which is off here.'

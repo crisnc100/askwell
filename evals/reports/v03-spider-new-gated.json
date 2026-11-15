@@ -13,10 +13,11 @@
       "issue_codes": [],
       "item_id": "spider:315",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "Before: refused (has none was not in the grammar). After: right with has none.",
+      "note": "v03-spider-new-gated: refused. The first run's answer used `has`, which is off here.",
       "outcome": "refused",
       "refusal": "refused (unanswerable)",
       "schema": "spider_cre_Doc_Template_Mgt",
+      "system": "ledgerline",
       "tag": "grammar_gap",
       "trial": 1
     },
@@ -26,11 +27,12 @@
       "issue_codes": [],
       "item_id": "spider:345",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "Askwell right with has none. CSV path refused: the template-type link is not drawn from the uploaded files (a code column, not <name>_id). Before: both refused.",
+      "note": "v03-spider-new-gated: refused. The first run's answer used `has`, which is off here.",
       "outcome": "refused",
       "refusal": "refused (unanswerable)",
       "schema": "spider_cre_Doc_Template_Mgt",
-      "tag": "validator_false_reject",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 1
     },
     {
@@ -39,11 +41,12 @@
       "issue_codes": [],
       "item_id": "spider:346",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "Askwell right with has none. CSV path refused: the template-type link is not drawn from the uploaded files. Before: both refused.",
+      "note": "v03-spider-new-gated: refused. The first run's answer used `has`, which is off here.",
       "outcome": "refused",
       "refusal": "refused (unanswerable)",
       "schema": "spider_cre_Doc_Template_Mgt",
-      "tag": "validator_false_reject",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 1
     },
     {
@@ -52,10 +55,11 @@
       "issue_codes": [],
       "item_id": "spider:379",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "Askwell wrong: it read \"both values\" as either value (an in-list), where two has filters, as the CSV path wrote, give the documents with both. Before: both right.",
+      "note": "Askwell wrong: it read a question needing both values as either value (an in-list), where two has filters, as the CSV path wrote, give the documents with both. Before: both right.",
       "outcome": "wrong",
       "refusal": null,
       "schema": "spider_cre_Doc_Template_Mgt",
+      "system": "ledgerline",
       "tag": "misread",
       "trial": 1
     },
@@ -69,6 +73,7 @@
       "outcome": "refused",
       "refusal": "refused (unanswerable)",
       "schema": "spider_student_transcripts_tracking",
+      "system": "ledgerline",
       "tag": "misread",
       "trial": 1
     },
@@ -82,6 +87,7 @@
       "outcome": "wrong",
       "refusal": null,
       "schema": "spider_student_transcripts_tracking",
+      "system": "ledgerline",
       "tag": "misread",
       "trial": 1
     },
@@ -95,6 +101,7 @@
       "outcome": "wrong",
       "refusal": null,
       "schema": "spider_student_transcripts_tracking",
+      "system": "ledgerline",
       "tag": "gold_issue",
       "trial": 1
     },
@@ -108,6 +115,7 @@
       "outcome": "wrong",
       "refusal": null,
       "schema": "spider_student_transcripts_tracking",
+      "system": "ledgerline",
       "tag": "gold_issue",
       "trial": 1
     },
@@ -121,6 +129,7 @@
       "outcome": "wrong",
       "refusal": null,
       "schema": "spider_student_transcripts_tracking",
+      "system": "ledgerline",
       "tag": "grammar_gap",
       "trial": 1
     },
@@ -134,6 +143,7 @@
       "outcome": "wrong",
       "refusal": null,
       "schema": "spider_student_transcripts_tracking",
+      "system": "ledgerline",
       "tag": "grammar_gap",
       "trial": 1
     },
@@ -147,6 +157,7 @@
       "outcome": "wrong",
       "refusal": null,
       "schema": "spider_student_transcripts_tracking",
+      "system": "ledgerline",
       "tag": "gold_issue",
       "trial": 1
     },
@@ -160,6 +171,7 @@
       "outcome": "wrong",
       "refusal": null,
       "schema": "spider_student_transcripts_tracking",
+      "system": "ledgerline",
       "tag": "gold_issue",
       "trial": 1
     },
@@ -173,6 +185,7 @@
       "outcome": "wrong",
       "refusal": null,
       "schema": "spider_student_transcripts_tracking",
+      "system": "ledgerline",
       "tag": "gold_issue",
       "trial": 1
     },
@@ -182,11 +195,12 @@
       "issue_codes": [],
       "item_id": "spider:549",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "Askwell right with a named link and has none. CSV path refused: the current-address column does not follow the <name>_id rule, so no link to addresses is drawn. Before: both refused.",
+      "note": "v03-spider-new-gated: refused. The first run's answer used `has` and `link_roles`, which is off here.",
       "outcome": "refused",
       "refusal": "refused (unanswerable)",
       "schema": "spider_student_transcripts_tracking",
-      "tag": "validator_false_reject",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 1
     },
     {
@@ -195,11 +209,12 @@
       "issue_codes": [],
       "item_id": "spider:550",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "Same as spider:549. Before: both refused.",
+      "note": "v03-spider-new-gated: refused. The first run's answer used `has` and `link_roles`, which is off here.",
       "outcome": "refused",
       "refusal": "refused (unanswerable)",
       "schema": "spider_student_transcripts_tracking",
-      "tag": "validator_false_reject",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 1
     },
     {
@@ -208,10 +223,11 @@
       "issue_codes": [],
       "item_id": "spider:552",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "Askwell right; wrong in v03-spider-new-gated, where it grouped the date by day and added a count column the gold does not return. CSV path wrong: it counted distinct courses and grouped the date by day, where the gold counts rows per transcript. Before: Askwell right, CSV refused.",
+      "note": "v03-spider-new-gated: wrong, it grouped the date by day and added a count column the gold does not return.",
       "outcome": "wrong",
       "refusal": null,
       "schema": "spider_student_transcripts_tracking",
+      "system": "ledgerline",
       "tag": "misread",
       "trial": 1
     },
@@ -221,10 +237,11 @@
       "issue_codes": [],
       "item_id": "spider:557",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "Both refused, reading \"graduate\" as a status the data lacks; the gold reads it as the earliest leaving date. Before: both refused.",
+      "note": "Both refused, reading the question as asking for a status the data lacks; the gold reads it as the earliest leaving date. Before: both refused.",
       "outcome": "refused",
       "refusal": "refused (unanswerable)",
       "schema": "spider_student_transcripts_tracking",
+      "system": "ledgerline",
       "tag": "misread",
       "trial": 1
     },
@@ -240,6 +257,7 @@
       "outcome": "refused",
       "refusal": "refused (aggregate_type)",
       "schema": "spider_student_transcripts_tracking",
+      "system": "ledgerline",
       "tag": "grammar_gap",
       "trial": 1
     },
@@ -253,6 +271,7 @@
       "outcome": "refused",
       "refusal": "refused (unanswerable)",
       "schema": "spider_student_transcripts_tracking",
+      "system": "ledgerline",
       "tag": "misread",
       "trial": 1
     },
@@ -266,6 +285,7 @@
       "outcome": "refused",
       "refusal": "refused (unanswerable)",
       "schema": "spider_student_transcripts_tracking",
+      "system": "ledgerline",
       "tag": "misread",
       "trial": 1
     },
@@ -278,11 +298,12 @@
       ],
       "item_id": "spider:578",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "Askwell listed the addresses that have students (the question asks which ones); the gold returns only their count. CSV path refused: the address links are not drawn from the files. Before: both refused.",
+      "note": "v03-spider-new-gated: refused. The first run's answer used `has` and `link_roles`, which is off here.",
       "outcome": "refused",
       "refusal": "refused (ambiguous_path, invalid_order_by)",
       "schema": "spider_student_transcripts_tracking",
-      "tag": "gold_issue",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 1
     },
     {
@@ -295,6 +316,7 @@
       "outcome": "wrong",
       "refusal": null,
       "schema": "spider_student_transcripts_tracking",
+      "system": "ledgerline",
       "tag": "misread",
       "trial": 1
     },
@@ -304,10 +326,11 @@
       "issue_codes": [],
       "item_id": "spider:581",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "Askwell right. CSV path refused, saying no section was named. Before: both refused.",
+      "note": "v03-spider-new-gated: refused, though the first run answered it right without any switch.",
       "outcome": "refused",
       "refusal": "refused (unanswerable)",
       "schema": "spider_student_transcripts_tracking",
+      "system": "ledgerline",
       "tag": "misread",
       "trial": 1
     },
@@ -317,11 +340,12 @@
       "issue_codes": [],
       "item_id": "spider:583",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "Askwell compared the country as written in the data; the gold compares a lowercased value that matches no row, so only the phone match remains. CSV path refused: no address link drawn. Before: both refused.",
+      "note": "v03-spider-new-gated: refused. The first run's answer used `link_roles`, which is off here.",
       "outcome": "refused",
       "refusal": "refused (unanswerable)",
       "schema": "spider_student_transcripts_tracking",
-      "tag": "gold_issue",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 1
     },
     {
@@ -330,11 +354,12 @@
       "issue_codes": [],
       "item_id": "spider:584",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "Same as spider:583. Before: both refused.",
+      "note": "v03-spider-new-gated: refused. The first run's answer used `link_roles`, which is off here.",
       "outcome": "refused",
       "refusal": "refused (unanswerable)",
       "schema": "spider_student_transcripts_tracking",
-      "tag": "gold_issue",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 1
     },
     {
@@ -343,11 +368,12 @@
       "issue_codes": [],
       "item_id": "spider:629",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "CSV path: same row as the gold, but the source stores the channel number as text and the upload reads it as an integer, so the scorer counts it as different. Askwell right. Before: Askwell right, CSV wrong.",
+      "note": "v03-spider-new-gated: refused, though the first run answered it right without any switch.",
       "outcome": "refused",
       "refusal": "refused (unanswerable)",
       "schema": "spider_tvshow",
-      "tag": "gold_issue",
+      "system": "ledgerline",
+      "tag": "misread",
       "trial": 1
     },
     {
@@ -356,11 +382,12 @@
       "issue_codes": [],
       "item_id": "spider:635",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "Askwell wrong (has none): it listed channels without such a cartoon, where the gold keeps countries none of whose channels play one. CSV path refused: no channel link drawn. Before: both refused.",
+      "note": "v03-spider-new-gated: refused. The first run's answer used `has`, which is off here.",
       "outcome": "refused",
       "refusal": "refused (unanswerable)",
       "schema": "spider_tvshow",
-      "tag": "misread",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 1
     },
     {
@@ -369,11 +396,12 @@
       "issue_codes": [],
       "item_id": "spider:636",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "Same as spider:635, counted per country. CSV path refused: no channel link. Before: both refused.",
+      "note": "v03-spider-new-gated: refused. The first run's answer used `has`, which is off here.",
       "outcome": "refused",
       "refusal": "refused (unanswerable)",
       "schema": "spider_tvshow",
-      "tag": "misread",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 1
     },
     {
@@ -382,11 +410,12 @@
       "issue_codes": [],
       "item_id": "spider:637",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "Askwell wrong: it read \"directed by A and B\" as either director (an in-list); two has filters, as in its own right answer to spider:638, give the channels with both. CSV path refused: no channel link. Before: Askwell wrong, CSV refused.",
+      "note": "v03-spider-new-gated: refused. The first run's answer used `has`, which is off here.",
       "outcome": "refused",
       "refusal": "refused (unanswerable)",
       "schema": "spider_tvshow",
-      "tag": "misread",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 1
     },
     {
@@ -395,11 +424,12 @@
       "issue_codes": [],
       "item_id": "spider:638",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "Askwell right. CSV path refused: the channel column does not follow the <name>_id rule, so no link to the channel table is drawn from the files. Before: Askwell right, CSV refused.",
+      "note": "v03-spider-new-gated: refused. The first run's answer used `has`, which is off here.",
       "outcome": "refused",
       "refusal": "refused (unanswerable)",
       "schema": "spider_tvshow",
-      "tag": "validator_false_reject",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 1
     },
     {
@@ -412,6 +442,7 @@
       "outcome": "refused",
       "refusal": "refused (unanswerable)",
       "schema": "spider_tvshow",
+      "system": "ledgerline",
       "tag": "gold_issue",
       "trial": 1
     },
@@ -425,6 +456,7 @@
       "outcome": "refused",
       "refusal": "refused (unanswerable)",
       "schema": "spider_tvshow",
+      "system": "ledgerline",
       "tag": "gold_issue",
       "trial": 1
     },
@@ -434,11 +466,12 @@
       "issue_codes": [],
       "item_id": "spider:643",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "Askwell right. CSV path refused: the channel column does not follow the <name>_id rule, so no link to the channel table is drawn from the files. Before: both refused.",
+      "note": "v03-spider-new-gated: refused. The first run's answer used `has`, which is off here.",
       "outcome": "refused",
       "refusal": "refused (unanswerable)",
       "schema": "spider_tvshow",
-      "tag": "validator_false_reject",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 1
     },
     {
@@ -447,11 +480,12 @@
       "issue_codes": [],
       "item_id": "spider:644",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "Askwell right. CSV path refused: the channel column does not follow the <name>_id rule, so no link to the channel table is drawn from the files. Before: both refused.",
+      "note": "v03-spider-new-gated: refused. The first run's answer used `has`, which is off here.",
       "outcome": "refused",
       "refusal": "refused (unanswerable)",
       "schema": "spider_tvshow",
-      "tag": "validator_false_reject",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 1
     },
     {
@@ -460,11 +494,12 @@
       "issue_codes": [],
       "item_id": "spider:645",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "Askwell right. CSV path refused: the channel column does not follow the <name>_id rule, so no link to the channel table is drawn from the files. Before: both refused.",
+      "note": "v03-spider-new-gated: refused. The first run's answer used `has`, which is off here.",
       "outcome": "refused",
       "refusal": "refused (unanswerable)",
       "schema": "spider_tvshow",
-      "tag": "validator_false_reject",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 1
     },
     {
@@ -473,11 +508,12 @@
       "issue_codes": [],
       "item_id": "spider:646",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "Askwell right. CSV path refused: the channel column does not follow the <name>_id rule, so no link to the channel table is drawn from the files. Before: both refused.",
+      "note": "v03-spider-new-gated: refused. The first run's answer used `has`, which is off here.",
       "outcome": "refused",
       "refusal": "refused (unanswerable)",
       "schema": "spider_tvshow",
-      "tag": "validator_false_reject",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 1
     },
     {
@@ -490,6 +526,7 @@
       "outcome": "wrong",
       "refusal": null,
       "schema": "spider_world_1",
+      "system": "ledgerline",
       "tag": "misread",
       "trial": 1
     },
@@ -503,6 +540,7 @@
       "outcome": "wrong",
       "refusal": null,
       "schema": "spider_world_1",
+      "system": "ledgerline",
       "tag": "misread",
       "trial": 1
     },
@@ -516,6 +554,7 @@
       "outcome": "wrong",
       "refusal": null,
       "schema": "spider_world_1",
+      "system": "ledgerline",
       "tag": "gold_issue",
       "trial": 1
     },
@@ -529,6 +568,7 @@
       "outcome": "wrong",
       "refusal": null,
       "schema": "spider_world_1",
+      "system": "ledgerline",
       "tag": "gold_issue",
       "trial": 1
     },
@@ -538,11 +578,12 @@
       "issue_codes": [],
       "item_id": "spider:745",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "Askwell right. CSV path refused: the language table's country-code column does not follow the <name>_id rule, so no link to the country table is drawn from the files. Before: both refused.",
+      "note": "v03-spider-new-gated: refused. The first run's answer used `has`, which is off here.",
       "outcome": "refused",
       "refusal": "refused (unanswerable)",
       "schema": "spider_world_1",
-      "tag": "validator_false_reject",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 1
     },
     {
@@ -551,11 +592,12 @@
       "issue_codes": [],
       "item_id": "spider:749",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "Askwell right. CSV path refused: the language table's country-code column does not follow the <name>_id rule, so no link to the country table is drawn from the files. Before: Askwell right, CSV refused.",
+      "note": "v03-spider-new-gated: refused. The first run's answer used `has`, which is off here.",
       "outcome": "refused",
       "refusal": "refused (unanswerable)",
       "schema": "spider_world_1",
-      "tag": "validator_false_reject",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 1
     },
     {
@@ -568,6 +610,7 @@
       "outcome": "wrong",
       "refusal": null,
       "schema": "spider_world_1",
+      "system": "ledgerline",
       "tag": "misread",
       "trial": 1
     },
@@ -581,6 +624,7 @@
       "outcome": "refused",
       "refusal": "refused (unanswerable)",
       "schema": "spider_world_1",
+      "system": "ledgerline",
       "tag": "misread",
       "trial": 1
     },
@@ -590,11 +634,12 @@
       "issue_codes": [],
       "item_id": "spider:764",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "Askwell right with has none. CSV path refused: the drafted registry lists no values for the official-language flag, so the model would not guess its coding. Before: both refused.",
+      "note": "v03-spider-new-gated: refused. The first run's answer used `has`, which is off here.",
       "outcome": "refused",
       "refusal": "refused (unanswerable)",
       "schema": "spider_world_1",
-      "tag": "validator_false_reject",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 1
     },
     {
@@ -603,11 +648,12 @@
       "issue_codes": [],
       "item_id": "spider:765",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "Askwell right. CSV path refused: the language table's country-code column does not follow the <name>_id rule, so no link to the country table is drawn from the files. Before: both refused.",
+      "note": "v03-spider-new-gated: refused. The first run's answer used `has`, which is off here.",
       "outcome": "refused",
       "refusal": "refused (unanswerable)",
       "schema": "spider_world_1",
-      "tag": "validator_false_reject",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 1
     },
     {
@@ -616,11 +662,12 @@
       "issue_codes": [],
       "item_id": "spider:767",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "Askwell right. CSV path refused: the language table's country-code column does not follow the <name>_id rule, so no link to the country table is drawn from the files. Before: both refused.",
+      "note": "v03-spider-new-gated: refused. The first run's answer used `has`, which is off here.",
       "outcome": "refused",
       "refusal": "refused (unanswerable)",
       "schema": "spider_world_1",
-      "tag": "validator_false_reject",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 1
     },
     {
@@ -633,6 +680,7 @@
       "outcome": "refused",
       "refusal": "refused (unanswerable)",
       "schema": "spider_world_1",
+      "system": "ledgerline",
       "tag": "grammar_gap",
       "trial": 1
     },
@@ -646,6 +694,7 @@
       "outcome": "refused",
       "refusal": "refused (unanswerable)",
       "schema": "spider_world_1",
+      "system": "ledgerline",
       "tag": "grammar_gap",
       "trial": 1
     },
@@ -659,6 +708,7 @@
       "outcome": "refused",
       "refusal": "refused (unanswerable)",
       "schema": "spider_world_1",
+      "system": "ledgerline",
       "tag": "grammar_gap",
       "trial": 1
     },
@@ -672,6 +722,7 @@
       "outcome": "refused",
       "refusal": "refused (unanswerable)",
       "schema": "spider_world_1",
+      "system": "ledgerline",
       "tag": "grammar_gap",
       "trial": 1
     },
@@ -681,11 +732,12 @@
       "issue_codes": [],
       "item_id": "spider:783",
       "model": "anthropic:claude-haiku-5-5",
-      "note": "Askwell wrong: the has none part is right, but it excluded every government form including the key word where the gold excludes only the exact form, as in spider:705. CSV path refused: no country link drawn. Before: both refused.",
+      "note": "v03-spider-new-gated: refused. The first run's answer used `has`, which is off here.",
       "outcome": "refused",
       "refusal": "refused (unanswerable)",
       "schema": "spider_world_1",
-      "tag": "misread",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
       "trial": 1
     },
     {
@@ -698,6 +750,7 @@
       "outcome": "wrong",
       "refusal": null,
       "schema": "spider_world_1",
+      "system": "ledgerline",
       "tag": "gold_issue",
       "trial": 1
     },
@@ -711,6 +764,7 @@
       "outcome": "refused",
       "refusal": "refused (unanswerable)",
       "schema": "spider_world_1",
+      "system": "ledgerline",
       "tag": "grammar_gap",
       "trial": 1
     },
@@ -724,6 +778,7 @@
       "outcome": "refused",
       "refusal": "refused (unanswerable)",
       "schema": "spider_world_1",
+      "system": "ledgerline",
       "tag": "gold_issue",
       "trial": 1
     },
@@ -737,6 +792,7 @@
       "outcome": "refused",
       "refusal": "refused (unanswerable)",
       "schema": "spider_world_1",
+      "system": "ledgerline",
       "tag": "gold_issue",
       "trial": 1
     }

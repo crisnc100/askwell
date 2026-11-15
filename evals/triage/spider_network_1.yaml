@@ -39,18 +39,34 @@ spider:894:
   note: 'Two foreign keys link the same pair of tables. The intent has no way to say which join to use,
     so it refuses rather than guess. Before and after: refused.'
   tag: grammar_gap
+  runs:
+    v03-roles-seen:
+      tag: grammar_gap
+      note: 'v03-roles-seen, link_roles on: refused in every trial; the question also needs "has none" or a set intersection.'
 spider:896:
   note: 'Two foreign keys link the same pair of tables. The intent has no way to say which join to use,
     so it refuses rather than guess. Before and after: refused.'
   tag: grammar_gap
+  runs:
+    v03-roles-seen:
+      tag: grammar_gap
+      note: 'v03-roles-seen, link_roles on: refused in every trial; the question also needs "has none" or a set intersection.'
 spider:897:
   note: 'Two foreign keys link the same pair of tables. The intent has no way to say which join to use,
     so it refuses rather than guess. Before and after: refused.'
   tag: grammar_gap
+  runs:
+    v03-roles-seen:
+      tag: grammar_gap
+      note: 'v03-roles-seen, link_roles on: refused in every trial; the question also needs "has none" or a set intersection.'
 spider:898:
   note: 'Two foreign keys link the same pair of tables. The intent has no way to say which join to use,
     so it refuses rather than guess. Before and after: refused.'
   tag: grammar_gap
+  runs:
+    v03-roles-seen:
+      tag: grammar_gap
+      note: 'v03-roles-seen, link_roles on: refused in every trial; the question also needs "has none" or a set intersection.'
 spider:899:
   note: 'Needs a subquery, set operation or anti-join. The intent grammar has none of these. Before and
     after: refused.'
@@ -59,6 +75,10 @@ spider:900:
   note: 'Two foreign keys link the same pair of tables. The intent has no way to say which join to use,
     so it refuses rather than guess. Before and after: refused.'
   tag: grammar_gap
+  runs:
+    v03-roles-seen:
+      tag: grammar_gap
+      note: 'v03-roles-seen, link_roles on: refused in every trial; the question also needs "has none" or a set intersection.'
 spider:904:
   note: 'Two foreign keys link the same pair of tables. The intent has no way to say which join to use,
     so it refuses rather than guess. Before and after: refused.'
@@ -71,6 +91,10 @@ spider:906:
   note: 'Two foreign keys link the same pair of tables. The intent has no way to say which join to use.
     Before: a wrong answer. After: refused.'
   tag: grammar_gap
+  runs:
+    v03-roles-seen:
+      tag: misread
+      note: 'v03-roles-seen, link_roles on: wrong in trials 1 and 2 (right in 3); it counted the likes a student received, where the gold counts likes given.'
 spider:907:
   note: 'Two foreign keys link the same pair of tables. The intent has no way to say which join to use.
     Before: a wrong answer. After: refused.'
@@ -87,10 +111,18 @@ spider:910:
   note: 'Two foreign keys link the same pair of tables. The intent has no way to say which join to use,
     so it refuses rather than guess. Before and after: refused.'
   tag: grammar_gap
+  runs:
+    v03-roles-seen:
+      tag: grammar_gap
+      note: 'v03-roles-seen, link_roles on: refused in trials 2 and 3, right in 1.'
 spider:911:
   note: 'Two foreign keys link the same pair of tables. The intent has no way to say which join to use,
     so it refuses rather than guess. Before and after: refused.'
   tag: grammar_gap
+  runs:
+    v03-roles-seen:
+      tag: grammar_gap
+      note: 'v03-roles-seen, link_roles on: refused in trial 3, right in 1 and 2.'
 spider:912:
   note: 'Two foreign keys link the same pair of tables. The intent has no way to say which join to use,
     so it refuses rather than guess. Before and after: refused.'
@@ -111,6 +143,10 @@ spider:917:
   note: 'Two foreign keys link the same pair of tables. The intent has no way to say which join to use,
     so it refuses rather than guess. Before and after: refused.'
   tag: grammar_gap
+  runs:
+    v03-roles-seen:
+      tag: grammar_gap
+      note: 'v03-roles-seen, link_roles on: refused in every trial; the question also needs "has none" or a set intersection.'
 spider:878:
   note: 'v03-spider-seen: every grade has the same count, so the gold''s single row is one of a four-way
     tie.'
@@ -118,3 +154,8 @@ spider:878:
 spider:879:
   note: Same tie as spider:878.
   tag: gold_issue
+
+  runs:
+    v03-spider-seen:
+      tag: gold_issue
+      note: 'v03-spider-seen: wrong, four grades tie on the count, and the gold''s single row is one of the tie; the answer also returns the count.'
