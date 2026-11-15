@@ -80,3 +80,30 @@ def test_two_runs_pair_with_planned_questions(tmp_path: Path) -> None:
     assert row["wrong_after"]["per_trial"][3]["n"] == 1
     text = paired.render(data)
     assert "| fieldservice | ledgerline | 2 | 0 | 2 | 2 | 0 |" in text
+
+
+def test_a_run_of_named_items_keeps_its_planned_trials_and_items(tmp_path: Path) -> None:
+    _write_run(tmp_path, "r", {"fs-002": ["correct", "wrong"]}, planned=["fs-002"], trials=2)
+    result = paired.load_run("r", tmp_path)
+    assert result.planned_trials == {"fieldservice": 2}
+    assert result.planned_items == {"fieldservice": ["fs-002"]}
+
+
+def test_checkpoint_entries_outside_the_runs_tasks_are_left_out(tmp_path: Path) -> None:
+    _write_run(tmp_path, "r", {"fs-001": ["correct"]}, trials=1)
+    stale = {"key": "fs-001|old-prompt", "cost_usd": 0.5, "record": _record("fs-001", 1, "wrong")}
+    with (tmp_path / "r" / "results.jsonl").open("a") as f:
+        f.write(json.dumps(stale) + "\n")
+    result = paired.load_run("r", tmp_path)
+    assert [r["outcome"] for r in result.records] == ["correct"]
+    assert result.spent_usd == pytest.approx(0.01)
+
+
+def test_a_run_without_its_recorded_plan_is_refused(tmp_path: Path) -> None:
+    _write_run(tmp_path, "r", {"fs-001": ["correct"]})
+    config_path = tmp_path / "r" / "config.json"
+    config = json.loads(config_path.read_text())
+    del config["task_keys"]
+    config_path.write_text(json.dumps(config))
+    with pytest.raises(ValueError, match="replay"):
+        paired.load_run("r", tmp_path)

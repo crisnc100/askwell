@@ -20,39 +20,35 @@ from typing import Any
 from askwell.bench.items import ROOT
 from askwell.bench.metrics import ItemOutcome, summarise
 from askwell.bench.report import compare_runs
-from askwell.bench.run import RUNS_DIR, RunResult, items_for, trials_for
+from askwell.bench.run import RUNS_DIR, RunResult
 from askwell.llm.budget import Checkpoint
 
 PAIRED_DIR = ROOT / "evals" / "paired"
 
 
 def load_run(run_id: str, runs_dir: Path = RUNS_DIR) -> RunResult:
-    """A finished run rebuilt from its config and checkpoint, with the trials and
-    in-schema items it planned, so unfinished trials count as not right."""
+    """A finished run rebuilt from its config and checkpoint: only the checkpoint entries
+    of the tasks it planned, with its planned trials and in-schema items, so unfinished
+    trials count as not right."""
     run_dir = runs_dir / run_id
     config: dict[str, Any] = json.loads((run_dir / "config.json").read_text())
-    entries, spent = Checkpoint(run_dir / "results.jsonl").load()
-    gold = Path(config["gold"]) if config.get("gold") else None
-    if gold is not None and not gold.is_absolute():
-        gold = ROOT / gold
-    schemas: list[str] = config["schemas"]
-    trials = int(config["trials"])
+    missing = [k for k in ("planned_trials", "planned_items", "task_keys") if k not in config]
+    if missing:
+        raise ValueError(
+            f"run {run_id} does not record {', '.join(missing)}; run it again in replay "
+            "mode with the code that made it, which rewrites its config without a model call"
+        )
+    entries, _ = Checkpoint(run_dir / "results.jsonl").load()
+    active = [entries[key] for key in config["task_keys"] if key in entries]
     return RunResult(
         run_id=run_id,
-        records=[entry["record"] for entry in entries.values()],
-        spent_usd=spent,
+        records=[entry["record"] for entry in active],
+        spent_usd=sum(float(entry["cost_usd"]) for entry in active),
         systems=list(config["systems"]),
         models=list(config["models"]),
-        trials=trials,
-        planned_trials={schema: trials_for(schema, trials) for schema in schemas},
-        planned_items={
-            schema: [
-                item.id
-                for item in (items_for(schema) if gold is None else items_for(schema, gold))
-                if item.category == "in_schema"
-            ]
-            for schema in schemas
-        },
+        trials=int(config["trials"]),
+        planned_trials={k: int(v) for k, v in config["planned_trials"].items()},
+        planned_items={k: list(v) for k, v in config["planned_items"].items()},
     )
 
 

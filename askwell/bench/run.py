@@ -343,6 +343,10 @@ def run_eval(
         progress(f"{task.key}: {outcome}")
         return ItemResult(record=record, cost_usd=answer.cost_usd)
 
+    planned_items = {
+        schema_id: [item.id for item in items if item.category == "in_schema"]
+        for schema_id, items in chosen.items()
+    }
     run_dir = RUNS_DIR / run_id
     run_dir.mkdir(parents=True, exist_ok=True)
     (run_dir / "config.json").write_text(
@@ -356,6 +360,11 @@ def run_eval(
                 "budget_usd": budget_usd,
                 "gold": str(gold) if gold is not None else None,
                 "registry_hashes": hashes,
+                # The checkpoint may hold entries from an earlier run under the same id;
+                # these say which belong to this one, for reading it back later.
+                "planned_trials": planned,
+                "planned_items": planned_items,
+                "task_keys": [task.key for task in tasks],
             },
             indent=2,
         )
@@ -388,10 +397,7 @@ def run_eval(
         models=models,
         trials=trials,
         planned_trials=planned,
-        planned_items={
-            schema_id: [item.id for item in items if item.category == "in_schema"]
-            for schema_id, items in chosen.items()
-        },
+        planned_items=planned_items,
         csv_load_failures=csv_failures,
     )
 
