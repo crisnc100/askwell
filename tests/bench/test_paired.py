@@ -35,6 +35,10 @@ def _record(item: str, trial: int, outcome: str) -> dict[str, Any]:
 PLANNED = ["fs-001", "fs-002"]
 
 
+def _key(item: str, trial: int) -> str:
+    return f"fieldservice|m|t{trial}|ledgerline|{item}|v|x|y"
+
+
 def _write_run(
     runs: Path,
     run_id: str,
@@ -52,11 +56,11 @@ def _write_run(
         "gold": None,
         "planned_trials": {"fieldservice": trials},
         "planned_items": {"fieldservice": planned},
-        "task_keys": [f"{item}|{t}" for item in planned for t in range(1, trials + 1)],
+        "task_keys": [_key(item, t) for item in planned for t in range(1, trials + 1)],
     }
     (run_dir / "config.json").write_text(json.dumps(config))
     lines = [
-        json.dumps({"key": f"{item}|{trial}", "cost_usd": 0.01, "record": _record(item, trial, o)})
+        json.dumps({"key": _key(item, trial), "cost_usd": 0.01, "record": _record(item, trial, o)})
         for item, trials in outcomes.items()
         for trial, o in enumerate(trials, start=1)
     ]
