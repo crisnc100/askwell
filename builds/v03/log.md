@@ -373,7 +373,8 @@ questions and gives the exact McNemar p-value. One-trial reports keep their old 
 | v03-spider-new-gated | accuracy-pr3, `has`, `link_roles`, `numeric_text` off | 200 | $0.0925 | 0.12 |
 | **Phase 4** | | | **$1.5259** | |
 
-With the $0.0720 re-record, v0.3's live spend is $1.5979 of the $4 cap.
+With the $0.0720 re-record and the $0.0427 link-role gate (`v03-roles-seen`, Phase 2),
+v0.3's live spend is $1.6406 of the $4 cap, leaving $2.3594.
 - `v03-spider-new` stopped at its $0.10 cap after 198 of 200: interpret-v3 costs about
   $0.00050 per Spider call against the $0.00036 the plan assumed. The orchestrator
   raised it to $0.11 and the run resumed for the last two; csv-new and spider-seen got
@@ -438,8 +439,9 @@ answer is refused or compiles to different SQL without it.
 switches off (`ASKWELL_FEATURES_OFF`; the registries are regenerated without them, so
 their hashes are not checked against the committed ones). Wrong among answered against
 v03-spider-new-before: cre 1 of 47 (+2.1, pass), student_transcripts 10 of 39 (−1.9,
-pass), tvshow 0 of 39 (−2.4, pass), world_1 6 of 36 (+8.6, **fail**). world_1's wrong
-answers use no switch: 705, 724, 758 were wrong before too; 740 and 741 tie for the most
+pass), tvshow 0 of 39 (−2.4, pass), world_1 6 of 36 (+8.6, **fail**). Five of world_1's
+wrong answers use no switch, and 788 uses `vs_aggregate`, which no wrong answer of the
+first run used: 705, 724, 758 were wrong before too; 740 and 741 tie for the most
 languages and the gold's single row is one of the tie; 788 is new on the repeat, seven
 countries tie for the smallest population and the answer returned all seven
 (`gold_issue`, added to `evals/triage/spider_world_1.yaml`). student_transcripts 552
@@ -502,3 +504,11 @@ ADR-008, with counted-right figures beside the official ones.
   miss with its triage note (51 and 106), and the five tables `v03-csv-new-before` could
   not load (`no_id_column`). Status, spend and every table row are unchanged. spider:533's
   note now says the CSV path refused it in `v03-csv-new`, with no SQL.
+- `paired.load_run` now restores a run's registry hashes (from its config) and its
+  outcome: `run_eval` writes `outcome.json` (aborted, abort reason, deferred counts, CSV
+  load failures), and a run from before it counts each planned task with no entry as
+  deferred. Test first (3743d76, test-only: the fixture's keys take `Task.key`'s shape;
+  88e307f). The four reports built through it and the four paired outputs rebuild
+  unchanged.
+- ADR-008: spider:788 on the gated repeat uses `vs_aggregate`; the spend total adds
+  `v03-roles-seen` ($0.0427): $1.6406 of $4.

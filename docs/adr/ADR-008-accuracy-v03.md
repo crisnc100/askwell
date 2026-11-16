@@ -115,7 +115,8 @@ Measured 2026-11-15 on `anthropic:claude-haiku-5-5`, record mode, every switch o
 before code is branch `v03-before`: main at `4014aa0` plus only the eval files these runs
 read (never merged). Reports are in `evals/reports/`; before and after are paired with
 `python -m askwell.bench.paired` (`evals/paired/`). Spend $1.4334, plus $0.0720 for the
-interpret-v3 re-record and $0.0925 for the gated Spider repeat: $1.5979 of the $4 cap.
+interpret-v3 re-record, $0.0427 for the link-role gate (`v03-roles-seen`, above) and
+$0.0925 for the gated Spider repeat: $1.6406 of the $4 cap, leaving $2.3594.
 
 ### The deploy gate: fails on the repeat; overridden
 The first read failed on tvshow, world_1 and CSV world_1. Per the rule, the switches
@@ -147,7 +148,9 @@ compiles to different SQL without it. `has` (tvshow 635, 636, 637; world_1 783;
 student_transcripts 578), `numeric_text` (tvshow 613, 615, 616) and `link_roles`
 (student_transcripts 578, 583, 584). The other 15 wrong answers use none.
 
-**world_1 on the repeat.** Its six wrong answers use no switch. Three were wrong before
+**world_1 on the repeat.** Five of its six wrong answers use no switch; 788 uses
+`vs_aggregate` (a comparison with the minimum), which the rule did not turn off, as no
+wrong answer of the first run used it. Three were wrong before
 too (705, 724, 758, misreads). Two are new in v0.3 and stay wrong with every switch off
 (740, 741): several countries tie for the most languages, and the gold's single row is
 one of the tie; before, the tie fell the gold's way. One is new on the repeat (788):
