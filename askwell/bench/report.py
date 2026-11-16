@@ -15,7 +15,14 @@ from typing import Any
 import yaml
 
 from askwell.bench.items import ROOT, default_gold
-from askwell.bench.metrics import ItemOutcome, summarise
+from askwell.bench.metrics import (
+    ItemOutcome,
+    Rate,
+    _right_by_question,
+    mcnemar_exact,
+    question_level,
+    summarise,
+)
 from askwell.bench.run import RunResult
 from askwell.config import get_settings
 
@@ -29,20 +36,45 @@ METRIC_LABELS = {
 TRIAGE_TAGS = ("grammar_gap", "misread", "validator_false_reject", "builder_bug", "gold_issue")
 
 
-def load_triage(schema_id: str) -> dict[str, dict[str, str]]:
-    """`evals/triage/<schema>.yaml`: item id -> {tag, note}, written after a run."""
+# Askwell's own systems: the registry path and the CSV upload path. Their misses are
+# listed and triaged; a baseline's are not.
+ASKWELL_SYSTEMS = ("ledgerline", "askwell_csv")
+
+
+def load_triage(schema_id: str) -> dict[str, dict[str, Any]]:
+    """`evals/triage/<schema>.yaml`: item id -> {tag, note}, written after a run. An entry
+    may also hold `runs: {run id: {tag, note}}`, notes written for one run only, since a
+    question can miss for a different reason in each run."""
     path = TRIAGE_DIR / f"{schema_id}.yaml"
     if not path.exists():
         return {}
-    data: dict[str, dict[str, str]] = yaml.safe_load(path.read_text()) or {}
+    data: dict[str, dict[str, Any]] = yaml.safe_load(path.read_text()) or {}
     for item_id, entry in data.items():
-        if entry.get("tag") not in TRIAGE_TAGS:
-            raise ValueError(f"{path.name}: {item_id} has tag {entry.get('tag')!r}")
+        runs: dict[str, dict[str, str]] = entry.get("runs") or {}
+        tags = [(item_id, entry.get("tag"))] if "tag" in entry or not runs else []
+        tags += [(f"{item_id} in {run}", e.get("tag")) for run, e in runs.items()]
+        for where, tag in tags:
+            if tag not in TRIAGE_TAGS:
+                raise ValueError(f"{path.name}: {where} has tag {tag!r}")
     return data
 
 
+def triage_for(entry: dict[str, Any], run_id: str) -> tuple[str, str]:
+    """The tag and note for one run's miss: the note written for that run if there is one,
+    otherwise the entry's general note, otherwise untriaged."""
+    own = (entry.get("runs") or {}).get(run_id)
+    if own is not None:
+        return str(own["tag"]), str(own.get("note", ""))
+    if "tag" in entry:
+        return str(entry["tag"]), str(entry.get("note", ""))
+    return "untriaged", ""
+
+
 def floor_checks(
-    table: list[dict[str, Any]], path: Path | None = None, default_model: str | None = None
+    table: list[dict[str, Any]],
+    path: Path | None = None,
+    default_model: str | None = None,
+    prompt_versions: dict[str, list[str]] | None = None,
 ) -> list[dict[str, Any]]:
     """Each schema's floors from `evals/floors.yaml`, checked on Askwell's row for the
     configured default model, never on whichever model sorts first. With
@@ -80,6 +112,14 @@ def floor_checks(
                 ok = value is not None and value <= bound["max"]
                 rule = f"<= {bound['max'] * 100:.0f}%"
             checks.append({"metric": metric, "rule": rule, "rate": row[metric], "met": ok})
+        note, cause, next_step = entry.get("status_note"), entry.get("cause"), entry.get("next")
+        # The written text explains one prompt version's results; a run made with another
+        # keeps its computed verdict and says which version it used instead.
+        written = entry.get("prompt_version")
+        used = (prompt_versions or {}).get(schema_id)
+        if written and used and used != [written]:
+            note = f"with prompt{'s' if len(used) > 1 else ''} {', '.join(used)}"
+            cause = next_step = None
         out.append(
             {
                 "schema": schema_id,
@@ -87,12 +127,23 @@ def floor_checks(
                 "model": row.get("model"),
                 "met": all(c["met"] for c in checks),
                 "checks": checks,
-                "status_note": entry.get("status_note"),
-                "cause": entry.get("cause"),
-                "next": entry.get("next"),
+                "status_note": note,
+                "cause": cause,
+                "next": next_step,
             }
         )
     return out
+
+
+def _prompt_versions(records: list[dict[str, Any]]) -> dict[str, list[str]]:
+    """Per schema, the prompt versions Askwell's records were made with, read from each
+    record's checkpoint key (its sixth part; see `Task.key`)."""
+    found: dict[str, set[str]] = defaultdict(set)
+    for record in records:
+        parts = str(record.get("key", "")).split("|")
+        if record["system"] == "ledgerline" and len(parts) > 5:
+            found[str(record["schema_id"])].add(parts[5])
+    return {schema: sorted(versions) for schema, versions in found.items()}
 
 
 def _is_spider(record: dict[str, Any]) -> bool:
@@ -187,14 +238,17 @@ def build(result: RunResult) -> dict[str, Any]:
 
     misses = []
     for record in result.records:
-        if record["system"] != "ledgerline" or record["outcome"] == "correct":
+        if record["system"] not in ASKWELL_SYSTEMS or record["outcome"] == "correct":
             continue
         if record["category"] != "in_schema" and record["outcome"] == "refused":
             continue
-        triage = load_triage(record["schema_id"]).get(record["item_id"], {})
+        tag, note = triage_for(
+            load_triage(record["schema_id"]).get(record["item_id"], {}), result.run_id
+        )
         misses.append(
             {
                 "schema": record["schema_id"],
+                "system": record["system"],
                 "gold": _gold(record),
                 "item_id": record["item_id"],
                 "trial": record["trial"],
@@ -203,8 +257,8 @@ def build(result: RunResult) -> dict[str, Any]:
                 "issue_codes": record["detail"].get("issue_codes", []),
                 "refusal": _public_refusal(record),
                 "error": _public_error(record),
-                "tag": triage.get("tag", "untriaged"),
-                "note": triage.get("note", ""),
+                "tag": tag,
+                "note": note,
             }
         )
 
@@ -235,7 +289,24 @@ def build(result: RunResult) -> dict[str, Any]:
         for table_name, codes in record["detail"].get("failed_tables", {}).items():
             csv_failures[record["schema_id"]][table_name] = codes
     simulation = simulation_note(result.records)
-    extra = {"csv_load_failures": dict(csv_failures)} if csv_failures else {}
+    extra: dict[str, Any] = {"csv_load_failures": dict(csv_failures)} if csv_failures else {}
+    if result.trials > 1:
+        extra["question_level"] = [
+            {
+                "schema": schema_id,
+                "system": system,
+                "model": model,
+                "gold": gold,
+                "right": Rate(
+                    *question_level(
+                        records,
+                        result.planned(schema_id),
+                        result.planned_items.get(schema_id, ()),
+                    )
+                ).to_dict(),
+            }
+            for (schema_id, gold, system, model), records in sorted(groups.items())
+        ]
     return {
         "run_id": result.run_id,
         "gold_files": sorted({_gold(r) for r in result.records}),
@@ -250,7 +321,11 @@ def build(result: RunResult) -> dict[str, Any]:
         "spent_usd": result.spent_usd,
         "registry_hashes": result.registry_hashes,
         "table": table,
-        "floors": floor_checks(table, default_model=get_settings().default_model),
+        "floors": floor_checks(
+            table,
+            default_model=get_settings().default_model,
+            prompt_versions=_prompt_versions(result.records),
+        ),
         "misses": misses,
         "baseline_wins": wins,
         **extra,
@@ -321,7 +396,8 @@ def render_markdown(report: dict[str, Any]) -> str:
     for miss in report["misses"]:
         why = miss["refusal"] or miss["error"] or ", ".join(miss["issue_codes"]) or "rows differ"
         lines.append(
-            f"- `{miss['item_id']}` ({miss['schema']}, {miss['gold']}, trial {miss['trial']}): "
+            f"- `{miss['item_id']}` ({miss['schema']}, {miss['gold']}, trial {miss['trial']}"
+            f"{'' if miss['system'] == 'ledgerline' else ', ' + miss['system']}): "
             f"{miss['outcome']}"
             f" — {why}. Tag: **{miss['tag']}**{'. ' + miss['note'] if miss['note'] else ''}"
         )
@@ -333,6 +409,23 @@ def render_markdown(report: dict[str, Any]) -> str:
             f"- `{win['item_id']}` ({win['schema']}, {win['gold']}, trial {win['trial']}): "
             f"{win['system']}"
         )
+    if report.get("question_level"):
+        lines += [
+            "",
+            "## Question-level accuracy",
+            "",
+            "A question counts as right when it is right in more than half of its planned "
+            "trials; a trial that did not finish counts as not right. "
+            "The interval is over distinct questions.",
+            "",
+            "| Schema | System | Model | Right | Gold |",
+            "|---|---|---|---|---|",
+        ]
+        for row in report["question_level"]:
+            lines.append(
+                f"| {row['schema']} | {row['system']} | {row['model']} "
+                f"| {_pct(row['right'])} | {row.get('gold') or ''} |"
+            )
     if report.get("csv_load_failures"):
         lines += [
             "",
@@ -358,3 +451,47 @@ def write(report: dict[str, Any], out_dir: Path = REPORTS_DIR) -> tuple[Path, Pa
         json.dumps(report, indent=2, sort_keys=True, default=str) + "\n", encoding="utf-8"
     )
     return md, js
+
+
+def compare_runs(before: RunResult, after: RunResult) -> list[dict[str, Any]]:
+    """Per schema, gold, system and model present in both runs: question-level right or
+    not against each run's planned trials, paired on the same questions, with the exact
+    McNemar p-value."""
+
+    def by_key(result: RunResult) -> dict[tuple[str, str, str, str], dict[str, bool]]:
+        groups: dict[tuple[str, str, str, str], list[dict[str, Any]]] = defaultdict(list)
+        for record in result.records:
+            key = (record["schema_id"], _gold(record), record["system"], record["model"])
+            groups[key].append(record)
+        return {
+            key: _right_by_question(
+                records, result.planned(key[0]), result.planned_items.get(key[0], ())
+            )
+            for key, records in groups.items()
+        }
+
+    old, new = by_key(before), by_key(after)
+    out: list[dict[str, Any]] = []
+    for key in sorted(old.keys() & new.keys()):
+        questions = sorted(old[key].keys() & new[key].keys())
+        pairs = [(old[key][q], new[key][q]) for q in questions]
+        only_after = sum(not b and a for b, a in pairs)
+        only_before = sum(b and not a for b, a in pairs)
+        schema_id, gold, system, model = key
+        out.append(
+            {
+                "schema": schema_id,
+                "gold": gold,
+                "system": system,
+                "model": model,
+                "questions": len(questions),
+                "before_right": sum(b for b, _ in pairs),
+                "after_right": sum(a for _, a in pairs),
+                "only_after": only_after,
+                "only_before": only_before,
+                "both": sum(b and a for b, a in pairs),
+                "neither": sum(not b and not a for b, a in pairs),
+                "p_value": mcnemar_exact(only_after, only_before),
+            }
+        )
+    return out

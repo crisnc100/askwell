@@ -12,7 +12,21 @@ from __future__ import annotations
 # link_roles: name one of two links between the same tables.
 # inferred_links: more links from column names, checked against the data.
 # numeric_text: a text column that holds only numbers is a number.
-FEATURES: frozenset[str] = frozenset({"link_roles", "inferred_links", "numeric_text"})
+# computed: a value computed from two numeric fields (multiply, subtract, add).
+# durations: days between two dates, or from a date to now.
+# has: keep rows that have, or have no, related rows.
+# vs_aggregate: compare a field with its own average, minimum or maximum.
+FEATURES: frozenset[str] = frozenset(
+    {
+        "link_roles",
+        "inferred_links",
+        "numeric_text",
+        "computed",
+        "durations",
+        "has",
+        "vs_aggregate",
+    }
+)
 Features = frozenset[str]
 ALL: Features = FEATURES
 

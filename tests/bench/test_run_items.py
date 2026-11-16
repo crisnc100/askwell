@@ -60,3 +60,43 @@ def test_the_roles_gate_items_are_the_26_two_link_refusals() -> None:
     assert len(ids) == len(set(ids)) == 26
     seen = {item.id for db in ("network_1", "wta_1") for item in spider_items(db)}
     assert set(ids) <= seen
+
+
+def test_the_run_config_records_its_plan(isolated: Path) -> None:
+    run_module.run_eval(
+        get_settings(),
+        run_id="t",
+        schema_ids=["spider_network_1"],
+        systems=["ledgerline"],
+        mode="export",
+        models=["target/model"],
+        trials=2,
+        budget_usd=1.0,
+        item_ids={"spider:885"},
+    )
+    config = json.loads((isolated / "runs" / "t" / "config.json").read_text())
+    assert config["planned_trials"] == {"spider_network_1": 2}
+    assert config["planned_items"] == {"spider_network_1": ["spider:885"]}
+    assert len(config["task_keys"]) == 2
+    assert all("|spider:885|" in key for key in config["task_keys"])
+
+
+def test_the_run_records_its_outcome(isolated: Path) -> None:
+    run_module.run_eval(
+        get_settings(),
+        run_id="t",
+        schema_ids=["spider_network_1"],
+        systems=["ledgerline"],
+        mode="export",
+        models=["target/model"],
+        trials=1,
+        budget_usd=1.0,
+        item_ids={"spider:885"},
+    )
+    outcome = json.loads((isolated / "runs" / "t" / "outcome.json").read_text())
+    assert outcome == {
+        "aborted": False,
+        "abort_reason": None,
+        "deferred": {"spider_network_1/ledgerline": 1},
+        "csv_load_failures": {},
+    }

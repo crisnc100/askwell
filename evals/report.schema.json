@@ -235,6 +235,15 @@
           "title": "Schema",
           "type": "string"
         },
+        "system": {
+          "default": "ledgerline",
+          "enum": [
+            "ledgerline",
+            "askwell_csv"
+          ],
+          "title": "System",
+          "type": "string"
+        },
         "tag": {
           "enum": [
             "grammar_gap",
@@ -266,6 +275,47 @@
         "note"
       ],
       "title": "Miss",
+      "type": "object"
+    },
+    "QuestionLevel": {
+      "additionalProperties": false,
+      "description": "Distinct in-schema questions right in more than half of their trials.",
+      "properties": {
+        "gold": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Gold"
+        },
+        "model": {
+          "title": "Model",
+          "type": "string"
+        },
+        "right": {
+          "$ref": "#/$defs/Rate"
+        },
+        "schema": {
+          "title": "Schema",
+          "type": "string"
+        },
+        "system": {
+          "title": "System",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schema",
+        "system",
+        "model",
+        "right"
+      ],
+      "title": "QuestionLevel",
       "type": "object"
     },
     "Rate": {
@@ -502,6 +552,13 @@
         "type": "string"
       },
       "title": "Notes",
+      "type": "array"
+    },
+    "question_level": {
+      "items": {
+        "$ref": "#/$defs/QuestionLevel"
+      },
+      "title": "Question Level",
       "type": "array"
     },
     "registry_hashes": {

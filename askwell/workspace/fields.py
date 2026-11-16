@@ -103,12 +103,15 @@ def draft(db_path: Path, plans: list[TablePlan], features: Features = ALL) -> di
     ]
     info = FieldInfo()
     headers = {(p.name, c.name): c.header for p in plans for c in p.columns}
+    generated = {(p.name, p.id_column) for p in plans if p.row_key}
     entities: dict[str, EntityDef] = {}
     for slug, entity in result.registry.entities.items():
         fields: dict[str, FieldDef] = {}
         for name, fdef in entity.fields.items():
             key = f"{slug}.{name}"
             info.headers[key] = headers.get((entity.table, fdef.column), fdef.column)
+            if (entity.table, fdef.column) in generated:
+                fdef = _with(fdef, hidden=True)
             if fdef.hidden:
                 info.auto_hidden.append(key)
             if fdef.allowed_values:

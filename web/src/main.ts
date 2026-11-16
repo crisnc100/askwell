@@ -173,7 +173,7 @@ async function preparePage(main: HTMLElement): Promise<void> {
       { class: "rules" },
       h("li", {}, "One table per CSV file, with a header row of column names. The file name becomes the table name."),
       h("li", {}, "UTF-8 text, separated by commas (not semicolons). A value with a comma or a line break goes in quotes."),
-      h("li", {}, "Each table has an ID column named id, <table>_id or <table>_id without a final s (customer_id in customers.csv), with one unique value per row. A table that only links two others needs no ID."),
+      h("li", {}, "Each table has an ID column named id, <table>_id or <table>_id without a final s (customer_id in customers.csv), with one unique value per row. A table with no ID column still loads, with its rows numbered, but no other table can link to it. A table that only links two others needs no ID."),
       h("li", {}, "A column named <name>_id links to the table <name> or <name>s (customer_id links to customers)."),
       h("li", {}, "A column named after its own table (customer_id in customers.csv) is one of its ID names, never a link."),
       h("li", {}, "Dates are YYYY-MM-DD (2025-03-04); times are YYYY-MM-DD HH:MM or YYYY-MM-DD HH:MM:SS, with no time zone."),

@@ -1,0 +1,253 @@
+{
+  "abort_reason": null,
+  "baseline_wins": [
+    {
+      "gold": "fieldservice.jsonl",
+      "item_id": "fs-024",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "fieldservice",
+      "system": "oneshot",
+      "trial": 1
+    },
+    {
+      "gold": "fieldservice.jsonl",
+      "item_id": "fs-037",
+      "model": "anthropic:claude-haiku-5-5",
+      "schema": "fieldservice",
+      "system": "oneshot",
+      "trial": 1
+    }
+  ],
+  "deferred": {},
+  "floors": [
+    {
+      "cause": null,
+      "checks": [
+        {
+          "met": true,
+          "metric": "execution_accuracy",
+          "rate": {
+            "ci95": [
+              0.8454450199593603,
+              0.9871507399056197
+            ],
+            "n": 41,
+            "of": 43,
+            "rate": 0.9534883720930233
+          },
+          "rule": ">= 80%"
+        },
+        {
+          "met": true,
+          "metric": "wrong_answer_rate_given_answered",
+          "rate": {
+            "ci95": [
+              0.004215404134432499,
+              0.12321201573766646
+            ],
+            "n": 1,
+            "of": 42,
+            "rate": 0.023809523809523808
+          },
+          "rule": "<= 5%"
+        }
+      ],
+      "gold": null,
+      "met": true,
+      "model": "anthropic:claude-haiku-5-5",
+      "next": null,
+      "schema": "fieldservice",
+      "status_note": "with prompt interpret-v3"
+    }
+  ],
+  "gold_files": [
+    "fieldservice.jsonl"
+  ],
+  "misses": [
+    {
+      "error": null,
+      "gold": "fieldservice.jsonl",
+      "issue_codes": [],
+      "item_id": "fs-024",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "Haiku 5.5 (v02-seen, v0.2 grammar): Wrong in 1 of 3 trials on the same ambiguous date as below. mistral-small (select-2026-11-11): Ambiguous date: \"did work for last month\" was read as completed last month; the gold uses opened last month. Both readings are defensible.",
+      "outcome": "wrong",
+      "refusal": null,
+      "schema": "fieldservice",
+      "tag": "gold_issue",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "fieldservice.jsonl",
+      "issue_codes": [],
+      "item_id": "fs-037",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "Haiku 5.5 (v02-seen, v0.2 grammar): Refused correctly in 3 of 3 trials. Haiku 5.5 (select-haiku-2026-11-11): Needs a distinct count of months in HAVING. Refused correctly. mistral-small (select-2026-11-11): Needs a distinct count of months in HAVING. Refused correctly.",
+      "outcome": "refused",
+      "refusal": "it needs a distinct count of months per technician, checked against every month of the quarter, which the intent cannot express",
+      "schema": "fieldservice",
+      "tag": "grammar_gap",
+      "trial": 1
+    }
+  ],
+  "notes": [
+    "sql_agent baseline not run: needs a live model (multi-step tool calls can't be honestly simulated in one pass)."
+  ],
+  "registry_hashes": {},
+  "run_id": "rerecord-v3-fieldservice",
+  "simulation": null,
+  "spent_usd": 0.06687150000000004,
+  "status": "complete",
+  "table": [
+    {
+      "accuracy_given_attempted": {
+        "ci95": [
+          0.8767879842623334,
+          0.9957845958655673
+        ],
+        "n": 41,
+        "of": 42,
+        "rate": 0.9761904761904762
+      },
+      "coverage": {
+        "ci95": [
+          0.8794100655939282,
+          0.9958829127256662
+        ],
+        "n": 42,
+        "of": 43,
+        "rate": 0.9767441860465116
+      },
+      "execution_accuracy": {
+        "ci95": [
+          0.8454450199593603,
+          0.9871507399056197
+        ],
+        "n": 41,
+        "of": 43,
+        "rate": 0.9534883720930233
+      },
+      "execution_error_rate": {
+        "ci95": [
+          0.0,
+          0.05422613939130178
+        ],
+        "n": 0,
+        "of": 67,
+        "rate": 0.0
+      },
+      "false_refusal_rate": {
+        "ci95": [
+          0.004117087274333769,
+          0.12058993440607177
+        ],
+        "n": 1,
+        "of": 43,
+        "rate": 0.023255813953488372
+      },
+      "gold": "fieldservice.jsonl",
+      "items": 67,
+      "mean_cost_usd": 0.0006004179104477612,
+      "model": "anthropic:claude-haiku-5-5",
+      "p50_latency_ms": 1141.3459590403363,
+      "pending": 0,
+      "refusal_recall": {
+        "ci95": [
+          0.8620237953250198,
+          1.0
+        ],
+        "n": 24,
+        "of": 24,
+        "rate": 1.0
+      },
+      "schema": "fieldservice",
+      "system": "ledgerline",
+      "trials": 1,
+      "wrong_answer_rate_given_answered": {
+        "ci95": [
+          0.004215404134432499,
+          0.12321201573766646
+        ],
+        "n": 1,
+        "of": 42,
+        "rate": 0.023809523809523808
+      }
+    },
+    {
+      "accuracy_given_attempted": {
+        "ci95": [
+          0.6738299634272562,
+          0.9025824857100377
+        ],
+        "n": 35,
+        "of": 43,
+        "rate": 0.813953488372093
+      },
+      "coverage": {
+        "ci95": [
+          0.9179901967742088,
+          1.0
+        ],
+        "n": 43,
+        "of": 43,
+        "rate": 1.0
+      },
+      "execution_accuracy": {
+        "ci95": [
+          0.6738299634272562,
+          0.9025824857100377
+        ],
+        "n": 35,
+        "of": 43,
+        "rate": 0.813953488372093
+      },
+      "execution_error_rate": {
+        "ci95": [
+          0.0,
+          0.05422613939130178
+        ],
+        "n": 0,
+        "of": 67,
+        "rate": 0.0
+      },
+      "false_refusal_rate": {
+        "ci95": [
+          0.0,
+          0.08200980322579117
+        ],
+        "n": 0,
+        "of": 43,
+        "rate": 0.0
+      },
+      "gold": "fieldservice.jsonl",
+      "items": 67,
+      "mean_cost_usd": 0.0003976641791044776,
+      "model": "anthropic:claude-haiku-5-5",
+      "p50_latency_ms": 1121.3800000259653,
+      "pending": 0,
+      "refusal_recall": {
+        "ci95": [
+          0.8620237953250198,
+          1.0
+        ],
+        "n": 24,
+        "of": 24,
+        "rate": 1.0
+      },
+      "schema": "fieldservice",
+      "system": "oneshot",
+      "trials": 1,
+      "wrong_answer_rate_given_answered": {
+        "ci95": [
+          0.09741751428996226,
+          0.32617003657274385
+        ],
+        "n": 8,
+        "of": 43,
+        "rate": 0.18604651162790697
+      }
+    }
+  ],
+  "trials": 1
+}

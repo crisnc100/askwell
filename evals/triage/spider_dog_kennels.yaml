@@ -51,10 +51,18 @@ spider:944:
   note: 'Needs a subquery, set operation or anti-join. The intent grammar has none of these. Before and
     after: refused.'
   tag: grammar_gap
+  runs:
+    v03-spider-seen:
+      tag: gold_issue
+      note: 'v03-spider-seen: wrong, answered with a comparison to the average; the gold joins the two tables with no join condition, so it lists every professional, where the answer lists only those with a cheaper treatment.'
 spider:945:
   note: 'Needs a subquery, set operation or anti-join. The intent grammar has none of these. Before and
     after: refused.'
   tag: grammar_gap
+  runs:
+    v03-spider-seen:
+      tag: gold_issue
+      note: 'v03-spider-seen: wrong, as spider:944.'
 spider:951:
   note: 'The answer returns the size description column; the gold returns the size code column. Both answer
     the question. Before and after: a wrong answer.'
@@ -114,3 +122,22 @@ spider:998:
 spider:999:
   note: 'Same as spider:998: needs DISTINCT rows. Before and after: a wrong answer.'
   tag: grammar_gap
+spider:976:
+  note: 'v03-spider-seen: refused as a comparison with the top row; a row list sorted by date with a limit
+    of one answers it.'
+  tag: misread
+spider:984:
+  note: 'v03-spider-seen: same rows and values as the gold; the gold reads a number stored as text and
+    returns the text; v0.3 reads it as a number (numeric_text), and the scorer counts the types as different.'
+  tag: gold_issue
+spider:985:
+  note: Same as spider:984.
+  tag: gold_issue
+  runs:
+    v03-spider-seen:
+      tag: gold_issue
+      note: 'v03-spider-seen: wrong, same values as the gold; the gold returns numbers stored as text, numeric_text returns numbers, and the scorer counts the types as different.'
+spider:988:
+  note: 'v03-spider-seen: same value as the gold; the gold reads a number stored as text and returns the
+    text; v0.3 reads it as a number (numeric_text), and the scorer counts the types as different.'
+  tag: gold_issue

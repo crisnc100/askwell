@@ -1,0 +1,1 @@
+{"f1": {"status": "fixed", "response": "real"}, "f2": {"status": "fixed", "response": "real"}, "f3": {"status": "fixed", "response": "real"}, "f4": {"status": "fixed", "response": "real"}, "x2": {"status": "fixed", "response": "real"}, "x1": {"status": "deferred", "reason": "Float casts lose precision only above 2^53, far beyond business amounts; recorded in builds/v03/log.md."}}

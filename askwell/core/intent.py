@@ -42,14 +42,42 @@ class _Strict(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 
 
+class Computed(_Strict):
+    """A value computed row by row from two numeric fields (feature `computed`)."""
+
+    op: Literal["multiply", "subtract", "add"]
+    left: str
+    right: str
+    alias: str | None = None
+
+
+class DaysBetween(_Strict):
+    """Days from the first date field to the second, with fractions (feature
+    `durations`). The second may be "now", the reference time."""
+
+    days_between: list[str]
+    alias: str | None = None
+
+
+# Where a numeric field is read: a field reference, or a value computed from fields.
+FieldExpr = str | Computed | DaysBetween
+
+
+class AggregateOf(_Strict):
+    """A filter value that is an aggregate of the filtered field itself, over the rows the
+    question selects (feature `vs_aggregate`): "longer than average"."""
+
+    of: Literal["avg", "min", "max"]
+
+
 class Condition(_Strict):
     """One predicate. Exactly one operand form applies per operator:
     `value` (eq..lte, ilike_contains, is_null as true/false), `values` (in; between as
     [low, high]) or `other_field` (eq..lte against another column)."""
 
-    field: str
+    field: FieldExpr
     op: FilterOp
-    value: Scalar | None = None
+    value: Scalar | AggregateOf | None = None
     values: list[Scalar] | None = None
     other_field: str | None = None
 
@@ -61,13 +89,23 @@ class FilterGroup(_Strict):
     all_of: list[Condition] | None = None
 
 
+class HasFilter(_Strict):
+    """Keeps the rows that have (or, with `none`, have no) related rows of `has`, an
+    entity whose rows each point at one of these (feature `has`). `where` narrows
+    which related rows count; its fields are read from `has`."""
+
+    has: str
+    where: list[Condition] = Field(default_factory=list[Condition])
+    none: bool = False
+
+
 class Metric(_Strict):
     """`where` makes it conditional: counted or summed only over the rows that match.
     A `ratio` takes only `numerator` and `denominator` (labels of other metrics in the
     same intent) and `as_percent`."""
 
     agg: Aggregate
-    field: str | None = None  # None only for count (count of rows) and ratio
+    field: FieldExpr | None = None  # None only for count (count of rows) and ratio
     distinct: bool = False
     alias: str | None = None
     where: list[Condition] = Field(default_factory=list[Condition])
@@ -117,9 +155,11 @@ class OrderBy(_Strict):
 class Intent(_Strict):
     intent_type: IntentType
     entity: str | None = None
-    select: list[str] = Field(default_factory=list[str])
+    select: list[FieldExpr] = Field(default_factory=list[FieldExpr])
     metrics: list[Metric] = Field(default_factory=list[Metric])
-    filters: list[Condition | FilterGroup] = Field(default_factory=list[Condition | FilterGroup])
+    filters: list[Condition | FilterGroup | HasFilter] = Field(
+        default_factory=list[Condition | FilterGroup | HasFilter]
+    )
     having: list[Having] = Field(default_factory=list[Having])
     group_by: list[GroupBy] = Field(default_factory=list[GroupBy])
     date_range: DateRange | None = None

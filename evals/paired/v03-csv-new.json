@@ -1,0 +1,242 @@
+{
+  "after": "v03-csv-new",
+  "before": "v03-csv-new-before",
+  "pairs": [
+    {
+      "after_right": 43,
+      "before_right": 40,
+      "both": 38,
+      "gold": "spider_ids_v03.json",
+      "model": "anthropic:claude-haiku-5-5",
+      "neither": 5,
+      "only_after": 5,
+      "only_before": 2,
+      "p_value": 0.453125,
+      "questions": 50,
+      "schema": "spider_cre_Doc_Template_Mgt",
+      "system": "askwell_csv",
+      "wrong_after": {
+        "per_trial": {
+          "1": {
+            "ci95": [
+              0.004023252060053224,
+              0.11807709698213287
+            ],
+            "n": 1,
+            "of": 44,
+            "rate": 0.022727272727272728
+          }
+        },
+        "pooled": {
+          "ci95": [
+            0.004023252060053224,
+            0.11807709698213287
+          ],
+          "n": 1,
+          "of": 44,
+          "rate": 0.022727272727272728
+        }
+      },
+      "wrong_before": {
+        "per_trial": {
+          "1": {
+            "ci95": [
+              0.004318531568912411,
+              0.1259506205577423
+            ],
+            "n": 1,
+            "of": 41,
+            "rate": 0.024390243902439025
+          }
+        },
+        "pooled": {
+          "ci95": [
+            0.004318531568912411,
+            0.1259506205577423
+          ],
+          "n": 1,
+          "of": 41,
+          "rate": 0.024390243902439025
+        }
+      }
+    },
+    {
+      "after_right": 28,
+      "before_right": 22,
+      "both": 20,
+      "gold": "spider_ids_v03.json",
+      "model": "anthropic:claude-haiku-5-5",
+      "neither": 20,
+      "only_after": 8,
+      "only_before": 2,
+      "p_value": 0.109375,
+      "questions": 50,
+      "schema": "spider_student_transcripts_tracking",
+      "system": "askwell_csv",
+      "wrong_after": {
+        "per_trial": {
+          "1": {
+            "ci95": [
+              0.13361352989116398,
+              0.40117292121442655
+            ],
+            "n": 9,
+            "of": 37,
+            "rate": 0.24324324324324326
+          }
+        },
+        "pooled": {
+          "ci95": [
+            0.13361352989116398,
+            0.40117292121442655
+          ],
+          "n": 9,
+          "of": 37,
+          "rate": 0.24324324324324326
+        }
+      },
+      "wrong_before": {
+        "per_trial": {
+          "1": {
+            "ci95": [
+              0.19750227679220683,
+              0.5039210557219438
+            ],
+            "n": 11,
+            "of": 33,
+            "rate": 0.3333333333333333
+          }
+        },
+        "pooled": {
+          "ci95": [
+            0.19750227679220683,
+            0.5039210557219438
+          ],
+          "n": 11,
+          "of": 33,
+          "rate": 0.3333333333333333
+        }
+      }
+    },
+    {
+      "after_right": 31,
+      "before_right": 30,
+      "both": 30,
+      "gold": "spider_ids_v03.json",
+      "model": "anthropic:claude-haiku-5-5",
+      "neither": 19,
+      "only_after": 1,
+      "only_before": 0,
+      "p_value": 1.0,
+      "questions": 50,
+      "schema": "spider_tvshow",
+      "system": "askwell_csv",
+      "wrong_after": {
+        "per_trial": {
+          "1": {
+            "ci95": [
+              0.030465943674648555,
+              0.22960486562808868
+            ],
+            "n": 3,
+            "of": 34,
+            "rate": 0.08823529411764706
+          }
+        },
+        "pooled": {
+          "ci95": [
+            0.030465943674648555,
+            0.22960486562808868
+          ],
+          "n": 3,
+          "of": 34,
+          "rate": 0.08823529411764706
+        }
+      },
+      "wrong_before": {
+        "per_trial": {
+          "1": {
+            "ci95": [
+              0.04671446664882335,
+              0.26620842770371833
+            ],
+            "n": 4,
+            "of": 34,
+            "rate": 0.11764705882352941
+          }
+        },
+        "pooled": {
+          "ci95": [
+            0.04671446664882335,
+            0.26620842770371833
+          ],
+          "n": 4,
+          "of": 34,
+          "rate": 0.11764705882352941
+        }
+      }
+    },
+    {
+      "after_right": 22,
+      "before_right": 2,
+      "both": 2,
+      "gold": "spider_ids_v03.json",
+      "model": "anthropic:claude-haiku-5-5",
+      "neither": 28,
+      "only_after": 20,
+      "only_before": 0,
+      "p_value": 1.9073486328125e-06,
+      "questions": 50,
+      "schema": "spider_world_1",
+      "system": "askwell_csv",
+      "wrong_after": {
+        "per_trial": {
+          "1": {
+            "ci95": [
+              0.06150033723578355,
+              0.3353119932821348
+            ],
+            "n": 4,
+            "of": 26,
+            "rate": 0.15384615384615385
+          }
+        },
+        "pooled": {
+          "ci95": [
+            0.06150033723578355,
+            0.3353119932821348
+          ],
+          "n": 4,
+          "of": 26,
+          "rate": 0.15384615384615385
+        }
+      },
+      "wrong_before": {
+        "per_trial": {
+          "1": {
+            "ci95": [
+              0.0,
+              0.6576197724933469
+            ],
+            "n": 0,
+            "of": 2,
+            "rate": 0.0
+          }
+        },
+        "pooled": {
+          "ci95": [
+            0.0,
+            0.6576197724933469
+          ],
+          "n": 0,
+          "of": 2,
+          "rate": 0.0
+        }
+      }
+    }
+  ],
+  "spent_usd": {
+    "after": 0.10617500000000005,
+    "before": 0.05131469999999998
+  }
+}

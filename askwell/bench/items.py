@@ -9,12 +9,15 @@ from __future__ import annotations
 import json
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Any
 
 from askwell.gold import GOLD_DIR, load_gold
 
 ROOT = Path(__file__).resolve().parents[2]
 SPIDER_DIR = ROOT / "data" / "spider" / "spider_data"
 SPIDER_IDS = GOLD_DIR / "spider_ids.json"
+# The triaged set first, then v0.3's untriaged databases. `--all` runs only the first.
+SPIDER_ID_FILES = (SPIDER_IDS, GOLD_DIR / "spider_ids_v03.json")
 
 
 @dataclass(frozen=True)
@@ -34,7 +37,18 @@ SPIDER_GOLD = "spider_ids.json"
 
 
 def default_gold(schema_id: str) -> str:
-    return SPIDER_GOLD if schema_id.startswith("spider_") else DEFAULT_GOLD
+    if not schema_id.startswith("spider_"):
+        return DEFAULT_GOLD
+    found = _spider_entry(schema_id.removeprefix("spider_"))
+    return found[0].name if found else SPIDER_GOLD
+
+
+def _spider_entry(db_id: str) -> tuple[Path, dict[str, Any]] | None:
+    for path in SPIDER_ID_FILES:
+        for db in json.loads(path.read_text())["databases"]:
+            if db["db_id"] == db_id:
+                return path, db
+    return None
 
 
 def fieldservice_items(path: Path | None = None) -> list[EvalItem]:
@@ -61,10 +75,10 @@ def spider_databases() -> list[str]:
 def spider_items(db_id: str) -> list[EvalItem]:
     from evals.gold.spider_selection import spider_hardness
 
-    selection = json.loads(SPIDER_IDS.read_text())
-    entry = next((db for db in selection["databases"] if db["db_id"] == db_id), None)
-    if entry is None:
+    found = _spider_entry(db_id)
+    if found is None:
         raise ValueError(f"{db_id} is not a pre-registered Spider database")
+    id_file, entry = found
     dev_json = SPIDER_DIR / "dev.json"
     if not dev_json.exists():
         raise FileNotFoundError(f"{dev_json}: run `uv run python -m scripts.fetch_benchmarks`")
@@ -84,7 +98,7 @@ def spider_items(db_id: str) -> list[EvalItem]:
                 gold_sql=query,
                 ordered="order by" in query.lower(),
                 difficulty=spider_hardness(example["sql"]),
-                gold=SPIDER_GOLD,
+                gold=id_file.name,
             )
         )
     return items

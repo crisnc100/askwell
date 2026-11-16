@@ -1,0 +1,154 @@
+# Triage of every Askwell miss on this untriaged v0.3 database by Claude Haiku 5.5, one
+# trial each: v03-spider-new (askwell, registry init) and v03-csv-new (askwell_csv, the
+# tables uploaded as CSV files), with the before runs on main at 4014aa0
+# (v03-spider-new-before, v03-csv-new-before) for comparison. Spider notes cite IDs only.
+# Tags: grammar_gap | misread | validator_false_reject | builder_bug | gold_issue.
+spider:525:
+  note: 'Both refused, saying a grouped count would drop courses with no sections; the gold is that grouped
+    count (an inner join), so counting from the sections side answers it. Before: Askwell right, CSV refused.'
+  tag: misread
+spider:526:
+  note: 'Both refused (Askwell after fan_out): counting sections grouped by course answers it, as the
+    gold does. Before: both refused.'
+  tag: misread
+spider:531:
+  note: 'Both wrong: the substring kept a leading word of the question, where the gold matches only the
+    key word. Before: both wrong.'
+  tag: misread
+spider:533:
+  note: 'Askwell grouped enrolments by student and semester, as the question says; the gold counts a student''s enrolments across all semesters. Before: both systems wrong, grouped the same way.'
+  tag: gold_issue
+  runs:
+    v03-csv-new:
+      tag: misread
+      note: 'v03-csv-new: CSV path refused it as unsupported, with no SQL; the question is expressible, as Askwell''s grouped answer shows (which the gold still scores wrong).'
+spider:534:
+  note: 'Askwell and the CSV path grouped by student and semester, as the question says; the gold ignores
+    the semester. Before: both wrong.'
+  tag: gold_issue
+spider:535:
+  note: 'Both list one row per enrolment, so names repeat; the gold asks for distinct rows, which row
+    lists cannot. Before: both wrong.'
+  tag: grammar_gap
+spider:536:
+  note: 'Same as spider:535: the gold needs distinct rows. Before: both wrong.'
+  tag: grammar_gap
+spider:541:
+  note: 'Two students tie for the most enrolments; the gold''s single row is one of the tie, by table
+    order. Before: both wrong.'
+  tag: gold_issue
+spider:547:
+  note: 'Several courses tie for the most enrolments; the gold''s single row is one of the tie. Before:
+    both right (the tie fell the gold''s way).'
+  tag: gold_issue
+spider:548:
+  note: 'Same tie as spider:547. Before: both right.'
+  tag: gold_issue
+spider:549:
+  note: 'Askwell right with a named link and has none. CSV path refused: the current-address column does
+    not follow the <name>_id rule, so no link to addresses is drawn. Before: both refused.'
+  tag: validator_false_reject
+  runs:
+    v03-spider-new-gated:
+      tag: grammar_gap
+      note: 'v03-spider-new-gated: refused. The first run''s answer used `has` and `link_roles`, which is off here.'
+spider:550:
+  note: 'Same as spider:549. Before: both refused.'
+  tag: validator_false_reject
+  runs:
+    v03-spider-new-gated:
+      tag: grammar_gap
+      note: 'v03-spider-new-gated: refused. The first run''s answer used `has` and `link_roles`, which is off here.'
+spider:552:
+  note: 'Askwell right. CSV path wrong: it counted distinct courses and grouped the date by day, where the gold counts rows per transcript. Before: Askwell right, CSV refused.'
+  tag: misread
+  runs:
+    v03-spider-new-gated:
+      tag: misread
+      note: 'v03-spider-new-gated: wrong, it grouped the date by day and added a count column the gold does not return.'
+spider:557:
+  note: 'Both refused, reading the question as asking for a status the data lacks; the gold reads it as the earliest
+    leaving date. Before: both refused.'
+  tag: misread
+spider:563:
+  note: 'The gold averages a datetime column (SQLite returns a number); the intent averages numeric fields
+    only. Before: both refused.'
+  tag: grammar_gap
+spider:567:
+  note: 'Both refused because no field marks a transcript as released; the gold counts every transcript.
+    Before: both refused.'
+  tag: misread
+spider:575:
+  note: 'Both refused as a set intersection; two has filters on semesters, as spider:379''s CSV answer
+    did, could likely express it. Before: both wrong.'
+  tag: misread
+spider:578:
+  note: 'Askwell listed the addresses that have students (the question asks which ones); the gold returns
+    only their count. CSV path refused: the address links are not drawn from the files. Before: both refused.'
+  tag: gold_issue
+  runs:
+    v03-spider-new-gated:
+      tag: grammar_gap
+      note: 'v03-spider-new-gated: refused. The first run''s answer used `has` and `link_roles`, which is off here.'
+spider:579:
+  note: 'Both ordered by last name and selected every column; the gold sorts and returns the one free-text
+    details column. Before: both wrong.'
+  tag: misread
+spider:581:
+  note: 'Askwell right. CSV path refused, saying no section was named. Before: both refused.'
+  tag: misread
+  runs:
+    v03-spider-new-gated:
+      tag: misread
+      note: 'v03-spider-new-gated: refused, though the first run answered it right without any switch.'
+spider:583:
+  note: 'Askwell compared the country as written in the data; the gold compares a lowercased value that
+    matches no row, so only the phone match remains. CSV path refused: no address link drawn. Before:
+    both refused.'
+  tag: gold_issue
+  runs:
+    v03-spider-new-gated:
+      tag: grammar_gap
+      note: 'v03-spider-new-gated: refused. The first run''s answer used `link_roles`, which is off here.'
+spider:584:
+  note: 'Same as spider:583. Before: both refused.'
+  tag: gold_issue
+  runs:
+    v03-spider-new-gated:
+      tag: grammar_gap
+      note: 'v03-spider-new-gated: refused. The first run''s answer used `link_roles`, which is off here.'
+spider:520:
+  note: 'Before: wrong, counting distinct program ids where the gold counts distinct summary names. After:
+    right.'
+  tag: misread
+spider:537:
+  note: 'Before: wrong, counting distinct students where the gold counts enrolment rows. After: right.'
+  tag: misread
+spider:538:
+  note: 'Same as spider:537. Before: wrong. After: right.'
+  tag: misread
+spider:513:
+  runs:
+    v03-csv-new-before:
+      tag: validator_false_reject
+      note: 'v03-csv-new-before: CSV path refused because `addresses` failed the upload check (no_id_column) and did not load. Right on the CSV path after (numbered rows, O11) and right for Askwell before and after.'
+spider:514:
+  runs:
+    v03-csv-new-before:
+      tag: validator_false_reject
+      note: 'v03-csv-new-before: CSV path refused because `addresses` failed the upload check (no_id_column) and did not load. Right on the CSV path after (numbered rows, O11) and right for Askwell before and after.'
+spider:571:
+  runs:
+    v03-csv-new-before:
+      tag: validator_false_reject
+      note: 'v03-csv-new-before: CSV path refused because `transcript_contents` failed the upload check (no_id_column) and did not load. Right on the CSV path after (numbered rows, O11) and right for Askwell before and after.'
+spider:573:
+  runs:
+    v03-csv-new-before:
+      tag: validator_false_reject
+      note: 'v03-csv-new-before: CSV path refused because `transcript_contents` failed the upload check (no_id_column) and did not load. Right on the CSV path after (numbered rows, O11) and right for Askwell before and after.'
+spider:574:
+  runs:
+    v03-csv-new-before:
+      tag: validator_false_reject
+      note: 'v03-csv-new-before: CSV path refused because `transcript_contents` failed the upload check (no_id_column) and did not load. Right on the CSV path after (numbered rows, O11) and right for Askwell before and after.'

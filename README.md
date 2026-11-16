@@ -11,11 +11,10 @@ reason. A question the intent cannot express can still get a wrong answer, when 
 fills in a valid intent for a nearby question instead of refusing. [docs/product-brief.md](docs/product-brief.md) explains
 who it is for and what it leaves out on purpose.
 
-**Status.** v0.2 runs on your machine, and a public beta answers live questions
+**Status.** v0.3 runs on your machine, and a public beta answers live questions
 ([Deploy the hosted beta](#deploy-the-hosted-beta)). The model is Claude
-Haiku 5.5 ([ADR-004](docs/adr/ADR-004-model-choice.md)). Held-out questions miss both
-targets: 47.6% right (target 80%), 25.9% wrong (target 5%). The seen questions v0.2 was
-built from meet both ([ADR-007](docs/adr/ADR-007-grammar-v02.md)).
+Haiku 5.5 ([ADR-004](docs/adr/ADR-004-model-choice.md)). v0.3's deploy gate failed on one
+database; Cristian approved deploying anyway ([ADR-008](docs/adr/ADR-008-accuracy-v03.md)).
 
 ## Try it
 
@@ -54,18 +53,26 @@ model answers; [Results](#results) has its measured accuracy.
 ## Results
 
 `http://localhost:8000/results/` shows the benchmark: how often Askwell is right,
-wrong or refuses, beside a baseline where the model writes SQL. Fieldservice, live, 3 trials:
+wrong or refuses, beside a baseline where the model writes SQL. Fieldservice, live,
+3 trials; a question counts as right when right in most:
 
-| Live, fieldservice | Askwell | one-shot |
+| | Askwell | One-shot |
 |---|---|---|
-| Held-out: rows match | 47.6% (40/84) | 60.7% (51/84) |
-| Held-out: wrong among answered | 25.9% (14/54) | 39.3% (33/84) |
-| Seen: rows match | 86.0% (111/129) | 76.7% (99/129) |
-| Seen: wrong among answered | 1.8% (2/113) | 23.3% (30/129) |
+| Held-out questions right | 62/96 | 78/96 |
+| Held-out wrong among answered, pooled | 8/193 | 19/255 |
+| Seen questions right | 40/43 | |
 
-v0.2 was built from the seen questions; the held-out ones came first. Both miss the
-held-out target (80% right, 5% wrong); 12 of Askwell's 14 wrong answers differ
-only by an id column or tie order. [docs/failures/](docs/failures/README.md) has more.
+Untriaged Spider, wrong among answered:
+
+| Database | Askwell | Switches off | CSV upload |
+|---|---|---|---|
+| cre_Doc_Template_Mgt | 1/50 | 1/47 | 1/44 |
+| student_transcripts_tracking | 12/44 | 10/39 | 9/37 |
+| tvshow | 6/48 | 0/39 | 3/34 |
+| world_1 | 6/42 | 6/36 | 4/26 |
+
+*Held-out* questions came after the code froze; *seen* ones shaped it
+([docs/failures/](docs/failures/README.md)).
 
 ## Read more
 
@@ -74,8 +81,8 @@ only by an id column or tie order. [docs/failures/](docs/failures/README.md) has
 - [docs/adr/](docs/adr/README.md): each design decision, with a prediction made before
   the code and the measured result.
 - [docs/build-log.md](docs/build-log.md): how v0.1 was built, and what reviews caught.
-- [evals/reports/](evals/reports/): the live runs (`select-haiku-2026-11-11` for the
-  default) and `sim-1`, run earlier on simulated answers.
+- [evals/reports/](evals/reports/): the live runs and `sim-1`, run earlier on
+  simulated answers.
 - The sections below: each part of the system in detail.
 
 ## Setup details
@@ -122,8 +129,9 @@ any other (the spike always uses OpenRouter).
 
 [Try it](#try-it) walks through the five pages. More on each:
 
-- **Prepare.** A file needs one table, a header row, an ID column, `YYYY-MM-DD` dates and
-  plain numbers. You pick your time zone, and the workspace lives in its own folder under
+- **Prepare.** A file needs one table, a header row, `YYYY-MM-DD` dates and plain
+  numbers. A file with no ID column loads with its rows numbered, under a hidden key,
+  but no other table can link to it. You pick your time zone, and the workspace lives in its own folder under
   `data/workspaces/`. Anyone with the workspace link can see your data.
 - **Upload.** A file with the same name replaces the old one.
 - **Check.** Up to 20 problems are listed per file.
@@ -261,12 +269,30 @@ row per period, one column per series. Each series is a metric counted or summed
 own date field, with its own `where`, and a `date_range` applies to each series by that
 field. [ADR-007](docs/adr/ADR-007-grammar-v02.md) explains why.
 
+Four more additions each have a switch (see `ASKWELL_FEATURES_OFF`):
+- **Computed values** (`computed`): a metric, selected or filtered field can be
+  `{op: multiply | subtract | add, left, right}` over two numeric fields, on the base
+  entity or across many-to-one links.
+- **Durations** (`durations`): `{days_between: [start, end]}` in fractional days, where
+  `end` may be `now`, the reference time. It goes wherever a numeric field does.
+- **Has / has none** (`has`): a filter `{has: <table>, where: [...], none: true|false}`
+  keeps the rows that do (or do not) have a matching row in a table that links to the
+  base, as `EXISTS` / `NOT EXISTS`. When two links point back, it names one:
+  `invoices@work_order_id`.
+- **Compare with an aggregate** (`vs_aggregate`): `{field, op, value: {of: avg | min |
+  max}}` compares each row with that aggregate of the same base field over the rows the
+  question already selects (its other filters and date range). It works only as a
+  top-level filter of a `summary` or `row_list`, on a numeric field of the base entity,
+  and every other filter must read the base entity alone, with no `has`; anything else
+  would compare with a different set of rows, so it is refused (`vs_aggregate_scope`).
+
 The validator (`askwell/core/validate.py`) checks an intent against the registry. It
 never raises for a bad intent; it returns typed errors such as `unknown_field`,
 `hidden_field`, `ambiguous_path` (two equally short join paths: refused, not guessed),
 `fan_out` (an aggregate across a one-to-many join, which would double count; see
-[ADR-003](docs/adr/ADR-003-fan-out-rule.md)), `ambiguous_value` and `placeholder_reason`
-(a reason such as "none" in `unanswerable_reason`). `ErrorCode` in that file lists them
+[ADR-003](docs/adr/ADR-003-fan-out-rule.md)), `ambiguous_value`, `placeholder_reason`
+(a reason such as "none" in `unanswerable_reason`) and `feature_off` (an addition that is
+switched off). `ErrorCode` in that file lists them
 all.
 
 The SQL builder (`askwell/core/sqlbuild.py`) writes SQLAlchemy Core. Table and column
@@ -381,7 +407,7 @@ The live run `select-2026-11-11` compared four OpenRouter models on fieldservice
 ([report](evals/reports/select-2026-11-11.md)), and `select-haiku-2026-11-11` measured
 Claude Haiku 5.5, the default, with v0.1 on the seen questions: 35/43 right and 2 of 37
 answered wrong, 1 trial ([report](evals/reports/select-haiku-2026-11-11.md),
-[ADR-004](docs/adr/ADR-004-model-choice.md)). [Results](#results) shows the v0.2 runs.
+[ADR-004](docs/adr/ADR-004-model-choice.md)). [Results](#results) shows the v0.3 runs.
 Before a key existed, the simulated run
 `sim-1` ([evals/reports/sim-1.md](evals/reports/sim-1.md)) checked the pipeline and the
 scoring. Every answer in it was written by claude-haiku-5-5 standing in for
@@ -454,7 +480,7 @@ On the host:
    | `OPENROUTER_API_KEY` | Only if `ASKWELL_DEFAULT_MODEL` names an OpenRouter model. Give that key a credit limit on OpenRouter too. |
    | `ASKWELL_DAILY_SPEND_CAP_USD` | The most live answers may cost per UTC day, for example `1.00`. |
    | `ASKWELL_LIVE_ANSWERS_OFF` | `1` turns live answers off. Restart the app after changing it. |
-   | `ASKWELL_FEATURES_OFF` | Features to switch off, comma-separated: `link_roles`, `inferred_links`, `numeric_text`. Off, Askwell drafts, prompts and refuses as it did before that feature. `compose.prod.yaml` sets `link_roles`, which failed its gate (ADR-008). |
+   | `ASKWELL_FEATURES_OFF` | Features to switch off, comma-separated: `link_roles`, `inferred_links`, `numeric_text`, `computed`, `durations`, `has`, `vs_aggregate`. Off, Askwell drafts, prompts and refuses as it did before that feature. `compose.prod.yaml` sets `link_roles`, which failed its gate (ADR-008). |
 
    `compose.prod.yaml` also sets `ASKWELL_TRUST_PROXY=1`, because Caddy is the only
    client and it writes `X-Forwarded-For`. The image sets the database and data paths.

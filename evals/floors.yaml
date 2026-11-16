@@ -1,8 +1,11 @@
 # The minimum scores v0.1 set out to reach, checked by the eval report for Askwell.
 # The report computes met / not met from the numbers. `status_note`, `cause` and `next`
-# are the written explanation for the current release. An entry with a `gold` file
-# checks only runs on that file; one without checks the schema's own gold.
+# explain the results of the prompt named in `prompt_version`; a run made with another
+# prompt keeps its computed verdict and gets a note naming its own prompt instead. An
+# entry with a `gold` file checks only runs on that file; one without checks the
+# schema's own gold.
 fieldservice:
+  prompt_version: interpret-v2
   floors:
     execution_accuracy: {min: 0.80}
     wrong_answer_rate_given_answered: {max: 0.05}
@@ -20,6 +23,7 @@ fieldservice:
 fieldservice-held-out:
   schema: fieldservice
   gold: holdout-v02.jsonl
+  prompt_version: interpret-v2
   floors:
     execution_accuracy: {min: 0.80}
     wrong_answer_rate_given_answered: {max: 0.05}
@@ -37,3 +41,22 @@ fieldservice-held-out:
   next: >-
     The held-out golds keep their id-column convention, fixed before the runs. The v0.2
     prompt and grammar are not changed after seeing these results.
+fieldservice-held-out-v03:
+  schema: fieldservice
+  gold: holdout-v03.jsonl
+  prompt_version: interpret-v3
+  floors:
+    execution_accuracy: {min: 0.80}
+    wrong_answer_rate_given_answered: {max: 0.05}
+  status_note: on the v0.3 held-out questions (live, default model)
+  cause: >-
+    Held-out questions, written blind and revealed after the v0.3 code was frozen. v0.3
+    (v03-holdout, 3 trials) is right on 185 of 288 (64.2%; 62 of 96 questions in most
+    trials) and wrong on 8 of 193 answered (4.1%); main at 4014aa0 (v03-holdout-before)
+    was right on 152 of 288 and wrong on 12 of 164 (7.3%). Accuracy misses because 31
+    questions are refused in every trial, most needing window functions, ranks within
+    groups, medians, set intersections or per-group totals beside rows. h3-065's three
+    wrong answers return the gold's values; its unordered gold passes the row cap.
+  next: >-
+    Deploying waits on the gate in ADR-008. The interpret-v3 prompt and grammar are not
+    changed after seeing these results.

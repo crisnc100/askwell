@@ -176,6 +176,28 @@ _PLAIN: list[tuple[frozenset[str], str, str]] = [
         "Name each date column and one period, like 'orders placed and orders shipped per month'.",
     ),
     (
+        frozenset({"feature_off"}),
+        "The question needs a kind of calculation that is switched off here.",
+        "Ask it another way, or ask whoever runs Askwell to switch it on.",
+    ),
+    (
+        frozenset({"computed_type", "duration_type"}),
+        "The question combines columns that cannot be combined that way (for example, "
+        "multiplying a text column, or counting days from a column that is not a date).",
+        "Use number columns to multiply or subtract, and date columns to count days.",
+    ),
+    (
+        frozenset({"has_link"}),
+        "The question asks about related rows, but those tables are not linked that way.",
+        "Ask about rows that point at the thing you count, like 'customers with no sites'.",
+    ),
+    (
+        frozenset({"vs_aggregate_scope"}),
+        "Comparing with an average works only on the rows the question itself picks, "
+        "from one table, without grouping.",
+        "Ask it on one table, like 'repairs this year longer than this year's average'.",
+    ),
+    (
         frozenset({"placeholder_reason"}),
         "The model gave no real reason for its answer.",
         "Ask again, or put the question another way.",

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import math
 import statistics
+from collections.abc import Sequence
 from dataclasses import dataclass
 from typing import Any, Literal
 
@@ -87,3 +88,36 @@ def summarise(outcomes: list[ItemOutcome]) -> dict[str, Any]:
         "mean_cost_usd": statistics.fmean(o.cost_usd for o in done) if done else None,
         "p50_latency_ms": statistics.median(latencies) if latencies else None,
     }
+
+
+def _right_by_question(
+    records: list[dict[str, Any]], planned: int, items: Sequence[str] = ()
+) -> dict[str, bool]:
+    """Each in-schema question, right when right in more than half of the trials its
+    run planned. A trial that is missing or pending is not right, so an unfinished run
+    never lowers the bar. `items` are the run's planned in-schema questions: one with no
+    finished trial at all has no record, and still counts as not right."""
+    correct: dict[str, int] = dict.fromkeys(items, 0)
+    for record in records:
+        if record["category"] == "in_schema":
+            hit = record["outcome"] == "correct"
+            correct[record["item_id"]] = correct.get(record["item_id"], 0) + hit
+    return {item: 2 * n > planned for item, n in correct.items()}
+
+
+def question_level(
+    records: list[dict[str, Any]], planned: int, items: Sequence[str] = ()
+) -> tuple[int, int]:
+    """(questions right in most of their planned trials, distinct questions),
+    in-schema only."""
+    right = _right_by_question(records, planned, items)
+    return sum(right.values()), len(right)
+
+
+def mcnemar_exact(only_after: int, only_before: int) -> float:
+    """Two-sided exact McNemar p-value: a binomial test on the discordant questions."""
+    n = only_after + only_before
+    if n == 0:
+        return 1.0
+    tail = sum(math.comb(n, k) for k in range(min(only_after, only_before) + 1))
+    return min(1.0, 2 * tail / 2**n)

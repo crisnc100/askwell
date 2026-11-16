@@ -1,0 +1,242 @@
+{
+  "after": "v03-spider-new",
+  "before": "v03-spider-new-before",
+  "pairs": [
+    {
+      "after_right": 49,
+      "before_right": 46,
+      "both": 45,
+      "gold": "spider_ids_v03.json",
+      "model": "anthropic:claude-haiku-5-5",
+      "neither": 0,
+      "only_after": 4,
+      "only_before": 1,
+      "p_value": 0.375,
+      "questions": 50,
+      "schema": "spider_cre_Doc_Template_Mgt",
+      "system": "ledgerline",
+      "wrong_after": {
+        "per_trial": {
+          "1": {
+            "ci95": [
+              0.003539259271646236,
+              0.10495443589637815
+            ],
+            "n": 1,
+            "of": 50,
+            "rate": 0.02
+          }
+        },
+        "pooled": {
+          "ci95": [
+            0.003539259271646236,
+            0.10495443589637815
+          ],
+          "n": 1,
+          "of": 50,
+          "rate": 0.02
+        }
+      },
+      "wrong_before": {
+        "per_trial": {
+          "1": {
+            "ci95": [
+              0.0,
+              0.07707356308558039
+            ],
+            "n": 0,
+            "of": 46,
+            "rate": 0.0
+          }
+        },
+        "pooled": {
+          "ci95": [
+            0.0,
+            0.07707356308558039
+          ],
+          "n": 0,
+          "of": 46,
+          "rate": 0.0
+        }
+      }
+    },
+    {
+      "after_right": 32,
+      "before_right": 29,
+      "both": 26,
+      "gold": "spider_ids_v03.json",
+      "model": "anthropic:claude-haiku-5-5",
+      "neither": 15,
+      "only_after": 6,
+      "only_before": 3,
+      "p_value": 0.5078125,
+      "questions": 50,
+      "schema": "spider_student_transcripts_tracking",
+      "system": "ledgerline",
+      "wrong_after": {
+        "per_trial": {
+          "1": {
+            "ci95": [
+              0.16346381623843378,
+              0.418488730924512
+            ],
+            "n": 12,
+            "of": 44,
+            "rate": 0.2727272727272727
+          }
+        },
+        "pooled": {
+          "ci95": [
+            0.16346381623843378,
+            0.418488730924512
+          ],
+          "n": 12,
+          "of": 44,
+          "rate": 0.2727272727272727
+        }
+      },
+      "wrong_before": {
+        "per_trial": {
+          "1": {
+            "ci95": [
+              0.16108016247667337,
+              0.42834955806210573
+            ],
+            "n": 11,
+            "of": 40,
+            "rate": 0.275
+          }
+        },
+        "pooled": {
+          "ci95": [
+            0.16108016247667337,
+            0.42834955806210573
+          ],
+          "n": 11,
+          "of": 40,
+          "rate": 0.275
+        }
+      }
+    },
+    {
+      "after_right": 42,
+      "before_right": 40,
+      "both": 37,
+      "gold": "spider_ids_v03.json",
+      "model": "anthropic:claude-haiku-5-5",
+      "neither": 5,
+      "only_after": 5,
+      "only_before": 3,
+      "p_value": 0.7265625,
+      "questions": 50,
+      "schema": "spider_tvshow",
+      "system": "ledgerline",
+      "wrong_after": {
+        "per_trial": {
+          "1": {
+            "ci95": [
+              0.058570514385719794,
+              0.24700458286386834
+            ],
+            "n": 6,
+            "of": 48,
+            "rate": 0.125
+          }
+        },
+        "pooled": {
+          "ci95": [
+            0.058570514385719794,
+            0.24700458286386834
+          ],
+          "n": 6,
+          "of": 48,
+          "rate": 0.125
+        }
+      },
+      "wrong_before": {
+        "per_trial": {
+          "1": {
+            "ci95": [
+              0.004318531568912411,
+              0.1259506205577423
+            ],
+            "n": 1,
+            "of": 41,
+            "rate": 0.024390243902439025
+          }
+        },
+        "pooled": {
+          "ci95": [
+            0.004318531568912411,
+            0.1259506205577423
+          ],
+          "n": 1,
+          "of": 41,
+          "rate": 0.024390243902439025
+        }
+      }
+    },
+    {
+      "after_right": 36,
+      "before_right": 34,
+      "both": 32,
+      "gold": "spider_ids_v03.json",
+      "model": "anthropic:claude-haiku-5-5",
+      "neither": 12,
+      "only_after": 4,
+      "only_before": 2,
+      "p_value": 0.6875,
+      "questions": 50,
+      "schema": "spider_world_1",
+      "system": "ledgerline",
+      "wrong_after": {
+        "per_trial": {
+          "1": {
+            "ci95": [
+              0.06715967015962647,
+              0.27841089474444775
+            ],
+            "n": 6,
+            "of": 42,
+            "rate": 0.14285714285714285
+          }
+        },
+        "pooled": {
+          "ci95": [
+            0.06715967015962647,
+            0.27841089474444775
+          ],
+          "n": 6,
+          "of": 42,
+          "rate": 0.14285714285714285
+        }
+      },
+      "wrong_before": {
+        "per_trial": {
+          "1": {
+            "ci95": [
+              0.02796057410044797,
+              0.2130067934928839
+            ],
+            "n": 3,
+            "of": 37,
+            "rate": 0.08108108108108109
+          }
+        },
+        "pooled": {
+          "ci95": [
+            0.02796057410044797,
+            0.2130067934928839
+          ],
+          "n": 3,
+          "of": 37,
+          "rate": 0.08108108108108109
+        }
+      }
+    }
+  ],
+  "spent_usd": {
+    "after": 0.09913860000000004,
+    "before": 0.11825520000000005
+  }
+}

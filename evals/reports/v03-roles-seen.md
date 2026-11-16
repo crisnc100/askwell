@@ -14,34 +14,43 @@ Rates show the value, the Wilson 95% interval, and the counts. Trials are pooled
 
 ## Ledgerline misses
 
-- `spider:894` (spider_network_1, spider_ids.json, trial 1): refused — refused (unanswerable). Tag: **grammar_gap**. Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so it refuses rather than guess. Before and after: refused.
-- `spider:896` (spider_network_1, spider_ids.json, trial 1): refused — refused (unanswerable). Tag: **grammar_gap**. Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so it refuses rather than guess. Before and after: refused.
-- `spider:897` (spider_network_1, spider_ids.json, trial 1): refused — refused (unanswerable). Tag: **grammar_gap**. Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so it refuses rather than guess. Before and after: refused.
-- `spider:898` (spider_network_1, spider_ids.json, trial 1): refused — refused (unanswerable). Tag: **grammar_gap**. Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so it refuses rather than guess. Before and after: refused.
-- `spider:900` (spider_network_1, spider_ids.json, trial 1): refused — refused (unanswerable). Tag: **grammar_gap**. Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so it refuses rather than guess. Before and after: refused.
-- `spider:906` (spider_network_1, spider_ids.json, trial 1): wrong — rows differ. Tag: **grammar_gap**. Two foreign keys link the same pair of tables. The intent has no way to say which join to use. Before: a wrong answer. After: refused.
-- `spider:917` (spider_network_1, spider_ids.json, trial 1): refused — refused (unanswerable). Tag: **grammar_gap**. Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so it refuses rather than guess. Before and after: refused.
-- `spider:894` (spider_network_1, spider_ids.json, trial 2): refused — refused (unanswerable). Tag: **grammar_gap**. Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so it refuses rather than guess. Before and after: refused.
-- `spider:896` (spider_network_1, spider_ids.json, trial 2): refused — refused (unanswerable). Tag: **grammar_gap**. Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so it refuses rather than guess. Before and after: refused.
-- `spider:897` (spider_network_1, spider_ids.json, trial 2): refused — refused (unanswerable). Tag: **grammar_gap**. Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so it refuses rather than guess. Before and after: refused.
-- `spider:898` (spider_network_1, spider_ids.json, trial 2): refused — refused (unanswerable). Tag: **grammar_gap**. Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so it refuses rather than guess. Before and after: refused.
-- `spider:900` (spider_network_1, spider_ids.json, trial 2): refused — refused (unanswerable). Tag: **grammar_gap**. Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so it refuses rather than guess. Before and after: refused.
-- `spider:906` (spider_network_1, spider_ids.json, trial 2): wrong — rows differ. Tag: **grammar_gap**. Two foreign keys link the same pair of tables. The intent has no way to say which join to use. Before: a wrong answer. After: refused.
-- `spider:910` (spider_network_1, spider_ids.json, trial 2): refused — refused (unknown_field, unknown_link, unknown_metric). Tag: **grammar_gap**. Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so it refuses rather than guess. Before and after: refused.
-- `spider:917` (spider_network_1, spider_ids.json, trial 2): refused — refused (unanswerable). Tag: **grammar_gap**. Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so it refuses rather than guess. Before and after: refused.
-- `spider:894` (spider_network_1, spider_ids.json, trial 3): refused — refused (unanswerable). Tag: **grammar_gap**. Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so it refuses rather than guess. Before and after: refused.
-- `spider:896` (spider_network_1, spider_ids.json, trial 3): refused — refused (unanswerable). Tag: **grammar_gap**. Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so it refuses rather than guess. Before and after: refused.
-- `spider:897` (spider_network_1, spider_ids.json, trial 3): refused — refused (unanswerable). Tag: **grammar_gap**. Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so it refuses rather than guess. Before and after: refused.
-- `spider:898` (spider_network_1, spider_ids.json, trial 3): refused — refused (unanswerable). Tag: **grammar_gap**. Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so it refuses rather than guess. Before and after: refused.
-- `spider:900` (spider_network_1, spider_ids.json, trial 3): refused — refused (unknown_link, unknown_metric). Tag: **grammar_gap**. Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so it refuses rather than guess. Before and after: refused.
-- `spider:910` (spider_network_1, spider_ids.json, trial 3): refused — refused (invalid_order_by, unknown_field, unknown_metric). Tag: **grammar_gap**. Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so it refuses rather than guess. Before and after: refused.
-- `spider:911` (spider_network_1, spider_ids.json, trial 3): refused — refused (unknown_field, unknown_metric). Tag: **grammar_gap**. Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so it refuses rather than guess. Before and after: refused.
-- `spider:917` (spider_network_1, spider_ids.json, trial 3): refused — refused (unanswerable). Tag: **grammar_gap**. Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so it refuses rather than guess. Before and after: refused.
-- `spider:451` (spider_wta_1, spider_ids.json, trial 1): refused — refused (unanswerable). Tag: **grammar_gap**. Two foreign keys link the same pair of tables. The intent has no way to say which join to use, so it refuses rather than guess. Before and after: refused.
+- `spider:894` (spider_network_1, spider_ids.json, trial 1): refused — refused (unanswerable). Tag: **grammar_gap**. v03-roles-seen, link_roles on: refused in every trial; the question also needs "has none" or a set intersection.
+- `spider:896` (spider_network_1, spider_ids.json, trial 1): refused — refused (unanswerable). Tag: **grammar_gap**. v03-roles-seen, link_roles on: refused in every trial; the question also needs "has none" or a set intersection.
+- `spider:897` (spider_network_1, spider_ids.json, trial 1): refused — refused (unanswerable). Tag: **grammar_gap**. v03-roles-seen, link_roles on: refused in every trial; the question also needs "has none" or a set intersection.
+- `spider:898` (spider_network_1, spider_ids.json, trial 1): refused — refused (unanswerable). Tag: **grammar_gap**. v03-roles-seen, link_roles on: refused in every trial; the question also needs "has none" or a set intersection.
+- `spider:900` (spider_network_1, spider_ids.json, trial 1): refused — refused (unanswerable). Tag: **grammar_gap**. v03-roles-seen, link_roles on: refused in every trial; the question also needs "has none" or a set intersection.
+- `spider:906` (spider_network_1, spider_ids.json, trial 1): wrong — rows differ. Tag: **misread**. v03-roles-seen, link_roles on: wrong in trials 1 and 2 (right in 3); it counted the likes a student received, where the gold counts likes given.
+- `spider:917` (spider_network_1, spider_ids.json, trial 1): refused — refused (unanswerable). Tag: **grammar_gap**. v03-roles-seen, link_roles on: refused in every trial; the question also needs "has none" or a set intersection.
+- `spider:894` (spider_network_1, spider_ids.json, trial 2): refused — refused (unanswerable). Tag: **grammar_gap**. v03-roles-seen, link_roles on: refused in every trial; the question also needs "has none" or a set intersection.
+- `spider:896` (spider_network_1, spider_ids.json, trial 2): refused — refused (unanswerable). Tag: **grammar_gap**. v03-roles-seen, link_roles on: refused in every trial; the question also needs "has none" or a set intersection.
+- `spider:897` (spider_network_1, spider_ids.json, trial 2): refused — refused (unanswerable). Tag: **grammar_gap**. v03-roles-seen, link_roles on: refused in every trial; the question also needs "has none" or a set intersection.
+- `spider:898` (spider_network_1, spider_ids.json, trial 2): refused — refused (unanswerable). Tag: **grammar_gap**. v03-roles-seen, link_roles on: refused in every trial; the question also needs "has none" or a set intersection.
+- `spider:900` (spider_network_1, spider_ids.json, trial 2): refused — refused (unanswerable). Tag: **grammar_gap**. v03-roles-seen, link_roles on: refused in every trial; the question also needs "has none" or a set intersection.
+- `spider:906` (spider_network_1, spider_ids.json, trial 2): wrong — rows differ. Tag: **misread**. v03-roles-seen, link_roles on: wrong in trials 1 and 2 (right in 3); it counted the likes a student received, where the gold counts likes given.
+- `spider:910` (spider_network_1, spider_ids.json, trial 2): refused — refused (unknown_field, unknown_link, unknown_metric). Tag: **grammar_gap**. v03-roles-seen, link_roles on: refused in trials 2 and 3, right in 1.
+- `spider:917` (spider_network_1, spider_ids.json, trial 2): refused — refused (unanswerable). Tag: **grammar_gap**. v03-roles-seen, link_roles on: refused in every trial; the question also needs "has none" or a set intersection.
+- `spider:894` (spider_network_1, spider_ids.json, trial 3): refused — refused (unanswerable). Tag: **grammar_gap**. v03-roles-seen, link_roles on: refused in every trial; the question also needs "has none" or a set intersection.
+- `spider:896` (spider_network_1, spider_ids.json, trial 3): refused — refused (unanswerable). Tag: **grammar_gap**. v03-roles-seen, link_roles on: refused in every trial; the question also needs "has none" or a set intersection.
+- `spider:897` (spider_network_1, spider_ids.json, trial 3): refused — refused (unanswerable). Tag: **grammar_gap**. v03-roles-seen, link_roles on: refused in every trial; the question also needs "has none" or a set intersection.
+- `spider:898` (spider_network_1, spider_ids.json, trial 3): refused — refused (unanswerable). Tag: **grammar_gap**. v03-roles-seen, link_roles on: refused in every trial; the question also needs "has none" or a set intersection.
+- `spider:900` (spider_network_1, spider_ids.json, trial 3): refused — refused (unknown_link, unknown_metric). Tag: **grammar_gap**. v03-roles-seen, link_roles on: refused in every trial; the question also needs "has none" or a set intersection.
+- `spider:910` (spider_network_1, spider_ids.json, trial 3): refused — refused (invalid_order_by, unknown_field, unknown_metric). Tag: **grammar_gap**. v03-roles-seen, link_roles on: refused in trials 2 and 3, right in 1.
+- `spider:911` (spider_network_1, spider_ids.json, trial 3): refused — refused (unknown_field, unknown_metric). Tag: **grammar_gap**. v03-roles-seen, link_roles on: refused in trial 3, right in 1 and 2.
+- `spider:917` (spider_network_1, spider_ids.json, trial 3): refused — refused (unanswerable). Tag: **grammar_gap**. v03-roles-seen, link_roles on: refused in every trial; the question also needs "has none" or a set intersection.
+- `spider:451` (spider_wta_1, spider_ids.json, trial 1): refused — refused (unanswerable). Tag: **grammar_gap**. v03-roles-seen, link_roles on: refused in trial 1, right in 2 and 3.
 
 ## Where a baseline beat Ledgerline
 
 None.
+
+## Question-level accuracy
+
+A question counts as right when it is right in more than half of its planned trials; a trial that did not finish counts as not right. The interval is over distinct questions.
+
+| Schema | System | Model | Right | Gold |
+|---|---|---|---|---|
+| spider_network_1 | ledgerline | anthropic:claude-haiku-5-5 | 66.7% [47-82] (16/24) | spider_ids.json |
+| spider_wta_1 | ledgerline | anthropic:claude-haiku-5-5 | 100.0% [34-100] (2/2) | spider_ids.json |
 
 ## Spider registries (generated by `registry init`, unedited, draft)
 

@@ -1,0 +1,1 @@
+{"f1": {"status": "fixed", "response": "real"}, "f2": {"status": "fixed", "response": "real"}, "x1": {"status": "deferred", "reason": "Only the paired comparison spend line undercounts interrupted attempts; the per-run reports and the build log spend come from the checkpoint total and the ledger, which include them. Follow-up: sum spend from every checkpoint entry."}}

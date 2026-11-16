@@ -13,12 +13,20 @@ from askwell.workspace.ask import _GENERAL, explain
 
 def test_every_feature_is_on_by_default() -> None:
     assert Settings(_env_file=None).features == ALL  # pyright: ignore[reportCallIssue]
-    assert {"link_roles", "inferred_links", "numeric_text"} == FEATURES
+    assert {
+        "link_roles",
+        "inferred_links",
+        "numeric_text",
+        "computed",
+        "durations",
+        "has",
+        "vs_aggregate",
+    } == FEATURES
 
 
 def test_named_features_turn_off(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("ASKWELL_FEATURES_OFF", " link_roles , numeric_text,")
-    assert Settings(_env_file=None).features == {"inferred_links"}  # pyright: ignore[reportCallIssue]
+    assert Settings(_env_file=None).features == FEATURES - {"link_roles", "numeric_text"}  # pyright: ignore[reportCallIssue]
 
 
 def test_an_unknown_feature_name_fails_at_startup(monkeypatch: pytest.MonkeyPatch) -> None:

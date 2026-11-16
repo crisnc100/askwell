@@ -1,0 +1,249 @@
+# Triage of every Askwell miss on this untriaged v0.3 database by Claude Haiku 5.5, one
+# trial each: v03-spider-new (askwell, registry init) and v03-csv-new (askwell_csv, the
+# tables uploaded as CSV files), with the before runs on main at 4014aa0
+# (v03-spider-new-before, v03-csv-new-before) for comparison. Spider notes cite IDs only.
+# Tags: grammar_gap | misread | validator_false_reject | builder_bug | gold_issue.
+spider:705:
+  note: 'Both wrong: they counted every government form that includes the key word; the gold counts only
+    the form that is exactly that word. A defensible reading the gold does not take. Before: Askwell wrong,
+    CSV refused (files did not load).'
+  tag: misread
+spider:706:
+  note: 'CSV path wrong: a contains match on the region also takes a second region whose name includes
+    it; the gold matches the region exactly, as Askwell did. Before: Askwell right, CSV refused (files
+    did not load).'
+  tag: misread
+spider:707:
+  note: 'Same as spider:706. Before: Askwell right, CSV refused.'
+  tag: misread
+spider:712:
+  note: 'Askwell right. CSV path refused: the language table''s country-code column does not follow the
+    <name>_id rule, so no link to the country table is drawn from the files. Before: Askwell right, CSV
+    refused.'
+  tag: validator_false_reject
+spider:724:
+  note: 'Both wrong: every government form including the key word counted, where the gold takes only the
+    exact form, as in spider:705. Before: Askwell wrong, CSV refused.'
+  tag: misread
+spider:740:
+  note: 'Several countries tie for the most languages; the gold''s single row is one of the tie. CSV path
+    refused: no country link drawn. Before: Askwell right (the tie fell the gold''s way), CSV refused.'
+  tag: gold_issue
+spider:741:
+  note: 'Same tie as spider:740. Before: Askwell right, CSV refused.'
+  tag: gold_issue
+spider:745:
+  note: 'Askwell right. CSV path refused: the language table''s country-code column does not follow the
+    <name>_id rule, so no link to the country table is drawn from the files. Before: both refused.'
+  tag: validator_false_reject
+  runs:
+    v03-spider-new-gated:
+      tag: grammar_gap
+      note: 'v03-spider-new-gated: refused. The first run''s answer used `has`, which is off here.'
+spider:746:
+  note: 'Askwell right. CSV path refused: the language table''s country-code column does not follow the
+    <name>_id rule, so no link to the country table is drawn from the files. Before: Askwell right, CSV
+    refused.'
+  tag: validator_false_reject
+spider:747:
+  note: 'Askwell right. CSV path refused: the language table''s country-code column does not follow the
+    <name>_id rule, so no link to the country table is drawn from the files. Before: Askwell right, CSV
+    refused.'
+  tag: validator_false_reject
+spider:749:
+  note: 'Askwell right. CSV path refused: the language table''s country-code column does not follow the
+    <name>_id rule, so no link to the country table is drawn from the files. Before: Askwell right, CSV
+    refused.'
+  tag: validator_false_reject
+  runs:
+    v03-spider-new-gated:
+      tag: grammar_gap
+      note: 'v03-spider-new-gated: refused. The first run''s answer used `has`, which is off here.'
+spider:751:
+  note: 'Askwell right. CSV path refused: the language table''s country-code column does not follow the
+    <name>_id rule, so no link to the country table is drawn from the files. Before: Askwell right, CSV
+    refused.'
+  tag: validator_false_reject
+spider:753:
+  note: 'Askwell right. CSV path refused: the language table''s country-code column does not follow the
+    <name>_id rule, so no link to the country table is drawn from the files. Before: Askwell right, CSV
+    refused.'
+  tag: validator_false_reject
+spider:758:
+  note: 'Askwell wrong: every government form including the key word counted, as in spider:705, where
+    the gold takes the exact form. CSV path refused: no country link drawn. Before: Askwell wrong, CSV
+    refused.'
+  tag: misread
+spider:759:
+  note: 'Both refused, reasoning that the count must be taken before the government-form filter; the gold
+    filters first, then counts. Before: both refused.'
+  tag: misread
+spider:764:
+  note: 'Askwell right with has none. CSV path refused: the drafted registry lists no values for the official-language
+    flag, so the model would not guess its coding. Before: both refused.'
+  tag: validator_false_reject
+  runs:
+    v03-spider-new-gated:
+      tag: grammar_gap
+      note: 'v03-spider-new-gated: refused. The first run''s answer used `has`, which is off here.'
+spider:765:
+  note: 'Askwell right. CSV path refused: the language table''s country-code column does not follow the
+    <name>_id rule, so no link to the country table is drawn from the files. Before: both refused.'
+  tag: validator_false_reject
+  runs:
+    v03-spider-new-gated:
+      tag: grammar_gap
+      note: 'v03-spider-new-gated: refused. The first run''s answer used `has`, which is off here.'
+spider:767:
+  note: 'Askwell right. CSV path refused: the language table''s country-code column does not follow the
+    <name>_id rule, so no link to the country table is drawn from the files. Before: both refused.'
+  tag: validator_false_reject
+  runs:
+    v03-spider-new-gated:
+      tag: grammar_gap
+      note: 'v03-spider-new-gated: refused. The first run''s answer used `has`, which is off here.'
+spider:770:
+  note: 'Askwell right. CSV path refused: the official-language flag has no listed values in the drafted
+    registry. Before: Askwell right, CSV refused.'
+  tag: validator_false_reject
+spider:773:
+  note: 'Both refused: it compares with an aggregate over a different set of rows (another continent),
+    which compare-with-an-aggregate refuses by design. Before: both refused.'
+  tag: grammar_gap
+spider:774:
+  note: 'Same as spider:773. Before: both refused.'
+  tag: grammar_gap
+spider:775:
+  note: 'Same as spider:773. Before: both refused.'
+  tag: grammar_gap
+spider:777:
+  note: 'Same as spider:773. Before: both refused.'
+  tag: grammar_gap
+spider:783:
+  note: 'Askwell wrong: the has none part is right, but it excluded every government form including the
+    key word where the gold excludes only the exact form, as in spider:705. CSV path refused: no country
+    link drawn. Before: both refused.'
+  tag: misread
+  runs:
+    v03-spider-new-gated:
+      tag: grammar_gap
+      note: 'v03-spider-new-gated: refused. The first run''s answer used `has`, which is off here.'
+spider:792:
+  note: 'Askwell right. CSV path refused: the language table''s country-code column does not follow the
+    <name>_id rule, so no link to the country table is drawn from the files. Before: Askwell right, CSV
+    refused.'
+  tag: validator_false_reject
+spider:817:
+  note: 'Both refused: the top language within each country is a rank within groups. Before: both refused.'
+  tag: grammar_gap
+spider:818:
+  note: 'Both refused (a rank within groups); the gold returns a count of one per country that speaks
+    the language, not the countries where it leads. Before: both refused.'
+  tag: gold_issue
+spider:821:
+  note: 'Both refused (a rank within groups); the gold returns every country where the language is spoken,
+    not where it leads. Before: both refused.'
+  tag: gold_issue
+spider:788:
+  runs:
+    v03-spider-new-gated:
+      tag: gold_issue
+      note: 'v03-spider-new-gated: wrong. Seven countries share the smallest population; comparing with the minimum returns all seven, where the gold''s single row is one of the tie. Right in v03-spider-new and before (a sorted list with a limit of one, which picks the gold''s row).'
+    v03-csv-new-before:
+      tag: validator_false_reject
+      note: 'v03-csv-new-before: CSV path refused because `country` failed the upload check (no_id_column) and did not load. Right on the CSV path after (numbered rows, O11) and right for Askwell before and after.'
+spider:714:
+  runs:
+    v03-csv-new-before:
+      tag: validator_false_reject
+      note: 'v03-csv-new-before: CSV path refused because `country` failed the upload check (no_id_column) and did not load. Right on the CSV path after (numbered rows, O11) and right for Askwell before and after.'
+spider:715:
+  runs:
+    v03-csv-new-before:
+      tag: validator_false_reject
+      note: 'v03-csv-new-before: CSV path refused because `country` failed the upload check (no_id_column) and did not load. Right on the CSV path after (numbered rows, O11) and right for Askwell before and after.'
+spider:716:
+  runs:
+    v03-csv-new-before:
+      tag: validator_false_reject
+      note: 'v03-csv-new-before: CSV path refused because `country` failed the upload check (no_id_column) and did not load. Right on the CSV path after (numbered rows, O11) and right for Askwell before and after.'
+spider:717:
+  runs:
+    v03-csv-new-before:
+      tag: validator_false_reject
+      note: 'v03-csv-new-before: CSV path refused because `country` failed the upload check (no_id_column) and did not load. Right on the CSV path after (numbered rows, O11) and right for Askwell before and after.'
+spider:720:
+  runs:
+    v03-csv-new-before:
+      tag: validator_false_reject
+      note: 'v03-csv-new-before: CSV path refused because `country` failed the upload check (no_id_column) and did not load. Right on the CSV path after (numbered rows, O11) and right for Askwell before and after.'
+spider:723:
+  runs:
+    v03-csv-new-before:
+      tag: validator_false_reject
+      note: 'v03-csv-new-before: CSV path refused because `country` failed the upload check (no_id_column) and did not load. Right on the CSV path after (numbered rows, O11) and right for Askwell before and after.'
+spider:726:
+  runs:
+    v03-csv-new-before:
+      tag: validator_false_reject
+      note: 'v03-csv-new-before: CSV path refused because `country` failed the upload check (no_id_column) and did not load. Right on the CSV path after (numbered rows, O11) and right for Askwell before and after.'
+spider:735:
+  runs:
+    v03-csv-new-before:
+      tag: validator_false_reject
+      note: 'v03-csv-new-before: CSV path refused because `country` failed the upload check (no_id_column) and did not load. Right on the CSV path after (numbered rows, O11) and right for Askwell before and after.'
+spider:780:
+  runs:
+    v03-csv-new-before:
+      tag: validator_false_reject
+      note: 'v03-csv-new-before: CSV path refused because `countrylanguage` failed the upload check (no_id_column) and did not load. Right on the CSV path after (numbered rows, O11) and right for Askwell before and after.'
+spider:781:
+  runs:
+    v03-csv-new-before:
+      tag: validator_false_reject
+      note: 'v03-csv-new-before: CSV path refused because `countrylanguage` failed the upload check (no_id_column) and did not load. Right on the CSV path after (numbered rows, O11) and right for Askwell before and after.'
+spider:791:
+  runs:
+    v03-csv-new-before:
+      tag: validator_false_reject
+      note: 'v03-csv-new-before: CSV path refused because `country` failed the upload check (no_id_column) and did not load. Right on the CSV path after (numbered rows, O11) and right for Askwell before and after.'
+spider:797:
+  runs:
+    v03-csv-new-before:
+      tag: validator_false_reject
+      note: 'v03-csv-new-before: CSV path refused because `country` failed the upload check (no_id_column) and did not load. Right on the CSV path after (numbered rows, O11) and right for Askwell before and after.'
+spider:801:
+  runs:
+    v03-csv-new-before:
+      tag: validator_false_reject
+      note: 'v03-csv-new-before: CSV path refused because `country` failed the upload check (no_id_column) and did not load. Right on the CSV path after (numbered rows, O11) and right for Askwell before and after.'
+spider:804:
+  runs:
+    v03-csv-new-before:
+      tag: validator_false_reject
+      note: 'v03-csv-new-before: CSV path refused because `country` failed the upload check (no_id_column) and did not load. Right on the CSV path after (numbered rows, O11) and right for Askwell before and after.'
+spider:805:
+  runs:
+    v03-csv-new-before:
+      tag: validator_false_reject
+      note: 'v03-csv-new-before: CSV path refused because `country` failed the upload check (no_id_column) and did not load. Right on the CSV path after (numbered rows, O11) and right for Askwell before and after.'
+spider:807:
+  runs:
+    v03-csv-new-before:
+      tag: validator_false_reject
+      note: 'v03-csv-new-before: CSV path refused because `country` failed the upload check (no_id_column) and did not load. Right on the CSV path after (numbered rows, O11) and right for Askwell before and after.'
+spider:809:
+  runs:
+    v03-csv-new-before:
+      tag: validator_false_reject
+      note: 'v03-csv-new-before: CSV path refused because `country` failed the upload check (no_id_column) and did not load. Right on the CSV path after (numbered rows, O11) and right for Askwell before and after.'
+spider:814:
+  runs:
+    v03-csv-new-before:
+      tag: validator_false_reject
+      note: 'v03-csv-new-before: CSV path refused because `countrylanguage` failed the upload check (no_id_column) and did not load. Right on the CSV path after (numbered rows, O11) and right for Askwell before and after.'
+spider:815:
+  runs:
+    v03-csv-new-before:
+      tag: validator_false_reject
+      note: 'v03-csv-new-before: CSV path refused because `countrylanguage` failed the upload check (no_id_column) and did not load. Right on the CSV path after (numbered rows, O11) and right for Askwell before and after.'

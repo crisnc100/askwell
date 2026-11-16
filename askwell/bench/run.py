@@ -107,6 +107,15 @@ class RunResult:
         default_factory=dict[str, dict[str, list[str]]]
     )
     trials: int = 1
+    # Trials each schema was planned to run: every trial on a run of named items,
+    # otherwise as `trials_for` says. Empty on a result built by hand.
+    planned_trials: dict[str, int] = field(default_factory=dict[str, int])
+    # Each schema's planned in-schema item ids. A deferred or unrun task leaves no
+    # record, so question-level stats count from this list, not from the records.
+    planned_items: dict[str, list[str]] = field(default_factory=dict[str, list[str]])
+
+    def planned(self, schema_id: str) -> int:
+        return self.planned_trials.get(schema_id, trials_for(schema_id, self.trials))
 
 
 def _schemas(
@@ -229,6 +238,7 @@ def run_eval(
         missing = sorted(item_ids - {i.id for items in chosen.values() for i in items})
         if missing:
             raise ValueError(f"no schema given has these items: {', '.join(missing)}")
+    planned = {s: trials if item_ids else trials_for(s, trials) for s in schema_ids}
     tasks = [
         Task(
             schema_id,
@@ -241,7 +251,7 @@ def run_eval(
         )
         for schema_id in schema_ids
         for model in models
-        for trial in range(1, (trials if item_ids else trials_for(schema_id, trials)) + 1)
+        for trial in range(1, planned[schema_id] + 1)
         for system in systems
         for item in chosen[schema_id]
     ]
@@ -333,6 +343,10 @@ def run_eval(
         progress(f"{task.key}: {outcome}")
         return ItemResult(record=record, cost_usd=answer.cost_usd)
 
+    planned_items = {
+        schema_id: [item.id for item in items if item.category == "in_schema"]
+        for schema_id, items in chosen.items()
+    }
     run_dir = RUNS_DIR / run_id
     run_dir.mkdir(parents=True, exist_ok=True)
     (run_dir / "config.json").write_text(
@@ -346,6 +360,11 @@ def run_eval(
                 "budget_usd": budget_usd,
                 "gold": str(gold) if gold is not None else None,
                 "registry_hashes": hashes,
+                # The checkpoint may hold entries from an earlier run under the same id;
+                # these say which belong to this one, for reading it back later.
+                "planned_trials": planned,
+                "planned_items": planned_items,
+                "task_keys": [task.key for task in tasks],
             },
             indent=2,
         )
@@ -366,6 +385,18 @@ def run_eval(
         for key, system in built.items()
         if isinstance(system, AskwellCsvSystem) and system.workspace.failed
     }
+    (run_dir / "outcome.json").write_text(
+        json.dumps(
+            {
+                "aborted": outcome.aborted,
+                "abort_reason": outcome.abort_reason,
+                "deferred": dict(deferred),
+                "csv_load_failures": csv_failures,
+            },
+            indent=2,
+        )
+        + "\n"
+    )
     return RunResult(
         run_id=run_id,
         records=outcome.records,
@@ -377,6 +408,8 @@ def run_eval(
         systems=systems,
         models=models,
         trials=trials,
+        planned_trials=planned,
+        planned_items=planned_items,
         csv_load_failures=csv_failures,
     )
 

@@ -1,0 +1,279 @@
+{
+  "abort_reason": null,
+  "baseline_wins": [],
+  "deferred": {},
+  "floors": [
+    {
+      "cause": null,
+      "checks": [
+        {
+          "met": true,
+          "metric": "execution_accuracy",
+          "rate": {
+            "ci95": [
+              0.8087538548365549,
+              0.9425997871233551
+            ],
+            "n": 75,
+            "of": 84,
+            "rate": 0.8928571428571429
+          },
+          "rule": ">= 80%"
+        },
+        {
+          "met": true,
+          "metric": "wrong_answer_rate_given_answered",
+          "rate": {
+            "ci95": [
+              0.013165825413161053,
+              0.1070844604750183
+            ],
+            "n": 3,
+            "of": 78,
+            "rate": 0.038461538461538464
+          },
+          "rule": "<= 5%"
+        }
+      ],
+      "gold": "holdout-v02.jsonl",
+      "met": true,
+      "model": "anthropic:claude-haiku-5-5",
+      "next": null,
+      "schema": "fieldservice",
+      "status_note": "with prompt interpret-v3"
+    }
+  ],
+  "gold_files": [
+    "holdout-v02.jsonl"
+  ],
+  "misses": [
+    {
+      "error": null,
+      "gold": "holdout-v02.jsonl",
+      "issue_codes": [],
+      "item_id": "ho-014",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "Haiku 5.5 (v02-holdout, v0.2 grammar): Needs a computed value (quantity times a price difference). Refused correctly in 3 of 3 trials, as with v0.1.",
+      "outcome": "refused",
+      "refusal": "Markup needs (unit_price - unit_cost) times quantity, which is three fields in one expression. A computed value takes exactly two fields and cannot nest, and the intent cannot subtract one aggregate from another, so the total cannot be expressed.",
+      "schema": "fieldservice",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "holdout-v02.jsonl",
+      "issue_codes": [],
+      "item_id": "ho-017",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "Haiku 5.5 (v02-holdout, v0.2 grammar): Needs a distinct count of months. Refused correctly in 3 of 3 trials. Haiku 5.5 (v02-holdout-before, v0.1 grammar): Wrong in 3 of 3 trials.",
+      "outcome": "refused",
+      "refusal": "it needs a distinct count of months per region, which the intent cannot express (distinct count of periods is not supported)",
+      "schema": "fieldservice",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
+      "trial": 1
+    },
+    {
+      "error": null,
+      "gold": "holdout-v02.jsonl",
+      "issue_codes": [],
+      "item_id": "ho-006",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "Haiku 5.5 (v02-holdout-before, v0.1 grammar): Needs a proportion. Answered a nearby grouped count instead: wrong in 3 of 3 trials. Right in all 3 trials with the v0.2 grammar.",
+      "outcome": "wrong",
+      "refusal": null,
+      "schema": "fieldservice",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
+      "trial": 2
+    },
+    {
+      "error": null,
+      "gold": "holdout-v02.jsonl",
+      "issue_codes": [],
+      "item_id": "ho-014",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "Haiku 5.5 (v02-holdout, v0.2 grammar): Needs a computed value (quantity times a price difference). Refused correctly in 3 of 3 trials, as with v0.1.",
+      "outcome": "refused",
+      "refusal": "The markup is (unit_price minus unit_cost) times quantity, which combines three fields in one row-level expression. The intent allows only one two-field computation and cannot nest it, so it cannot express the dollar markup per line.",
+      "schema": "fieldservice",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
+      "trial": 2
+    },
+    {
+      "error": null,
+      "gold": "holdout-v02.jsonl",
+      "issue_codes": [],
+      "item_id": "ho-017",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "Haiku 5.5 (v02-holdout, v0.2 grammar): Needs a distinct count of months. Refused correctly in 3 of 3 trials. Haiku 5.5 (v02-holdout-before, v0.1 grammar): Wrong in 3 of 3 trials.",
+      "outcome": "refused",
+      "refusal": "it needs a distinct count of months per region, and a distinct count of periods is not expressible in this intent",
+      "schema": "fieldservice",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
+      "trial": 2
+    },
+    {
+      "error": null,
+      "gold": "holdout-v02.jsonl",
+      "issue_codes": [],
+      "item_id": "ho-019",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "Haiku 5.5 (v02-holdout, v0.2 grammar): Needs date arithmetic (days open). Refused correctly in 3 of 3 trials. Haiku 5.5 (v02-holdout-before, v0.1 grammar): Wrong in 3 of 3 trials.",
+      "outcome": "wrong",
+      "refusal": null,
+      "schema": "fieldservice",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
+      "trial": 2
+    },
+    {
+      "error": null,
+      "gold": "holdout-v02.jsonl",
+      "issue_codes": [],
+      "item_id": "ho-014",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "Haiku 5.5 (v02-holdout, v0.2 grammar): Needs a computed value (quantity times a price difference). Refused correctly in 3 of 3 trials, as with v0.1.",
+      "outcome": "refused",
+      "refusal": "Markup is (unit_price minus unit_cost) times quantity, which combines three fields. A computed value takes exactly two fields and cannot nest, and the intent cannot subtract one aggregate from another (revenue at price minus cost at cost), so this cannot be expressed.",
+      "schema": "fieldservice",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
+      "trial": 3
+    },
+    {
+      "error": null,
+      "gold": "holdout-v02.jsonl",
+      "issue_codes": [],
+      "item_id": "ho-017",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "Haiku 5.5 (v02-holdout, v0.2 grammar): Needs a distinct count of months. Refused correctly in 3 of 3 trials. Haiku 5.5 (v02-holdout-before, v0.1 grammar): Wrong in 3 of 3 trials.",
+      "outcome": "refused",
+      "refusal": "it needs a distinct count of months per region, and the intent cannot express a distinct count of periods",
+      "schema": "fieldservice",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
+      "trial": 3
+    },
+    {
+      "error": null,
+      "gold": "holdout-v02.jsonl",
+      "issue_codes": [],
+      "item_id": "ho-019",
+      "model": "anthropic:claude-haiku-5-5",
+      "note": "Haiku 5.5 (v02-holdout, v0.2 grammar): Needs date arithmetic (days open). Refused correctly in 3 of 3 trials. Haiku 5.5 (v02-holdout-before, v0.1 grammar): Wrong in 3 of 3 trials.",
+      "outcome": "wrong",
+      "refusal": null,
+      "schema": "fieldservice",
+      "system": "ledgerline",
+      "tag": "grammar_gap",
+      "trial": 3
+    }
+  ],
+  "notes": [
+    "sql_agent baseline not run: needs a live model (multi-step tool calls can't be honestly simulated in one pass)."
+  ],
+  "question_level": [
+    {
+      "gold": "holdout-v02.jsonl",
+      "model": "anthropic:claude-haiku-5-5",
+      "right": {
+        "ci95": [
+          0.7280414845132785,
+          0.9628816331707
+        ],
+        "n": 25,
+        "of": 28,
+        "rate": 0.8928571428571429
+      },
+      "schema": "fieldservice",
+      "system": "ledgerline"
+    }
+  ],
+  "registry_hashes": {},
+  "run_id": "v03-seen-holdout-v02",
+  "simulation": null,
+  "spent_usd": 0.07472370000000005,
+  "status": "complete",
+  "table": [
+    {
+      "accuracy_given_attempted": {
+        "ci95": [
+          0.8929155395249817,
+          0.986834174586839
+        ],
+        "n": 75,
+        "of": 78,
+        "rate": 0.9615384615384616
+      },
+      "coverage": {
+        "ci95": [
+          0.8528043284375555,
+          0.9668541900641647
+        ],
+        "n": 78,
+        "of": 84,
+        "rate": 0.9285714285714286
+      },
+      "execution_accuracy": {
+        "ci95": [
+          0.8087538548365549,
+          0.9425997871233551
+        ],
+        "n": 75,
+        "of": 84,
+        "rate": 0.8928571428571429
+      },
+      "execution_error_rate": {
+        "ci95": [
+          0.0,
+          0.031019166418703486
+        ],
+        "n": 0,
+        "of": 120,
+        "rate": 0.0
+      },
+      "false_refusal_rate": {
+        "ci95": [
+          0.03314580993583533,
+          0.14719567156244456
+        ],
+        "n": 6,
+        "of": 84,
+        "rate": 0.07142857142857142
+      },
+      "gold": "holdout-v02.jsonl",
+      "items": 120,
+      "mean_cost_usd": 0.0006226975,
+      "model": "anthropic:claude-haiku-5-5",
+      "p50_latency_ms": 1754.721625475213,
+      "pending": 0,
+      "refusal_recall": {
+        "ci95": [
+          0.9035813714055363,
+          1.0
+        ],
+        "n": 36,
+        "of": 36,
+        "rate": 1.0
+      },
+      "schema": "fieldservice",
+      "system": "ledgerline",
+      "trials": 3,
+      "wrong_answer_rate_given_answered": {
+        "ci95": [
+          0.013165825413161053,
+          0.1070844604750183
+        ],
+        "n": 3,
+        "of": 78,
+        "rate": 0.038461538461538464
+      }
+    }
+  ],
+  "trials": 3
+}

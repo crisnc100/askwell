@@ -11,6 +11,10 @@ spider:451:
   note: 'Two foreign keys link the same pair of tables. The intent has no way to say which join to use,
     so it refuses rather than guess. Before and after: refused.'
   tag: grammar_gap
+  runs:
+    v03-roles-seen:
+      tag: grammar_gap
+      note: 'v03-roles-seen, link_roles on: refused in trial 1, right in 2 and 3.'
 spider:452:
   note: 'Needs a subquery, set operation or anti-join. The intent grammar has none of these. Before and
     after: refused.'
@@ -27,6 +31,10 @@ spider:470:
   note: 'The gold''s rows are cut by the row cap, and the answer''s sort keeps a different set at the
     cut. Before: a wrong answer. After: right.'
   tag: gold_issue
+  runs:
+    v03-spider-seen:
+      tag: gold_issue
+      note: 'v03-spider-seen: wrong, the gold groups by first name and passes the row cap; the answer groups by player and adds the id, so the rows differ.'
 spider:472:
   note: 'The gold groups by first name, which merges different players who share one; the answer totals
     per player. Before and after: a wrong answer.'
@@ -38,3 +46,15 @@ spider:488:
   note: 'Two foreign keys link the same pair of tables. The intent has no way to say which join to use,
     so it refuses rather than guess. Before and after: refused.'
   tag: grammar_gap
+spider:439:
+  note: 'v03-spider-seen: took the largest rank number, where the highest rank is the smallest number,
+    as the gold reads it.'
+  tag: misread
+spider:447:
+  note: 'v03-spider-seen: the right players through two has filters, but as first and last name in two
+    columns, where the gold returns the one name column of the matches table.'
+  tag: misread
+spider:459:
+  note: 'v03-spider-seen: summed tours over every ranking row per player, where the gold takes the single
+    ranking row with the most tours.'
+  tag: misread

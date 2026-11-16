@@ -1,0 +1,73 @@
+# Triage of every Askwell miss on this untriaged v0.3 database by Claude Haiku 5.5, one
+# trial each: v03-spider-new (askwell, registry init) and v03-csv-new (askwell_csv, the
+# tables uploaded as CSV files), with the before runs on main at 4014aa0
+# (v03-spider-new-before, v03-csv-new-before) for comparison. Spider notes cite IDs only.
+# Tags: grammar_gap | misread | validator_false_reject | builder_bug | gold_issue.
+spider:334:
+  note: 'Askwell right. CSV path refused: templates name their type by a code column, which no CSV link
+    rule turns into a link to the type table. Before: both right.'
+  tag: validator_false_reject
+spider:345:
+  note: 'Askwell right with has none. CSV path refused: the template-type link is not drawn from the uploaded
+    files (a code column, not <name>_id). Before: both refused.'
+  tag: validator_false_reject
+  runs:
+    v03-spider-new-gated:
+      tag: grammar_gap
+      note: 'v03-spider-new-gated: refused. The first run''s answer used `has`, which is off here.'
+spider:346:
+  note: 'Askwell right with has none. CSV path refused: the template-type link is not drawn from the uploaded
+    files. Before: both refused.'
+  tag: validator_false_reject
+  runs:
+    v03-spider-new-gated:
+      tag: grammar_gap
+      note: 'v03-spider-new-gated: refused. The first run''s answer used `has`, which is off here.'
+spider:353:
+  note: 'Askwell right. CSV path refused: the template-type link is not drawn from the uploaded files.
+    Before: Askwell right, CSV refused.'
+  tag: validator_false_reject
+spider:356:
+  note: 'Askwell right. CSV path refused: the template-type link is not drawn from the uploaded files.
+    Before: Askwell right, CSV refused.'
+  tag: validator_false_reject
+spider:361:
+  note: 'CSV path wrong: it matched the text with the trailing space the question carries, where the gold
+    matches without it, ignoring case. Askwell right with a contains match. Before: Askwell right, CSV
+    right.'
+  tag: misread
+spider:369:
+  note: 'CSV path refused for fan_out after putting the count on the wrong side; Askwell right counting
+    from the many side. Before: Askwell refused, CSV right.'
+  tag: misread
+spider:379:
+  note: 'Askwell wrong: it read a question needing both values as either value (an in-list), where two has filters, as
+    the CSV path wrote, give the documents with both. Before: both right.'
+  tag: misread
+spider:315:
+  note: 'Before: refused (has none was not in the grammar). After: right with has none.'
+  tag: grammar_gap
+  runs:
+    v03-spider-new-gated:
+      tag: grammar_gap
+      note: 'v03-spider-new-gated: refused. The first run''s answer used `has`, which is off here.'
+spider:348:
+  runs:
+    v03-csv-new-before:
+      tag: validator_false_reject
+      note: 'v03-csv-new-before: CSV path refused because `ref_template_types` failed the upload check (no_id_column) and did not load. Right on the CSV path after (numbered rows, O11) and right for Askwell before and after.'
+spider:349:
+  runs:
+    v03-csv-new-before:
+      tag: validator_false_reject
+      note: 'v03-csv-new-before: CSV path refused because `ref_template_types` failed the upload check (no_id_column) and did not load. Right on the CSV path after (numbered rows, O11) and right for Askwell before and after.'
+spider:351:
+  runs:
+    v03-csv-new-before:
+      tag: validator_false_reject
+      note: 'v03-csv-new-before: CSV path refused because `ref_template_types` failed the upload check (no_id_column) and did not load. Right on the CSV path after (numbered rows, O11) and right for Askwell before and after.'
+spider:380:
+  runs:
+    v03-csv-new-before:
+      tag: grammar_gap
+      note: 'v03-csv-new-before: CSV path refused: two conditions on rows of one table, each met by a different row, could not be expressed. Right on the CSV path after and right for Askwell before and after.'

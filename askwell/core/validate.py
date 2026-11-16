@@ -8,7 +8,8 @@ registry and every value is already converted to the field's Python type.
 from __future__ import annotations
 
 import re
-from collections import deque
+from collections import Counter, deque
+from collections.abc import Sequence
 from dataclasses import dataclass, field
 from datetime import date, datetime
 from typing import Literal
@@ -17,8 +18,13 @@ from askwell.core.dates import naive_utc, resolve_relative
 from askwell.core.features import ALL, Features
 from askwell.core.intent import (
     COMPARISON_OPS,
+    AggregateOf,
+    Computed,
     Condition,
+    DaysBetween,
+    FieldExpr,
     FilterGroup,
+    HasFilter,
     Intent,
     Metric,
     Scalar,
@@ -78,6 +84,11 @@ ErrorCode = Literal[
     "series_shape",
     "series_date_field",
     "unknown_link",
+    "feature_off",
+    "computed_type",
+    "duration_type",
+    "has_link",
+    "vs_aggregate_scope",
 ]
 
 _ALIAS = re.compile(r"^[a-z][a-z0-9_]{0,62}$")
@@ -88,6 +99,9 @@ _PLACEHOLDER_REASONS: frozenset[str] = frozenset(
 )
 
 Value = int | float | str | bool | date | datetime
+
+_OP_WORDS = {"multiply": "times", "subtract": "minus", "add": "plus"}
+NOW = "now"
 
 
 @dataclass(frozen=True)
@@ -123,10 +137,16 @@ class ResolvedField:
     link: str | None = None
     # A text column that holds only numbers, read as a number (see FieldDef.text_number).
     text_number: bool = False
+    # A computed value: `expr` is multiply, subtract, add or days_between over `parts`
+    # (for days_between to now, one part and `now`). `name` is then its label, and
+    # `alias` and `column` are unused.
+    expr: str | None = None
+    parts: tuple[ResolvedField, ...] = ()
+    now: datetime | None = None
 
     @property
     def label(self) -> str:
-        if self.is_base:
+        if self.expr is not None or self.is_base:
             return self.name
         if self.link is not None:
             return f"{self.entity}_{self.link}__{self.name}"
@@ -134,6 +154,9 @@ class ResolvedField:
 
     @property
     def key(self) -> tuple[str, ...]:
+        if self.expr is not None:
+            ends = (NOW,) if self.now is not None else ()
+            return (f"={self.expr}", *(k for part in self.parts for k in (*part.key, "|")), *ends)
         # The same field reached through two named links is two different values.
         if self.link is None:
             return (self.entity, self.name)
@@ -146,12 +169,37 @@ class Predicate:
     op: str
     values: tuple[Value, ...] = ()
     other: ResolvedField | None = None
+    # Compared with this aggregate (avg, min, max) of `field` over the base-entity rows
+    # that `scope` selects, instead of with `values`.
+    of: str | None = None
+    scope: tuple[Predicate | PredicateGroup, ...] = ()
 
 
 @dataclass(frozen=True)
 class PredicateGroup:
     mode: Literal["any_of", "all_of"]
     predicates: tuple[Predicate, ...]
+
+
+@dataclass(frozen=True)
+class PlanExists:
+    """EXISTS (or, with `none`, NOT EXISTS) a row of `table` AS `alias` that matches
+    `where` and whose `link_alias`.`column` is the outer base row's `parent_column`.
+    `joins` are its own many-to-one joins: toward the base entity when it is more than
+    one link away, and for fields of `where` on other entities."""
+
+    none: bool
+    table: str
+    db_schema: str | None
+    alias: str
+    link_alias: str
+    column: str
+    parent_column: str
+    joins: tuple[JoinStep, ...]
+    where: tuple[Predicate, ...]
+
+
+WhereItem = Predicate | PredicateGroup | PlanExists
 
 
 @dataclass(frozen=True)
@@ -209,7 +257,7 @@ class QueryPlan:
     joins: tuple[JoinStep, ...]
     select: tuple[ResolvedField, ...]
     metrics: tuple[PlanMetric, ...]
-    where: tuple[Predicate | PredicateGroup, ...]
+    where: tuple[Predicate | PredicateGroup | PlanExists, ...]
     group_by: tuple[PlanGroup, ...]
     having: tuple[PlanHaving, ...]
     order_by: tuple[PlanOrder, ...]
@@ -308,8 +356,13 @@ class _Validator:
         now: datetime,
         row_cap: int,
         features: Features = ALL,
+        prefix: str = "t",
     ) -> None:
         self.features = features
+        # Table aliases are `<prefix>0` (the base), `<prefix>1`...; a subquery's
+        # validator takes its own prefix so its aliases never meet the outer query's.
+        self.prefix = prefix
+        self.base_alias = f"{prefix}0"
         self.intent = intent
         self.registry = enabled_links(registry, features)
         self.now = now
@@ -321,6 +374,7 @@ class _Validator:
         self.paths: dict[str, _PathInfo] = {}
         self.join_aliases: dict[tuple[tuple[int, bool], ...], str] = {}
         self.joins: list[JoinStep] = []
+        self.subs: list[_Validator] = []
 
     def fail(self, code: ErrorCode, location: str, message: str) -> None:
         self.issues.append(Issue(code, location, message))
@@ -346,12 +400,12 @@ class _Validator:
 
     def _alias_for(self, path: tuple[_Edge, ...]) -> str:
         if not path:
-            return "t0"
+            return self.base_alias
         key = tuple((edge.rel, edge.down) for edge in path)
         if key in self.join_aliases:
             return self.join_aliases[key]
         parent = self._alias_for(path[:-1])
-        alias = f"t{len(self.join_aliases) + 1}"
+        alias = f"{self.prefix}{len(self.join_aliases) + 1}"
         self.join_aliases[key] = alias
         edge = path[-1]
         src = self.registry.entities[edge.src]
@@ -486,6 +540,97 @@ class _Validator:
             return ""
         examples = ", ".join(f"{entity_slug}@{name}.{field_name}" for name in names)
         return f"; name the link: {examples}"
+
+    def resolve_expr(self, expr: FieldExpr, loc: str) -> tuple[ResolvedField, FieldDef] | None:
+        """A field reference, or a value computed from fields. A computed value reads as
+        a number, filterable and aggregatable when its fields are."""
+        if isinstance(expr, str):
+            return self.resolve(expr, loc)
+        if expr.alias is not None and not _ALIAS.match(expr.alias):
+            self.fail("invalid_alias", f"{loc}.alias", f"{expr.alias!r} is not a slug")
+            return None
+        if isinstance(expr, Computed):
+            return self._computed(expr, loc)
+        return self._duration(expr, loc)
+
+    def _computed(self, expr: Computed, loc: str) -> tuple[ResolvedField, FieldDef] | None:
+        if "computed" not in self.features:
+            self.fail("feature_off", loc, "values computed from two fields are switched off")
+            return None
+        parts: list[tuple[ResolvedField, FieldDef]] = []
+        for side, ref in (("left", expr.left), ("right", expr.right)):
+            resolved = self.resolve(ref, f"{loc}.{side}")
+            if resolved is None:
+                return None
+            if resolved[0].type not in NUMERIC_TYPES:
+                self.fail("computed_type", f"{loc}.{side}", f"{ref} is {resolved[0].type}")
+                return None
+            parts.append(resolved)
+        (left, ldef), (right, rdef) = parts
+        label = expr.alias or f"{left.name}_{_OP_WORDS[expr.op]}_{right.name}"
+        return self._expression(expr.op, label, (left, right), None, (ldef, rdef))
+
+    def _duration(self, expr: DaysBetween, loc: str) -> tuple[ResolvedField, FieldDef] | None:
+        if "durations" not in self.features:
+            self.fail("feature_off", loc, "durations are switched off")
+            return None
+        if len(expr.days_between) != 2 or expr.days_between[0] == NOW:
+            self.fail("value_shape", loc, "days_between takes [start field, end field or now]")
+            return None
+        parts: list[tuple[ResolvedField, FieldDef]] = []
+        for index, ref in enumerate(expr.days_between):
+            if ref == NOW:
+                continue
+            resolved = self.resolve(ref, f"{loc}.days_between[{index}]")
+            if resolved is None:
+                return None
+            if resolved[0].type not in TEMPORAL_TYPES:
+                self.fail(
+                    "duration_type",
+                    f"{loc}.days_between[{index}]",
+                    f"{ref} is {resolved[0].type}, not a date",
+                )
+                return None
+            parts.append(resolved)
+        to_now = expr.days_between[1] == NOW
+        end = NOW if to_now else parts[1][0].name
+        label = expr.alias or f"days_{parts[0][0].name}_to_{end}"
+        return self._expression(
+            "days_between",
+            label,
+            tuple(p for p, _ in parts),
+            naive_utc(self.now) if to_now else None,
+            tuple(d for _, d in parts),
+        )
+
+    def _expression(
+        self,
+        op: str,
+        label: str,
+        parts: tuple[ResolvedField, ...],
+        now: datetime | None,
+        defs: tuple[FieldDef, ...],
+    ) -> tuple[ResolvedField, FieldDef]:
+        rfield = ResolvedField(
+            alias=parts[0].alias,
+            entity=self.base,
+            name=label,
+            column="",
+            type="number",
+            is_base=True,
+            expr=op,
+            parts=parts,
+            now=now,
+        )
+        fdef = FieldDef(
+            column=label,
+            type="number",
+            filterable=all(d.filterable for d in defs),
+            # A count of days is a measure whatever its dates allow; a product or a
+            # difference is one when both of its fields are.
+            aggregatable=op == "days_between" or all(d.aggregatable for d in defs),
+        )
+        return rfield, fdef
 
     def convert(self, value: Scalar | None, ftype: FieldType, location: str) -> Value | None:
         ok = True
@@ -652,8 +797,9 @@ class _Validator:
             if series.alias is None:
                 self.fail("series_shape", f"series[{index}].alias", "each series needs an alias")
 
-    def check_condition(self, cond: Condition, loc: str) -> Predicate | None:
-        resolved = self.resolve(cond.field, f"{loc}.field")
+    def check_condition(self, cond: Condition, loc: str, top: bool = False) -> Predicate | None:
+        """`top`: a filter of the intent itself, the only place an aggregate value may be."""
+        resolved = self.resolve_expr(cond.field, f"{loc}.field")
         if resolved is None:
             return None
         rfield, fdef = resolved
@@ -661,6 +807,8 @@ class _Validator:
             self.fail("not_filterable", f"{loc}.field", f"{cond.field} is not filterable")
             return None
         op = cond.op
+        if isinstance(cond.value, AggregateOf):
+            return self.check_vs_aggregate(cond, cond.value, rfield, fdef, loc, top)
         if op in _RANGE_OPS and rfield.type not in _ORDERABLE:
             self.fail("operator_type", f"{loc}.op", f"{op} does not apply to {rfield.type}")
             return None
@@ -700,12 +848,157 @@ class _Validator:
         if cond.values is not None or cond.value is None:
             self.fail("value_shape", loc, f"{op} takes one `value`")
             return None
+        assert not isinstance(cond.value, AggregateOf)
         if op == "ilike_contains":
             if not isinstance(cond.value, str) or not cond.value:
                 self.fail("value_type", f"{loc}.value", "ilike_contains needs non-empty text")
                 return None
             return Predicate(rfield, op, (cond.value,))
         return self._values_predicate(rfield, fdef, op, [cond.value], loc)
+
+    def check_vs_aggregate(
+        self,
+        cond: Condition,
+        of: AggregateOf,
+        rfield: ResolvedField,
+        fdef: FieldDef,
+        loc: str,
+        top: bool,
+    ) -> Predicate | None:
+        """The aggregate's rows are filled in by `run`, once every filter is known."""
+        if "vs_aggregate" not in self.features:
+            self.fail("feature_off", loc, "comparison with an aggregate is switched off")
+            return None
+        if not top or self.intent.intent_type not in ("summary", "row_list"):
+            self.fail(
+                "vs_aggregate_scope",
+                loc,
+                "compare with an aggregate only in a top-level filter of a summary or row_list",
+            )
+            return None
+        if cond.op not in COMPARISON_OPS or cond.values is not None or cond.other_field:
+            self.fail("value_shape", loc, f"{{of: {of.of}}} works with eq..lte")
+            return None
+        if rfield.expr is not None or not rfield.is_base or rfield.type not in NUMERIC_TYPES:
+            self.fail(
+                "vs_aggregate_scope",
+                f"{loc}.field",
+                "compare with an aggregate only on a numeric field of the base entity",
+            )
+            return None
+        if not fdef.aggregatable:
+            self.fail("not_aggregatable", f"{loc}.field", f"{cond.field} is not aggregatable")
+            return None
+        return Predicate(rfield, cond.op, (), of=of.of)
+
+    def _with_scopes(self, where: list[WhereItem]) -> list[WhereItem]:
+        """Each aggregate comparison's rows: every other filter and the date range, which
+        must all read the base entity alone (no join, no related rows)."""
+        compared = [w for w in where if isinstance(w, Predicate) and w.of is not None]
+        if not compared:
+            return where
+        scope: list[Predicate | PredicateGroup] = []
+        for item in where:
+            if isinstance(item, Predicate) and item.of is not None:
+                continue
+            if isinstance(item, PlanExists) or any(
+                leaf.alias != self.base_alias
+                for p in _flatten([item])
+                for f in (p.field, p.other)
+                if f is not None
+                for leaf in _leaves(f)
+            ):
+                self.fail(
+                    "vs_aggregate_scope",
+                    "filters",
+                    "an aggregate comparison needs every other filter on the base entity",
+                )
+                return where
+            scope.append(item)
+        return [
+            Predicate(w.field, w.op, w.values, w.other, w.of, tuple(scope))
+            if isinstance(w, Predicate) and w.of is not None
+            else w
+            for w in where
+        ]
+
+    def check_has(self, item: HasFilter, loc: str) -> PlanExists | None:
+        """`has` names an entity whose rows each lead to one base row: directly, by a
+        link (`entity@link` picks one of two), or along one shortest chain of
+        many-to-one links (work orders -> sites -> customers)."""
+        assert self.base_def is not None
+        if "has" not in self.features:
+            self.fail("feature_off", loc, "has / has none filters are switched off")
+            return None
+        name, _, link = item.has.partition("@")
+        if link and "link_roles" not in self.features:
+            self.fail("feature_off", f"{loc}.has", "named links are switched off")
+            return None
+        child = self._find_entity(name)
+        if child is None:
+            self.fail("unknown_entity", f"{loc}.has", f"no entity {name!r}")
+            return None
+        sub = _Validator(
+            self.intent, self.registry, self.now, self.row_cap, self.features, f"h{len(self.subs)}_"
+        )
+        self.subs.append(sub)
+        sub.aggregated = False
+        sub.base = child
+        sub.base_def = self.registry.entities[child]
+        sub.paths = _shortest_paths(self.registry, child)
+        direct = [
+            rel
+            for rel in self.registry.relationships
+            if rel.from_entity == child and rel.to_entity == self.base and child != self.base
+        ]
+        if link:
+            direct = [rel for rel in direct if rel.from_field == link.lower()]
+        if len(direct) > 1:
+            message = f"{child} points at {self.base} more than one way"
+            if "link_roles" in self.features:
+                forms = ", ".join(f"{child}@{rel.from_field}" for rel in direct)
+                message += f"; name the link: {forms}"
+            self.fail("ambiguous_path", f"{loc}.has", message)
+            return None
+        if direct:
+            link_alias = sub.base_alias
+            column = sub.base_def.fields[direct[0].from_field].column
+            parent_column = self.base_def.fields[direct[0].to_field].column
+        else:
+            info = sub.paths.get(self.base)
+            if link or child == self.base or info is None or any(e.down for e in info.path):
+                self.fail("has_link", f"{loc}.has", f"rows of {child} do not lead to {self.base}")
+                return None
+            if info.count > 1:
+                self.fail(
+                    "ambiguous_path",
+                    f"{loc}.has",
+                    f"{child} leads to {self.base} more than one way",
+                )
+                return None
+            if len(self.base_def.primary_key) != 1:
+                self.fail("has_link", f"{loc}.has", f"{self.base} has no single-column key")
+                return None
+            link_alias = sub._alias_for(info.path)
+            column = parent_column = self.base_def.fields[self.base_def.primary_key[0]].column
+        predicates = [
+            sub.check_condition(cond, f"{loc}.where[{index}]")
+            for index, cond in enumerate(item.where)
+        ]
+        self.issues += sub.issues
+        if sub.issues:
+            return None
+        return PlanExists(
+            none=item.none,
+            table=sub.base_def.table,
+            db_schema=sub.base_def.db_schema,
+            alias=sub.base_alias,
+            link_alias=link_alias,
+            column=column,
+            parent_column=parent_column,
+            joins=tuple(sub.joins),
+            where=tuple(p for p in predicates if p is not None),
+        )
 
     def _values_predicate(
         self, rfield: ResolvedField, fdef: FieldDef, op: str, raw: list[Scalar], loc: str
@@ -745,14 +1038,19 @@ class _Validator:
             return None
         return Predicate(rfield, cond.op, (), other)
 
-    def check_filters(self) -> list[Predicate | PredicateGroup]:
-        out: list[Predicate | PredicateGroup] = []
+    def check_filters(self) -> list[WhereItem]:
+        out: list[WhereItem] = []
         for index, item in enumerate(self.intent.filters):
             loc = f"filters[{index}]"
             if isinstance(item, Condition):
-                predicate = self.check_condition(item, loc)
+                predicate = self.check_condition(item, loc, top=True)
                 if predicate is not None:
                     out.append(predicate)
+                continue
+            if isinstance(item, HasFilter):
+                exists = self.check_has(item, loc)
+                if exists is not None:
+                    out.append(exists)
                 continue
             out_group = self.check_group(item, loc)
             if out_group is not None:
@@ -778,7 +1076,7 @@ class _Validator:
             return None
         return PredicateGroup(mode, tuple(predicates))
 
-    def check_date_range(self, where: list[Predicate | PredicateGroup]) -> list[Predicate]:
+    def check_date_range(self, where: Sequence[WhereItem]) -> list[Predicate]:
         dr = self.intent.date_range
         if dr is None or dr.field is None:
             return []
@@ -830,7 +1128,7 @@ class _Validator:
         rfield: ResolvedField,
         fdef: FieldDef,
         ref: str,
-        where: list[Predicate | PredicateGroup],
+        where: Sequence[WhereItem],
         loc: str,
     ) -> bool:
         if not fdef.filterable:
@@ -858,7 +1156,7 @@ class _Validator:
                 self.fail("value_shape", loc, f"{metric.agg} needs a field")
                 return False, None
             return True, None
-        resolved = self.resolve(metric.field, f"{loc}.field")
+        resolved = self.resolve_expr(metric.field, f"{loc}.field")
         if resolved is None:
             return False, None
         rfield, fdef = resolved
@@ -873,7 +1171,7 @@ class _Validator:
             return False, None
         return True, rfield
 
-    def check_series(self, where: list[Predicate | PredicateGroup]) -> list[PlanSeries]:
+    def check_series(self, where: Sequence[WhereItem]) -> list[PlanSeries]:
         """Each series is checked on its own: its metric, its date field (fan-out
         included) and its conditions. The period, when given, is resolved once and
         applied to each series by its own date field."""
@@ -1120,11 +1418,43 @@ class _Validator:
             out.append(PlanHaving(having.metric, having.op, (having.value,)))
         return out
 
-    def check_order(self, metrics: list[PlanMetric], groups: list[PlanGroup]) -> list[PlanOrder]:
+    def _check_select_labels(self, select: list[tuple[int, ResolvedField]]) -> None:
+        """A computed value's name is its column and what `order_by` names, so it must not
+        be a base field's name or registered alias (ordering would pick the field) or
+        another column's. Every label is collected first, so the order of `select` does
+        not matter."""
+        assert self.base_def is not None
+        taken = set(self.base_def.fields) | {
+            alias.lower() for fdef in self.base_def.fields.values() for alias in fdef.aliases
+        }
+        counts = Counter(rfield.label for _, rfield in select)
+        reported: set[str] = set()
+        for index, rfield in select:
+            if rfield.expr is None or rfield.label in reported:
+                continue
+            loc = f"select[{index}].alias"
+            if rfield.label in taken:
+                self.fail("alias_collision", loc, f"{rfield.label!r} is a field's name")
+            elif counts[rfield.label] > 1:
+                self.fail("duplicate_alias", loc, f"{rfield.label!r} is used twice")
+            else:
+                continue
+            reported.add(rfield.label)
+
+    def check_order(
+        self,
+        metrics: list[PlanMetric],
+        groups: list[PlanGroup],
+        select: list[ResolvedField] | None = None,
+    ) -> list[PlanOrder]:
         out: list[PlanOrder] = []
         metric_labels = {metric.label for metric in metrics}
+        computed = {f.label: f for f in select or [] if f.expr is not None}
         for index, order in enumerate(self.intent.order_by):
             loc = f"order_by[{index}]"
+            if order.target in computed:
+                out.append(PlanOrder(None, computed[order.target], order.direction))
+                continue
             if self.intent.intent_type == "row_list":
                 resolved = self.resolve(order.target, f"{loc}.target")
                 if resolved is not None:
@@ -1171,11 +1501,13 @@ class _Validator:
         if self.intent.intent_type == "date_series":
             return self.run_series(base)
 
-        select: list[ResolvedField] = []
+        selected: list[tuple[int, ResolvedField]] = []
         for index, ref in enumerate(self.intent.select):
-            resolved = self.resolve(ref, f"select[{index}]")
+            resolved = self.resolve_expr(ref, f"select[{index}]")
             if resolved is not None:
-                select.append(resolved[0])
+                selected.append((index, resolved[0]))
+        self._check_select_labels(selected)
+        select = [rfield for _, rfield in selected]
         groups = self.check_group_by()
         group_labels = {g.label for g in groups} | {
             g.key.label for g in groups if g.key and g.key_shown
@@ -1183,8 +1515,9 @@ class _Validator:
         metrics = self.check_metrics(group_labels)
         where = self.check_filters()
         where_dates = self.check_date_range(where)
+        where = self._with_scopes([*where, *where_dates])
         having = self.check_having(metrics)
-        order = self.check_order(metrics, groups)
+        order = self.check_order(metrics, groups, select)
         limit = self.check_limit()
         if self.issues:
             return ValidationResult(self.issues)
@@ -1193,11 +1526,11 @@ class _Validator:
             base_entity=base,
             base_table=self.base_def.table,
             base_schema=self.base_def.db_schema,
-            base_alias="t0",
+            base_alias=self.base_alias,
             joins=tuple(self.joins),
             select=tuple(select),
             metrics=tuple(metrics),
-            where=(*where, *where_dates),
+            where=tuple(where),
             group_by=tuple(groups),
             having=tuple(having),
             order_by=tuple(order),
@@ -1209,7 +1542,7 @@ class _Validator:
     def _row_tiebreak(self) -> tuple[ResolvedField, ...]:
         if self.intent.intent_type != "row_list":
             return ()
-        return self._key_of(self.base, "t0", is_base=True)
+        return self._key_of(self.base, self.base_alias, is_base=True)
 
     def run_series(self, base: str) -> ValidationResult:
         assert self.base_def is not None
@@ -1222,7 +1555,7 @@ class _Validator:
             base_entity=base,
             base_table=self.base_def.table,
             base_schema=self.base_def.db_schema,
-            base_alias="t0",
+            base_alias=self.base_alias,
             joins=tuple(self.joins),
             select=(),
             metrics=(),
@@ -1273,14 +1606,22 @@ def _ref(rfield: ResolvedField) -> str:
     return f"{rfield.entity}.{rfield.name}"
 
 
-def _flatten(where: list[Predicate | PredicateGroup]) -> list[Predicate]:
+def _flatten(where: Sequence[WhereItem]) -> list[Predicate]:
+    """The predicates of the query's own rows; a related-rows filter has its own."""
     out: list[Predicate] = []
     for item in where:
         if isinstance(item, Predicate):
             out.append(item)
-        else:
+        elif isinstance(item, PredicateGroup):
             out.extend(item.predicates)
     return out
+
+
+def _leaves(rfield: ResolvedField) -> list[ResolvedField]:
+    """The stored fields a value reads: itself, or a computed value's fields."""
+    if rfield.expr is None:
+        return [rfield]
+    return [leaf for part in rfield.parts for leaf in _leaves(part)]
 
 
 def validate(

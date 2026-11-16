@@ -3,7 +3,9 @@
 - **Status:** Proposed. Predictions and the deploy gate committed 2026-11-13, after the
   v0.3 held-out set's hash and the untriaged Spider IDs (gold revision 6, `37f85d7`) and
   before any v0.3 code.
-- **Result:** not measured yet.
+- **Result:** measured 2026-11-15. Held-out wrong answers fall and accuracy rises
+  (53.1% → 64.6%, below the 70% predicted). The deploy gate failed on world_1 (gated
+  repeat) and CSV world_1; Cristian overrode it and approved the deploy.
 
 ## Context
 On the v0.2 held-out questions Askwell was right on 40 of 84 (47.6%, target 80%) and
@@ -103,10 +105,145 @@ Seen questions, so neither is a measurement of accuracy.
   of all of them. No gold was changed.
 - **Link-role gate (prediction 7, as amended): failed.** `evals/reports/v03-roles-seen.md`,
   26 questions, 3 trials, $0.043. Wrong among answered per trial: 1 of 19 (5.3%), 1 of 19
-  (5.3%), 0 of 18. spider:906 was wrong in 2 of 3 trials: asked who "has the greatest
-  number of likes", the model counted likes received (`highschooler@liked_id`), the
+  (5.3%), 0 of 18. spider:906 was wrong in 2 of 3 trials: asked for the student with the most
+  likes, the model counted likes received (`highschooler@liked_id`), the
   gold counts likes given. So `link_roles` ships switched off (`compose.prod.yaml`), as
   the plan says; with it off those questions are refused as before.
 
 ## Result
-Not measured yet. It is written from the Phase 4 reports of `builds/v03/plan.md`.
+Measured 2026-11-15 on `anthropic:claude-haiku-5-5`, record mode, every switch on. The
+before code is branch `v03-before`: main at `4014aa0` plus only the eval files these runs
+read (never merged). Reports are in `evals/reports/`; before and after are paired with
+`python -m askwell.bench.paired` (`evals/paired/`). Spend $1.4334, plus $0.0720 for the
+interpret-v3 re-record, $0.0427 for the link-role gate (`v03-roles-seen`, above) and
+$0.0925 for the gated Spider repeat: $1.6406 of the $4 cap, leaving $2.3594.
+
+### The deploy gate: fails on the repeat; overridden
+The first read failed on tvshow, world_1 and CSV world_1. Per the rule, the switches
+used by the failing run's wrong answers were turned off and the untriaged Spider run
+repeated once (`v03-spider-new-gated`: `has`, `link_roles` and `numeric_text` off). The
+gate is read on the repeat. The CSV run cannot be repeated that way (below), so its
+first read stands.
+
+| Criterion | Before | First read | Gated repeat | Verdict |
+|---|---|---|---|---|
+| v0.3 held-out, wrong among answered, per trial | 7.3%, 7.4%, 7.3% | 4.7%, 4.7%, 3.1% | (not repeated) | pass |
+| cre_Doc_Template_Mgt, wrong among answered | 0.0% (0/46) | 2.0% (1/50) | 2.1% (1/47) | pass (+2.1) |
+| student_transcripts_tracking | 27.5% (11/40) | 27.3% (12/44) | 25.6% (10/39) | pass (−1.9) |
+| tvshow | 2.4% (1/41) | 12.5% (6/48) | 0.0% (0/39) | pass (−2.4) |
+| world_1 | 8.1% (3/37) | 14.3% (6/42) | 16.7% (6/36) | **fail (+8.6)** |
+| CSV path, cre_Doc_Template_Mgt | 2.4% (1/41) | 2.3% (1/44) | (not repeated) | pass |
+| CSV path, student_transcripts_tracking | 33.3% (11/33) | 24.3% (9/37) | (not repeated) | pass |
+| CSV path, tvshow | 11.8% (4/34) | 8.8% (3/34) | (not repeated) | pass |
+| CSV path, world_1 | 0.0% (0/2) | 15.4% (4/26) | (not repeated) | **fail (+15.4)** |
+| CSV path, all four together | 14.5% (16/110) | 12.1% (17/141) | (not repeated) | pass (−2.4) |
+
+Two criteria fail, so under the rule v0.3 does not deploy and the result goes to
+Cristian. Spider runs are one trial, and each database row moves by a handful of answers, so its interval is wide
+(world_1 on the repeat: 6 of 36, 8–32%).
+
+**What the rule turned off.** Every wrong answer of the first Spider run was validated
+again with each switch off; a switch counts as used when the answer is refused or
+compiles to different SQL without it. `has` (tvshow 635, 636, 637; world_1 783;
+student_transcripts 578), `numeric_text` (tvshow 613, 615, 616) and `link_roles`
+(student_transcripts 578, 583, 584). The other 15 wrong answers use none.
+
+**world_1 on the repeat.** Five of its six wrong answers use no switch; 788 uses
+`vs_aggregate` (a comparison with the minimum), which the rule did not turn off, as no
+wrong answer of the first run used it. Three were wrong before
+too (705, 724, 758, misreads). Two are new in v0.3 and stay wrong with every switch off
+(740, 741): several countries tie for the most languages, and the gold's single row is
+one of the tie; before, the tie fell the gold's way. One is new on the repeat (788):
+seven countries share the smallest population, and the answer returned all seven where
+the first run and the before run sorted with a limit of one and picked the gold's row.
+All three new ones are tagged `gold_issue` in `evals/triage/spider_world_1.yaml`, but
+the rule counts them as wrong.
+
+**CSV world_1.** Fails on the per-database rule as written. No wrong answer of
+`v03-csv-new` uses a switch, so turning switches off cannot change it. Before, 2 of 50
+questions were answered and 48 refused, because `country` and `countrylanguage` failed
+the upload check and did not load; after, they load through the numbered rows of O11,
+and 26 are answered: 22 right and 4 wrong. The CSV path as a whole improves (14.5% →
+12.1% wrong among answered).
+
+**Override.** On 2026-11-15 the gate failed on Spider world_1 (+8.6 points on the gated
+repeat) and on CSV world_1 (per database). Cristian overrode it and approved deploying
+v0.3, for three reasons:
+- the held-out gain is significant (51 → 62 of 96 questions right, p = 0.001, with
+  fewer wrong answers in every trial);
+- 3 of world_1's 6 wrong answers on the repeat (740, 741, 788) are ties the gold
+  resolves to one row; without them world_1 is level with before (3 of 33 against 3 of
+  37);
+- CSV world_1 went from answering 2 questions to answering 26, 22 of them right.
+
+The switches stay as the deploy settings had them before the repeat: `has` and
+`numeric_text` on, `link_roles` off. The repeat's settings were for reading the gate,
+not for deploying.
+
+**A scoring limitation, not fixed.** When a gold stores a number as text ('5.8') and
+`numeric_text` returns the number, the scorer counts the two types as different and
+scores the answer wrong, though the rows and values match. The scorer is unchanged; the
+official figures above count these as wrong. Counted right instead (not the official
+figures):
+
+| Run | Questions affected | Official wrong among answered | Counted right |
+|---|---|---|---|
+| Untriaged Spider, first read, tvshow | 615, 616 | 12.5% (6/48) | 8.3% (4/48), still a fail |
+| CSV path, tvshow | 615, 616, 629 | 8.8% (3/34) | 0.0% (0/34) |
+| Seen Spider, car_1 | 155 | 31.8% (14/44) | 29.5% (13/44) |
+| Seen Spider, dog_kennels | 984, 985, 988 | 28.6% (10/35) | 20.0% (7/35) |
+
+The gated repeat runs with `numeric_text` off, so none of its answers are affected.
+
+### Before and after on the held-out set (question-level, paired)
+| System | Right before | Right after | Only after | Only before | McNemar p |
+|---|---|---|---|---|---|
+| Askwell | 51 of 96 (53.1%) | 62 of 96 (64.6%, 55–73%) | 11 | 0 | 0.0010 |
+| One-shot baseline | 78 of 96 | 78 of 96 | 3 | 3 | 1.0 |
+
+Pooled over trials: Askwell 64.2% right (185/288), 4.1% wrong among answered (8/193);
+the one-shot baseline 81.9% right and 7.5% wrong (19/255).
+
+### Predictions
+1. Held-out accuracy at least 70%: **missed**, 64.6% (62 of 96). 31 of the 96 are
+   refused in every trial. Most need what the grammar still lacks (window functions and
+   ranks within groups, running totals, medians and percentiles, set intersections,
+   per-group totals beside rows, a computed value of three fields); a few look
+   expressible and were refused anyway (h3-037 and h3-060, counts that keep the zero
+   rows; h3-073, an average per group). One of the 34 misses, h3-065, returns the gold's
+   values but is scored wrong: its gold has 3,649 unordered rows, past the 1,000-row
+   cap, and the scorer cuts it to different rows. Counted right, accuracy is 63 of 96
+   (65.6%), still below 70%.
+2. Held-out wrong among answered at most 8% per trial: **met**, 4.7%, 4.7%, 3.1%.
+3. Before and after at least +10 points with p < 0.05 and lower wrong: **met**,
+   +11.5 points, p = 0.001, wrong lower in every trial.
+4. Refusal recall at least 23 of 24 per trial: **met**, 24 of 24 in each trial.
+5. Seen v0.2 held-out at least 63 of 84, wrong at most 4 per trial: **met**, 75 of 84
+   right, 3 wrong of 78 answered in all.
+6. Seen fieldservice at least 81.4% right, at most 5% wrong: **met**, 94.6% (122/129) and
+   3.9% (5/127).
+7. Link roles, seen: **missed** in PR-2 (above); `link_roles` stays off.
+8. Untriaged Spider: false refusals fall in at least 3 of 4, no wrong rate up more than
+   5 points: **half met**. False refusals fell in all 4 (4 → 0, 10 → 6, 9 → 2, 13 → 8
+   of 50), but wrong rose 10.1 points on tvshow and 6.2 on world_1 (8.6 on the gated
+   repeat).
+9. CSV path: false refusals down at least 3 points in at least 2 of 4: **met** in 3
+   (cre 18 → 12%, student_transcripts 34 → 26%, world_1 96 → 48%; tvshow 32% both).
+   No file fails the upload check now; before, five tables failed on `no_id_column`.
+10. Unreadable answers at most 2% of calls, cost per question up at most 35%: **missed**
+    on the held-out run, 13 of 381 calls (3.4%): 10 are answers cut off at the completion
+    limit (h3-091 in every trial, h3-094 and h3-058 once each); at most 0.5% in the
+    others. Cost per
+    question **met**: $0.000642 on the held-out set, up 33.8% from $0.000480.
+
+### Seen Spider, one trial
+| Database | Right | Wrong among answered | False refusals |
+|---|---|---|---|
+| car_1 | 60.0% | 31.8% (14/44) | 12% |
+| dog_kennels | 50.0% | 28.6% (10/35) | 30% |
+| flight_2 | 88.0% | 8.3% (4/48) | 4% |
+| network_1 | 92.0% | 6.1% (3/49) | 2% |
+| wta_1 | 86.0% | 12.2% (6/49) | 2% |
+
+Seen: the PR-2 and PR-3 changes were written from these questions, so these numbers
+show where the fixes landed, not accuracy.
