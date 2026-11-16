@@ -13,7 +13,7 @@ from __future__ import annotations
 
 import json
 import sys
-from collections import defaultdict
+from collections import Counter, defaultdict
 from pathlib import Path
 from typing import Any
 
@@ -40,15 +40,34 @@ def load_run(run_id: str, runs_dir: Path = RUNS_DIR) -> RunResult:
         )
     entries, _ = Checkpoint(run_dir / "results.jsonl").load()
     active = [entries[key] for key in config["task_keys"] if key in entries]
+    outcome_path = run_dir / "outcome.json"
+    if outcome_path.exists():
+        outcome: dict[str, Any] = json.loads(outcome_path.read_text())
+    else:
+        # Written before runs recorded their outcome: a planned task with no entry did
+        # not finish, and is counted as deferred under its schema and system.
+        unfinished = Counter(
+            f"{parts[0]}/{parts[3]}"
+            for parts in (key.split("|") for key in config["task_keys"] if key not in entries)
+        )
+        outcome = {"aborted": False, "abort_reason": None, "deferred": dict(unfinished)}
     return RunResult(
         run_id=run_id,
         records=[entry["record"] for entry in active],
+        deferred=Counter({k: int(v) for k, v in outcome.get("deferred", {}).items()}),
+        aborted=bool(outcome.get("aborted", False)),
+        abort_reason=outcome.get("abort_reason"),
         spent_usd=sum(float(entry["cost_usd"]) for entry in active),
+        registry_hashes=dict(config.get("registry_hashes") or {}),
         systems=list(config["systems"]),
         models=list(config["models"]),
         trials=int(config["trials"]),
         planned_trials={k: int(v) for k, v in config["planned_trials"].items()},
         planned_items={k: list(v) for k, v in config["planned_items"].items()},
+        csv_load_failures={
+            k: {t: list(c) for t, c in v.items()}
+            for k, v in outcome.get("csv_load_failures", {}).items()
+        },
     )
 
 

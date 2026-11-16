@@ -385,6 +385,18 @@ def run_eval(
         for key, system in built.items()
         if isinstance(system, AskwellCsvSystem) and system.workspace.failed
     }
+    (run_dir / "outcome.json").write_text(
+        json.dumps(
+            {
+                "aborted": outcome.aborted,
+                "abort_reason": outcome.abort_reason,
+                "deferred": dict(deferred),
+                "csv_load_failures": csv_failures,
+            },
+            indent=2,
+        )
+        + "\n"
+    )
     return RunResult(
         run_id=run_id,
         records=outcome.records,

@@ -111,3 +111,33 @@ def test_a_run_without_its_recorded_plan_is_refused(tmp_path: Path) -> None:
     config_path.write_text(json.dumps(config))
     with pytest.raises(ValueError, match="replay"):
         paired.load_run("r", tmp_path)
+
+
+def test_a_finished_run_keeps_its_hashes_and_outcome(tmp_path: Path) -> None:
+    _write_run(tmp_path, "r", {"fs-001": ["correct"]}, planned=["fs-001", "fs-002"], trials=1)
+    config_path = tmp_path / "r" / "config.json"
+    config = json.loads(config_path.read_text())
+    config["registry_hashes"] = {"fieldservice": "abc"}
+    config_path.write_text(json.dumps(config))
+    outcome = {
+        "aborted": True,
+        "abort_reason": "budget",
+        "deferred": {"fieldservice/ledgerline": 1},
+        "csv_load_failures": {"fieldservice": {"parts": ["no_id_column"]}},
+    }
+    (tmp_path / "r" / "outcome.json").write_text(json.dumps(outcome))
+    result = paired.load_run("r", tmp_path)
+    assert result.registry_hashes == {"fieldservice": "abc"}
+    assert (result.aborted, result.abort_reason) == (True, "budget")
+    assert result.deferred == {"fieldservice/ledgerline": 1}
+    assert result.csv_load_failures == {"fieldservice": {"parts": ["no_id_column"]}}
+
+
+def test_without_an_outcome_file_the_tasks_with_no_entry_count_as_deferred(
+    tmp_path: Path,
+) -> None:
+    _write_run(tmp_path, "done", {"fs-001": ["correct"], "fs-002": ["wrong"]}, trials=1)
+    result = paired.load_run("done", tmp_path)
+    assert (result.aborted, result.abort_reason, result.deferred) == (False, None, {})
+    _write_run(tmp_path, "part", {"fs-001": ["correct"]}, trials=1)
+    assert paired.load_run("part", tmp_path).deferred == {"fieldservice/ledgerline": 1}
