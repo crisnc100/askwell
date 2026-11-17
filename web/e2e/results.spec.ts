@@ -28,7 +28,9 @@ test("the results page renders every schema of every committed report", async ({
   // where the fieldservice floor is not met.
   await page.goto("/results/");
   await page.locator("#reports > summary").click();
-  await expect(page.locator("#report-title")).toHaveText("Benchmark results: v03-holdout");
+  await expect(
+    page.locator("#reports").getByRole("heading", { level: 3, name: "Benchmark results: v03-holdout", exact: true }),
+  ).toBeVisible();
   await expect(page.locator('section.schema[data-schema="fieldservice"] .floor')).toContainText(
     "Floor not met on the v0.3 held-out questions",
   );
@@ -38,7 +40,9 @@ test("the results page renders every schema of every committed report", async ({
     await page.goto(`/results/?report=${encodeURIComponent(id)}`);
     // Naming a report in ?report= opens the reports fold on it.
     await expect(page.locator("#reports")).toHaveAttribute("open", "");
-    await expect(page.locator("#report-title")).toHaveText(`Benchmark results: ${id}`);
+    await expect(
+      page.locator("#reports").getByRole("heading", { level: 3, name: `Benchmark results: ${id}`, exact: true }),
+    ).toBeVisible();
 
     const banner = page.getByRole("note");
     if (data.simulation) {
