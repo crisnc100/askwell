@@ -1,0 +1,15 @@
+{
+  "mode": "pr",
+  "purpose": "Give Askwell a new front page that shows, in plain words and in the first screen, how the AI is used and how it is not: a question answered with the form the AI filled in, a carbon copy of exactly what the AI was shown (names only, 0 rows), the SQL that plain code wrote, and the three measured results. The audience is hiring managers and business owners. The working five-step app moves to /try/ in the same look.",
+  "mechanism": "web/index.html is the new front page; web/src/front.ts drives it. On load it fills the slip from web/src/recorded-answer.json (the first demo starter's recorded reply), with no API call. Asking another question calls GET /schemas/fieldservice/examples and POST /ask through the small demo object in web/src/api.ts. The carbon copy draws table and column names from web/src/demo-schema.json (a test keeps it equal to registries/fieldservice.yaml), shows hidden columns, 'Rows sent to the AI: 0', a CHECKED or NOT ANSWERED stamp, and the three measured numbers linking to /results/. The SQL is shown with values written in for reading; the query that runs is unchanged. The five-step app (Prepare, Upload, Check, Confirm, Ask) is now web/try/index.html, driven by web/src/main.ts as before; workspace links are /try/#ws=<id>, and old /#ws=<id> links forward to them. Styles: web/src/tokens.css (shared), front.css, try.css; font Archivo self-hosted in web/public/fonts. vite.config.ts adds the try page input and proxies /api, /schemas and /ask in dev. Results and Value still use style.css; only their link to the app changed to /try/. tests/pipeline/test_front_recorded_answer.py keeps the bundled answer equal to the real pipeline.",
+  "decisions": "Nothing is asked live on load because the hosted site pays per answer and limits questions per visitor; a bundled recorded answer is shown instead. The page states that the AI also sees column types, short descriptions and category labels, rather than claiming names only. Results and Value are left in the old look for a later PR.",
+  "readers": "README and PRODUCT.md: people running or evaluating Askwell. DESIGN.md: whoever builds the next page in this look. Comments: the next maintainer of web/src.",
+  "base": "origin/main",
+  "docMap": [
+    {"behavior": "The front page at / and the five-step app moved to /try/", "docs": ["README.md"]},
+    {"behavior": "Workspace links are /try/#ws=<id>; old /#ws= links forward", "docs": ["README.md"]},
+    {"behavior": "Dev server proxies /api, /schemas and /ask", "docs": ["README.md"]},
+    {"behavior": "Visual system for the new look", "docs": ["DESIGN.md"]}
+  ],
+  "untouchable": ["PRODUCT.md", ".impeccable/**", "evals/**", "web/src/recorded-answer.json", "web/src/demo-schema.json", "web/e2e/fixtures/**"]
+}
