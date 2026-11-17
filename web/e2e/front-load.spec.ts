@@ -105,3 +105,24 @@ test("on a phone the stamp sits with the rows and the nav is one row", async ({ 
   expect(new Set(tops).size).toBe(1);
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(390);
 });
+
+test("the three numbers sit in the carbon, inside the first 1440x900 view", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await open(page);
+  const numbers = page.locator(".carbon .ledger a");
+  await expect(numbers).toHaveCount(3);
+  await expect(page.locator(".ledger")).toHaveCount(1);
+  for (const link of await numbers.all()) {
+    const box = await link.boundingBox();
+    expect(box).not.toBeNull();
+    expect((box?.y ?? 0) + (box?.height ?? 0)).toBeLessThanOrEqual(900);
+  }
+});
+
+test("the method says what the AI is shown beyond names", async ({ page }) => {
+  await open(page);
+  await expect(page.locator(".how-ledger tbody td:nth-child(1)")).toContainText([
+    "Works only from what it is shown: table and column names, each column's type and short description, and category labels.",
+  ]);
+  await expect(page.locator(".how-ledger")).not.toContainText("Works only from the table and column names it is shown.");
+});
