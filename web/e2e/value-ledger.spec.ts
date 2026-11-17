@@ -36,6 +36,8 @@ test("typing a new number in any form line updates every line of the statement",
   await open(page);
   const before = monthly(examples, measured);
   await expect(page.locator("#out-hours-saved")).toHaveText(hours(before.hoursSaved));
+  await expect(page.locator("#out-answered")).toHaveText(Math.round(before.answered).toLocaleString("en-US"));
+  await expect(page.locator("#out-answered")).not.toContainText(".");
 
   await page.locator("#minutesByHand-number").fill("45");
   await expect(page.locator("#minutesByHand-slider")).toHaveValue("45");
@@ -49,6 +51,19 @@ test("typing a new number in any form line updates every line of the statement",
   const afterHosting = monthly({ ...examples, minutesByHand: 45, hosting: 250 }, measured);
   await expect(page.locator("#out-running-cost")).toHaveText(money(afterHosting.runningCost));
   await expect(page.locator("#out-net")).toHaveText(money(afterHosting.net));
+});
+
+test("the result region is updated in place, never rebuilt, so screen readers hear only what changed", async ({ page }) => {
+  await open(page);
+  await expect(page.locator("#results")).toHaveAttribute("aria-live", "polite");
+  await page.evaluate(() => {
+    (window as unknown as { netCell: Element | null }).netCell = document.getElementById("out-net");
+  });
+  await page.locator("#questions-number").fill("900");
+  await expect(page.locator("#out-net")).toHaveText(money(monthly({ ...examples, questions: 900 }, measured).net));
+  expect(
+    await page.evaluate(() => (window as unknown as { netCell: Element | null }).netCell === document.getElementById("out-net")),
+  ).toBe(true);
 });
 
 test("the stated rates beside the result are the ones the formula uses", async ({ page }) => {
