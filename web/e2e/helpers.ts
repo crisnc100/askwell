@@ -7,7 +7,7 @@ import { EXPORT_DIR } from "../playwright.config";
 export const SAMPLE = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "public", "sample");
 
 export async function startWorkspace(page: Page): Promise<void> {
-  await page.goto("/");
+  await page.goto("/try/");
   await expect(page.getByRole("heading", { name: "Prepare your data" })).toBeVisible();
   await expect(page.locator("#time-zone option")).not.toHaveCount(0);
   await page.getByRole("button", { name: "Start a workspace" }).click();
