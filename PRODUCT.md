@@ -17,7 +17,7 @@ Askwell answers plain-English questions about a database and shows the SQL behin
 
 ## Positioning
 
-The AI never sees your data and never writes SQL. The model only fills in a small typed form (an *intent*) from table and column names. Plain code checks that form against a list of what the database may expose, then writes the SQL itself and runs it read-only. Result rows never go to the model. When the question can't be expressed safely, Askwell says so instead of guessing.
+The AI never sees your data and never writes SQL. The model only fills in a small typed form (an *intent*) from the table and column names, each column's type and short description, and the allowed labels of category columns. Hidden columns are never shown. Plain code checks that form against a list of what the database may expose, then writes the SQL itself and runs it read-only. Result rows never go to the model. When the question can't be expressed safely, Askwell says so instead of guessing.
 
 ## Operating Context
 
