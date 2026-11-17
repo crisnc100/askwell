@@ -297,7 +297,7 @@
   position: relative;
   min-width: 0;
   padding: 0 28px 24px 30px;
-  background: #e3e6ef;
+  background: var(--carbon-paper);
   color: var(--carbon);
 }
 /* The perforation: punched holes in flat ink down the line where the carbon tears off. */

@@ -193,7 +193,7 @@ Cheque-stock greens under near-black ink, with three working inks that each carr
 - **Cheque Sage** (#e2ebe4): the page ground.
 - **Deep Sage** (#d3e0d6): hover fill for step tabs, disabled button fill, scrollbar track.
 - **Slip White** (#f1f5f1): the original slip, input fields, tables, SQL blocks, notices; the text color on ink buttons.
-- **Carbon Paper** (#e3e6ef): the carbon half of the slip and anything else printed as carbon (the prompt preview and model-facing notices in `/try/`).
+- **Carbon Paper** (#e3e6ef, `--carbon-paper`): the carbon half of the slip and anything else printed as carbon: in `/try/`, the prompt preview and the notice about which values go to the model. Nothing the AI was not shown is printed on it.
 - **Ink** (#15181d): body text, 2px frames, primary button fill.
 - **Soft Ink** (#3c4149): notes under steps, form-line keys, muted copy, disabled text.
 
@@ -268,7 +268,7 @@ Top rule: the Askwell wordmark (800, width 112%) left, three uppercase nav links
 A row of uppercase label cells inside a 2px ink frame, split by 1px ink rules. Current step inverts to ink with slip-white text; hover deepens to Deep Sage; unreached steps fade.
 
 ### Notices and tables
-Notices are square boxes on slip white: 1px ink by default, 2px Form Blue for success, 2px red with red text for errors, dashed indigo on carbon paper for what the model will be sent. Tables are slip white with a 2px ink rule under uppercase label heads and 1px Form Blue rules between rows.
+Notices are square boxes on slip white: 1px ink by default, 2px Form Blue for success, 2px red with red text for errors, dashed indigo on carbon paper for what the model will be sent, and 2px ink with the reason in ledger red for a refused answer, which is the visitor's result and so never carbon. Tables are slip white with a 2px ink rule under uppercase label heads and 1px Form Blue rules between rows.
 
 ### The Cheque Slip (signature)
 The original (slip white over dense guilloche) and the carbon (carbon paper, indigo) side by side in one 2px ink frame, torn apart by the perforation. The original fills step by step: question, form lines (key in Soft Ink, value in mono on Form Blue rules), the check, the SQL (mono on slip white in a 1px blue box), the rows. Empty steps show a single blue write-on line. The carbon lists used tables as rows of column names over empty dashed cells, used columns bold and underlined; hidden columns struck through over red "hidden" cells; the rest folded behind a dashed rule. A 2px indigo rule sets off "Rows sent to the AI: 0", and a red-ruled ledger of the measured figures closes the carbon.

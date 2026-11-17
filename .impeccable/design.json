@@ -123,7 +123,7 @@
           "#c7c9cf",
           "#edeef3"
         ],
-        "note": "Written as a literal in front.css and try.css; tokens.css has no custom property for it."
+        "note": "Custom property --carbon-paper in tokens.css."
       },
       "ink": {
         "role": "neutral",
@@ -315,7 +315,7 @@
       "refersTo": "slip-carbon",
       "description": "What the AI was shown: column names over empty dashed cells, hidden columns struck in red, rows sent: 0.",
       "html": "<div class=\"ds-carbon\"><p class=\"ds-carbon-title\">Carbon copy: what the AI was shown</p><p class=\"ds-ctable\">Invoices</p><ul class=\"ds-cells\"><li class=\"is-used\"><span class=\"ds-cname\">id</span><span class=\"ds-cell\"></span></li><li><span class=\"ds-cname\">issued_at</span><span class=\"ds-cell\"></span></li><li class=\"is-used\"><span class=\"ds-cname\">status</span><span class=\"ds-cell\"></span></li><li class=\"is-hidden\"><span class=\"ds-cname\">users.email</span><span class=\"ds-cell\">hidden</span></li></ul><p class=\"ds-rows-sent\">Rows sent to the AI: <strong>0</strong></p></div>",
-      "css": ".ds-carbon { font-family: var(--sans); padding: 0 28px 24px; background: #e3e6ef; color: var(--carbon); } .ds-carbon-title { margin: 0 -28px 10px; padding: 9px 28px; border-bottom: 1px solid var(--carbon); font-size: 0.75rem; font-weight: 700; font-stretch: 115%; letter-spacing: 0.09em; text-transform: uppercase; } .ds-ctable { margin: 0 0 3px; font-size: 0.75rem; font-weight: 750; font-stretch: 112%; letter-spacing: 0.07em; text-transform: uppercase; } .ds-cells { display: flex; flex-wrap: wrap; gap: 4px 5px; margin: 0; padding: 0; list-style: none; } .ds-cells li { display: grid; gap: 2px; min-width: 3rem; } .ds-cname { font-family: var(--mono); font-size: 0.6875rem; line-height: 1.2; } .ds-cell { display: block; height: 14px; border: 1px dashed var(--carbon-soft); } .ds-cells li.is-used .ds-cname { font-weight: 800; text-decoration: underline 2px; text-underline-offset: 3px; } .ds-cells li.is-used .ds-cell { border-color: var(--carbon); } .ds-cells li.is-hidden .ds-cname { text-decoration: line-through; } .ds-cells li.is-hidden .ds-cell { height: auto; border-color: var(--red); color: var(--red); font-size: 0.625rem; font-weight: 750; letter-spacing: 0.06em; line-height: 12px; text-align: center; text-transform: uppercase; } .ds-rows-sent { margin: 10px 0 0; padding-top: 8px; border-top: 2px solid var(--carbon); font-weight: 700; } .ds-rows-sent strong { font-size: 2.25rem; font-weight: 820; line-height: 1; vertical-align: -0.12em; margin-left: 4px; font-variant-numeric: tabular-nums; }"
+      "css": ".ds-carbon { font-family: var(--sans); padding: 0 28px 24px; background: var(--carbon-paper); color: var(--carbon); } .ds-carbon-title { margin: 0 -28px 10px; padding: 9px 28px; border-bottom: 1px solid var(--carbon); font-size: 0.75rem; font-weight: 700; font-stretch: 115%; letter-spacing: 0.09em; text-transform: uppercase; } .ds-ctable { margin: 0 0 3px; font-size: 0.75rem; font-weight: 750; font-stretch: 112%; letter-spacing: 0.07em; text-transform: uppercase; } .ds-cells { display: flex; flex-wrap: wrap; gap: 4px 5px; margin: 0; padding: 0; list-style: none; } .ds-cells li { display: grid; gap: 2px; min-width: 3rem; } .ds-cname { font-family: var(--mono); font-size: 0.6875rem; line-height: 1.2; } .ds-cell { display: block; height: 14px; border: 1px dashed var(--carbon-soft); } .ds-cells li.is-used .ds-cname { font-weight: 800; text-decoration: underline 2px; text-underline-offset: 3px; } .ds-cells li.is-used .ds-cell { border-color: var(--carbon); } .ds-cells li.is-hidden .ds-cname { text-decoration: line-through; } .ds-cells li.is-hidden .ds-cell { height: auto; border-color: var(--red); color: var(--red); font-size: 0.625rem; font-weight: 750; letter-spacing: 0.06em; line-height: 12px; text-align: center; text-transform: uppercase; } .ds-rows-sent { margin: 10px 0 0; padding-top: 8px; border-top: 2px solid var(--carbon); font-weight: 700; } .ds-rows-sent strong { font-size: 2.25rem; font-weight: 820; line-height: 1; vertical-align: -0.12em; margin-left: 4px; font-variant-numeric: tabular-nums; }"
     },
     {
       "name": "Checked Stamp",
@@ -337,9 +337,9 @@
       "name": "Notice",
       "kind": "card",
       "refersTo": "notice",
-      "description": "Square status boxes in /try/: blue for success, red for errors.",
-      "html": "<div class=\"ds-notice ds-ok\">Every file passed and your data is loaded.</div><div class=\"ds-notice ds-error\">1 file needs fixing. Nothing was loaded.</div>",
-      "css": ".ds-notice { font-family: var(--sans); margin: 14px 0; padding: 10px 14px; border: 1px solid var(--ink); background: var(--field); color: var(--ink); } .ds-notice.ds-ok { border: 2px solid var(--blue); } .ds-notice.ds-error { border: 2px solid var(--red); color: var(--red); font-weight: 600; }"
+      "description": "Square status boxes in /try/: blue for success, red for errors, 2px ink with a ledger-red reason for a refused answer.",
+      "html": "<div class=\"ds-notice ds-ok\">Every file passed and your data is loaded.</div><div class=\"ds-notice ds-error\">1 file needs fixing. Nothing was loaded.</div><div class=\"ds-notice ds-refusal\"><strong>The model found no way to answer this from your data.</strong> Check that the data is in your files.</div>",
+      "css": ".ds-notice { font-family: var(--sans); margin: 14px 0; padding: 10px 14px; border: 1px solid var(--ink); background: var(--field); color: var(--ink); } .ds-notice.ds-ok { border: 2px solid var(--blue); } .ds-notice.ds-error { border: 2px solid var(--red); color: var(--red); font-weight: 600; } .ds-notice.ds-refusal { border: 2px solid var(--ink); } .ds-notice.ds-refusal strong { color: var(--red); font-weight: 750; }"
     }
   ],
   "narrative": {

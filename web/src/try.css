@@ -180,8 +180,17 @@ pre {
 }
 .notice.info {
   border: 1px dashed var(--carbon);
-  background: #e3e6ef;
+  background: var(--carbon-paper);
   color: var(--carbon);
+}
+/* A refusal is the visitor's own result, not something the AI was shown, so it is
+   printed on the original, never as carbon. */
+.notice.refusal {
+  border: 2px solid var(--ink);
+}
+.notice.refusal strong {
+  color: var(--red);
+  font-weight: 750;
 }
 .notice.error {
   border: 2px solid var(--red);
@@ -266,7 +275,7 @@ pre {
   overflow-y: auto;
   border-style: dashed;
   border-color: var(--carbon);
-  background: #e3e6ef;
+  background: var(--carbon-paper);
   color: var(--carbon);
 }
 

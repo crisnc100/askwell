@@ -112,7 +112,7 @@ function nav(): HTMLElement {
   return h("nav", { attrs: { "aria-label": "Steps" } }, list);
 }
 
-function notice(kind: "error" | "info" | "ok", ...children: Child[]): HTMLElement {
+function notice(kind: "error" | "info" | "ok" | "refusal", ...children: Child[]): HTMLElement {
   return h("div", { class: `notice ${kind}`, attrs: { role: kind === "error" ? "alert" : "status" } }, ...children);
 }
 
@@ -636,7 +636,7 @@ function showAnswer(where: HTMLElement, answer: Answer): void {
   if (answer.explanation) {
     append(
       where,
-      notice("info", h("strong", {}, answer.explanation.message), " ", answer.explanation.suggestion),
+      notice("refusal", h("strong", {}, answer.explanation.message), " ", answer.explanation.suggestion),
     );
   } else {
     const table = h(
