@@ -81,8 +81,8 @@ test("the three measured numbers render and link to the results", async ({ page 
   const links = page.locator(".ledger a");
   await expect(links).toHaveText([
     "Right on 62 of 96 questions it had never seen",
-    "Wrong about 1 answer in 25, down from 1 in 14",
-    "When it can't answer safely, it says so: it refused all 72 questions it should have",
+    "Wrong about 1 answer in 24, down from 1 in 14",
+    "When it can't answer safely, it says so: it refused all 24 questions it should have, in every run",
   ]);
   for (const link of await links.all()) await expect(link).toHaveAttribute("href", "/results/");
 });
