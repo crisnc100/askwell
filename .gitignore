@@ -14,3 +14,7 @@ evals/pending/
 evals/runs/
 # Spider recordings can hold Spider data values (CC BY-SA): never committed.
 evals/recordings/eval/spider_*/
+
+# Impeccable decision-round scratch files
+.impeccable/decision/
+.impeccable/review/
