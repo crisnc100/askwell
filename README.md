@@ -28,8 +28,9 @@ docker compose up -d                  # a demo database, filled with made-up dat
 uv run uvicorn askwell.api:create_app --factory
 ```
 
-Open `http://localhost:8000/` and go through the five steps with the sample shop data
-linked on the first page:
+Open `http://localhost:8000/`. The front page shows one recorded answer and lets you ask
+the demo database questions. The working app is at `http://localhost:8000/try/`: go
+through its five steps with the sample shop data linked on the first step:
 
 1. **Prepare.** Read the rules a CSV file must follow, then start a *workspace*: a private
    folder for your files. Bookmark the link it gives you.
@@ -40,6 +41,10 @@ linked on the first page:
    and your descriptions, never your rows. Hide any field you like.
 5. **Ask** a question. With a model key you get the rows and the SQL. Without one, the page
    says that live answers need a key.
+
+A workspace link looks like `/try/#ws=<id>`. Older links of the form `/#ws=<id>` forward
+to it. To work on the pages, run `npm run dev` in `web/` beside the server on port 8000;
+it proxies `/api`, `/schemas` and `/ask` to the server.
 
 To see an answer with no key, ask the demo database one of its recorded questions:
 
@@ -127,7 +132,7 @@ any other (the spike always uses OpenRouter).
 
 ## Your data
 
-[Try it](#try-it) walks through the five pages. More on each:
+[Try it](#try-it) walks through the five steps. More on each:
 
 - **Prepare.** A file needs one table, a header row, `YYYY-MM-DD` dates and plain
   numbers. A file with no ID column loads with its rows numbered, under a hidden key,
