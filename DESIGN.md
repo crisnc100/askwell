@@ -178,7 +178,7 @@ Every answer is a cheque with its carbon copy. The original slip, on pale cheque
 
 Rank comes from one variable grotesk pushed through weight, width and case, not from a second family or a parade of sizes. Color is semantic before it is decorative: indigo means "the AI saw this", red means "audited, refused, hidden or measured", blue means "a line you write on". Depth is the change of paper (sage page, near-white slip, lavender-grey carbon) and the weight of the rule between them.
 
-Scope: the front page (`/`), the ask flow (`/try/`) and Results (`/results/`) are built in this world and share `web/src/tokens.css`. Value (`/value/`) still loads the older `style.css` and is not yet in this world; it is not described here and is not a source for new work.
+Scope: the front page (`/`), the ask flow (`/try/`), Results (`/results/`) and Value (`/value/`) are built in this world and share `web/src/tokens.css`.
 
 **Key Characteristics:**
 - Sage cheque paper with a guilloche security pattern, densest on the slip, faint on the page head, never behind long-read paragraphs.
@@ -294,7 +294,10 @@ The three plain answers on `/results/` as an audited statement: one 2px ink fram
 
 A comparison follows as a red-ruled ledger table (the how-it-works ledger's rules): a row label, then one column per system, figures in red.
 
-### Folds (Results)
+### The Worksheet (Value)
+The calculator on `/value/` as a ledger worksheet: one 2px ink frame, 7fr / 5fr, the halves split by a 2px ink rule. The left half is the original slip (slip white over the guilloche) captioned "Your numbers"; each input is a form line closed by a 1px Form Blue rule: the label (650), a note and the example in Soft Ink, then a slider drawn as a 2px Form Blue write-on line with a square ink marker (blue on hover), beside a square slip-white number box in mono with tabular figures. The right half is the statement, captioned "Each month, at your numbers" with "Estimate" in red over the security pattern and a 2px red rule: one line per figure, label left and figure right in ink (700, tabular), split by 1px red rules; then the total, "Net value each month", between 2px red rules with the figure set large in ledger red (820, width 92%, clamp 2.25–3.25rem; 1.875rem at 860px and below). Under it, one sentence gives net value at both measured answer rates, and an "Assumed" block lists, on 1px blue rules, every rate the estimate takes from a measurement (each in red, because it is measured) and what it leaves out, with links to the two folds. On wide screens the statement stays in view (sticky) while the reader works down the form. Computed estimates are ink, not red: only the total and the measured rates carry red. No stamp: nothing on the worksheet is a checked answer. At 860px it stacks, statement under the form, insets 18px.
+
+### Folds (Results, Value)
 The technical record lives behind native `<details>` folds, so nothing technical sits in a headline. Each fold is a ledger line: 2px ink rule above (and below the last), a summary in Title type with a drawn plus that turns to a minus when open, focusable and toggled by Enter or Space. The body opens with one bold line defining the fold's terms in plain words, under a 1px Form Blue rule, then the tables (slip white, 2px ink under uppercase heads, 1px blue between rows; wide ones scroll inside their own box). A failed check is red text; the override sits in a 2px red notice. Notices inside follow the Notices rules above.
 
 ### Motion
