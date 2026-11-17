@@ -1,0 +1,399 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-16T00:00:00Z",
+  "title": "Design System: Askwell",
+  "extensions": {
+    "colorMeta": {
+      "carbon": {
+        "role": "primary",
+        "displayName": "Carbon Indigo",
+        "canonical": "#2b2f80",
+        "tonalRamp": [
+          "#060526",
+          "#1a1d53",
+          "#313784",
+          "#4d57ac",
+          "#6c79d2",
+          "#8e9ef5",
+          "#b6c5ff",
+          "#e1ecff"
+        ]
+      },
+      "carbon-soft": {
+        "role": "primary",
+        "displayName": "Carbon Indigo Soft",
+        "canonical": "#5a5ea6",
+        "tonalRamp": [
+          "#080722",
+          "#1e1e4c",
+          "#38397a",
+          "#5558a0",
+          "#747ac5",
+          "#979ee8",
+          "#bdc4ff",
+          "#e6ebff"
+        ]
+      },
+      "red": {
+        "role": "secondary",
+        "displayName": "Ledger Red",
+        "canonical": "#a3261d",
+        "tonalRamp": [
+          "#240000",
+          "#500000",
+          "#810001",
+          "#aa2e24",
+          "#d25346",
+          "#f77a6a",
+          "#ffab9c",
+          "#ffdbcf"
+        ]
+      },
+      "blue": {
+        "role": "tertiary",
+        "displayName": "Form Blue",
+        "canonical": "#2c5291",
+        "tonalRamp": [
+          "#010922",
+          "#0a234c",
+          "#1c407a",
+          "#3960a0",
+          "#5982c5",
+          "#7da6e9",
+          "#aacbff",
+          "#d9f0ff"
+        ]
+      },
+      "paper": {
+        "role": "neutral",
+        "displayName": "Cheque Sage",
+        "canonical": "#e2ebe4",
+        "tonalRamp": [
+          "#090c0a",
+          "#222623",
+          "#3d443f",
+          "#5c645e",
+          "#7d857e",
+          "#9fa7a1",
+          "#c5cbc6",
+          "#ebf0ec"
+        ]
+      },
+      "paper-deep": {
+        "role": "neutral",
+        "displayName": "Deep Sage",
+        "canonical": "#d3e0d6",
+        "tonalRamp": [
+          "#080c09",
+          "#202722",
+          "#3b453d",
+          "#59655c",
+          "#7a867d",
+          "#9da9a0",
+          "#c3ccc5",
+          "#eaf0eb"
+        ]
+      },
+      "field": {
+        "role": "neutral",
+        "displayName": "Slip White",
+        "canonical": "#f1f5f1",
+        "tonalRamp": [
+          "#0a0c0a",
+          "#242624",
+          "#404340",
+          "#5f625f",
+          "#808380",
+          "#a3a6a3",
+          "#c7cac7",
+          "#edefed"
+        ]
+      },
+      "carbon-paper": {
+        "role": "neutral",
+        "displayName": "Carbon Paper",
+        "canonical": "#e3e6ef",
+        "tonalRamp": [
+          "#0a0b0e",
+          "#23252a",
+          "#3f4249",
+          "#5e6169",
+          "#7f828a",
+          "#a2a5ad",
+          "#c7c9cf",
+          "#edeef3"
+        ],
+        "note": "Written as a literal in front.css and try.css; tokens.css has no custom property for it."
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Ink",
+        "canonical": "#15181d",
+        "tonalRamp": [
+          "#0a0b0e",
+          "#232529",
+          "#3f4248",
+          "#5e6168",
+          "#7f8389",
+          "#a1a5ac",
+          "#c6c9ce",
+          "#eceff2"
+        ]
+      },
+      "ink-soft": {
+        "role": "neutral",
+        "displayName": "Soft Ink",
+        "canonical": "#3c4149",
+        "tonalRamp": [
+          "#090b0e",
+          "#22252b",
+          "#3d424a",
+          "#5c626a",
+          "#7d838c",
+          "#a0a5ae",
+          "#c5c9d1",
+          "#ebeff4"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "The one-line promise on the front page."
+      },
+      "page-title": {
+        "displayName": "Page Title",
+        "purpose": "Step titles in /try/."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Section heads below the slip."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Sub-heads inside /try/ steps."
+      },
+      "lead": {
+        "displayName": "Lead",
+        "purpose": "The two sentences beside the promise."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Running copy."
+      },
+      "body-ledger": {
+        "displayName": "Body Ledger",
+        "purpose": "Ledger rows and closing copy."
+      },
+      "note": {
+        "displayName": "Note",
+        "purpose": "The line under a step caption, in Soft Ink."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Uppercase captions for fields, steps, table heads and slip blocks."
+      },
+      "nav": {
+        "displayName": "Nav",
+        "purpose": "Top navigation links."
+      },
+      "button": {
+        "displayName": "Button",
+        "purpose": "Inked buttons."
+      },
+      "figure": {
+        "displayName": "Figure",
+        "purpose": "A measured number inside a ledger line, in red."
+      },
+      "stamp-value": {
+        "displayName": "Stamp Value",
+        "purpose": "The value on the red stamp."
+      },
+      "mono": {
+        "displayName": "Mono",
+        "purpose": "Column names, form values and SQL."
+      }
+    },
+    "shadows": [],
+    "motion": [
+      {
+        "name": "ease-out",
+        "value": "cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "The one easing in the build: step feed, stamp drop and button color swaps."
+      },
+      {
+        "name": "feed",
+        "value": "560ms ease-out; clip-path inset(0 0 100% 0) to inset(0), translateY(-8px) to 0",
+        "purpose": "Each step of the slip fills in from above, in order."
+      },
+      {
+        "name": "stamp",
+        "value": "300ms ease-out; opacity 0 to 0.94, rotate(-6deg) scale(1.5) to scale(1)",
+        "purpose": "The stamp comes down once, after the last step; it then stays set."
+      },
+      {
+        "name": "swap",
+        "value": "160ms ease-out on background-color and color",
+        "purpose": "Button hover. Removed under prefers-reduced-motion, as are feed and stamp."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "stack",
+        "value": "860px",
+        "purpose": "Head, slip and form lines go to one column; perforation turns horizontal; stamp moves onto the rows."
+      },
+      {
+        "name": "nav-scroll",
+        "value": "600px",
+        "purpose": "Top nav becomes one scrolling row."
+      }
+    ],
+    "textures": [
+      {
+        "name": "security-faint",
+        "value": "var(--security-faint) at 48px 16px",
+        "purpose": "Guilloche on the top rule and page head."
+      },
+      {
+        "name": "security",
+        "value": "var(--security) at 42px 14px",
+        "purpose": "Denser guilloche on the original slip."
+      },
+      {
+        "name": "perforation",
+        "value": "var(--holes-v) 14px 16px / var(--holes-h) 16px 14px",
+        "purpose": "Punched holes between original and carbon."
+      }
+    ],
+    "scope": "Front page (/) and /try/ only. /results/ and /value/ still load style.css and are not yet in this world."
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Inked square button for the main action (Ask, Try your data).",
+      "html": "<button class=\"ds-btn-primary\" type=\"button\">Ask</button>",
+      "css": ".ds-btn-primary { font-family: var(--sans); padding: 10px 22px; border: 2px solid var(--ink); border-radius: 0; background: var(--ink); color: var(--field); font-size: 0.9375rem; font-weight: 750; font-stretch: 112%; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; transition: background-color 160ms cubic-bezier(0.16, 1, 0.3, 1), color 160ms cubic-bezier(0.16, 1, 0.3, 1); } .ds-btn-primary:hover { background: var(--field); color: var(--ink); } .ds-btn-primary:focus-visible { outline: 3px solid var(--blue); outline-offset: 3px; } .ds-btn-primary:disabled { background: var(--paper-deep); border-color: var(--ink-soft); color: var(--ink-soft); cursor: progress; }"
+    },
+    {
+      "name": "Danger Button",
+      "kind": "button",
+      "refersTo": "button-danger",
+      "description": "Destructive action in /try/: red outline that fills red on hover.",
+      "html": "<button class=\"ds-btn-danger\" type=\"button\">Delete workspace</button>",
+      "css": ".ds-btn-danger { font-family: var(--sans); padding: 9px 18px; border: 2px solid var(--red); border-radius: 0; background: transparent; color: var(--red); font-weight: 700; cursor: pointer; transition: background-color 160ms cubic-bezier(0.16, 1, 0.3, 1), color 160ms cubic-bezier(0.16, 1, 0.3, 1); } .ds-btn-danger:hover { background: var(--red); color: var(--field); } .ds-btn-danger:focus-visible { outline: 3px solid var(--blue); outline-offset: 3px; }"
+    },
+    {
+      "name": "Question Field",
+      "kind": "input",
+      "refersTo": "input-text",
+      "description": "The ask field: a write-on line in Form Blue with the Ask button inline.",
+      "html": "<div class=\"ds-ask\"><label class=\"ds-label\" for=\"ds-q\">You asked</label><div class=\"ds-ask-field\"><input id=\"ds-q\" type=\"text\" value=\"How many invoices are still unpaid?\"><button class=\"ds-ask-btn\" type=\"button\">Ask</button></div></div>",
+      "css": ".ds-ask { font-family: var(--sans); background: var(--field); padding: 16px 28px; } .ds-label { display: block; font-size: 0.75rem; font-weight: 700; font-stretch: 115%; letter-spacing: 0.09em; text-transform: uppercase; color: var(--ink); } .ds-ask-field { display: flex; gap: 12px; margin-top: 6px; border-bottom: 2px solid var(--blue); } .ds-ask-field input { flex: 1; min-width: 0; padding: 6px 0 8px; border: 0; background: transparent; font: inherit; font-size: 1.5rem; font-weight: 560; color: var(--ink); } .ds-ask-field input:focus-visible { outline: 3px solid var(--blue); outline-offset: 6px; } .ds-ask-btn { align-self: center; margin-bottom: 8px; padding: 10px 22px; border: 2px solid var(--ink); border-radius: 0; background: var(--ink); color: var(--field); font: inherit; font-size: 0.9375rem; font-weight: 750; font-stretch: 112%; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; } .ds-ask-btn:hover { background: var(--field); color: var(--ink); }"
+    },
+    {
+      "name": "Top Rule Navigation",
+      "kind": "nav",
+      "refersTo": "nav",
+      "description": "Wordmark and three uppercase links over faint guilloche, closed by a 2px ink rule.",
+      "html": "<header class=\"ds-topbar\"><a class=\"ds-brand\" href=\"#\">Askwell</a><nav><a href=\"#\">How it works</a><a href=\"#\">Results</a><a href=\"#\" aria-current=\"page\">Try your data</a></nav></header>",
+      "css": ".ds-topbar { font-family: var(--sans); display: flex; justify-content: space-between; align-items: baseline; gap: 8px 32px; padding: 20px 32px 16px; border-bottom: 2px solid var(--ink); background: var(--paper); color: var(--ink); } .ds-brand { font-weight: 800; font-stretch: 112%; font-size: 1.375rem; color: inherit; text-decoration: none; } .ds-topbar nav { display: flex; gap: 4px 28px; } .ds-topbar nav a { font-size: 0.8125rem; font-weight: 650; font-stretch: 115%; letter-spacing: 0.08em; text-transform: uppercase; color: inherit; text-decoration: none; } .ds-topbar nav a:hover, .ds-topbar nav a[aria-current=\"page\"] { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 0.22em; } .ds-topbar a:focus-visible { outline: 3px solid var(--blue); outline-offset: 3px; }"
+    },
+    {
+      "name": "Step Tabs",
+      "kind": "nav",
+      "refersTo": "step-tab",
+      "description": "The /try/ step row: label cells in a 2px ink frame; current step inverts to ink.",
+      "html": "<ol class=\"ds-steps\"><li><button type=\"button\">Prepare</button></li><li><button type=\"button\" aria-current=\"step\">Upload</button></li><li><button type=\"button\" disabled>Check</button></li></ol>",
+      "css": ".ds-steps { font-family: var(--sans); display: flex; margin: 0; padding: 0; list-style: none; border: 2px solid var(--ink); } .ds-steps li { flex: 1 1 auto; } .ds-steps li + li { border-left: 1px solid var(--ink); } .ds-steps button { width: 100%; padding: 10px 14px; border: 0; background: var(--field); color: var(--ink); font: inherit; font-size: 0.8125rem; font-weight: 700; font-stretch: 112%; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; } .ds-steps button:hover:not(:disabled) { background: var(--paper-deep); } .ds-steps button[aria-current=\"step\"] { background: var(--ink); color: var(--field); } .ds-steps button:disabled { background: transparent; color: var(--ink-soft); opacity: 0.55; cursor: default; } .ds-steps button:focus-visible { outline: 3px solid var(--blue); outline-offset: 3px; }"
+    },
+    {
+      "name": "Carbon Copy",
+      "kind": "card",
+      "refersTo": "slip-carbon",
+      "description": "What the AI was shown: column names over empty dashed cells, hidden columns struck in red, rows sent: 0.",
+      "html": "<div class=\"ds-carbon\"><p class=\"ds-carbon-title\">Carbon copy: what the AI was shown</p><p class=\"ds-ctable\">Invoices</p><ul class=\"ds-cells\"><li class=\"is-used\"><span class=\"ds-cname\">id</span><span class=\"ds-cell\"></span></li><li><span class=\"ds-cname\">issued_at</span><span class=\"ds-cell\"></span></li><li class=\"is-used\"><span class=\"ds-cname\">status</span><span class=\"ds-cell\"></span></li><li class=\"is-hidden\"><span class=\"ds-cname\">users.email</span><span class=\"ds-cell\">hidden</span></li></ul><p class=\"ds-rows-sent\">Rows sent to the AI: <strong>0</strong></p></div>",
+      "css": ".ds-carbon { font-family: var(--sans); padding: 0 28px 24px; background: #e3e6ef; color: var(--carbon); } .ds-carbon-title { margin: 0 -28px 10px; padding: 9px 28px; border-bottom: 1px solid var(--carbon); font-size: 0.75rem; font-weight: 700; font-stretch: 115%; letter-spacing: 0.09em; text-transform: uppercase; } .ds-ctable { margin: 0 0 3px; font-size: 0.75rem; font-weight: 750; font-stretch: 112%; letter-spacing: 0.07em; text-transform: uppercase; } .ds-cells { display: flex; flex-wrap: wrap; gap: 4px 5px; margin: 0; padding: 0; list-style: none; } .ds-cells li { display: grid; gap: 2px; min-width: 3rem; } .ds-cname { font-family: var(--mono); font-size: 0.6875rem; line-height: 1.2; } .ds-cell { display: block; height: 14px; border: 1px dashed var(--carbon-soft); } .ds-cells li.is-used .ds-cname { font-weight: 800; text-decoration: underline 2px; text-underline-offset: 3px; } .ds-cells li.is-used .ds-cell { border-color: var(--carbon); } .ds-cells li.is-hidden .ds-cname { text-decoration: line-through; } .ds-cells li.is-hidden .ds-cell { height: auto; border-color: var(--red); color: var(--red); font-size: 0.625rem; font-weight: 750; letter-spacing: 0.06em; line-height: 12px; text-align: center; text-transform: uppercase; } .ds-rows-sent { margin: 10px 0 0; padding-top: 8px; border-top: 2px solid var(--carbon); font-weight: 700; } .ds-rows-sent strong { font-size: 2.25rem; font-weight: 820; line-height: 1; vertical-align: -0.12em; margin-left: 4px; font-variant-numeric: tabular-nums; }"
+    },
+    {
+      "name": "Checked Stamp",
+      "kind": "custom",
+      "refersTo": "stamp",
+      "description": "The red rubber stamp on a checked or refused result; rotated, uneven ink, dropped once.",
+      "html": "<div class=\"ds-stamp\"><span class=\"ds-stamp-word\">Checked</span><span class=\"ds-stamp-value\">161</span></div>",
+      "css": ".ds-stamp { font-family: var(--sans); display: inline-grid; justify-items: center; padding: 4px 16px 2px; border: 3px solid var(--red); outline: 1px solid var(--red); outline-offset: 3px; color: var(--red); transform: rotate(-6deg); opacity: 0.94; animation: ds-stamp 300ms cubic-bezier(0.16, 1, 0.3, 1) both; } .ds-stamp-word { font-size: 0.9375rem; font-weight: 820; font-stretch: 90%; letter-spacing: 0.16em; text-transform: uppercase; } .ds-stamp-value { font-size: 2.625rem; font-weight: 880; font-stretch: 78%; line-height: 0.95; letter-spacing: 0.01em; font-variant-numeric: tabular-nums slashed-zero; } @keyframes ds-stamp { from { opacity: 0; transform: rotate(-6deg) scale(1.5); } to { opacity: 0.94; transform: rotate(-6deg) scale(1); } } @media (prefers-reduced-motion: reduce) { .ds-stamp { animation: none; } }"
+    },
+    {
+      "name": "Measured Ledger",
+      "kind": "custom",
+      "refersTo": "ledger",
+      "description": "Measured figures as red-ruled ledger lines, each linking to its measurement.",
+      "html": "<div class=\"ds-ledger\"><p class=\"ds-ledger-title\">Measured results</p><ul><li><a href=\"#\">Right on <strong>62 of 96</strong> questions it had never seen</a></li><li><a href=\"#\">Wrong about <strong>1 answer in 25</strong>, down from 1 in 14</a></li></ul></div>",
+      "css": ".ds-ledger { font-family: var(--sans); color: var(--ink); } .ds-ledger-title { margin: 0; padding-bottom: 6px; border-bottom: 2px solid var(--red); font-size: 0.75rem; font-weight: 700; font-stretch: 115%; letter-spacing: 0.09em; text-transform: uppercase; } .ds-ledger ul { margin: 0; padding: 0; list-style: none; } .ds-ledger li { border-bottom: 1px solid var(--red); } .ds-ledger a { display: block; padding: 5px 0; color: var(--ink); font-size: 0.9375rem; line-height: 1.35; text-decoration: none; } .ds-ledger a:hover { text-decoration: underline; } .ds-ledger a:focus-visible { outline: 3px solid var(--blue); outline-offset: 3px; } .ds-ledger strong { font-weight: 820; font-size: 1.0625rem; color: var(--red); font-variant-numeric: tabular-nums slashed-zero; }"
+    },
+    {
+      "name": "Notice",
+      "kind": "card",
+      "refersTo": "notice",
+      "description": "Square status boxes in /try/: blue for success, red for errors.",
+      "html": "<div class=\"ds-notice ds-ok\">Every file passed and your data is loaded.</div><div class=\"ds-notice ds-error\">1 file needs fixing. Nothing was loaded.</div>",
+      "css": ".ds-notice { font-family: var(--sans); margin: 14px 0; padding: 10px 14px; border: 1px solid var(--ink); background: var(--field); color: var(--ink); } .ds-notice.ds-ok { border: 2px solid var(--blue); } .ds-notice.ds-error { border: 2px solid var(--red); color: var(--red); font-weight: 600; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Audited Ledger",
+    "overview": "Every answer is a cheque with its carbon copy. The original slip, on pale cheque paper over a fine guilloche security pattern, carries what the visitor asked, the form the AI filled in, the check, the SQL and the rows. The carbon copy, torn off down a line of punched holes and printed in indigo, carries only what the AI was shown: table and column names over empty cells, and the count of rows sent to it, always zero. A red rubber stamp lands on the result. The page is a business document, not an app screen: hard ink rules, square corners, no shadows, no cards floating on a canvas.\n\nRank comes from one variable grotesk pushed through weight, width and case, not from a second family or a parade of sizes. Color is semantic before it is decorative: indigo means \"the AI saw this\", red means \"audited, refused, hidden or measured\", blue means \"a line you write on\". Depth is the change of paper (sage page, near-white slip, lavender-grey carbon) and the weight of the rule between them.\n\nScope: the front page (`/`) and the ask flow (`/try/`) are built in this world and share `web/src/tokens.css`. Results (`/results/`) and Value (`/value/`) still load the older `style.css` and are not yet in this world; they are not described here and are not a source for new work.",
+    "keyCharacteristics": [
+      "Sage cheque paper with a guilloche security pattern, densest on the slip, faint on the page head, never behind long-read paragraphs.",
+      "One family, Archivo variable, ranked by weight (400 to 880), width (78% to 115%) and uppercase tracking.",
+      "2px ink frames, 1px subdivisions, square corners everywhere.",
+      "Indigo carbon reserved for what the AI was shown; absence drawn as empty dashed cells.",
+      "A red rotated rubber stamp with uneven ink as the single mark of a checked result.",
+      "Flat: no box shadows, no gradients, no glow."
+    ],
+    "rules": [
+      {
+        "name": "The Carbon Rule",
+        "body": "Indigo on carbon paper means \"this is what the AI was shown\". Nothing the AI did not see is printed in carbon.",
+        "section": "colors"
+      },
+      {
+        "name": "The Three Inks Rule",
+        "body": "Red audits, blue lines the form, indigo is the carbon. A color that carries no one of those meanings stays ink.",
+        "section": "colors"
+      },
+      {
+        "name": "The Weight-and-Width Rule",
+        "body": "Rank is set by weight, width and case within one family. Don't add a second display face or a new size where a weight or width step does the job.",
+        "section": "typography"
+      },
+      {
+        "name": "The Caption Rule",
+        "body": "Uppercase labels caption a field, a step, a table column or a block of the slip, as printed captions do on a cheque. They never sit above a headline as a kicker.",
+        "section": "typography"
+      },
+      {
+        "name": "The Flat Paper Rule",
+        "body": "Surfaces never lift. If something needs separating, change the paper or draw a rule.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do take every color from `tokens.css`; Ink, Slip White and the three working inks cover the build.",
+      "Do print anything the model receives on carbon paper in indigo, and nothing else.",
+      "Do draw absence: an empty dashed cell, a struck-through hidden column, \"Rows sent to the AI: 0\".",
+      "Do separate with rules: 2px ink for frames and table heads, 1px for rows and steps, red rules for ledgers of audited facts, blue rules for lines you write on.",
+      "Do set numbers in tables and outputs with tabular figures and a slashed zero.",
+      "Do keep the guilloche off long-read copy; it belongs on the page head and the slip."
+    ],
+    "donts": [
+      "Don't round a corner or add a box shadow, gradient or glow.",
+      "Don't add a second type family for display; reach for Archivo's weight and width instead.",
+      "Don't use the red stamp for anything but the checked or refused result.",
+      "Don't put an uppercase label above a headline as a kicker; labels caption fields, steps and tables.",
+      "Don't build the AI-landing layout of a headline beside a chat screenshot or a row of feature cards."
+    ]
+  }
+}
