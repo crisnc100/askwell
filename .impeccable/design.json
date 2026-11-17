@@ -266,7 +266,7 @@
         "purpose": "Punched holes between original and carbon."
       }
     ],
-    "scope": "Front page (/) and /try/ only. /results/ and /value/ still load style.css and are not yet in this world."
+    "scope": "Front page (/), /try/, /results/ and /value/."
   },
   "components": [
     {
@@ -356,11 +356,19 @@
       "description": "Results: a native details fold holding the technical record, opening with a one-line plain definition.",
       "html": "<details class=\"ds-fold\"><summary>Where each figure comes from</summary><p class=\"ds-fold-def\">Held-out questions are questions kept from the builders until the code was frozen.</p></details>",
       "css": ".ds-fold { font-family: var(--sans); border-top: 2px solid var(--ink); border-bottom: 2px solid var(--ink); } .ds-fold summary { padding: 18px 2px; font-size: 1.1875rem; font-weight: 740; cursor: pointer; list-style: none; } .ds-fold summary:focus-visible { outline: 3px solid var(--blue); outline-offset: 3px; } .ds-fold-def { margin: 0 0 16px; padding-bottom: 12px; border-bottom: 1px solid var(--blue); font-weight: 600; }"
+    },
+    {
+      "name": "Worksheet",
+      "kind": "form",
+      "refersTo": "worksheet",
+      "description": "Value: the reader's numbers as form lines on the original slip, beside a red-ruled monthly statement with net value large in ledger red and the measured rates it assumes.",
+      "html": "<div class=\"ds-sheet\"><div class=\"ds-sheet-in\"><label>Data questions your team asks each month</label><input type=\"number\" value=\"500\"></div><table class=\"ds-sheet-out\"><tr><th>Running cost</th><td>$10.24</td></tr><tr class=\"ds-total\"><th>Net value each month</th><td>$5,775.47</td></tr></table></div>",
+      "css": ".ds-sheet { font-family: var(--sans); display: grid; grid-template-columns: 7fr 5fr; border: 2px solid var(--ink); background: var(--field); } .ds-sheet-in { padding: 14px 28px; border-right: 2px solid var(--ink); border-bottom: 1px solid var(--blue); } .ds-sheet-in label { display: block; font-weight: 650; } .ds-sheet-in input { margin-top: 10px; width: 8em; padding: 7px 9px; border: 1px solid var(--ink); border-radius: 0; background: var(--field); font-family: var(--mono); } .ds-sheet-out { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums slashed-zero; } .ds-sheet-out th, .ds-sheet-out td { padding: 11px 28px; border-bottom: 1px solid var(--red); text-align: left; font-weight: 500; } .ds-sheet-out td { text-align: right; font-weight: 700; } .ds-total th, .ds-total td { border-top: 2px solid var(--red); border-bottom: 2px solid var(--red); } .ds-total td { color: var(--red); font-size: 2.25rem; font-weight: 820; font-stretch: 92%; }"
     }
   ],
   "narrative": {
     "northStar": "The Audited Ledger",
-    "overview": "Every answer is a cheque with its carbon copy. The original slip, on pale cheque paper over a fine guilloche security pattern, carries what the visitor asked, the form the AI filled in, the check, the SQL and the rows. The carbon copy, torn off down a line of punched holes and printed in indigo, carries only what the AI was shown: table and column names over empty cells, and the count of rows sent to it, always zero. A red rubber stamp lands on the result. The page is a business document, not an app screen: hard ink rules, square corners, no shadows, no cards floating on a canvas.\n\nRank comes from one variable grotesk pushed through weight, width and case, not from a second family or a parade of sizes. Color is semantic before it is decorative: indigo means \"the AI saw this\", red means \"audited, refused, hidden or measured\", blue means \"a line you write on\". Depth is the change of paper (sage page, near-white slip, lavender-grey carbon) and the weight of the rule between them.\n\nScope: the front page (`/`) and the ask flow (`/try/`) are built in this world and share `web/src/tokens.css`. Results (`/results/`) and Value (`/value/`) still load the older `style.css` and are not yet in this world; they are not described here and are not a source for new work.",
+    "overview": "Every answer is a cheque with its carbon copy. The original slip, on pale cheque paper over a fine guilloche security pattern, carries what the visitor asked, the form the AI filled in, the check, the SQL and the rows. The carbon copy, torn off down a line of punched holes and printed in indigo, carries only what the AI was shown: table and column names over empty cells, and the count of rows sent to it, always zero. A red rubber stamp lands on the result. The page is a business document, not an app screen: hard ink rules, square corners, no shadows, no cards floating on a canvas.\n\nRank comes from one variable grotesk pushed through weight, width and case, not from a second family or a parade of sizes. Color is semantic before it is decorative: indigo means \"the AI saw this\", red means \"audited, refused, hidden or measured\", blue means \"a line you write on\". Depth is the change of paper (sage page, near-white slip, lavender-grey carbon) and the weight of the rule between them.\n\nScope: the front page (`/`), the ask flow (`/try/`), Results (`/results/`) and Value (`/value/`) are built in this world and share `web/src/tokens.css`.",
     "keyCharacteristics": [
       "Sage cheque paper with a guilloche security pattern, densest on the slip, faint on the page head, never behind long-read paragraphs.",
       "One family, Archivo variable, ranked by weight (400 to 880), width (78% to 115%) and uppercase tracking.",

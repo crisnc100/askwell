@@ -130,6 +130,9 @@ test("V3: the headline is the formula at the held-out answered share, and the ra
   // The dollar-risk term is gone, and wrong-answer rates do not move the result.
   await expect(page.locator("#out-risk")).toHaveCount(0);
   await expect(page.locator("#inputs")).not.toContainText("wrong answer");
+  // The wrong-answer rates live in the closed "measured" fold; opening it must show them.
+  await expect(page.locator("#accuracy")).toBeHidden();
+  await page.locator("#measured > summary").click();
   await expect(page.locator("#accuracy")).toBeVisible();
   await expect(page.locator("#measured")).toContainText("These do not feed the formula.");
   await expect(page.locator("#measured")).toContainText("Every answer shows its query; the check time is counted.");
@@ -140,17 +143,17 @@ test("V3: the headline is the formula at the held-out answered share, and the ra
 test("at $0 findings every figure is unchanged; findings add to net value and clamp", async ({ page }) => {
   await open(page);
   await expect(page.locator("#findings-number")).toHaveValue("0");
-  // The example figures before the findings input existed, pinned.
-  await expect(page.locator("#out-net")).toHaveText("$5,775.47");
-  await expect(page.locator("#out-range-unseen")).toHaveText("$5,775.47");
-  await expect(page.locator("#out-range-tuned")).toHaveText("$7,873.48");
-  await expect(page.locator("#out-running-cost")).toHaveText("$10.24");
+  // The example figures at the v0.3 rates (v03-holdout, v03-seen), pinned.
+  await expect(page.locator("#out-net")).toHaveText("$6,020.96");
+  await expect(page.locator("#out-range-unseen")).toHaveText("$6,020.96");
+  await expect(page.locator("#out-range-tuned")).toHaveText("$8,850.18");
+  await expect(page.locator("#out-running-cost")).toHaveText("$10.29");
 
   const box = page.locator("#findings-number");
   await box.fill("1000");
   await expect(page.locator("#out-findings")).toHaveText("$1,000.00");
-  await expect(page.locator("#out-net")).toHaveText("$6,775.47");
-  await expect(page.locator("#out-range-tuned")).toHaveText("$8,873.48");
+  await expect(page.locator("#out-net")).toHaveText("$7,020.96");
+  await expect(page.locator("#out-range-tuned")).toHaveText("$9,850.18");
 
   const spec = INPUTS.find((s) => s.key === "findings")!;
   await box.fill(String(spec.max * 10));
@@ -159,7 +162,7 @@ test("at $0 findings every figure is unchanged; findings add to net value and cl
   await box.fill("-5");
   await box.press("Tab");
   await expect(box).toHaveValue("0");
-  await expect(page.locator("#out-net")).toHaveText("$5,775.47");
+  await expect(page.locator("#out-net")).toHaveText("$6,020.96");
   await noBadNumbers(page);
 });
 
