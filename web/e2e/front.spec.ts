@@ -19,7 +19,7 @@ async function demo(page: Page): Promise<{ schema_id: string; question: string }
     await route.fulfill(answer ? { json: answer } : { status: 409, json: { detail: "no recorded model answer" } });
   });
   await page.goto("/");
-  await expect(page.locator("#starters button")).toHaveCount(FIXTURE.examples.length);
+  await expect(page.locator("#starters li button")).toHaveCount(FIXTURE.examples.length);
   return asked;
 }
 
@@ -40,7 +40,7 @@ test("a starter question steps the slip through form, check and SQL to checked r
   await expect(page.locator(".answer-rows tbody td")).toHaveText(["161"]);
   await expect(page.locator("#stamp")).toHaveClass(/is-down/);
   await expect(page.locator("#stamp")).toContainText("Checked");
-  await expect(page.locator("#slip-no")).toHaveText("0001");
+  await expect(page.locator("#slip-no")).toHaveText("0002");
 });
 
 test("the carbon copy shows names only, hidden columns, and 0 rows sent", async ({ page }) => {
@@ -49,12 +49,12 @@ test("the carbon copy shows names only, hidden columns, and 0 rows sent", async 
   await expect(page.locator("#stamp")).toHaveClass(/is-down/);
 
   await expect(page.locator("#rows-sent")).toHaveText("0");
-  const cells = page.locator("#carbon-tables [data-column] .cell");
+  const cells = page.locator(".carbon [data-column] .cell");
   expect(await cells.count()).toBeGreaterThan(40);
   for (const text of await cells.allTextContents()) expect(text).toBe("");
   // The answer's value is stamped on the carbon, never written into what the AI saw.
   await expect(page.locator("#carbon-tables")).not.toContainText("161");
-  await expect(page.locator('[data-table="users"] .is-hidden')).toHaveText(["emailhidden", "password_hashhidden"]);
+  await expect(page.locator("#carbon-hidden .is-hidden")).toHaveText(["users.emailhidden", "users.password_hashhidden"]);
   await expect(page.locator('[data-column="invoices.status"]')).toHaveClass(/is-used/);
   await expect(page.locator('[data-column="customers.name"]')).not.toHaveClass(/is-used/);
 });
