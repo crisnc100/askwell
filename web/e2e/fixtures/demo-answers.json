@@ -104,6 +104,115 @@
       "truncated": false,
       "tied_at_cutoff": false,
       "refusal": "the request asks to delete data (void invoices), and this intent can only read data; it cannot change or remove records"
+    },
+    "Per month this year, show work orders opened next to work orders completed.": {
+      "question": "Per month this year, show work orders opened next to work orders completed.",
+      "intent": {
+        "intent_type": "date_series",
+        "entity": "work_orders",
+        "date_range": {
+          "relative": "this_year"
+        },
+        "grain": "month",
+        "series": [
+          {
+            "metric": {
+              "agg": "count"
+            },
+            "date_field": "opened_at",
+            "alias": "opened"
+          },
+          {
+            "metric": {
+              "agg": "count"
+            },
+            "date_field": "completed_at",
+            "alias": "completed"
+          }
+        ]
+      },
+      "validation": {
+        "ok": true,
+        "attempts": [
+          {
+            "answer": "{\"intent_type\": \"date_series\", \"entity\": \"work_orders\", \"grain\": \"month\", \"date_range\": {\"relative\": \"this_year\"}, \"series\": [{\"metric\": {\"agg\": \"count\"}, \"date_field\": \"opened_at\", \"alias\": \"opened\"}, {\"metric\": {\"agg\": \"count\"}, \"date_field\": \"completed_at\", \"alias\": \"completed\"}]}",
+            "intent": {
+              "intent_type": "date_series",
+              "entity": "work_orders",
+              "date_range": {
+                "relative": "this_year"
+              },
+              "grain": "month",
+              "series": [
+                {
+                  "metric": {
+                    "agg": "count"
+                  },
+                  "date_field": "opened_at",
+                  "alias": "opened"
+                },
+                {
+                  "metric": {
+                    "agg": "count"
+                  },
+                  "date_field": "completed_at",
+                  "alias": "completed"
+                }
+              ]
+            },
+            "parse_error": null,
+            "issues": [],
+            "provenance": null
+          }
+        ]
+      },
+      "sql": "WITH s0 AS \n(SELECT CAST(date_trunc('month', t0.opened_at) AS DATE) AS period, count(*) AS value \nFROM work_orders AS t0 \nWHERE t0.opened_at >= %(param_1)s::TIMESTAMP WITHOUT TIME ZONE AND t0.opened_at < %(param_2)s::TIMESTAMP WITHOUT TIME ZONE AND t0.opened_at IS NOT NULL GROUP BY CAST(date_trunc('month', t0.opened_at) AS DATE)), \ns1 AS \n(SELECT CAST(date_trunc('month', t0.completed_at) AS DATE) AS period, count(*) AS value \nFROM work_orders AS t0 \nWHERE t0.completed_at >= %(param_3)s::TIMESTAMP WITHOUT TIME ZONE AND t0.completed_at < %(param_4)s::TIMESTAMP WITHOUT TIME ZONE AND t0.completed_at IS NOT NULL GROUP BY CAST(date_trunc('month', t0.completed_at) AS DATE))\n SELECT periods.period AS period, coalesce(s0.value, 0) AS opened, coalesce(s1.value, 0) AS completed \nFROM (SELECT s0.period AS period \nFROM s0 UNION SELECT s1.period AS period \nFROM s1) AS periods LEFT OUTER JOIN s0 ON s0.period = periods.period LEFT OUTER JOIN s1 ON s1.period = periods.period ORDER BY periods.period",
+      "params": {
+        "param_1": "2026-01-01T00:00:00",
+        "param_2": "2026-06-30T00:00:00",
+        "param_3": "2026-01-01T00:00:00",
+        "param_4": "2026-06-30T00:00:00"
+      },
+      "columns": [
+        "period",
+        "opened",
+        "completed"
+      ],
+      "rows": [
+        [
+          "2026-01-01",
+          240,
+          230
+        ],
+        [
+          "2026-02-01",
+          214,
+          193
+        ],
+        [
+          "2026-03-01",
+          248,
+          242
+        ],
+        [
+          "2026-04-01",
+          227,
+          202
+        ],
+        [
+          "2026-05-01",
+          219,
+          234
+        ],
+        [
+          "2026-06-01",
+          250,
+          213
+        ]
+      ],
+      "truncated": false,
+      "tied_at_cutoff": false,
+      "refusal": null
     }
   }
 }
