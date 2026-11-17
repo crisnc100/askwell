@@ -428,7 +428,7 @@ function comparison(now: Report | undefined): HTMLElement | null {
     h(
       "p",
       {},
-      `Writing SQL directly gets more questions right. It attempts every one, though ${direct.execution_error_rate.n} of its queries failed to run, so ${direct.wrong_answer_rate_given_answered.of} of its ${direct.coverage.n} tries came back with an answer, and more of those answers are wrong. Askwell answers fewer questions so that fewer of the numbers it gives are confidently wrong; if you would rather have more answers and check each one yourself, writing SQL directly gets more right.`,
+      `Writing SQL directly gets more questions right. But ${direct.execution_error_rate.n} of its ${direct.coverage.n} queries failed to run, and more of the answers it did give were wrong. Askwell answers fewer questions so that fewer of its numbers are confidently wrong. If you'd rather have more answers and check each one yourself, writing SQL directly gets more right.`,
     ),
   );
 }
