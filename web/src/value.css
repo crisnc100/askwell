@@ -1,0 +1,436 @@
+.label {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 700;
+  font-stretch: 115%;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  line-height: 1.3;
+}
+
+.head {
+  display: grid;
+  grid-template-columns: minmax(0, 7fr) minmax(0, 4fr);
+  align-items: end;
+  gap: 20px 56px;
+  padding: 28px var(--gutter) 32px;
+  background-image: var(--security-faint);
+  background-size: 48px 16px;
+}
+.head h1 {
+  margin: 0;
+  max-width: 20ch;
+  font-size: clamp(2.25rem, 1.1rem + 3.4vw, 3.875rem);
+  font-weight: 780;
+  font-stretch: 104%;
+  line-height: 1.02;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+.head .lead {
+  margin: 0;
+  max-width: 40ch;
+  font-size: 1.125rem;
+  line-height: 1.45;
+  text-wrap: pretty;
+}
+
+.sheet-wait {
+  margin: 0 var(--gutter);
+  padding: 28px;
+  border: var(--rule);
+  background: var(--field);
+  font-size: 1.0625rem;
+}
+
+/* The worksheet: the reader's form lines on the original slip at left, the ruled
+   statement they produce at right, in one ink frame. */
+.worksheet {
+  display: grid;
+  grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+  margin: 0 var(--gutter);
+  border: var(--rule);
+  background: var(--field);
+}
+.sheet-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 4px 24px;
+  padding: 12px 28px 10px;
+  border-bottom: 1px solid var(--ink);
+}
+.sheet-head.red {
+  border-bottom: 2px solid var(--red);
+  background-image: var(--security);
+  background-size: 60px 20px;
+}
+.sheet-mark {
+  color: var(--red);
+}
+
+.sheet-inputs {
+  min-width: 0;
+  padding: 0 28px 20px;
+  background-image: var(--security);
+  background-size: 42px 14px;
+}
+.sheet-inputs > .sheet-head {
+  margin: 0 -28px;
+}
+.sheet-note {
+  margin: 12px 0 4px;
+  font-size: 0.875rem;
+  color: var(--ink-soft);
+}
+
+.value-input {
+  padding: 14px 0 12px;
+  border-bottom: 1px solid var(--blue);
+}
+.value-input:last-child {
+  border-bottom: 0;
+}
+.value-input label {
+  display: block;
+  font-size: 1rem;
+  font-weight: 650;
+  line-height: 1.35;
+  text-wrap: pretty;
+}
+.line-note {
+  margin: 2px 0 0;
+  max-width: 64ch;
+  font-size: 0.875rem;
+  color: var(--ink-soft);
+}
+.value-controls {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 10px;
+}
+
+/* The slider is a write-on line: a blue rule with a square ink marker. */
+.value-controls input[type="range"] {
+  flex: 1;
+  min-width: 0;
+  height: 28px;
+  margin: 0;
+  background: transparent;
+  appearance: none;
+  cursor: pointer;
+}
+.value-controls input[type="range"]::-webkit-slider-runnable-track {
+  height: 2px;
+  background: var(--blue);
+}
+.value-controls input[type="range"]::-moz-range-track {
+  height: 2px;
+  background: var(--blue);
+}
+.value-controls input[type="range"]::-webkit-slider-thumb {
+  width: 12px;
+  height: 22px;
+  margin-top: -10px;
+  border: 0;
+  border-radius: 0;
+  background: var(--ink);
+  appearance: none;
+}
+.value-controls input[type="range"]::-moz-range-thumb {
+  width: 12px;
+  height: 22px;
+  border: 0;
+  border-radius: 0;
+  background: var(--ink);
+}
+.value-controls input[type="range"]:hover::-webkit-slider-thumb {
+  background: var(--blue);
+}
+.value-controls input[type="range"]:hover::-moz-range-thumb {
+  background: var(--blue);
+}
+.value-controls input[type="number"] {
+  flex: none;
+  width: 8em;
+  box-sizing: border-box;
+  padding: 7px 9px;
+  border: 1px solid var(--ink);
+  border-radius: 0;
+  background: var(--field);
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 0.9375rem;
+  font-variant-numeric: tabular-nums slashed-zero;
+}
+
+/* The statement column fills the frame's height so its rule runs full length; the
+   statement itself stays in view while the reader works down the form. */
+.sheet-side {
+  min-width: 0;
+  border-left: var(--rule);
+}
+.sheet-statement {
+  position: sticky;
+  top: 0;
+}
+
+.sheet-ledger {
+  width: 100%;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums slashed-zero;
+}
+.sheet-ledger th,
+.sheet-ledger td {
+  padding: 11px 0;
+  border-bottom: 1px solid var(--red);
+  vertical-align: baseline;
+}
+.sheet-ledger th {
+  padding-left: 28px;
+  padding-right: 16px;
+  text-align: left;
+  font-size: 1rem;
+  font-weight: 500;
+}
+.sheet-ledger td {
+  padding-right: 28px;
+  text-align: right;
+  font-size: 1.0625rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.sheet-ledger .total th,
+.sheet-ledger .total td {
+  padding-top: 18px;
+  padding-bottom: 18px;
+  border-top: 2px solid var(--red);
+  border-bottom: 2px solid var(--red);
+}
+.sheet-ledger .total th {
+  font-size: 0.75rem;
+  font-weight: 700;
+  font-stretch: 115%;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  vertical-align: middle;
+}
+.sheet-ledger .total td {
+  color: var(--red);
+  font-size: clamp(2.25rem, 1.6rem + 1.6vw, 3.25rem);
+  font-weight: 820;
+  font-stretch: 92%;
+  line-height: 1;
+  letter-spacing: -0.005em;
+}
+
+.sheet-range {
+  margin: 0;
+  padding: 14px 28px 16px;
+  border-bottom: 1px solid var(--red);
+  font-size: 0.9375rem;
+  line-height: 1.45;
+  text-wrap: pretty;
+}
+.sheet-range strong {
+  font-weight: 760;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums slashed-zero;
+}
+
+.assumed {
+  padding: 16px 28px 22px;
+}
+.assumed ul {
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.assumed li {
+  padding: 7px 0;
+  border-bottom: 1px solid var(--blue);
+  font-size: 0.9375rem;
+  line-height: 1.45;
+  text-wrap: pretty;
+}
+.assumed .rate {
+  color: var(--red);
+  font-weight: 820;
+  font-variant-numeric: tabular-nums slashed-zero;
+}
+.assumed-foot {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 20px;
+  margin: 12px 0 0;
+  font-size: 0.9375rem;
+}
+.assumed-foot a {
+  text-decoration-color: var(--blue);
+}
+
+.details {
+  margin: 0 var(--gutter);
+  padding-top: 72px;
+}
+.details h2 {
+  margin: 0 0 16px;
+  font-size: clamp(1.5rem, 1.2rem + 1vw, 2rem);
+  font-weight: 760;
+  font-stretch: 104%;
+  letter-spacing: -0.01em;
+  line-height: 1.15;
+  text-wrap: balance;
+}
+.details > p {
+  margin: 0 0 20px;
+  max-width: 68ch;
+  font-size: 1.0625rem;
+  text-wrap: pretty;
+}
+
+/* The folds: each a ruled ledger line that opens; the technical record lives only here. */
+.fold {
+  max-width: 1100px;
+  border-top: var(--rule);
+}
+.fold:last-of-type {
+  border-bottom: var(--rule);
+}
+.fold > summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 18px 2px;
+  list-style: none;
+  cursor: pointer;
+  font-size: 1.1875rem;
+  font-weight: 740;
+  line-height: 1.25;
+}
+.fold > summary::-webkit-details-marker {
+  display: none;
+}
+.fold > summary::after {
+  content: "";
+  flex: none;
+  width: 16px;
+  height: 16px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpath d='M0 8h16M8 0v16' stroke='%2315181d' stroke-width='2'/%3E%3C/svg%3E")
+    center / 16px 16px no-repeat;
+}
+.fold[open] > summary::after {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpath d='M0 8h16' stroke='%2315181d' stroke-width='2'/%3E%3C/svg%3E");
+}
+.fold > summary:hover {
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.22em;
+}
+.fold-body {
+  padding: 0 0 32px;
+  overflow-wrap: anywhere;
+}
+.fold-body > p,
+.fold-body > ul {
+  max-width: 72ch;
+}
+.fold-def {
+  margin: 0 0 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--blue);
+  font-size: 1.0625rem;
+  font-weight: 600;
+}
+.fold-body h3 {
+  margin: 28px 0 10px;
+  font-size: 1.1875rem;
+  font-weight: 740;
+  line-height: 1.25;
+}
+.fold-body pre {
+  max-width: 72ch;
+  margin: 16px 0 0;
+  padding: 12px 14px;
+  border: 1px solid var(--blue);
+  background: var(--field);
+  font-family: var(--mono);
+  font-size: 0.8125rem;
+  line-height: 1.55;
+  white-space: pre-wrap;
+}
+.definitions {
+  margin: 0;
+  max-width: 72ch;
+}
+.definitions dt {
+  margin-top: 10px;
+  font-weight: 700;
+}
+.definitions dd {
+  margin: 2px 0 0;
+  font-variant-numeric: tabular-nums slashed-zero;
+}
+.muted {
+  color: var(--ink-soft);
+  font-size: 0.875rem;
+}
+
+.notice {
+  margin: 0 var(--gutter);
+  padding: 12px 16px;
+  border: 1px solid var(--ink);
+  background: var(--field);
+  max-width: 72ch;
+}
+.notice.error {
+  border: 2px solid var(--red);
+  color: var(--red);
+}
+
+@media (max-width: 860px) {
+  .head {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .worksheet {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .sheet-head,
+  .sheet-wait {
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+  .sheet-inputs {
+    padding: 0 18px 16px;
+  }
+  .sheet-inputs > .sheet-head {
+    margin: 0 -18px;
+  }
+  .sheet-side {
+    border-left: 0;
+    border-top: var(--rule);
+  }
+  .sheet-statement {
+    position: static;
+  }
+  .sheet-ledger th {
+    padding-left: 18px;
+  }
+  .sheet-ledger td {
+    padding-right: 18px;
+  }
+  .sheet-range,
+  .assumed {
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+  .details {
+    padding-top: 56px;
+  }
+}
+
+main {
+  padding-bottom: 96px;
+}

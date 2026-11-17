@@ -4,10 +4,37 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="referrer" content="no-referrer" />
-    <title>Askwell: value calculator</title>
+    <meta
+      name="description"
+      content="Put in your own numbers to estimate the hours Askwell could save your team each month, against what it costs to run."
+    />
+    <title>Askwell: what it could be worth to you</title>
+    <link rel="preload" href="/fonts/archivo-latin-var.woff2" as="font" type="font/woff2" crossorigin />
   </head>
   <body>
-    <div id="app"></div>
+    <header class="topbar">
+      <a class="brand" href="/">Askwell</a>
+      <nav aria-label="Main">
+        <ul>
+          <li><a href="/#how">How it works</a></li>
+          <li><a href="/results/">Results</a></li>
+          <li><a href="/try/">Try your data</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="app">
+      <section class="head" aria-labelledby="title">
+        <h1 id="title">What Askwell could be worth to&nbsp;you</h1>
+        <p class="lead">
+          Put in your own numbers. It estimates the hours your team would save each month, and weighs them against what
+          it costs to run.
+        </p>
+      </section>
+
+      <p class="sheet-wait" id="sheet-wait" aria-busy="true">Reading the measured rates…</p>
+    </main>
+
     <script type="module" src="/src/value.ts"></script>
   </body>
 </html>
