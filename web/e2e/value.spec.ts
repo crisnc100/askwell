@@ -130,6 +130,9 @@ test("V3: the headline is the formula at the held-out answered share, and the ra
   // The dollar-risk term is gone, and wrong-answer rates do not move the result.
   await expect(page.locator("#out-risk")).toHaveCount(0);
   await expect(page.locator("#inputs")).not.toContainText("wrong answer");
+  // The wrong-answer rates live in the closed "measured" fold; opening it must show them.
+  await expect(page.locator("#accuracy")).toBeHidden();
+  await page.locator("#measured > summary").click();
   await expect(page.locator("#accuracy")).toBeVisible();
   await expect(page.locator("#measured")).toContainText("These do not feed the formula.");
   await expect(page.locator("#measured")).toContainText("Every answer shows its query; the check time is counted.");
