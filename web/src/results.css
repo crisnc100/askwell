@@ -1,0 +1,496 @@
+.label {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 700;
+  font-stretch: 115%;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  line-height: 1.3;
+}
+
+.head {
+  display: grid;
+  grid-template-columns: minmax(0, 7fr) minmax(0, 4fr);
+  align-items: end;
+  gap: 20px 56px;
+  padding: 28px var(--gutter) 32px;
+  background-image: var(--security-faint);
+  background-size: 48px 16px;
+}
+.head h1 {
+  margin: 0;
+  max-width: 20ch;
+  font-size: clamp(2.25rem, 1.1rem + 3.4vw, 3.875rem);
+  font-weight: 780;
+  font-stretch: 104%;
+  line-height: 1.02;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+.head .lead {
+  margin: 0;
+  max-width: 40ch;
+  font-size: 1.125rem;
+  line-height: 1.45;
+  text-wrap: pretty;
+}
+
+/* The statement: a ledger of three measured answers in one ink frame, red rules between
+   the lines as on the front page's measured ledger, and the stamp on the foot. */
+.statement {
+  margin: 0 var(--gutter);
+  border: var(--rule);
+  background: var(--field);
+}
+.statement-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 4px 24px;
+  padding: 12px 28px 10px;
+  border-bottom: 2px solid var(--red);
+  background-color: var(--field);
+  background-image: var(--security);
+  background-size: 60px 20px;
+}
+.statement-version {
+  color: var(--red);
+}
+.statement-wait {
+  margin: 0;
+  padding: 28px;
+  font-size: 1.0625rem;
+}
+.lines {
+  margin: 0;
+}
+.line {
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(0, 5fr) minmax(0, 5fr);
+  gap: 8px 32px;
+  padding: 22px 28px;
+  border-bottom: 1px solid var(--red);
+}
+.line dt {
+  padding-top: 0.75em;
+}
+.line dd {
+  margin: 0;
+}
+.figure {
+  font-size: 1.0625rem;
+  line-height: 1.4;
+  text-wrap: pretty;
+}
+.figure strong {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--red);
+  font-size: clamp(1.75rem, 1.35rem + 1.3vw, 2.5rem);
+  font-weight: 820;
+  font-stretch: 92%;
+  line-height: 1.05;
+  letter-spacing: -0.005em;
+  font-variant-numeric: tabular-nums slashed-zero;
+}
+.means {
+  max-width: 46ch;
+  font-size: 1.0625rem;
+  line-height: 1.45;
+  text-wrap: pretty;
+}
+.statement-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px 32px;
+  padding: 18px 28px 22px;
+  border-top: 1px solid var(--red);
+  margin-top: -1px;
+}
+.statement-foot p {
+  margin: 0;
+  max-width: 64ch;
+  font-size: 0.9375rem;
+  color: var(--ink-soft);
+}
+.statement-foot a {
+  color: var(--ink);
+  text-decoration-color: var(--blue);
+  white-space: nowrap;
+}
+
+.stamp {
+  display: grid;
+  justify-items: center;
+  margin-right: 10px;
+  padding: 4px 16px 2px;
+  border: 3px solid var(--red);
+  outline: 1px solid var(--red);
+  outline-offset: 3px;
+  color: var(--red);
+  transform: rotate(-6deg);
+  opacity: 0;
+  pointer-events: none;
+  /* Uneven ink, as from a rubber stamp. */
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='80'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' seed='7'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -2.2 1.9'/%3E%3C/filter%3E%3Crect width='160' height='80' filter='url(%23n)'/%3E%3C/svg%3E");
+  mask-size: 160px 80px;
+}
+.stamp-word {
+  font-size: 0.9375rem;
+  font-weight: 820;
+  font-stretch: 90%;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+.stamp-value {
+  font-size: 2.625rem;
+  font-weight: 880;
+  font-stretch: 78%;
+  line-height: 0.95;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+  font-variant-numeric: tabular-nums slashed-zero;
+}
+.stamp.is-down {
+  opacity: 0.94;
+  animation: stamp 300ms var(--ease-out) both;
+}
+.stamp.is-set {
+  animation: none;
+}
+@keyframes stamp {
+  from {
+    opacity: 0;
+    transform: rotate(-6deg) scale(1.5);
+  }
+  to {
+    opacity: 0.94;
+    transform: rotate(-6deg) scale(1);
+  }
+}
+
+.compare,
+.details {
+  margin: 0 var(--gutter);
+  padding-top: 72px;
+}
+.compare h2,
+.details h2 {
+  margin: 0 0 16px;
+  font-size: clamp(1.5rem, 1.2rem + 1vw, 2rem);
+  font-weight: 760;
+  font-stretch: 104%;
+  letter-spacing: -0.01em;
+  line-height: 1.15;
+  text-wrap: balance;
+}
+.compare > p,
+.details > p {
+  margin: 0 0 20px;
+  max-width: 68ch;
+  font-size: 1.0625rem;
+  text-wrap: pretty;
+}
+.compare > p:last-child {
+  margin: 20px 0 0;
+}
+
+.compare-ledger {
+  width: 100%;
+  max-width: 920px;
+  border-collapse: collapse;
+}
+.compare-ledger thead th {
+  padding: 0 16px 8px;
+  border-bottom: 2px solid var(--red);
+  text-align: left;
+  font-size: 0.8125rem;
+  font-weight: 750;
+  font-stretch: 112%;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.compare-ledger thead td {
+  border-bottom: 2px solid var(--red);
+}
+.compare-ledger tbody th,
+.compare-ledger td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--red);
+  vertical-align: baseline;
+  text-align: left;
+}
+.compare-ledger tbody th {
+  padding-left: 0;
+  width: 40%;
+  font-size: 1rem;
+  font-weight: 650;
+}
+.compare-ledger td + td,
+.compare-ledger th + th {
+  border-left: 1px solid var(--red);
+}
+.compare-ledger td strong {
+  color: var(--red);
+  font-size: 1.1875rem;
+  font-weight: 820;
+}
+.small {
+  font-size: 0.875rem;
+  color: var(--ink-soft);
+}
+
+/* The folds: each a ruled ledger line that opens; the technical record lives only here. */
+.fold {
+  max-width: 1100px;
+  border-top: var(--rule);
+}
+.fold:last-of-type {
+  border-bottom: var(--rule);
+}
+.fold > summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 18px 2px;
+  list-style: none;
+  cursor: pointer;
+  font-size: 1.1875rem;
+  font-weight: 740;
+  line-height: 1.25;
+}
+.fold > summary::-webkit-details-marker {
+  display: none;
+}
+.fold > summary::after {
+  content: "";
+  flex: none;
+  width: 16px;
+  height: 16px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpath d='M0 8h16M8 0v16' stroke='%2315181d' stroke-width='2'/%3E%3C/svg%3E")
+    center / 16px 16px no-repeat;
+}
+.fold[open] > summary::after {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpath d='M0 8h16' stroke='%2315181d' stroke-width='2'/%3E%3C/svg%3E");
+}
+.fold > summary:hover {
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.22em;
+}
+.fold-body {
+  padding: 0 0 32px;
+}
+.fold-body > p,
+.fold-body > ul {
+  max-width: 72ch;
+}
+.fold-def {
+  margin: 0 0 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--blue);
+  font-size: 1.0625rem;
+  font-weight: 600;
+  max-width: 72ch;
+}
+.fold-body h3 {
+  margin: 28px 0 10px;
+  font-size: 1.1875rem;
+  font-weight: 740;
+  line-height: 1.25;
+}
+.fold-body h4 {
+  margin: 0 0 10px;
+  font-size: 1.0625rem;
+  font-weight: 740;
+}
+
+.scroll {
+  overflow-x: auto;
+  max-width: 100%;
+}
+.fold-body table {
+  border-collapse: collapse;
+  background: var(--field);
+  margin: 8px 0 16px;
+  font-size: 0.9375rem;
+}
+.fold-body table caption {
+  padding: 0 0 6px;
+  text-align: left;
+  font-weight: 700;
+}
+.fold-body th,
+.fold-body td {
+  padding: 7px 12px;
+  border-bottom: 1px solid var(--blue);
+  text-align: left;
+  vertical-align: top;
+}
+.fold-body thead th {
+  border-bottom: var(--rule);
+  font-size: 0.75rem;
+  font-weight: 700;
+  font-stretch: 115%;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.fold-body tbody th {
+  font-weight: 650;
+}
+.fold-body td.failed {
+  color: var(--red);
+  font-weight: 820;
+}
+.metrics th,
+.metrics td {
+  white-space: nowrap;
+}
+.misses td.note {
+  min-width: 28ch;
+  max-width: 60ch;
+}
+.muted {
+  color: var(--ink-soft);
+  font-size: 0.875rem;
+}
+code {
+  font-family: var(--mono);
+  font-size: 0.8125rem;
+}
+.json {
+  font-family: var(--mono);
+  font-size: 0.8125rem;
+  overflow-wrap: anywhere;
+}
+
+.notice {
+  margin: 12px 0;
+  padding: 12px 16px;
+  border: 1px solid var(--ink);
+  background: var(--field);
+  max-width: 72ch;
+}
+.notice.ok {
+  border: 2px solid var(--blue);
+}
+.notice.error {
+  border: 2px solid var(--red);
+  color: var(--red);
+}
+.notice.info {
+  border: 1px dashed var(--carbon);
+}
+.notice ul {
+  margin: 8px 0;
+  padding-left: 20px;
+}
+.notice p {
+  margin: 8px 0 0;
+}
+.notice.override {
+  border: 2px solid var(--red);
+}
+.notice.override strong {
+  color: var(--red);
+}
+.notice.override p:first-child {
+  margin-top: 0;
+}
+
+.definitions {
+  margin: 0;
+  max-width: 72ch;
+}
+.definitions dt {
+  margin-top: 10px;
+  font-weight: 700;
+}
+.definitions dd {
+  margin: 2px 0 0;
+}
+.schema {
+  margin-top: 32px;
+  padding-top: 18px;
+  border-top: 1px solid var(--ink);
+}
+.picker {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+}
+.picker label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  font-stretch: 115%;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+.picker select {
+  max-width: 100%;
+  padding: 7px 9px;
+  border: 1px solid var(--ink);
+  border-radius: 0;
+  background: var(--field);
+  color: var(--ink);
+  font: inherit;
+}
+.misses {
+  margin: 8px 0;
+}
+.misses > summary {
+  padding: 6px 0;
+  cursor: pointer;
+  font-weight: 650;
+}
+
+@media (max-width: 860px) {
+  .head {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .statement-head,
+  .statement-wait,
+  .line,
+  .statement-foot {
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+  .line {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 6px;
+  }
+  .line dt {
+    padding-top: 0;
+  }
+  .compare-ledger thead th,
+  .compare-ledger td {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+  .compare-ledger tbody th {
+    width: auto;
+    font-size: 0.9375rem;
+  }
+  .compare-ledger td strong {
+    font-size: 1.0625rem;
+  }
+  .compare,
+  .details {
+    padding-top: 56px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stamp.is-down {
+    animation: none;
+  }
+}
+
+main {
+  padding-bottom: 96px;
+}

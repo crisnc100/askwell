@@ -340,6 +340,22 @@
       "description": "Square status boxes in /try/: blue for success, red for errors, 2px ink with a ledger-red reason for a refused answer.",
       "html": "<div class=\"ds-notice ds-ok\">Every file passed and your data is loaded.</div><div class=\"ds-notice ds-error\">1 file needs fixing. Nothing was loaded.</div><div class=\"ds-notice ds-refusal\"><strong>The model found no way to answer this from your data.</strong> Check that the data is in your files.</div>",
       "css": ".ds-notice { font-family: var(--sans); margin: 14px 0; padding: 10px 14px; border: 1px solid var(--ink); background: var(--field); color: var(--ink); } .ds-notice.ds-ok { border: 2px solid var(--blue); } .ds-notice.ds-error { border: 2px solid var(--red); color: var(--red); font-weight: 600; } .ds-notice.ds-refusal { border: 2px solid var(--ink); } .ds-notice.ds-refusal strong { color: var(--red); font-weight: 750; }"
+    },
+    {
+      "name": "Measured Statement",
+      "kind": "card",
+      "refersTo": "statement",
+      "description": "Results: the three plain answers as an audited statement, ruled in red, with a MEASURED stamp on the foot.",
+      "html": "<section class=\"ds-statement\"><div class=\"ds-statement-head\">Statement of measured results</div><dl><div class=\"ds-line\"><dt>How often it's right</dt><dd class=\"ds-fig\"><strong>62 of 96</strong> questions it had never seen.</dd><dd>Most questions your data can answer get the right table.</dd></div></dl></section>",
+      "css": ".ds-statement { font-family: var(--sans); border: 2px solid var(--ink); background: var(--field); } .ds-statement-head { padding: 12px 28px 10px; border-bottom: 2px solid var(--red); font-size: 0.75rem; font-weight: 700; font-stretch: 115%; letter-spacing: 0.09em; text-transform: uppercase; } .ds-statement dl { margin: 0; } .ds-line { display: grid; grid-template-columns: 3fr 5fr 5fr; gap: 8px 32px; padding: 22px 28px; border-bottom: 1px solid var(--red); } .ds-line dt { font-size: 0.75rem; font-weight: 700; font-stretch: 115%; letter-spacing: 0.09em; text-transform: uppercase; } .ds-line dd { margin: 0; } .ds-fig strong { display: block; color: var(--red); font-size: 2.5rem; font-weight: 820; font-stretch: 92%; font-variant-numeric: tabular-nums slashed-zero; }"
+    },
+    {
+      "name": "Fold",
+      "kind": "disclosure",
+      "refersTo": "fold-summary",
+      "description": "Results: a native details fold holding the technical record, opening with a one-line plain definition.",
+      "html": "<details class=\"ds-fold\"><summary>Where each figure comes from</summary><p class=\"ds-fold-def\">Held-out questions are questions kept from the builders until the code was frozen.</p></details>",
+      "css": ".ds-fold { font-family: var(--sans); border-top: 2px solid var(--ink); border-bottom: 2px solid var(--ink); } .ds-fold summary { padding: 18px 2px; font-size: 1.1875rem; font-weight: 740; cursor: pointer; list-style: none; } .ds-fold summary:focus-visible { outline: 3px solid var(--blue); outline-offset: 3px; } .ds-fold-def { margin: 0 0 16px; padding-bottom: 12px; border-bottom: 1px solid var(--blue); font-weight: 600; }"
     }
   ],
   "narrative": {
