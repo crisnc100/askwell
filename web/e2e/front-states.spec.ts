@@ -19,7 +19,10 @@ async function open(page: Page, reply: (question: string) => { status?: number; 
     await route.fulfill(reply(question));
   });
   await page.goto("/");
-  await expect(page.locator("#stamp")).toHaveClass(/is-down/);
+  // The recorded answer's stamp lands on a fixed 1.36s timer after load (4 steps of
+  // 340ms), which a busy machine can push past the default 5s; the wait is longer, the
+  // assertion the same.
+  await expect(page.locator("#stamp")).toHaveClass(/is-down/, { timeout: 15_000 });
 }
 
 test("a failed ask after load leaves nothing of the earlier answer on the slip", async ({ page }) => {
