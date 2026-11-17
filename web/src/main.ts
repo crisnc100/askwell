@@ -1,4 +1,5 @@
-import "./style.css";
+import "./tokens.css";
+import "./try.css";
 import {
   api,
   ApiError,
@@ -37,7 +38,7 @@ let notices: string[] = [];
 // using the answer, so a slow, older load never overwrites a newer page or its edits.
 let drawn = 0;
 
-// The workspace link is "/#ws=<id>". A fragment never reaches the server, so the id is
+// The workspace link is "/try/#ws=<id>". A fragment never reaches the server, so the id is
 // not in any access log, and Referrer-Policy keeps it from leaking to other sites.
 function idFromHash(): string | null {
   const match = /(?:^#|&)ws=([0-9a-f]{32})(?:&|$)/.exec(location.hash);
@@ -45,7 +46,7 @@ function idFromHash(): string | null {
 }
 
 function workspaceLink(id: string): string {
-  return `${location.origin}/#ws=${id}`;
+  return `${location.origin}/try/#ws=${id}`;
 }
 
 function reachable(target: Step): boolean {
@@ -90,9 +91,7 @@ function header(): HTMLElement {
   return h(
     "header",
     {},
-    h("p", { class: "brand" }, "Askwell"),
     h("p", { class: "tagline" }, "Ask questions about your own data. See the SQL behind every answer."),
-    h("p", {}, h("a", { attrs: { href: "/results/" } }, "Benchmark results")),
   );
 }
 
@@ -142,7 +141,7 @@ function workspaceBox(): HTMLElement | null {
           }
           status = null;
           useWorkspace(null);
-          history.replaceState(null, "", "/");
+          history.replaceState(null, "", "/try/");
           go("prepare");
         },
       },
@@ -223,7 +222,7 @@ async function preparePage(main: HTMLElement): Promise<void> {
     try {
       status = await api.create(select.value || DEFAULT_TIME_ZONE);
       useWorkspace(status.id);
-      history.replaceState(null, "", `/#ws=${status.id}`);
+      history.replaceState(null, "", `/try/#ws=${status.id}`);
       go("upload");
     } catch (err) {
       start.disabled = false;
@@ -683,7 +682,7 @@ async function start(): Promise<void> {
       step = stepFor(status);
     } catch (err) {
       useWorkspace(null);
-      history.replaceState(null, "", "/");
+      history.replaceState(null, "", "/try/");
       render();
       showError(app.querySelector("main") as HTMLElement, err);
       return;

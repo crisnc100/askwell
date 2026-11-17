@@ -95,7 +95,7 @@ function header(): HTMLElement {
     {},
     h("p", { class: "brand" }, "Askwell"),
     h("p", { class: "tagline" }, "What it would cost to run, and what it could be worth to you."),
-    h("p", {}, h("a", { attrs: { href: "/" } }, "Ask about your own data"), " · ", h("a", { attrs: { href: "/results/" } }, "Benchmark results")),
+    h("p", {}, h("a", { attrs: { href: "/try/" } }, "Ask about your own data"), " · ", h("a", { attrs: { href: "/results/" } }, "Benchmark results")),
   );
 }
 

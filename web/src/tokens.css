@@ -1,0 +1,122 @@
+/* Archivo (SIL Open Font License 1.1, web/public/fonts/Archivo-OFL.txt), subset to Latin.
+   One variable file carries both weight and width, so rank comes from weight, width and
+   case at a few sizes rather than from a second family. */
+@font-face {
+  font-family: "Archivo";
+  src: url("/fonts/archivo-latin-var.woff2") format("woff2");
+  font-weight: 100 900;
+  font-stretch: 62% 125%;
+  font-display: swap;
+}
+
+:root {
+  color-scheme: light;
+  --paper: #e2ebe4;
+  --paper-deep: #d3e0d6;
+  --guilloche: #c3d5c9;
+  --ink: #15181d;
+  --ink-soft: #3c4149;
+  --carbon: #2b2f80;
+  --carbon-soft: #5a5ea6;
+  --red: #a3261d;
+  --blue: #2c5291;
+  --field: #f1f5f1;
+
+  --sans: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+  --rule: 2px solid var(--ink);
+  --gutter: clamp(16px, 4.4vw, 64px);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* A fine wave, repeated, as on cheque stock: it reads as paper, never as content. */
+  --security: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='12' viewBox='0 0 48 12'%3E%3Cpath d='M0 6 C 6 0, 18 0, 24 6 S 42 12, 48 6' fill='none' stroke='%23c3d5c9' stroke-width='0.8'/%3E%3Cpath d='M0 12 C 6 6, 18 6, 24 12 M24 0 C 30 6, 42 6, 48 0' fill='none' stroke='%23cbdcd0' stroke-width='0.6'/%3E%3C/svg%3E");
+
+  font-family: var(--sans);
+  font-size: 100%;
+  color: var(--ink);
+  background: var(--paper);
+  line-height: 1.5;
+  caret-color: var(--red);
+  accent-color: var(--blue);
+  scrollbar-color: var(--ink-soft) var(--paper-deep);
+}
+
+body {
+  margin: 0;
+  background-color: var(--paper);
+  background-image: var(--security);
+  background-size: 48px 12px;
+}
+
+::selection {
+  background: var(--carbon);
+  color: var(--field);
+}
+
+a {
+  color: inherit;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.22em;
+}
+a:hover {
+  text-decoration-thickness: 2px;
+}
+
+:focus-visible {
+  outline: 3px solid var(--blue);
+  outline-offset: 3px;
+}
+
+table,
+output {
+  font-variant-numeric: tabular-nums slashed-zero;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.topbar {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px 32px;
+  padding: 20px var(--gutter) 16px;
+  border-bottom: var(--rule);
+}
+.topbar .brand {
+  font-weight: 800;
+  font-stretch: 112%;
+  font-size: 1.375rem;
+  letter-spacing: 0.01em;
+  text-decoration: none;
+}
+.topbar nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 28px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.topbar nav a {
+  font-size: 0.8125rem;
+  font-weight: 650;
+  font-stretch: 115%;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-decoration: none;
+}
+.topbar nav a:hover,
+.topbar nav a[aria-current="page"] {
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+}

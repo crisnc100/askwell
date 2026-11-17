@@ -4,10 +4,128 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="referrer" content="no-referrer" />
-    <title>Askwell: your data</title>
+    <meta
+      name="description"
+      content="Ask a database a question in plain English. The AI fills in a small form from column names; it never sees your rows and never writes SQL."
+    />
+    <title>Askwell: ask your database, keep the receipt</title>
+    <link rel="preload" href="/fonts/archivo-latin-var.woff2" as="font" type="font/woff2" crossorigin />
   </head>
   <body>
-    <div id="app"></div>
-    <script type="module" src="/src/main.ts"></script>
+    <header class="topbar">
+      <a class="brand" href="/" aria-current="page">Askwell</a>
+      <nav aria-label="Main">
+        <ul>
+          <li><a href="#how">How it works</a></li>
+          <li><a href="/results/">Results</a></li>
+          <li><a href="/try/">Try your data</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main>
+      <section class="hook" aria-labelledby="promise">
+        <h1 id="promise">Ask your database a question. The&nbsp;AI never sees your data.</h1>
+        <p>
+          The AI only fills in a small form from your table and column names. Plain code checks
+          that form, writes the SQL, runs it read-only and hands you the rows with the SQL.
+        </p>
+      </section>
+
+      <section class="slip" id="slip" aria-labelledby="slip-title" data-state="idle">
+        <h2 class="visually-hidden" id="slip-title">Ask the demo database</h2>
+
+        <div class="original">
+          <div class="slip-head">
+            <span>Demo database: field service, made-up data</span>
+            <span class="slip-no">No. <output id="slip-no">0001</output></span>
+          </div>
+
+          <form id="ask" class="ask" autocomplete="off">
+            <label class="label" for="question">You asked</label>
+            <div class="ask-field">
+              <input id="question" name="question" type="text" maxlength="2000" required />
+              <button type="submit" id="ask-button">Ask</button>
+            </div>
+          </form>
+          <div class="starters" id="starters" hidden>
+            <p class="label" id="starters-label">Or pick a question</p>
+            <ul aria-labelledby="starters-label"></ul>
+          </div>
+
+          <ol class="steps" id="steps">
+            <li class="step" data-step="form">
+              <h3 class="label">The form the AI filled in</h3>
+              <p class="step-note">A small form, not SQL: which table, what to count, which filters.</p>
+              <dl class="form-lines" id="form-lines">
+                <div><dt>Table</dt><dd></dd></div>
+                <div><dt>Count</dt><dd></dd></div>
+                <div><dt>Filter</dt><dd></dd></div>
+              </dl>
+            </li>
+            <li class="step" data-step="check">
+              <h3 class="label">The check</h3>
+              <p id="check-text" class="check-text">Plain code checks the form against what this database may show.</p>
+            </li>
+            <li class="step" data-step="sql">
+              <h3 class="label">The SQL, written by code</h3>
+              <pre id="sql"><code></code></pre>
+            </li>
+            <li class="step" data-step="rows">
+              <h3 class="label">The rows</h3>
+              <div class="rows" id="rows"></div>
+            </li>
+          </ol>
+          <p class="slip-error" id="slip-error" role="alert" hidden></p>
+          <p class="visually-hidden" id="announce" aria-live="polite"></p>
+        </div>
+
+        <div class="carbon" aria-labelledby="carbon-title">
+          <h3 class="label carbon-title" id="carbon-title">Carbon copy: what the AI was shown</h3>
+          <p class="carbon-note">Table and column names. Every cell stays empty.</p>
+          <div class="tables" id="carbon-tables"></div>
+          <p class="carbon-also">
+            Also shown: each column's type, a short description, and the allowed labels of
+            category columns such as invoice status. Hidden columns are never shown.
+          </p>
+          <p class="rows-sent">Rows sent to the AI: <strong id="rows-sent">0</strong></p>
+          <div class="stamp" id="stamp" aria-hidden="true"></div>
+        </div>
+      </section>
+
+      <ul class="ledger" aria-label="Measured results">
+        <li>
+          <a href="/results/">Right on <strong>62 of 96</strong> questions it had never seen</a>
+        </li>
+        <li>
+          <a href="/results/">Wrong about <strong>1 answer in 25</strong>, down from 1 in 14</a>
+        </li>
+        <li>
+          <a href="/results/">When it can't answer safely, it says so: it refused <strong>all 72</strong> questions it should have</a>
+        </li>
+      </ul>
+
+      <section class="how" id="how" aria-labelledby="how-title">
+        <h2 id="how-title">How the AI is used, and how it isn't</h2>
+        <ol>
+          <li><strong>You ask</strong> a question in plain English.</li>
+          <li><strong>The AI fills in a small form</strong> from table and column names. It never sees a row of your data.</li>
+          <li><strong>Plain code checks the form</strong> against a list of what the database may show. Hidden columns are not on it.</li>
+          <li><strong>Code writes the SQL</strong> from the form and runs it read-only. The AI never writes SQL.</li>
+          <li><strong>You get the rows and the SQL.</strong> When the question can't be answered safely, it says so instead of guessing.</li>
+        </ol>
+      </section>
+
+      <section class="own" aria-labelledby="own-title">
+        <h2 id="own-title">Try it on your own data</h2>
+        <p>Upload CSV files, fix what the check finds, choose what the AI may see, then ask.</p>
+        <p class="own-links">
+          <a class="go" href="/try/">Try your data</a>
+          <a href="https://github.com/crisnc100/askwell">Read the code on GitHub</a>
+        </p>
+      </section>
+    </main>
+
+    <script type="module" src="/src/front.ts"></script>
   </body>
 </html>

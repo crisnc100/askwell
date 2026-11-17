@@ -1,0 +1,10 @@
+[
+  {"table": "customers", "shown": ["id", "name", "segment", "region", "created_at", "is_active"], "hidden": []},
+  {"table": "invoices", "shown": ["id", "work_order_id", "issued_at", "due_at", "amount", "status", "paid_at"], "hidden": []},
+  {"table": "parts", "shown": ["id", "sku", "name", "category", "unit_cost", "unit_price"], "hidden": []},
+  {"table": "sites", "shown": ["id", "customer_id", "name", "city", "state", "site_type"], "hidden": []},
+  {"table": "technicians", "shown": ["id", "full_name", "skill_level", "home_region", "hourly_rate", "hired_at", "is_active"], "hidden": []},
+  {"table": "users", "shown": ["id", "username", "full_name", "role", "created_at"], "hidden": ["email", "password_hash"]},
+  {"table": "work_order_parts", "shown": ["id", "work_order_id", "part_id", "quantity"], "hidden": []},
+  {"table": "work_orders", "shown": ["id", "site_id", "technician_id", "opened_at", "scheduled_for", "completed_at", "status", "priority", "job_type", "labor_hours"], "hidden": []}
+]
