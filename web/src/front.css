@@ -13,7 +13,7 @@
   grid-template-columns: minmax(0, 7fr) minmax(0, 4fr);
   align-items: end;
   gap: 24px 56px;
-  padding: 28px var(--gutter) 28px;
+  padding: 22px var(--gutter) 24px;
   background-image: var(--security-faint);
   background-size: 48px 16px;
 }
@@ -319,7 +319,7 @@
   font-size: 0.75rem;
 }
 .carbon-note {
-  margin: 12px 0 10px;
+  margin: 10px 0 8px;
   font-weight: 650;
 }
 .tables {
@@ -341,7 +341,7 @@
 .cells {
   display: flex;
   flex-wrap: wrap;
-  gap: 4px 6px;
+  gap: 4px 5px;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -349,7 +349,7 @@
 .cells li {
   display: grid;
   gap: 2px;
-  min-width: 3.5rem;
+  min-width: 3rem;
 }
 .cname {
   font-family: var(--mono);
@@ -412,8 +412,8 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px 20px;
-  margin-top: 12px;
-  padding-top: 10px;
+  margin-top: 10px;
+  padding-top: 8px;
   border-top: 2px solid var(--carbon);
 }
 .rows-sent {
@@ -430,7 +430,7 @@
   margin-left: 4px;
 }
 .carbon-also {
-  margin: 14px 0 0;
+  margin: 12px 0 0;
   font-size: 0.8125rem;
   line-height: 1.45;
 }
@@ -439,7 +439,7 @@
   display: grid;
   justify-items: center;
   margin-right: 6px;
-  padding: 6px 18px 4px;
+  padding: 4px 16px 2px;
   border: 3px solid var(--red);
   outline: 1px solid var(--red);
   outline-offset: 3px;
@@ -459,7 +459,7 @@
   text-transform: uppercase;
 }
 .stamp-value {
-  font-size: 3rem;
+  font-size: 2.625rem;
   font-weight: 880;
   font-stretch: 78%;
   line-height: 0.95;
@@ -501,38 +501,34 @@
   display: none;
 }
 
+.ledger-title {
+  margin: 14px 0 0;
+  padding-bottom: 6px;
+  border-bottom: 2px solid var(--red);
+  color: var(--ink);
+}
 .ledger {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  margin: 0 var(--gutter);
+  margin: 0;
   padding: 0;
   list-style: none;
-  border-bottom: 2px solid var(--red);
 }
 .ledger li {
-  border-left: 1px solid var(--red);
-}
-.ledger li:first-child {
-  border-left: 2px solid var(--ink);
-}
-.ledger li:last-child {
-  border-right: 2px solid var(--ink);
+  border-bottom: 1px solid var(--red);
 }
 .ledger a {
   display: block;
-  height: 100%;
-  padding: 14px 20px 16px;
-  font-size: 1.0625rem;
-  line-height: 1.4;
+  padding: 5px 0;
+  color: var(--ink);
+  font-size: 0.9375rem;
+  line-height: 1.35;
   text-decoration: none;
-  box-sizing: border-box;
 }
 .ledger a:hover {
-  background: var(--field);
   text-decoration: underline;
 }
 .ledger strong {
   font-weight: 820;
+  font-size: 1.0625rem;
   color: var(--red);
 }
 
@@ -660,17 +656,6 @@
   .form-lines > div {
     grid-template-columns: minmax(0, 1fr);
     gap: 2px;
-  }
-  .ledger {
-    grid-template-columns: minmax(0, 1fr);
-  }
-  .ledger li,
-  .ledger li:first-child {
-    border-left: 2px solid var(--ink);
-    border-right: 2px solid var(--ink);
-  }
-  .ledger li + li {
-    border-top: 1px solid var(--ink);
   }
   .how-ledger td {
     font-size: 1rem;

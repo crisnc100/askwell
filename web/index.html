@@ -98,24 +98,24 @@
             <p class="rows-sent">Rows sent to the AI: <strong id="rows-sent">0</strong></p>
             <div class="stamp stamp-carbon" id="stamp" aria-hidden="true"></div>
           </div>
+          <h3 class="label ledger-title" id="ledger-title">Measured results</h3>
+          <ul class="ledger" aria-labelledby="ledger-title">
+            <li>
+              <a href="/results/">Right on <strong>62 of 96</strong> questions it had never seen</a>
+            </li>
+            <li>
+              <a href="/results/">Wrong about <strong>1 answer in 25</strong>, down from 1 in 14</a>
+            </li>
+            <li>
+              <a href="/results/">When it can't answer safely, it says so: it refused <strong>all 72</strong> questions it should have</a>
+            </li>
+          </ul>
           <p class="carbon-also">
             Also shown: each column's type, a short description, and the allowed labels of
             category columns such as invoice status.
           </p>
         </div>
       </section>
-
-      <ul class="ledger" aria-label="Measured results">
-        <li>
-          <a href="/results/">Right on <strong>62 of 96</strong> questions it had never seen</a>
-        </li>
-        <li>
-          <a href="/results/">Wrong about <strong>1 answer in 25</strong>, down from 1 in 14</a>
-        </li>
-        <li>
-          <a href="/results/">When it can't answer safely, it says so: it refused <strong>all 72</strong> questions it should have</a>
-        </li>
-      </ul>
 
       <section class="how" id="how" aria-labelledby="how-title">
         <h2 id="how-title">How the AI is used, and how it isn't</h2>
@@ -126,7 +126,7 @@
           <tbody>
             <tr><td>Reads your question in plain English.</td><td>Never sees a row of your data.</td></tr>
             <tr><td>Fills in a small form: which table, what to count, which filters.</td><td>Never writes SQL. Plain code writes it from the form and runs it read-only.</td></tr>
-            <tr><td>Works only from the table and column names it is shown.</td><td>Never sees hidden columns.</td></tr>
+            <tr><td>Works only from what it is shown: table and column names, each column's type and short description, and category labels.</td><td>Never sees hidden columns.</td></tr>
             <tr><td>Gets one more try when the check turns its form down.</td><td>Never guesses when unsure. It says it can't answer.</td></tr>
           </tbody>
         </table>
