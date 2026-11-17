@@ -3,6 +3,7 @@ import "./front.css";
 import { ApiError, demo, type Answer } from "./api";
 import { append, clear, h } from "./dom";
 import schema from "./demo-schema.json";
+import recorded from "./recorded-answer.json";
 
 // Workspace links handed out before the app moved to /try/ were "/#ws=<id>"; they keep
 // working by forwarding, with the id still only in the fragment.
@@ -23,18 +24,25 @@ const starters = $<HTMLElement>("starters");
 const formLines = $<HTMLElement>("form-lines");
 const checkText = $<HTMLElement>("check-text");
 const sql = $<HTMLElement>("sql");
+const sqlNote = $<HTMLElement>("sql-note");
 const rows = $<HTMLElement>("rows");
-const stamp = $<HTMLElement>("stamp");
+const stamps = Array.from(document.querySelectorAll<HTMLElement>(".stamp"));
 const error = $<HTMLElement>("slip-error");
 const announce = $<HTMLElement>("announce");
 const slipNo = $<HTMLOutputElement>("slip-no");
-const carbon = $<HTMLElement>("carbon-tables");
+const carbonTables = $<HTMLElement>("carbon-tables");
+const carbonHidden = $<HTMLElement>("carbon-hidden");
+const carbonRest = $<HTMLDetailsElement>("carbon-rest");
+const moreButton = $<HTMLButtonElement>("more-starters-toggle");
+const moreStarters = $<HTMLElement>("more-starters");
 const steps = Array.from(document.querySelectorAll<HTMLElement>("#steps .step"));
 
 const STEP_MS = 340;
 const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 let timers: number[] = [];
 let asked = 0;
+const VISIBLE_STARTERS = 3;
+const REFUSAL_STARTER = "Delete all void invoices.";
 
 const AGG: Record<string, string> = {
   count: "Count",
@@ -189,46 +197,67 @@ function namedColumns(intent: unknown): Set<string> {
   return named;
 }
 
-function drawCarbon(): void {
-  for (const table of schema) {
-    append(
-      carbon,
+function columnCells(table: string, columns: string[]): HTMLElement {
+  return h(
+    "ul",
+    { class: "cells", attrs: { "aria-label": `${table} columns` } },
+    ...columns.map((column) =>
       h(
-        "div",
-        { class: "ctable", attrs: { "data-table": table.table } },
-        h("p", { class: "ctable-name" }, table.table),
-        h(
-          "ul",
-          { class: "cells", attrs: { "aria-label": `${table.table} columns` } },
-          ...table.shown.map((column) =>
-            h(
-              "li",
-              { attrs: { "data-column": `${table.table}.${column}` } },
-              h("span", { class: "cname" }, column),
-              h("span", { class: "cell", attrs: { "aria-label": "empty" } }),
-            ),
-          ),
-          ...table.hidden.map((column) =>
-            h(
-              "li",
-              { class: "is-hidden" },
-              h("span", { class: "cname" }, column),
-              h("span", { class: "cell" }, "hidden"),
-            ),
-          ),
-        ),
+        "li",
+        { attrs: { "data-column": `${table}.${column}` } },
+        h("span", { class: "cname" }, column),
+        h("span", { class: "cell", attrs: { "aria-label": "empty" } }),
       ),
-    );
-  }
+    ),
+  );
 }
 
-function markCarbon(named: Set<string>): void {
-  for (const el of carbon.querySelectorAll<HTMLElement>("[data-table]")) {
-    el.classList.toggle("is-used", named.has(`${el.dataset.table}.`));
+function tableBlock(table: (typeof schema)[number], named: Set<string>): HTMLElement {
+  const block = h(
+    "div",
+    { class: "ctable", attrs: { "data-table": table.table } },
+    h("p", { class: "ctable-name" }, table.table),
+    columnCells(table.table, table.shown),
+  );
+  block.classList.toggle("is-used", named.has(`${table.table}.`));
+  for (const li of block.querySelectorAll<HTMLElement>("[data-column]")) {
+    li.classList.toggle("is-used", named.has(li.dataset.column ?? ""));
   }
-  for (const el of carbon.querySelectorAll<HTMLElement>("[data-column]")) {
-    el.classList.toggle("is-used", named.has(el.dataset.column ?? ""));
-  }
+  return block;
+}
+
+// The carbon opens on the tables the form named; every other table the AI was shown
+// folds into one line, and the hidden columns always stay in view.
+function drawCarbon(named: Set<string>): void {
+  const used = schema.filter((t) => named.has(`${t.table}.`));
+  const rest = schema.filter((t) => !named.has(`${t.table}.`));
+  clear(carbonTables);
+  if (!used.length) carbonTables.appendChild(h("p", { class: "carbon-none" }, "The form named no table."));
+  for (const table of used) carbonTables.appendChild(tableBlock(table, named));
+
+  clear(carbonHidden);
+  append(
+    carbonHidden,
+    h("p", { class: "ctable-name" }, "Never shown"),
+    h(
+      "ul",
+      { class: "cells", attrs: { "aria-label": "Hidden columns" } },
+      ...schema.flatMap((t) =>
+        t.hidden.map((column) =>
+          h("li", { class: "is-hidden" }, h("span", { class: "cname" }, `${t.table}.${column}`), h("span", { class: "cell" }, "hidden")),
+        ),
+      ),
+    ),
+  );
+
+  clear(carbonRest);
+  carbonRest.hidden = rest.length === 0;
+  const others = used.length ? `${rest.length} other ${rest.length === 1 ? "table" : "tables"}` : `${rest.length} tables`;
+  append(
+    carbonRest,
+    h("summary", {}, `${others}: names only`),
+    h("div", { class: "tables" }, ...rest.map((table) => tableBlock(table, named))),
+  );
 }
 
 function cellText(value: unknown): string {
@@ -242,6 +271,51 @@ function cellText(value: unknown): string {
 function sentence(text: string): string {
   const trimmed = text.trim().replace(/\.$/, "");
   return `${trimmed.charAt(0).toUpperCase()}${trimmed.slice(1)}.`;
+}
+
+function literal(value: unknown): string {
+  if (value === null || value === undefined) return "NULL";
+  if (typeof value === "number" || typeof value === "boolean") return String(value).toUpperCase();
+  if (typeof value === "string") {
+    const shown = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}$/.test(value) ? value.replace("T", " ") : value;
+    return `'${shown.replace(/'/g, "''")}'`;
+  }
+  return JSON.stringify(value);
+}
+
+const CAST = /::(?:TIMESTAMP WITHOUT TIME ZONE|TIMESTAMP WITH TIME ZONE|[A-Z]+)/;
+const PARAM = new RegExp(`%\\((\\w+)\\)s(?:${CAST.source})?`, "g");
+const CLAUSE = /\s+(FROM|WHERE|GROUP BY|HAVING|ORDER BY|LIMIT|UNION|(?:LEFT OUTER |LEFT |INNER )?JOIN)\b/g;
+
+// For reading only: the query runs with its values passed as parameters and its short
+// table aliases. Here the values are written in and each alias is swapped for its
+// table's name, wherever one alias always means one table.
+function readableSql(text: string, params: Record<string, unknown> | null): string {
+  let out = text.replace(PARAM, (match, name: string) => (params && name in params ? literal(params[name]) : match));
+  const tablesOf = new Map<string, Set<string>>();
+  const aliasesOf = new Map<string, Set<string>>();
+  for (const [, table, alias] of out.matchAll(/\b([a-z_][a-z0-9_]*) AS (t\d+)\b/g)) {
+    tablesOf.set(alias, (tablesOf.get(alias) ?? new Set()).add(table));
+    aliasesOf.set(table, (aliasesOf.get(table) ?? new Set()).add(alias));
+  }
+  for (const [alias, tables] of tablesOf) {
+    const [table] = tables;
+    if (tables.size !== 1 || aliasesOf.get(table)?.size !== 1) continue;
+    out = out.replace(new RegExp(`\\b${table} AS ${alias}\\b`, "g"), table).replace(new RegExp(`\\b${alias}\\.`, "g"), `${table}.`);
+  }
+  return out.replace(/\s+/g, " ").replace(CLAUSE, "\n$1").trim();
+}
+
+function stampWith(answered: boolean, value: string): void {
+  for (const stamp of stamps) {
+    clear(stamp);
+    append(
+      stamp,
+      h("span", { class: "stamp-word" }, answered ? "Checked" : "Not answered"),
+      h("span", { class: "stamp-value" }, value),
+    );
+    stamp.classList.toggle("is-refused", !answered);
+  }
 }
 
 function fill(answer: Answer): void {
@@ -264,12 +338,13 @@ function fill(answer: Answer): void {
     checkText.textContent = `Failed${issues.length ? `: ${sentence(issues[0].message)}` : "."} No query was run.`;
   }
 
-  const code = h("code", {}, answer.sql ?? "No SQL was written.");
   clear(sql);
-  sql.appendChild(code);
+  sql.appendChild(h("code", {}, answer.sql === null ? "No SQL was written." : readableSql(answer.sql, answer.params)));
+  sqlNote.hidden = answer.sql === null;
 
   clear(rows);
-  if (answer.refusal || answer.sql === null) {
+  const answered = !answer.refusal && answer.sql !== null;
+  if (!answered) {
     rows.appendChild(h("p", { class: "no-rows" }, "No rows. It said so instead of guessing."));
   } else {
     const numeric = answer.columns.map((_, i) => answer.rows.every((row) => row[i] === null || typeof row[i] === "number"));
@@ -294,27 +369,26 @@ function fill(answer: Answer): void {
     if (answer.truncated) rows.appendChild(h("p", { class: "step-note" }, "Only the first rows are shown."));
   }
 
-  clear(stamp);
-  const answered = !answer.refusal && answer.sql !== null;
   const count = answer.rows.length;
   const single = answered && count === 1 && answer.columns.length === 1 ? cellText(answer.rows[0][0]) : null;
-  append(
-    stamp,
-    h("span", { class: "stamp-word" }, answered ? "Checked" : "Not answered"),
-    h("span", { class: "stamp-sub" }, answered ? (single ?? `${count} ${count === 1 ? "row" : "rows"}`) : "Said so"),
-  );
-  stamp.classList.toggle("is-refused", !answered);
-  markCarbon(namedColumns(answer.intent));
+  stampWith(answered, answered ? (single ?? `${count} ${count === 1 ? "row" : "rows"}`) : "Said so");
+  drawCarbon(namedColumns(answer.intent));
   announce.textContent = answered
     ? `Answered and checked: ${count} ${count === 1 ? "row" : "rows"}. Rows sent to the AI: 0.`
     : `Not answered: ${answer.refusal ?? "the form failed the check"}.`;
+}
+
+// Once down, the stamp stays down: dropping the finished animation keeps a resize or a
+// print from replaying it.
+for (const stamp of stamps) {
+  stamp.addEventListener("animationend", () => stamp.classList.add("is-set"));
 }
 
 function reset(): void {
   for (const id of timers) window.clearTimeout(id);
   timers = [];
   for (const step of steps) step.dataset.filled = "false";
-  stamp.classList.remove("is-down");
+  for (const stamp of stamps) stamp.classList.remove("is-down", "is-set");
   error.hidden = true;
 }
 
@@ -324,13 +398,13 @@ function reveal(): void {
   steps.forEach((step, i) => {
     timers.push(window.setTimeout(() => (step.dataset.filled = "true"), gap * i));
   });
-  timers.push(window.setTimeout(() => stamp.classList.add("is-down"), gap * steps.length));
+  timers.push(window.setTimeout(() => stamps.forEach((s) => s.classList.add("is-down")), gap * steps.length));
 }
 
 function setBusy(busy: boolean): void {
   askButton.disabled = busy;
   slip.setAttribute("aria-busy", String(busy));
-  for (const button of starters.querySelectorAll("button")) button.disabled = busy;
+  for (const button of starters.querySelectorAll<HTMLButtonElement>("li button")) button.disabled = busy;
 }
 
 function failure(err: unknown): string {
@@ -341,18 +415,21 @@ function failure(err: unknown): string {
   return "Something went wrong. Try again in a minute.";
 }
 
+function show(answer: Answer): void {
+  asked += 1;
+  slipNo.value = String(asked).padStart(4, "0");
+  fill(answer);
+  slip.dataset.state = "answered";
+  reveal();
+}
+
 async function ask(question: string): Promise<void> {
   if (!question || askButton.disabled) return;
   setBusy(true);
   reset();
-  asked += 1;
-  slipNo.value = String(asked).padStart(4, "0");
   slip.dataset.state = "asking";
   try {
-    const answer = await demo.ask(question);
-    fill(answer);
-    slip.dataset.state = "answered";
-    reveal();
+    show(await demo.ask(question));
   } catch (err) {
     slip.dataset.state = "idle";
     error.textContent = failure(err);
@@ -367,6 +444,22 @@ form.addEventListener("submit", (event) => {
   void ask(input.value.trim());
 });
 
+moreButton.addEventListener("click", () => {
+  const open = moreStarters.hidden;
+  moreStarters.hidden = !open;
+  moreButton.setAttribute("aria-expanded", String(open));
+  moreButton.textContent = open ? "Fewer questions" : "More questions";
+});
+
+function starterItem(question: string): HTMLElement {
+  const button = h("button", { attrs: { type: "button" } }, question);
+  button.addEventListener("click", () => {
+    input.value = question;
+    void ask(question);
+  });
+  return h("li", {}, button);
+}
+
 async function loadStarters(): Promise<void> {
   let questions: string[];
   try {
@@ -376,19 +469,19 @@ async function loadStarters(): Promise<void> {
     return;
   }
   if (!questions.length) return;
-  if (!input.value) input.value = questions[0];
-  const list = starters.querySelector("ul") as HTMLUListElement;
-  for (const question of questions) {
-    const button = h("button", { attrs: { type: "button" } }, question);
-    button.addEventListener("click", () => {
-      input.value = question;
-      void ask(question);
-    });
-    list.appendChild(h("li", {}, button));
-  }
+  // The refusal example stays in view: saying no is part of what the demo shows.
+  const first = questions.slice(0, VISIBLE_STARTERS);
+  if (questions.includes(REFUSAL_STARTER) && !first.includes(REFUSAL_STARTER)) first.push(REFUSAL_STARTER);
+  const later = questions.filter((q) => !first.includes(q));
+  (starters.querySelector("ul") as HTMLUListElement).append(...first.map(starterItem));
+  (moreStarters.querySelector("ul") as HTMLUListElement).append(...later.map(starterItem));
+  moreButton.hidden = later.length === 0;
   starters.hidden = false;
   setBusy(askButton.disabled);
 }
 
-drawCarbon();
+// The first starter's recorded answer ships with the page, so a visitor sees a whole
+// answered slip before asking anything, at no cost to the live-answer budget.
+input.value = recorded.question;
+show(recorded as unknown as Answer);
 void loadStarters();

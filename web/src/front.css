@@ -13,11 +13,13 @@
   grid-template-columns: minmax(0, 7fr) minmax(0, 4fr);
   align-items: end;
   gap: 24px 56px;
-  padding: 36px var(--gutter) 0;
+  padding: 28px var(--gutter) 28px;
+  background-image: var(--security-faint);
+  background-size: 48px 16px;
 }
 .hook h1 {
   margin: 0;
-  font-size: clamp(2.25rem, 1.1rem + 3.7vw, 4.25rem);
+  font-size: clamp(2.25rem, 1.1rem + 3.4vw, 3.875rem);
   font-weight: 780;
   font-stretch: 104%;
   line-height: 1.02;
@@ -35,7 +37,7 @@
 .slip {
   display: grid;
   grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
-  margin: 32px var(--gutter) 0;
+  margin: 0 var(--gutter);
   border: var(--rule);
 }
 
@@ -44,14 +46,14 @@
   padding: 0 28px 28px;
   background-color: var(--field);
   background-image: var(--security);
-  background-size: 48px 12px;
+  background-size: 42px 14px;
 }
 .slip-head {
   display: flex;
   justify-content: space-between;
   gap: 16px;
-  margin: 0 -28px 20px;
-  padding: 10px 28px;
+  margin: 0 -28px 16px;
+  padding: 9px 28px;
   border-bottom: 1px solid var(--ink);
   font-size: 0.75rem;
   font-weight: 650;
@@ -150,13 +152,30 @@
   cursor: progress;
 }
 
+.more {
+  margin-top: 6px;
+  padding: 3px 0;
+  border: 0;
+  background: none;
+  color: var(--blue);
+  font: inherit;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  font-stretch: 112%;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-decoration: underline;
+  text-underline-offset: 0.25em;
+  cursor: pointer;
+}
+
 .steps {
-  margin: 22px 0 0;
+  margin: 16px 0 0;
   padding: 0;
   list-style: none;
 }
 .step {
-  padding: 14px 0 6px;
+  padding: 10px 0 4px;
   border-top: 1px solid var(--ink);
 }
 .step-note {
@@ -196,7 +215,7 @@
   display: grid;
   grid-template-columns: 9.5rem minmax(0, 1fr);
   gap: 12px;
-  padding: 6px 0;
+  padding: 4px 0;
   border-bottom: 1px solid var(--blue);
   min-height: 1.5em;
 }
@@ -277,24 +296,39 @@
 .carbon {
   position: relative;
   min-width: 0;
-  padding: 0 28px 28px;
-  border-left: 2px dashed var(--ink);
+  padding: 0 28px 24px 30px;
   background: #e3e6ef;
   color: var(--carbon);
 }
+/* The perforation: punched holes in flat ink down the line where the carbon tears off. */
+.carbon::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -8px;
+  width: 14px;
+  background-image: var(--holes-v);
+  background-size: 14px 16px;
+  background-position: 0 4px;
+}
 .carbon-title {
-  margin: 0 -28px;
-  padding: 10px 28px;
+  margin: 0 -28px 0 -30px;
+  padding: 9px 28px 9px 30px;
   border-bottom: 1px solid var(--carbon);
   font-size: 0.75rem;
 }
 .carbon-note {
-  margin: 14px 0 12px;
+  margin: 12px 0 10px;
   font-weight: 650;
 }
 .tables {
   display: grid;
   gap: 10px;
+}
+.carbon-none {
+  margin: 0;
+  font-size: 0.875rem;
 }
 .ctable-name {
   margin: 0 0 3px;
@@ -327,6 +361,12 @@
   height: 14px;
   border: 1px dashed var(--carbon-soft);
 }
+.hidden-row {
+  margin-top: 12px;
+}
+.hidden-row .ctable-name {
+  color: var(--red);
+}
 .is-hidden .cname {
   text-decoration: line-through;
 }
@@ -350,15 +390,34 @@
 .cells li.is-used .cell {
   border-color: var(--carbon);
 }
-.carbon-also {
-  margin: 14px 0 0;
-  font-size: 0.8125rem;
-  line-height: 1.45;
+.carbon-rest {
+  margin-top: 12px;
+  border-top: 1px dashed var(--carbon);
 }
-.rows-sent {
-  margin: 18px 0 0;
+.carbon-rest summary {
+  padding: 6px 0;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+.carbon-rest summary::marker {
+  color: var(--carbon);
+}
+.carbon-rest .tables {
+  padding: 4px 0 6px;
+}
+.carbon-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 20px;
+  margin-top: 12px;
   padding-top: 10px;
   border-top: 2px solid var(--carbon);
+}
+.rows-sent {
+  margin: 0;
   font-weight: 700;
   font-stretch: 108%;
 }
@@ -370,14 +429,17 @@
   vertical-align: -0.12em;
   margin-left: 4px;
 }
+.carbon-also {
+  margin: 14px 0 0;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+}
 
 .stamp {
-  position: absolute;
-  right: 26px;
-  bottom: 24px;
   display: grid;
   justify-items: center;
-  padding: 8px 16px 6px;
+  margin-right: 6px;
+  padding: 6px 18px 4px;
   border: 3px solid var(--red);
   outline: 1px solid var(--red);
   outline-offset: 3px;
@@ -390,23 +452,30 @@
   mask-size: 160px 80px;
 }
 .stamp-word {
-  font-size: 1.5rem;
-  font-weight: 860;
-  font-stretch: 75%;
-  letter-spacing: 0.12em;
-  line-height: 1.05;
+  font-size: 0.9375rem;
+  font-weight: 820;
+  font-stretch: 90%;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
 }
-.stamp-sub {
-  font-size: 1rem;
-  font-weight: 750;
-  font-stretch: 85%;
-  letter-spacing: 0.06em;
+.stamp-value {
+  font-size: 3rem;
+  font-weight: 880;
+  font-stretch: 78%;
+  line-height: 0.95;
+  letter-spacing: 0.01em;
   text-transform: uppercase;
+  font-variant-numeric: tabular-nums slashed-zero;
+}
+.stamp.is-refused .stamp-value {
+  font-size: 1.75rem;
 }
 .stamp.is-down {
   opacity: 0.94;
   animation: stamp 300ms var(--ease-out) both;
+}
+.stamp.is-set {
+  animation: none;
 }
 @keyframes stamp {
   from {
@@ -418,6 +487,19 @@
     transform: rotate(-6deg) scale(1);
   }
 }
+.rows-with-stamp {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 28px;
+}
+.rows-with-stamp .rows {
+  flex: 1 1 60%;
+  min-width: 0;
+}
+.stamp-rows {
+  display: none;
+}
 
 .ledger {
   display: grid;
@@ -425,10 +507,10 @@
   margin: 0 var(--gutter);
   padding: 0;
   list-style: none;
-  border-bottom: var(--rule);
+  border-bottom: 2px solid var(--red);
 }
 .ledger li {
-  border-left: 1px solid var(--ink);
+  border-left: 1px solid var(--red);
 }
 .ledger li:first-child {
   border-left: 2px solid var(--ink);
@@ -468,29 +550,36 @@
   letter-spacing: -0.01em;
   line-height: 1.15;
 }
-.how ol {
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 0 24px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  counter-reset: how;
+.how-ledger {
+  width: 100%;
+  max-width: 1100px;
+  border-collapse: collapse;
 }
-.how li {
-  counter-increment: how;
-  padding-top: 10px;
-  border-top: var(--rule);
-  font-size: 1rem;
+.how-ledger th {
+  padding: 0 24px 8px 0;
+  border-bottom: 2px solid var(--red);
+  text-align: left;
+  font-size: 0.8125rem;
+  font-weight: 750;
+  font-stretch: 112%;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.how-ledger td {
+  width: 50%;
+  padding: 10px 24px 10px 0;
+  border-bottom: 1px solid var(--red);
+  vertical-align: top;
+  font-size: 1.0625rem;
   line-height: 1.45;
 }
-.how li::before {
-  content: counter(how);
-  display: block;
-  margin-bottom: 6px;
-  font-weight: 820;
-  font-stretch: 112%;
-  color: var(--red);
+.how-ledger th + th,
+.how-ledger td + td {
+  padding-left: 24px;
+  border-left: 1px solid var(--red);
+}
+.how-ledger td + td {
+  font-weight: 650;
 }
 
 .own {
@@ -512,13 +601,6 @@
   margin: 0;
 }
 
-@media (max-width: 1100px) {
-  .how ol {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 20px 24px;
-  }
-}
-
 @media (max-width: 860px) {
   .hook {
     grid-template-columns: minmax(0, 1fr);
@@ -531,15 +613,37 @@
   .carbon {
     padding: 0 18px 22px;
   }
-  .slip-head,
-  .carbon-title {
-    margin: 0 -18px 18px;
+  .slip-head {
+    margin: 0 -18px 16px;
     padding: 10px 18px;
   }
-  .carbon {
-    border-left: 0;
-    border-top: 2px dashed var(--ink);
-    padding-bottom: 120px;
+  .carbon::before {
+    top: -8px;
+    right: 0;
+    bottom: auto;
+    left: 0;
+    width: auto;
+    height: 14px;
+    background-image: var(--holes-h);
+    background-size: 16px 14px;
+    background-position: 4px 0;
+  }
+  .carbon-title {
+    margin: 0 -18px;
+    padding: 12px 18px 10px;
+  }
+  .stamp-carbon {
+    display: none;
+  }
+  .stamp-rows {
+    display: grid;
+    margin: 6px 8px 6px 8px;
+  }
+  .rows-with-stamp .rows {
+    flex: 1 1 140px;
+  }
+  .answer-rows {
+    min-width: 0;
   }
   .ask-field {
     flex-wrap: wrap;
@@ -568,8 +672,12 @@
   .ledger li + li {
     border-top: 1px solid var(--ink);
   }
-  .how ol {
-    grid-template-columns: minmax(0, 1fr);
+  .how-ledger td {
+    font-size: 1rem;
+  }
+  .how-ledger th + th,
+  .how-ledger td + td {
+    padding-left: 14px;
   }
   .how,
   .own {

@@ -51,6 +51,10 @@
           <div class="starters" id="starters" hidden>
             <p class="label" id="starters-label">Or pick a question</p>
             <ul aria-labelledby="starters-label"></ul>
+            <div id="more-starters" hidden>
+              <ul aria-label="More questions"></ul>
+            </div>
+            <button type="button" class="more" id="more-starters-toggle" aria-expanded="false" aria-controls="more-starters" hidden>More questions</button>
           </div>
 
           <ol class="steps" id="steps">
@@ -70,10 +74,14 @@
             <li class="step" data-step="sql">
               <h3 class="label">The SQL, written by code</h3>
               <pre id="sql"><code></code></pre>
+              <p class="step-note" id="sql-note">Shown with its values written in, for reading. It runs with them passed separately.</p>
             </li>
             <li class="step" data-step="rows">
               <h3 class="label">The rows</h3>
-              <div class="rows" id="rows"></div>
+              <div class="rows-with-stamp">
+                <div class="rows" id="rows"></div>
+                <div class="stamp stamp-rows" aria-hidden="true"></div>
+              </div>
             </li>
           </ol>
           <p class="slip-error" id="slip-error" role="alert" hidden></p>
@@ -84,12 +92,16 @@
           <h3 class="label carbon-title" id="carbon-title">Carbon copy: what the AI was shown</h3>
           <p class="carbon-note">Table and column names. Every cell stays empty.</p>
           <div class="tables" id="carbon-tables"></div>
+          <div class="ctable hidden-row" id="carbon-hidden"></div>
+          <details class="carbon-rest" id="carbon-rest"></details>
+          <div class="carbon-foot">
+            <p class="rows-sent">Rows sent to the AI: <strong id="rows-sent">0</strong></p>
+            <div class="stamp stamp-carbon" id="stamp" aria-hidden="true"></div>
+          </div>
           <p class="carbon-also">
             Also shown: each column's type, a short description, and the allowed labels of
-            category columns such as invoice status. Hidden columns are never shown.
+            category columns such as invoice status.
           </p>
-          <p class="rows-sent">Rows sent to the AI: <strong id="rows-sent">0</strong></p>
-          <div class="stamp" id="stamp" aria-hidden="true"></div>
         </div>
       </section>
 
@@ -107,13 +119,17 @@
 
       <section class="how" id="how" aria-labelledby="how-title">
         <h2 id="how-title">How the AI is used, and how it isn't</h2>
-        <ol>
-          <li><strong>You ask</strong> a question in plain English.</li>
-          <li><strong>The AI fills in a small form</strong> from table and column names. It never sees a row of your data.</li>
-          <li><strong>Plain code checks the form</strong> against a list of what the database may show. Hidden columns are not on it.</li>
-          <li><strong>Code writes the SQL</strong> from the form and runs it read-only. The AI never writes SQL.</li>
-          <li><strong>You get the rows and the SQL.</strong> When the question can't be answered safely, it says so instead of guessing.</li>
-        </ol>
+        <table class="how-ledger">
+          <thead>
+            <tr><th scope="col">What the AI does</th><th scope="col">What it never does</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Reads your question in plain English.</td><td>Never sees a row of your data.</td></tr>
+            <tr><td>Fills in a small form: which table, what to count, which filters.</td><td>Never writes SQL. Plain code writes it from the form and runs it read-only.</td></tr>
+            <tr><td>Works only from the table and column names it is shown.</td><td>Never sees hidden columns.</td></tr>
+            <tr><td>Gets one more try when the check turns its form down.</td><td>Never guesses when unsure. It says it can't answer.</td></tr>
+          </tbody>
+        </table>
       </section>
 
       <section class="own" aria-labelledby="own-title">
