@@ -27,8 +27,9 @@
       <section class="hook" aria-labelledby="promise">
         <h1 id="promise">Ask your database a question. The&nbsp;AI never sees your data.</h1>
         <p>
-          The AI only fills in a small form from your table and column names. Plain code checks
-          that form, writes the SQL, runs it read-only and hands you the rows with the SQL.
+          The AI works out what your question means: which table, what to count, which filters
+          and values. Plain code checks that work, writes the SQL, runs it read-only and hands
+          you the rows with the SQL.
         </p>
       </section>
 
@@ -59,8 +60,8 @@
 
           <ol class="steps" id="steps">
             <li class="step" data-step="form">
-              <h3 class="label">The form the AI filled in</h3>
-              <p class="step-note">A small form, not SQL: which table, what to count, which filters.</p>
+              <h3 class="label">What the AI understood</h3>
+              <p class="step-note">Your question, turned into a small form that code can check. Not SQL.</p>
               <dl class="form-lines" id="form-lines">
                 <div><dt>Table</dt><dd></dd></div>
                 <div><dt>Count</dt><dd></dd></div>
@@ -104,10 +105,10 @@
               <a href="/results/">Right on <strong>62 of 96</strong> questions it had never seen</a>
             </li>
             <li>
-              <a href="/results/">Wrong about <strong>1 answer in 25</strong>, down from 1 in 14</a>
+              <a href="/results/">Wrong about <strong>1 answer in 24</strong>, down from 1 in 14</a>
             </li>
             <li>
-              <a href="/results/">When it can't answer safely, it says so: it refused <strong>all 72</strong> questions it should have</a>
+              <a href="/results/">When it can't answer safely, it says so: it refused <strong>all 24</strong> questions it should have, in every run</a>
             </li>
           </ul>
           <p class="carbon-also">
@@ -118,16 +119,21 @@
       </section>
 
       <section class="how" id="how" aria-labelledby="how-title">
-        <h2 id="how-title">How the AI is used, and how it isn't</h2>
+        <h2 id="how-title">Why the AI only fills in a form</h2>
+        <p class="how-intro">
+          Understanding a question is the hard part, and that is the AI's job. Writing and
+          running the query has to be exact, so plain code does it. That split is why every
+          answer can be checked, and why it says so when it can't answer safely.
+        </p>
         <table class="how-ledger">
           <thead>
             <tr><th scope="col">What the AI does</th><th scope="col">What it never does</th></tr>
           </thead>
           <tbody>
-            <tr><td>Reads your question in plain English.</td><td>Never sees a row of your data.</td></tr>
-            <tr><td>Fills in a small form: which table, what to count, which filters.</td><td>Never writes SQL. Plain code writes it from the form and runs it read-only.</td></tr>
+            <tr><td>Understands a question in your own words.</td><td>Never sees a row of your data.</td></tr>
+            <tr><td>Maps your words onto your tables, columns and values: “still unpaid” becomes status = unpaid.</td><td>Never writes SQL. Plain code writes it from the form and runs it read-only.</td></tr>
             <tr><td>Works only from what it is shown: table and column names, each column's type and short description, and category labels.</td><td>Never sees hidden columns.</td></tr>
-            <tr><td>Gets one more try when the check turns its form down.</td><td>Never guesses when unsure. It says it can't answer.</td></tr>
+            <tr><td>Tries once more, with the check's reasons, when the check turns its form down.</td><td>Never guesses when unsure. It says it can't answer.</td></tr>
           </tbody>
         </table>
       </section>

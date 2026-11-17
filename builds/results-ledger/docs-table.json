@@ -1,0 +1,81 @@
+{
+ "rows": [
+  {
+   "behavior": "Results page shows three plain answers, a comparison and folds, with figures computed from the reports",
+   "files": [
+    "web/results/index.html",
+    "web/src/results.ts",
+    "web/src/results.css",
+    "web/e2e/results.spec.ts",
+    "web/e2e/results-plain.spec.ts",
+    "web/e2e/results-gate.spec.ts",
+    "web/e2e/results-status.spec.ts"
+   ],
+   "docs": [
+    {
+     "path": "README.md",
+     "claims": [
+      {
+       "claim": "The Results page shows how often Askwell is right, confidently wrong and what it does when unsure",
+       "at": "web/src/results.ts:262"
+      },
+      {
+       "claim": "It sits beside a baseline where the model writes SQL",
+       "at": "web/src/results.ts:89"
+      },
+      {
+       "claim": "The page's last fold draws every report from its JSON file",
+       "at": "web/src/results.ts:810"
+      },
+      {
+       "claim": "The page links each schema's triage file",
+       "at": "web/src/results.ts:753"
+      }
+     ]
+    },
+    {
+     "path": "DESIGN.md",
+     "claims": [
+      {
+       "claim": "Statement columns are 3fr / 5fr / 5fr",
+       "at": "web/src/results.css:69"
+      },
+      {
+       "claim": "Figure weight 820, width 92%, clamp 1.75-2.5rem",
+       "at": "web/src/results.css:89"
+      },
+      {
+       "claim": "MEASURED stamp over the number of runs",
+       "at": "web/src/results.ts:312"
+      },
+      {
+       "claim": "Columns stack at 860px",
+       "at": "web/src/results.css:452"
+      },
+      {
+       "claim": "Folds are native details elements",
+       "at": "web/src/results.ts:437"
+      },
+      {
+       "claim": "Wide tables scroll inside their own box",
+       "at": "web/src/results.css:312"
+      },
+      {
+       "claim": "Override sits in a red notice",
+       "at": "web/src/results.css:395"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "behavior": "Front page ledger figures corrected",
+   "files": [
+    "web/index.html",
+    "web/e2e/front.spec.ts",
+    "web/e2e/front-states.spec.ts"
+   ],
+   "none": "Figures live in the page text and PRODUCT.md, which is untouchable; no doc describes them."
+  }
+ ]
+}

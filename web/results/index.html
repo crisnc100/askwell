@@ -4,10 +4,40 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="referrer" content="no-referrer" />
-    <title>Askwell: benchmark results</title>
+    <meta
+      name="description"
+      content="How often Askwell is right, how often it is confidently wrong, and what it does when it isn't sure, measured on questions it had never seen."
+    />
+    <title>Askwell: how often it's right</title>
+    <link rel="preload" href="/fonts/archivo-latin-var.woff2" as="font" type="font/woff2" crossorigin />
   </head>
   <body>
-    <div id="app"></div>
+    <header class="topbar">
+      <a class="brand" href="/">Askwell</a>
+      <nav aria-label="Main">
+        <ul>
+          <li><a href="/#how">How it works</a></li>
+          <li><a href="/results/" aria-current="page">Results</a></li>
+          <li><a href="/try/">Try your data</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="app">
+      <section class="head" aria-labelledby="title">
+        <h1 id="title">How often it's right, and what it does when it isn't&nbsp;sure</h1>
+        <p class="lead" id="lead">Measured on questions it had never seen.</p>
+      </section>
+
+      <section class="statement" id="statement" aria-labelledby="statement-title" aria-busy="true">
+        <div class="statement-head">
+          <h2 class="label" id="statement-title">Statement of measured results</h2>
+          <span class="label statement-version">Askwell v0.3</span>
+        </div>
+        <p class="statement-wait" id="statement-wait">Reading the measured figures…</p>
+      </section>
+    </main>
+
     <script type="module" src="/src/results.ts"></script>
   </body>
 </html>

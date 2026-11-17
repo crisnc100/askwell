@@ -43,8 +43,8 @@ The AI never sees your data and never writes SQL. The model only fills in a smal
 ## Evidence on Hand
 
 Measured v0.3 results (docs/adr/ADR-008-accuracy-v03.md, evals/reports/):
-- On 96 questions held out from its design: 62 right (51 before v0.3); wrong among answered 4.1% (7.3% before), about 1 in 25 against 1 in 14; it refused all 72 questions it should refuse.
-- A one-shot baseline (the same model writing SQL directly) gets more right (78 of 96) but is wrong more often among its answers (7.5%).
+- On 96 questions held out from its design: 62 right (51 before v0.3); wrong among answered 4.1% (7.3% before), about 1 in 24 against 1 in 14; it refused all 24 questions it should refuse, in every run (72 of 72 over 3 runs).
+- A one-shot baseline (the same model writing SQL directly) gets more right (78 of 96) but is wrong more often among its answers (7.5%, about 1 in 13).
 - One gate criterion failed on a public test database (world_1); Cristian approved the deploy anyway, recorded in ADR-008.
 - Total cost of the v0.3 measurement: $1.64.
 No customers, testimonials or case studies exist. Never invent them.

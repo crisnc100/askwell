@@ -18,6 +18,7 @@ for (const status of ["partial", "aborted at budget"]) {
     );
     await page.route("**/api/reports/run", (route) => route.fulfill({ json: { ...BASE, run_id: "run", status } }));
     await page.goto("/results/");
+    await page.locator("#reports > summary").click();
     const banner = page.getByRole("note");
     await expect(banner).toContainText("Not measured");
     await expect(banner).toContainText(status);
@@ -33,6 +34,7 @@ test("a complete report with no simulation mark says it was measured with a real
     route.fulfill({ json: { ...BASE, run_id: "run", status: "complete" } }),
   );
   await page.goto("/results/");
+  await page.locator("#reports > summary").click();
   await expect(page.getByRole("note")).toHaveText("Measured with a real model.");
   await expect(page.locator("#status")).toHaveText("Status: complete.");
 });

@@ -29,6 +29,15 @@
         ],
         "createdAt": "2026-11-17T01:07:21.864Z",
         "reason": "orchestrator: gitignored throwaway direction sketch from the decision round, not shipped UI"
+      },
+      {
+        "rule": "flat-type-hierarchy",
+        "value": "*",
+        "files": [
+          "web/results/index.html"
+        ],
+        "createdAt": "2026-11-17T02:30:56.925Z",
+        "reason": "orchestrator: the page's CSS loads through results.ts, which the detector does not read; the rendered 1440 screenshot shows a 62px h1 over 16px body"
       }
     ]
   }

@@ -52,9 +52,8 @@ model answers; [Results](#results) has its measured accuracy.
 
 ## Results
 
-`http://localhost:8000/results/` shows the benchmark: how often Askwell is right,
-wrong or refuses, beside a baseline where the model writes SQL. Fieldservice, live,
-3 trials; a question counts as right when right in most:
+`http://localhost:8000/results/` shows how often Askwell is right, confidently wrong,
+and what it does when unsure, beside direct SQL writing. Fieldservice, live, 3 trials; a question counts as right when right in most:
 
 | | Askwell | One-shot |
 |---|---|---|
@@ -431,7 +430,7 @@ Askwell miss with a tag for its cause;
 prediction. `./verify.sh` replays the committed fieldservice recordings and checks that
 they reproduce `evals/reports/replay-fieldservice.md`.
 
-The Results page (`/results/`) draws every report in `evals/reports/` from its JSON file.
+The page's last fold draws every report in `evals/reports/` from its JSON file.
 `evals/report.schema.json` is the shape of that file. It is generated from
 `askwell/bench/report_schema.py` (`uv run python -m askwell.bench.report_schema
 --write`), and a test checks every committed report against it. The page links each

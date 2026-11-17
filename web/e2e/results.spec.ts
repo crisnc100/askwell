@@ -24,15 +24,25 @@ const LABELS = [
 
 test("the results page renders every schema of every committed report", async ({ page, request }) => {
   expect(reports.length).toBeGreaterThan(0);
-  // The page opens on the report with the most schemas, sim-1, where the fieldservice
-  // floor is not met in v0.1.
+  // With no report named, the reports fold opens on the headline v0.3 held-out report,
+  // where the fieldservice floor is not met.
   await page.goto("/results/");
-  await expect(page.locator('section.schema[data-schema="fieldservice"] .floor')).toContainText("Floor not met in v0.1");
-  await expect(page.getByRole("note")).toContainText("standing in for openai/gpt-oss-120b");
+  await page.locator("#reports > summary").click();
+  await expect(
+    page.locator("#reports").getByRole("heading", { level: 3, name: "Benchmark results: v03-holdout", exact: true }),
+  ).toBeVisible();
+  await expect(page.locator('section.schema[data-schema="fieldservice"] .floor')).toContainText(
+    "Floor not met on the v0.3 held-out questions",
+  );
+  await expect(page.getByRole("note")).toHaveText("Measured with a real model.");
 
   for (const { id, data } of reports) {
     await page.goto(`/results/?report=${encodeURIComponent(id)}`);
-    await expect(page.getByRole("heading", { level: 1 })).toHaveText(`Benchmark results: ${id}`);
+    // Naming a report in ?report= opens the reports fold on it.
+    await expect(page.locator("#reports")).toHaveAttribute("open", "");
+    await expect(
+      page.locator("#reports").getByRole("heading", { level: 3, name: `Benchmark results: ${id}`, exact: true }),
+    ).toBeVisible();
 
     const banner = page.getByRole("note");
     if (data.simulation) {

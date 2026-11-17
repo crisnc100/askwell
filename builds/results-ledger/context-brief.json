@@ -1,0 +1,13 @@
+{
+  "mode": "pr",
+  "purpose": "Move the Results page into the Audited Ledger look so a hiring manager or business owner gets three plain answers first (how often it is right, how often it is confidently wrong, what it does when unsure), a fair comparison with letting the AI write SQL directly, and all technical detail behind folds. Also correct two figures on the front page and in PRODUCT.md.",
+  "mechanism": "web/results/index.html and web/src/results.ts render a ruled statement whose figures are computed at load from /api/reports/v03-holdout and v03-holdout-before (askwell/bench/results.py serves evals/reports/*.json): right = question_level for ledgerline, wrong = wrong_answer_rate_given_answered as 'about 1 in N', refusals = refusal_recall divided by trials. A comparison table reads the oneshot row of the same report. Three closed <details> folds hold: where each figure comes from, the world_1 release-gate failure with Cristian's override and the ADR-008 link (always shown, with a load-error alert if gate reports fail), and the full per-report browser. Styles in web/src/results.css on the shared tokens.css; style.css is no longer loaded on Results. The front page ledger and PRODUCT.md now say about 1 in 24 and all 24 questions in every run.",
+  "decisions": "Every figure is computed from the reports rather than typed, so the page cannot drift from the data. The comparison states that writing SQL directly gets more questions right, to stay fair. The override disclosure always renders so a failed fetch cannot hide it.",
+  "readers": "README: people running or evaluating Askwell. DESIGN.md: whoever builds the next page in this look. Comments: the next maintainer of web/src.",
+  "base": "origin/front-ai-role",
+  "docMap": [
+    {"behavior": "Results page layout, plain answers and folds", "docs": ["README.md", "DESIGN.md"]},
+    {"behavior": "Front page and PRODUCT.md figures corrected", "docs": ["PRODUCT.md"]}
+  ],
+  "untouchable": ["PRODUCT.md", ".impeccable/**", "evals/**", "web/e2e/fixtures/**"]
+}

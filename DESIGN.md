@@ -153,6 +153,19 @@ components:
     typography: "{typography.stamp-value}"
     rounded: "{rounded.none}"
     padding: "4px 16px 2px"
+  statement:
+    backgroundColor: "{colors.field}"
+    textColor: "{colors.ink}"
+    rounded: "{rounded.none}"
+    padding: "22px 28px"
+  statement-figure:
+    textColor: "{colors.red}"
+    typography: "{typography.figure}"
+  fold-summary:
+    backgroundColor: "transparent"
+    textColor: "{colors.ink}"
+    typography: "{typography.title}"
+    padding: "18px 2px"
 ---
 
 # Design System: Askwell
@@ -165,7 +178,7 @@ Every answer is a cheque with its carbon copy. The original slip, on pale cheque
 
 Rank comes from one variable grotesk pushed through weight, width and case, not from a second family or a parade of sizes. Color is semantic before it is decorative: indigo means "the AI saw this", red means "audited, refused, hidden or measured", blue means "a line you write on". Depth is the change of paper (sage page, near-white slip, lavender-grey carbon) and the weight of the rule between them.
 
-Scope: the front page (`/`) and the ask flow (`/try/`) are built in this world and share `web/src/tokens.css`. Results (`/results/`) and Value (`/value/`) still load the older `style.css` and are not yet in this world; they are not described here and are not a source for new work.
+Scope: the front page (`/`), the ask flow (`/try/`) and Results (`/results/`) are built in this world and share `web/src/tokens.css`. Value (`/value/`) still loads the older `style.css` and is not yet in this world; it is not described here and is not a source for new work.
 
 **Key Characteristics:**
 - Sage cheque paper with a guilloche security pattern, densest on the slip, faint on the page head, never behind long-read paragraphs.
@@ -184,7 +197,7 @@ Cheque-stock greens under near-black ink, with three working inks that each carr
 - **Carbon Indigo Soft** (#5a5ea6): the dashed outlines of empty carbon cells for columns the form did not use.
 
 ### Secondary
-- **Ledger Red** (#a3261d): audit marks. The CHECKED / NOT ANSWERED stamp, the slip number, the double rule under "Measured results" and the measured figures, the column rule of the how-it-works ledger, hidden columns ("Never shown"), errors, the danger button, the caret.
+- **Ledger Red** (#a3261d): audit marks. The CHECKED / NOT ANSWERED and MEASURED stamps, the slip number, the figures and rules of the Results statement and comparison, a failed release check, the double rule under "Measured results" and the measured figures, the column rule of the how-it-works ledger, hidden columns ("Never shown"), errors, the danger button, the caret.
 
 ### Tertiary
 - **Form Blue** (#2c5291): lines you write on. The underline of the question field, the rules between form lines and answer rows, the border of SQL blocks, starter-question underlines, the "More questions" link, the passed badge, the focus ring and native control accents.
@@ -276,6 +289,14 @@ The original (slip white over dense guilloche) and the carbon (carbon paper, ind
 ### The Stamp (signature)
 "Checked" over the value, or "Not answered" over "Said so", in red, rotated −6°, with uneven ink. It drops in once (scale 1.5 to 1 over 300ms) after the slip has filled, then stays down.
 
+### The Statement (Results)
+The three plain answers on `/results/` as an audited statement: one 2px ink frame on slip white, a caption strip over the security pattern ("Statement of measured results" left, the version in red right) closed by a 2px red rule, then one ruled line per answer split by 1px red rules. Each line is three columns (3fr / 5fr / 5fr): the question as a label, the measured figure in red (820, width 92%, clamp 1.75–2.5rem, tabular) over a one-sentence detail, and one sentence on what it means for someone relying on the numbers. The foot states the provenance in Soft Ink with a link to the sources fold, and carries a MEASURED stamp over the number of runs, which drops in once when the figures load. Every figure is computed from the committed reports, never typed. At 860px the columns stack and the insets shrink to 18px.
+
+A comparison follows as a red-ruled ledger table (the how-it-works ledger's rules): a row label, then one column per system, figures in red.
+
+### Folds (Results)
+The technical record lives behind native `<details>` folds, so nothing technical sits in a headline. Each fold is a ledger line: 2px ink rule above (and below the last), a summary in Title type with a drawn plus that turns to a minus when open, focusable and toggled by Enter or Space. The body opens with one bold line defining the fold's terms in plain words, under a 1px Form Blue rule, then the tables (slip white, 2px ink under uppercase heads, 1px blue between rows; wide ones scroll inside their own box). A failed check is red text; the override sits in a 2px red notice. Notices inside follow the Notices rules above.
+
 ### Motion
 One orchestrated sequence per answer: each step feeds in from above (clip reveal plus 8px drop, 560ms, `cubic-bezier(0.16, 1, 0.3, 1)`), then the stamp comes down. Everything else is a 160ms color swap. Reduced motion removes the feed, the stamp drop and the transitions.
 
@@ -292,6 +313,6 @@ One orchestrated sequence per answer: each step feeds in from above (clip reveal
 ### Don't:
 - **Don't** round a corner or add a box shadow, gradient or glow.
 - **Don't** add a second type family for display; reach for Archivo's weight and width instead.
-- **Don't** use the red stamp for anything but the checked or refused result.
+- **Don't** use the red stamp for anything but the checked or refused result, and the MEASURED stamp on the Results statement.
 - **Don't** put an uppercase label above a headline as a kicker; labels caption fields, steps and tables.
 - **Don't** build the AI-landing layout of a headline beside a chat screenshot or a row of feature cards.
