@@ -225,6 +225,22 @@ interface Line {
   means: string;
 }
 
+// Of the questions Askwell got wrong at question level (missed in more than half its
+// trials), how many it turned down in every trial. Shown only when the miss records
+// account for exactly the question-level misses, so the two counts can't disagree.
+function missesRefused(report: Report, rightNow: Rate, trials: number): { refused: number; missed: number } | null {
+  const byItem = new Map<string, string[]>();
+  for (const m of report.misses) {
+    if ((m.system ?? ASKWELL) !== ASKWELL) continue;
+    byItem.set(m.item_id, [...(byItem.get(m.item_id) ?? []), m.outcome]);
+  }
+  const needed = Math.floor(trials / 2) + 1;
+  const missed = [...byItem.values()].filter((outcomes) => outcomes.length > trials - needed);
+  if (missed.length !== rightNow.of - rightNow.n) return null;
+  const refused = missed.filter((o) => o.length === trials && o.every((x) => x === "refused")).length;
+  return { refused, missed: missed.length };
+}
+
 function lines(now: Report, before: Report | undefined): Line[] | null {
   const askwell = row(now, ASKWELL);
   const rightNow = right(now, ASKWELL);
@@ -236,6 +252,7 @@ function lines(now: Report, before: Report | undefined): Line[] | null {
   const trials = trialsOf(now);
   const shouldRefuse = refused.of / trials;
   const allRefused = refused.n === refused.of;
+  const refusedMisses = missesRefused(now, rightNow, trials);
   return [
     {
       key: "right",
@@ -243,7 +260,7 @@ function lines(now: Report, before: Report | undefined): Line[] | null {
       figure: `${rightNow.n} of ${rightNow.of}`,
       detail: `questions it had never seen${rightBefore ? `, up from ${rightBefore.n} before v0.3` : ""}.`,
       means:
-        "Most questions your data can answer get the right table. When one doesn't, it is usually because Askwell said it couldn't answer, not because it guessed.",
+        `Most questions your data can answer get the right answer. When one doesn't, it is usually because Askwell said it couldn't answer${refusedMisses ? ` (${refusedMisses.refused} of the ${refusedMisses.missed} misses)` : ""}, not because it guessed.`,
     },
     {
       key: "wrong",
@@ -261,7 +278,7 @@ function lines(now: Report, before: Report | undefined): Line[] | null {
         ? `questions it should not answer: it said so every time, in all ${trials} runs, instead of guessing.`
         : `times it turned down a question it should have, over ${trials} runs of ${shouldRefuse} questions.`,
       means:
-        "Ask for data that isn't there, that is hidden from it, or for a change to your data, and you get a plain “can't answer that”, not a made-up number.",
+        "Ask for data that isn't there, for private fields such as passwords, or to change or delete your data, and you get a plain “can't answer that”, not a made-up number.",
     },
   ];
 }
@@ -423,6 +440,9 @@ function sourcesFold(now: Report | undefined, before: Report | undefined): HTMLD
     if (wb) rows.push([`${oneIn(wb)} before v0.3`, BEFORE, `table, system ${ASKWELL}: wrong_answer_rate_given_answered`, `${wb.n} of ${wb.of} (${pct(wb.rate ?? 0)})`]);
     const rr = askwell.refusal_recall;
     rows.push([`All ${rr.of / t} turned down`, HEADLINE, `table, system ${ASKWELL}: refusal_recall, over ${t} trials`, `${rr.n} of ${rr.of}`]);
+    const mr = r ? missesRefused(now, r, t) : null;
+    if (mr)
+      rows.push([`${mr.refused} of the ${mr.missed} misses turned down`, HEADLINE, `misses, system ${ASKWELL}: outcome refused in all ${t} trials`, `${mr.refused} questions`]);
     if (d) rows.push([`${d.n} of ${d.of} right, SQL written directly`, HEADLINE, `question_level, system ${DIRECT}: right`, `${d.n} of ${d.of} (${pct(d.rate ?? 0)})`]);
     if (direct) {
       const dw = direct.wrong_answer_rate_given_answered;
