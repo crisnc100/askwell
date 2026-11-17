@@ -207,13 +207,33 @@ function load(id: string): Promise<Report> {
   return pending;
 }
 
-async function loadIf(listed: Set<string>, id: string): Promise<Report | undefined> {
-  if (!listed.has(id)) return undefined;
+// A report the list doesn't name is missing; one it names that won't load has failed.
+// The page says which, so a network fault never reads as "nothing to show".
+interface Loaded {
+  id: string;
+  report?: Report;
+  state: "loaded" | "missing" | "failed";
+}
+
+async function loadIf(listed: Set<string>, id: string): Promise<Loaded> {
+  if (!listed.has(id)) return { id, state: "missing" };
   try {
-    return await load(id);
+    return { id, report: await load(id), state: "loaded" };
   } catch {
-    return undefined;
+    return { id, state: "failed" };
   }
+}
+
+function unloaded(results: Loaded[]): HTMLElement | null {
+  const failed = results.filter((r) => r.state === "failed").map((r) => r.id);
+  const missing = results.filter((r) => r.state === "missing").map((r) => r.id);
+  if (!failed.length && !missing.length) return null;
+  return h(
+    "div",
+    { class: "notice error unloaded", attrs: { role: "alert" } },
+    failed.length ? h("p", {}, `Couldn't load ${failed.length === 1 ? "this report" : "these reports"}: ${failed.join(", ")}. Reloading the page may help.`) : null,
+    missing.length ? h("p", {}, `Not among the committed reports: ${missing.join(", ")}.`) : null,
+  );
 }
 
 
@@ -408,7 +428,7 @@ function comparison(now: Report | undefined): HTMLElement | null {
     h(
       "p",
       {},
-      `Writing SQL directly gets more questions right, because it tries every one. It is also wrong more often among the answers it gives. Askwell gives up some answers so that fewer of the numbers it does give are confidently wrong; if you would rather always get an answer and check it yourself, the direct way gets more right.`,
+      `Writing SQL directly gets more questions right. It attempts every one, though ${direct.execution_error_rate.n} of its queries failed to run, so ${direct.wrong_answer_rate_given_answered.of} of its ${direct.coverage.n} tries came back with an answer, and more of those answers are wrong. Askwell answers fewer questions so that fewer of the numbers it gives are confidently wrong; if you would rather have more answers and check each one yourself, writing SQL directly gets more right.`,
     ),
   );
 }
@@ -540,9 +560,10 @@ function gateTable(caption: string, rows: GateLine[]): HTMLElement {
 function gateFold(
   now: Report | undefined,
   before: Report | undefined,
-  spider: [Report | undefined, Report | undefined],
-  csv: [Report | undefined, Report | undefined],
+  gate: { spider: [Loaded, Loaded]; csv: [Loaded, Loaded] },
 ): HTMLDetailsElement {
+  const spider = gate.spider.map((l) => l.report);
+  const csv = gate.csv.map((l) => l.report);
   const spiderLines = gateLines(spider[0], spider[1], GATE.spider.system);
   const csvLines = gateLines(csv[0], csv[1], GATE.csv.system);
   const world = spiderLines.find((g) => g.schema === "spider_world_1");
@@ -553,7 +574,6 @@ function gateFold(
   const csvWorldAfter = row(csv[1], GATE.csv.system, "spider_world_1");
   const rightBefore = right(before, ASKWELL);
   const rightNow = right(now, ASKWELL);
-  const failed = [...spiderLines, ...csvLines].some((g) => g.failed);
   const perDb = spider[1]?.table.find((t) => t.system === GATE.spider.system)?.coverage.of;
 
   const reasons: string[] = [];
@@ -581,20 +601,21 @@ function gateFold(
     ),
     spiderLines.length ? gateTable("Spider databases, read on the repeat run", spiderLines) : null,
     csvLines.length ? gateTable("The same databases uploaded as CSV files", csvLines) : null,
-    failed
-      ? h(
-          "div",
-          { class: "notice override" },
-          h(
-            "p",
-            {},
-            h("strong", {}, "The rule said not to ship. "),
-            "world_1 failed it, as a database and as CSV uploads. Cristian read the failures and approved the release anyway, on 2026-11-15. His reasons, recorded in ADR-008:",
-          ),
-          reasons.length ? h("ul", {}, ...reasons.map((r) => h("li", {}, r))) : null,
-          h("p", {}, h("a", { attrs: { href: ADR_008 } }, "Read ADR-008, with the gate and the override in full")),
-        )
-      : null,
+    unloaded([...gate.spider, ...gate.csv]),
+    // The failure and the override are recorded in ADR-008, so they are shown whatever
+    // loads; the reports only add the figures behind them.
+    h(
+      "div",
+      { class: "notice override" },
+      h(
+        "p",
+        {},
+        h("strong", {}, "The rule said not to ship. "),
+        `world_1 failed it, as a database and as CSV uploads. Cristian read the failures and approved the release anyway, on 2026-11-15. ${reasons.length ? "His reasons, recorded in ADR-008:" : "His reasons are recorded in ADR-008."}`,
+      ),
+      reasons.length ? h("ul", {}, ...reasons.map((r) => h("li", {}, r))) : null,
+      h("p", {}, h("a", { attrs: { href: ADR_008 } }, "Read ADR-008, with the gate and the override in full")),
+    ),
     h(
       "p",
       { class: "small" },
@@ -823,7 +844,7 @@ async function start(): Promise<void> {
     return;
   }
   const listed = new Set(reports.map((r) => r.id));
-  const [now, before, spiderBefore, spiderAfter, csvBefore, csvAfter] = await Promise.all([
+  const [headline, previous, spiderBefore, spiderAfter, csvBefore, csvAfter] = await Promise.all([
     loadIf(listed, HEADLINE),
     loadIf(listed, BEFORE),
     loadIf(listed, GATE.spider.before),
@@ -831,13 +852,15 @@ async function start(): Promise<void> {
     loadIf(listed, GATE.csv.before),
     loadIf(listed, GATE.csv.after),
   ]);
+  const now = headline.report;
+  const before = previous.report;
   renderStatement(now, before);
   append(
     main,
     comparison(now),
     details,
   );
-  append(details, sourcesFold(now, before), gateFold(now, before, [spiderBefore, spiderAfter], [csvBefore, csvAfter]));
+  append(details, sourcesFold(now, before), gateFold(now, before, { spider: [spiderBefore, spiderAfter], csv: [csvBefore, csvAfter] }));
 
   const wanted = new URLSearchParams(location.search).get("report");
   if (!reports.length) {
