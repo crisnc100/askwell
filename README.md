@@ -439,8 +439,8 @@ schema's triage file, `evals/triage/<schema>.yaml`, which gives every miss its c
 `http://localhost:8000/value/` is a value calculator. You enter your own question volume,
 time and costs, and it weighs the hours Askwell saves, plus any savings from findings you
 estimate, against what it costs to run. It also shows the median answer time. Model
-cost comes from `v02-seen`, at the provider's list price. The answered share comes from
-`v02-holdout` (questions it never saw), with `v02-seen` (questions it was tuned on) as the
+cost comes from `v03-seen`, at the provider's list price. The answered share comes from
+`v03-holdout` (questions it never saw), with `v03-seen` (questions it was tuned on) as the
 other end of a range. Wrong-answer rates are shown beside it but do not enter the sum;
 checking each answer is counted instead. The rates come from one benchmark schema, not your data.
 

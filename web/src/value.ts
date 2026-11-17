@@ -1,6 +1,6 @@
 import "./tokens.css";
 import "./value.css";
-import { append, clear, h } from "./dom";
+import { append, h } from "./dom";
 import { clamp, INPUTS, type InputSpec, monthly, range, type ReaderInputs } from "./value-formula";
 import { SOURCE } from "./value-source";
 
@@ -24,6 +24,7 @@ interface Report {
   run_id: string;
   simulation: string | null;
   status: string;
+  trials?: number;
   table: Row[];
 }
 
@@ -37,6 +38,7 @@ interface Figures {
   wrongInterval: [number, number];
   wrong: Rate;
   p50LatencyMs: number | null;
+  trials: number;
 }
 
 const main = document.getElementById("app") as HTMLElement;
@@ -88,6 +90,7 @@ function figures(report: Report): Figures {
     wrongInterval: wrong.ci95,
     wrong,
     p50LatencyMs: Number.isFinite(row.p50_latency_ms) ? row.p50_latency_ms : null,
+    trials: report.trials ?? 1,
   };
 }
 
@@ -104,7 +107,9 @@ function fold(id: string, title: string, definition: string, ...body: (HTMLEleme
 function measuredFold(seen: Figures, holdout: Figures): HTMLDetailsElement {
   const from = (tag: "span" | "dd", id: string, f: Figures, ...children: (string | HTMLElement)[]) =>
     h(tag, { attrs: { id, "data-source": f.reportId } }, ...children);
-  const rate = (r: Rate, value: number) => `${pct(value)} (${r.n} of ${r.of})`;
+  // The counts are answers over every run, so a report run 3 times counts each question 3 times.
+  const rate = (r: Rate, value: number, f: Figures) =>
+    `${pct(value)} (${r.n} of ${r.of}${f.trials > 1 ? `, over ${f.trials} runs` : ""})`;
   const interval = (f: Figures) => `95% range ${pct(f.wrongInterval[0])} to ${pct(f.wrongInterval[1])}`;
   return fold(
     "measured",
@@ -136,18 +141,18 @@ function measuredFold(seen: Figures, holdout: Figures): HTMLDetailsElement {
       "dl",
       { class: "definitions" },
       h("dt", {}, "On questions it never saw (report ", from("span", "holdout-run-id", holdout, holdout.reportId), ", written blind)"),
-      from("dd", "holdout-answered", holdout, rate(holdout.answered, holdout.answeredShare)),
+      from("dd", "holdout-answered", holdout, rate(holdout.answered, holdout.answeredShare, holdout)),
       h("dt", {}, `On questions it was tuned on (report ${seen.reportId})`),
-      from("dd", "seen-answered", seen, rate(seen.answered, seen.answeredShare)),
+      from("dd", "seen-answered", seen, rate(seen.answered, seen.answeredShare, seen)),
     ),
     h("h3", {}, "Answers it gave that were wrong, shown but not used in the estimate"),
     h(
       "dl",
       { class: "definitions", attrs: { id: "accuracy" } },
       h("dt", {}, "On questions it never saw"),
-      from("dd", "holdout-wrong", holdout, `${rate(holdout.wrong, holdout.wrongRate)}, ${interval(holdout)}`),
+      from("dd", "holdout-wrong", holdout, `${rate(holdout.wrong, holdout.wrongRate, holdout)}, ${interval(holdout)}`),
       h("dt", {}, "On questions it was tuned on"),
-      from("dd", "seen-wrong", seen, `${rate(seen.wrong, seen.wrongRate)}, ${interval(seen)}`),
+      from("dd", "seen-wrong", seen, `${rate(seen.wrong, seen.wrongRate, seen)}, ${interval(seen)}`),
     ),
     h("p", { class: "muted" }, "These do not feed the formula. Every answer shows its query; the check time is counted."),
     h(
@@ -258,46 +263,62 @@ function render(seen: Figures, holdout: Figures): void {
   const state = Object.fromEntries(INPUTS.map((s) => [s.key, s.example])) as unknown as ReaderInputs;
   const results = h("section", { class: "sheet-figures", attrs: { id: "results", "aria-live": "polite", "aria-labelledby": "results-title" } });
 
+  const line = (label: string, id: string) => {
+    const cell = h("td", { attrs: { id } });
+    return { cell, row: h("tr", {}, h("th", { attrs: { scope: "row" } }, label), cell) };
+  };
+  const running = line("Running cost", "out-running-cost");
+  const answered = line("Questions answered", "out-answered");
+  const hoursSaved = line("Hours saved", "out-hours-saved");
+  const valueOfTime = line("Value of the time saved", "out-value-of-time");
+  const findings = line("Savings from findings (your estimate)", "out-findings");
+  const net = h("td", { attrs: { id: "out-net" } });
+  const atUnseenText = h("strong", { attrs: { id: "out-range-unseen" } });
+  const atTunedText = h("strong", { attrs: { id: "out-range-tuned" } });
+  // Built once and only its figures rewritten, so a screen reader hears the figures that
+  // changed rather than the whole region on every keystroke.
+  append(
+    results,
+    h(
+      "table",
+      { class: "sheet-ledger" },
+      h(
+        "tbody",
+        {},
+        running.row,
+        answered.row,
+        hoursSaved.row,
+        valueOfTime.row,
+        findings.row,
+        h("tr", { class: "total" }, h("th", { attrs: { scope: "row" } }, "Net value each month"), net),
+      ),
+    ),
+    h(
+      "p",
+      { class: "sheet-range", attrs: { id: "out-range" } },
+      "Net value a month is ",
+      atUnseenText,
+      ` on questions it never saw (it answered ${pct(holdout.answeredShare)}) and `,
+      atTunedText,
+      ` on questions it was tuned on (it answered ${pct(seen.answeredShare)}).`,
+    ),
+  );
+
   const update = () => {
     const out = monthly(state, { costPerQuestion: seen.costPerQuestion, answeredShare: holdout.answeredShare });
     const [atUnseen, atTuned] = range(state, {
       costPerQuestion: seen.costPerQuestion,
       answeredShares: [holdout.answeredShare, seen.answeredShare],
     });
-    const line = (label: string, id: string, value: string) =>
-      h("tr", {}, h("th", { attrs: { scope: "row" } }, label), h("td", { attrs: { id } }, value));
-    clear(results);
-    append(
-      results,
-      h(
-        "table",
-        { class: "sheet-ledger" },
-        h(
-          "tbody",
-          {},
-          line("Running cost", "out-running-cost", money(out.runningCost)),
-          line("Questions answered", "out-answered", number(out.answered)),
-          line("Hours saved", "out-hours-saved", number(out.hoursSaved)),
-          line("Value of the time saved", "out-value-of-time", money(out.valueOfTime)),
-          line("Savings from findings (your estimate)", "out-findings", money(out.findings)),
-          h(
-            "tr",
-            { class: "total" },
-            h("th", { attrs: { scope: "row" } }, "Net value each month"),
-            h("td", { attrs: { id: "out-net" } }, money(out.net)),
-          ),
-        ),
-      ),
-      h(
-        "p",
-        { class: "sheet-range", attrs: { id: "out-range" } },
-        "Net value a month is ",
-        h("strong", { attrs: { id: "out-range-unseen" } }, money(atUnseen)),
-        ` on questions it never saw (it answered ${pct(holdout.answeredShare)}) and `,
-        h("strong", { attrs: { id: "out-range-tuned" } }, money(atTuned)),
-        ` on questions it was tuned on (it answered ${pct(seen.answeredShare)}).`,
-      ),
-    );
+    running.cell.textContent = money(out.runningCost);
+    // Whole questions on screen; the formula keeps the fraction.
+    answered.cell.textContent = number(Math.round(out.answered), 0);
+    hoursSaved.cell.textContent = number(out.hoursSaved);
+    valueOfTime.cell.textContent = money(out.valueOfTime);
+    findings.cell.textContent = money(out.findings);
+    net.textContent = money(out.net);
+    atUnseenText.textContent = money(atUnseen);
+    atTunedText.textContent = money(atTuned);
   };
 
   const worksheet = h(
