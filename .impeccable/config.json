@@ -1,0 +1,17 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "flat-type-hierarchy",
+        "value": "*",
+        "files": [
+          "web/index.html"
+        ],
+        "createdAt": "2026-11-17T00:44:41.489Z",
+        "reason": "orchestrator: the page's CSS loads through the front.ts module, which the detector does not read; the rendered 1440 screenshot shows a 68px display headline over 18px body"
+      }
+    ]
+  }
+}
