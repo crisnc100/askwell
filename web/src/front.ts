@@ -6,10 +6,15 @@ import schema from "./demo-schema.json";
 import recorded from "./recorded-answer.json";
 
 // Workspace links handed out before the app moved to /try/ were "/#ws=<id>"; they keep
-// working by forwarding, with the id still only in the fragment.
-if (/(?:^#|&)ws=[0-9a-f]{32}(?:&|$)/.test(location.hash)) {
-  location.replace(`/try/${location.hash}`);
+// working by forwarding, with the id still only in the fragment. A link pasted into a
+// tab already on this page changes only the hash, so that is watched too.
+function forwardWorkspaceLink(): void {
+  if (/(?:^#|&)ws=[0-9a-f]{32}(?:&|$)/.test(location.hash)) {
+    location.replace(`/try/${location.hash}`);
+  }
 }
+forwardWorkspaceLink();
+window.addEventListener("hashchange", forwardWorkspaceLink);
 
 type Json = Record<string, unknown>;
 type Line = [label: string, value: string];
@@ -228,11 +233,11 @@ function tableBlock(table: (typeof schema)[number], named: Set<string>): HTMLEle
 
 // The carbon opens on the tables the form named; every other table the AI was shown
 // folds into one line, and the hidden columns always stay in view.
-function drawCarbon(named: Set<string>): void {
+function drawCarbon(named: Set<string>, empty = "The form named no table."): void {
   const used = schema.filter((t) => named.has(`${t.table}.`));
   const rest = schema.filter((t) => !named.has(`${t.table}.`));
   clear(carbonTables);
-  if (!used.length) carbonTables.appendChild(h("p", { class: "carbon-none" }, "The form named no table."));
+  if (!used.length) carbonTables.appendChild(h("p", { class: "carbon-none" }, empty));
   for (const table of used) carbonTables.appendChild(tableBlock(table, named));
 
   clear(carbonHidden);
@@ -288,10 +293,11 @@ const PARAM = new RegExp(`%\\((\\w+)\\)s(?:${CAST.source})?`, "g");
 const CLAUSE = /\s+(FROM|WHERE|GROUP BY|HAVING|ORDER BY|LIMIT|UNION|(?:LEFT OUTER |LEFT |INNER )?JOIN)\b/g;
 
 // For reading only: the query runs with its values passed as parameters and its short
-// table aliases. Here the values are written in and each alias is swapped for its
-// table's name, wherever one alias always means one table.
+// table aliases. Here each alias is swapped for its table's name, wherever one alias
+// always means one table, and the values are written in. The values go in last, after
+// every rewrite, so a value that looks like an alias or holds extra spaces stays as is.
 function readableSql(text: string, params: Record<string, unknown> | null): string {
-  let out = text.replace(PARAM, (match, name: string) => (params && name in params ? literal(params[name]) : match));
+  let out = text;
   const tablesOf = new Map<string, Set<string>>();
   const aliasesOf = new Map<string, Set<string>>();
   for (const [, table, alias] of out.matchAll(/\b([a-z_][a-z0-9_]*) AS (t\d+)\b/g)) {
@@ -303,7 +309,8 @@ function readableSql(text: string, params: Record<string, unknown> | null): stri
     if (tables.size !== 1 || aliasesOf.get(table)?.size !== 1) continue;
     out = out.replace(new RegExp(`\\b${table} AS ${alias}\\b`, "g"), table).replace(new RegExp(`\\b${alias}\\.`, "g"), `${table}.`);
   }
-  return out.replace(/\s+/g, " ").replace(CLAUSE, "\n$1").trim();
+  out = out.replace(/\s+/g, " ").replace(CLAUSE, "\n$1").trim();
+  return out.replace(PARAM, (match, name: string) => (params && name in params ? literal(params[name]) : match));
 }
 
 function stampWith(answered: boolean, value: string): void {
@@ -367,6 +374,7 @@ function fill(answer: Answer): void {
       ),
     );
     if (answer.truncated) rows.appendChild(h("p", { class: "step-note" }, "Only the first rows are shown."));
+    if (answer.tied_at_cutoff) rows.appendChild(h("p", { class: "step-note tie-note" }, "More rows tie with the last one shown."));
   }
 
   const count = answer.rows.length;
@@ -384,11 +392,27 @@ for (const stamp of stamps) {
   stamp.addEventListener("animationend", () => stamp.classList.add("is-set"));
 }
 
+const BLANK_FORM = ["Table", "Count", "Filter"];
+const BLANK_CHECK = checkText.textContent ?? "";
+
+// A new ask wipes the slip before it is sent, so nothing of the last answer can stand
+// under the new question, even when the ask then fails.
 function reset(): void {
   for (const id of timers) window.clearTimeout(id);
   timers = [];
   for (const step of steps) step.dataset.filled = "false";
-  for (const stamp of stamps) stamp.classList.remove("is-down", "is-set");
+  clear(formLines);
+  for (const label of BLANK_FORM) formLines.appendChild(h("div", {}, h("dt", {}, label), h("dd", {})));
+  checkText.textContent = BLANK_CHECK;
+  clear(sql);
+  sqlNote.hidden = true;
+  clear(rows);
+  for (const stamp of stamps) {
+    stamp.classList.remove("is-down", "is-set", "is-refused");
+    clear(stamp);
+  }
+  drawCarbon(new Set(), "Waiting for the form.");
+  announce.textContent = "";
   error.hidden = true;
 }
 

@@ -185,7 +185,7 @@
 }
 .step[data-filled="false"] > .check-text,
 .step[data-filled="false"] > pre,
-.step[data-filled="false"] > .rows {
+.step[data-filled="false"] > .rows-with-stamp {
   display: none;
 }
 .step[data-filled="false"]:not([data-step="form"])::after {
