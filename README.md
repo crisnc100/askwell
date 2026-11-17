@@ -28,8 +28,8 @@ docker compose up -d                  # a demo database, filled with made-up dat
 uv run uvicorn askwell.api:create_app --factory
 ```
 
-Open `http://localhost:8000/` and go through the five steps with the sample shop data
-linked on the first page:
+Open `http://localhost:8000/try/` and go through the five steps with the sample shop data
+linked on the first step:
 
 1. **Prepare.** Read the rules a CSV file must follow, then start a *workspace*: a private
    folder for your files. Bookmark the link it gives you.
@@ -127,7 +127,11 @@ any other (the spike always uses OpenRouter).
 
 ## Your data
 
-[Try it](#try-it) walks through the five pages. More on each:
+[Try it](#try-it) walks through the five steps at `/try/`; `/` is the front page,
+with one recorded answer. A workspace link looks like
+`/try/#ws=<id>`; older `/#ws=<id>` links forward to it. To work on the pages, run
+`npm run dev` in `web/` beside the server on port 8000; it proxies `/api`, `/schemas`
+and `/ask` to the server. More on each:
 
 - **Prepare.** A file needs one table, a header row, `YYYY-MM-DD` dates and plain
   numbers. A file with no ID column loads with its rows numbered, under a hidden key,

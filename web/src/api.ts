@@ -145,3 +145,13 @@ export const api = {
     call<Answer>("POST", "/api/workspace/ask", JSON.stringify({ question })),
   remove_workspace: () => call<{ deleted: boolean }>("DELETE", "/api/workspace"),
 };
+
+// The demo database the front page asks. Its example questions are the recorded ones,
+// so they answer even where live answers are switched off.
+export const DEMO_SCHEMA = "fieldservice";
+
+export const demo = {
+  examples: () => call<string[]>("GET", `/schemas/${DEMO_SCHEMA}/examples`),
+  ask: (question: string) =>
+    call<Answer>("POST", "/ask", JSON.stringify({ schema_id: DEMO_SCHEMA, question })),
+};

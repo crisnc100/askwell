@@ -157,7 +157,7 @@ function header(): HTMLElement {
     {},
     h("p", { class: "brand" }, "Askwell"),
     h("p", { class: "tagline" }, "How often it answers, how often it is right, and how often it refuses."),
-    h("p", {}, h("a", { attrs: { href: "/" } }, "Ask about your own data")),
+    h("p", {}, h("a", { attrs: { href: "/try/" } }, "Ask about your own data")),
   );
 }
 

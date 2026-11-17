@@ -1,0 +1,65 @@
+{
+  "question": "How many invoices are still unpaid?",
+  "intent": {
+    "intent_type": "summary",
+    "entity": "invoices",
+    "metrics": [
+      {
+        "agg": "count",
+        "field": "id",
+        "alias": "unpaid_invoices"
+      }
+    ],
+    "filters": [
+      {
+        "field": "status",
+        "op": "eq",
+        "value": "unpaid"
+      }
+    ]
+  },
+  "validation": {
+    "ok": true,
+    "attempts": [
+      {
+        "answer": "{\"intent_type\": \"summary\", \"entity\": \"invoices\", \"metrics\": [{\"agg\": \"count\", \"alias\": \"unpaid_invoices\", \"field\": \"id\"}], \"filters\": [{\"field\": \"status\", \"op\": \"eq\", \"value\": \"unpaid\"}]}",
+        "intent": {
+          "intent_type": "summary",
+          "entity": "invoices",
+          "metrics": [
+            {
+              "agg": "count",
+              "field": "id",
+              "alias": "unpaid_invoices"
+            }
+          ],
+          "filters": [
+            {
+              "field": "status",
+              "op": "eq",
+              "value": "unpaid"
+            }
+          ]
+        },
+        "parse_error": null,
+        "issues": [],
+        "provenance": null
+      }
+    ]
+  },
+  "sql": "SELECT count(t0.id) AS unpaid_invoices \nFROM invoices AS t0 \nWHERE t0.status = %(param_1)s::VARCHAR",
+  "params": {
+    "param_1": "unpaid"
+  },
+  "columns": [
+    "unpaid_invoices"
+  ],
+  "rows": [
+    [
+      161
+    ]
+  ],
+  "truncated": false,
+  "tied_at_cutoff": false,
+  "refusal": null
+}

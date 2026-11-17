@@ -1,0 +1,128 @@
+{
+ "rows": [
+  {
+   "behavior": "Front page at / and five-step app at /try/",
+   "files": [
+    "web/index.html",
+    "web/try/index.html",
+    "web/src/front.ts",
+    "web/src/main.ts",
+    "web/vite.config.ts",
+    "web/src/api.ts"
+   ],
+   "docs": [
+    {
+     "path": "README.md",
+     "claims": [
+      {
+       "claim": "/try/ is the five-step app; sample data linked on its first step",
+       "at": "web/src/main.ts:198"
+      },
+      {
+       "claim": "try page is a build input",
+       "at": "web/vite.config.ts:21"
+      },
+      {
+       "claim": "front page asks the demo database via /ask and examples",
+       "at": "web/src/front.ts:456"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "behavior": "Workspace links are /try/#ws=<id>; old /#ws= links forward",
+   "files": [
+    "web/src/main.ts",
+    "web/src/front.ts"
+   ],
+   "docs": [
+    {
+     "path": "README.md",
+     "claims": [
+      {
+       "claim": "link form /try/#ws=<id>",
+       "at": "web/src/main.ts:49"
+      },
+      {
+       "claim": "old links forward to /try/",
+       "at": "web/src/front.ts:13"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "behavior": "Dev server proxies /api, /schemas, /ask",
+   "files": [
+    "web/vite.config.ts"
+   ],
+   "docs": [
+    {
+     "path": "README.md",
+     "claims": [
+      {
+       "claim": "npm run dev proxies the three routes to port 8000",
+       "at": "web/vite.config.ts:9"
+      },
+      {
+       "claim": "dev script is vite",
+       "at": "web/package.json:7"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "behavior": "Results and Value link to /try/",
+   "files": [
+    "web/src/results.ts",
+    "web/src/value.ts"
+   ],
+   "none": "Link target change only; README names the pages by URL, which did not change."
+  },
+  {
+   "behavior": "Shared tokens and new page styles, Archivo font",
+   "files": [
+    "web/src/tokens.css",
+    "web/src/front.css",
+    "web/src/try.css",
+    "web/src/style.css",
+    "web/public/fonts/Archivo-OFL.txt",
+    "web/public/fonts/archivo-latin-var.woff2"
+   ],
+   "none": "DESIGN.md already describes this look and its files; no change needed."
+  },
+  {
+   "behavior": "Recorded answer and demo schema data, kept equal by tests",
+   "files": [
+    "web/src/recorded-answer.json",
+    "web/src/demo-schema.json",
+    "tests/pipeline/test_front_recorded_answer.py",
+    "tests/test_front_demo_schema.py"
+   ],
+   "none": "Data and tests; no doc describes them."
+  },
+  {
+   "behavior": "Browser tests and fixtures",
+   "files": [
+    "web/e2e/fixtures/demo-answers.json",
+    "web/e2e/front-load.spec.ts",
+    "web/e2e/front-states.spec.ts",
+    "web/e2e/front.spec.ts",
+    "web/e2e/helpers.ts",
+    "web/e2e/review.spec.ts",
+    "web/e2e/smoke.spec.ts"
+   ],
+   "none": "Tests only."
+  },
+  {
+   "behavior": "Build config",
+   "files": [
+    ".gitignore",
+    "web/tsconfig.json"
+   ],
+   "none": "resolveJsonModule for JSON imports; nothing documented."
+  }
+ ]
+}

@@ -48,7 +48,7 @@ test("changing the link's workspace switches the page to it", async ({ page }) =
     data: Buffer.from("id\n1\n"),
   });
   expect(put.status()).toBe(200);
-  await page.goto(`/#ws=${first}`);
+  await page.goto(`/try/#ws=${first}`);
   await expect(page.locator(".file-name")).toHaveText(["only-in-first.csv"]);
   await page.evaluate((id) => (location.hash = `#ws=${id}`), second);
   await expect(page.locator(".workspace .link")).toContainText(second);

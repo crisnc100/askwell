@@ -42,7 +42,7 @@ test("the sample data goes from upload to an answer", async ({ page }) => {
 
   // The bookmark link reopens the workspace where it was left.
   const link = (await page.locator(".workspace .link").first().textContent()) ?? "";
-  expect(link).toMatch(/\/#ws=[0-9a-f]{32}$/);
+  expect(link).toMatch(/\/try\/#ws=[0-9a-f]{32}$/);
   await page.goto("about:blank");
   await page.goto(link);
   await expect(page.getByRole("heading", { name: "Ask a question" })).toBeVisible();

@@ -2,11 +2,14 @@ import { defineConfig } from "vite";
 import { resolve } from "node:path";
 
 // `npm run dev` serves the page on its own port and sends API calls to a local
-// `uvicorn askwell.api:create_app --factory` on port 8000.
+// `uvicorn askwell.api:create_app --factory` on port 8000. The demo database's routes
+// (/schemas, /ask) sit at the root, not under /api, as askwell/api.py serves them.
 export default defineConfig({
   server: {
     proxy: {
       "/api": "http://127.0.0.1:8000",
+      "/schemas": "http://127.0.0.1:8000",
+      "^/ask$": "http://127.0.0.1:8000",
     },
   },
   build: {
@@ -15,6 +18,7 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: resolve(__dirname, "index.html"),
+        try: resolve(__dirname, "try/index.html"),
         results: resolve(__dirname, "results/index.html"),
         value: resolve(__dirname, "value/index.html"),
       },

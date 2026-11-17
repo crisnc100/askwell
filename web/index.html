@@ -4,10 +4,144 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="referrer" content="no-referrer" />
-    <title>Askwell: your data</title>
+    <meta
+      name="description"
+      content="Ask a database a question in plain English. The AI fills in a small form from column names; it never sees your rows and never writes SQL."
+    />
+    <title>Askwell: ask your database, keep the receipt</title>
+    <link rel="preload" href="/fonts/archivo-latin-var.woff2" as="font" type="font/woff2" crossorigin />
   </head>
   <body>
-    <div id="app"></div>
-    <script type="module" src="/src/main.ts"></script>
+    <header class="topbar">
+      <a class="brand" href="/" aria-current="page">Askwell</a>
+      <nav aria-label="Main">
+        <ul>
+          <li><a href="#how">How it works</a></li>
+          <li><a href="/results/">Results</a></li>
+          <li><a href="/try/">Try your data</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main>
+      <section class="hook" aria-labelledby="promise">
+        <h1 id="promise">Ask your database a question. The&nbsp;AI never sees your data.</h1>
+        <p>
+          The AI only fills in a small form from your table and column names. Plain code checks
+          that form, writes the SQL, runs it read-only and hands you the rows with the SQL.
+        </p>
+      </section>
+
+      <section class="slip" id="slip" aria-labelledby="slip-title" data-state="idle">
+        <h2 class="visually-hidden" id="slip-title">Ask the demo database</h2>
+
+        <div class="original">
+          <div class="slip-head">
+            <span>Demo database: field service, made-up data</span>
+            <span class="slip-no">No. <output id="slip-no">0001</output></span>
+          </div>
+
+          <form id="ask" class="ask" autocomplete="off">
+            <label class="label" for="question">You asked</label>
+            <div class="ask-field">
+              <input id="question" name="question" type="text" maxlength="2000" required />
+              <button type="submit" id="ask-button">Ask</button>
+            </div>
+          </form>
+          <div class="starters" id="starters" hidden>
+            <p class="label" id="starters-label">Or pick a question</p>
+            <ul aria-labelledby="starters-label"></ul>
+            <div id="more-starters" hidden>
+              <ul aria-label="More questions"></ul>
+            </div>
+            <button type="button" class="more" id="more-starters-toggle" aria-expanded="false" aria-controls="more-starters" hidden>More questions</button>
+          </div>
+
+          <ol class="steps" id="steps">
+            <li class="step" data-step="form">
+              <h3 class="label">The form the AI filled in</h3>
+              <p class="step-note">A small form, not SQL: which table, what to count, which filters.</p>
+              <dl class="form-lines" id="form-lines">
+                <div><dt>Table</dt><dd></dd></div>
+                <div><dt>Count</dt><dd></dd></div>
+                <div><dt>Filter</dt><dd></dd></div>
+              </dl>
+            </li>
+            <li class="step" data-step="check">
+              <h3 class="label">The check</h3>
+              <p id="check-text" class="check-text">Plain code checks the form against what this database may show.</p>
+            </li>
+            <li class="step" data-step="sql">
+              <h3 class="label">The SQL, written by code</h3>
+              <pre id="sql"><code></code></pre>
+              <p class="step-note" id="sql-note">Shown with its values written in, for reading. It runs with them passed separately.</p>
+            </li>
+            <li class="step" data-step="rows">
+              <h3 class="label">The rows</h3>
+              <div class="rows-with-stamp">
+                <div class="rows" id="rows"></div>
+                <div class="stamp stamp-rows" aria-hidden="true"></div>
+              </div>
+            </li>
+          </ol>
+          <p class="slip-error" id="slip-error" role="alert" hidden></p>
+          <p class="visually-hidden" id="announce" aria-live="polite"></p>
+        </div>
+
+        <div class="carbon" aria-labelledby="carbon-title">
+          <h3 class="label carbon-title" id="carbon-title">Carbon copy: what the AI was shown</h3>
+          <p class="carbon-note">Table and column names. Every cell stays empty.</p>
+          <div class="tables" id="carbon-tables"></div>
+          <div class="ctable hidden-row" id="carbon-hidden"></div>
+          <details class="carbon-rest" id="carbon-rest"></details>
+          <div class="carbon-foot">
+            <p class="rows-sent">Rows sent to the AI: <strong id="rows-sent">0</strong></p>
+            <div class="stamp stamp-carbon" id="stamp" aria-hidden="true"></div>
+          </div>
+          <h3 class="label ledger-title" id="ledger-title">Measured results</h3>
+          <ul class="ledger" aria-labelledby="ledger-title">
+            <li>
+              <a href="/results/">Right on <strong>62 of 96</strong> questions it had never seen</a>
+            </li>
+            <li>
+              <a href="/results/">Wrong about <strong>1 answer in 25</strong>, down from 1 in 14</a>
+            </li>
+            <li>
+              <a href="/results/">When it can't answer safely, it says so: it refused <strong>all 72</strong> questions it should have</a>
+            </li>
+          </ul>
+          <p class="carbon-also">
+            Also shown: each column's type, a short description, and the allowed labels of
+            category columns such as invoice status.
+          </p>
+        </div>
+      </section>
+
+      <section class="how" id="how" aria-labelledby="how-title">
+        <h2 id="how-title">How the AI is used, and how it isn't</h2>
+        <table class="how-ledger">
+          <thead>
+            <tr><th scope="col">What the AI does</th><th scope="col">What it never does</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Reads your question in plain English.</td><td>Never sees a row of your data.</td></tr>
+            <tr><td>Fills in a small form: which table, what to count, which filters.</td><td>Never writes SQL. Plain code writes it from the form and runs it read-only.</td></tr>
+            <tr><td>Works only from what it is shown: table and column names, each column's type and short description, and category labels.</td><td>Never sees hidden columns.</td></tr>
+            <tr><td>Gets one more try when the check turns its form down.</td><td>Never guesses when unsure. It says it can't answer.</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section class="own" aria-labelledby="own-title">
+        <h2 id="own-title">Try it on your own data</h2>
+        <p>Upload CSV files, fix what the check finds, choose what the AI may see, then ask.</p>
+        <p class="own-links">
+          <a class="go" href="/try/">Try your data</a>
+          <a href="https://github.com/crisnc100/askwell">Read the code on GitHub</a>
+        </p>
+      </section>
+    </main>
+
+    <script type="module" src="/src/front.ts"></script>
   </body>
 </html>

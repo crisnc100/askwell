@@ -31,7 +31,6 @@ button.link-button { background: none; border: none; color: var(--accent); paddi
 label { display: block; margin: 12px 0 4px; }
 input[type="text"], select { font: inherit; padding: 6px 8px; border: 1px solid var(--line); border-radius: 4px; width: 100%; box-sizing: border-box; }
 .muted { color: var(--muted); font-size: 0.92rem; }
-.privacy { border-left: 3px solid var(--accent); padding-left: 10px; }
 .notice { padding: 10px 14px; border-radius: 6px; margin: 12px 0; }
 .notice.ok { background: var(--ok); }
 .notice.info { background: var(--info); }
