@@ -11,6 +11,24 @@
         ],
         "createdAt": "2026-11-17T00:44:41.489Z",
         "reason": "orchestrator: the page's CSS loads through the front.ts module, which the detector does not read; the rendered 1440 screenshot shows a 68px display headline over 18px body"
+      },
+      {
+        "rule": "design-system-font",
+        "value": "courier new",
+        "files": [
+          ".impeccable/decision/assigned.html"
+        ],
+        "createdAt": "2026-11-17T01:07:21.844Z",
+        "reason": "orchestrator: gitignored throwaway direction sketch from the decision round, not shipped UI"
+      },
+      {
+        "rule": "design-system-font",
+        "value": "courier new",
+        "files": [
+          ".impeccable/decision/pick.html"
+        ],
+        "createdAt": "2026-11-17T01:07:21.864Z",
+        "reason": "orchestrator: gitignored throwaway direction sketch from the decision round, not shipped UI"
       }
     ]
   }
