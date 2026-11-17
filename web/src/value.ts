@@ -306,7 +306,7 @@ function render(seen: Figures, holdout: Figures): void {
     h(
       "section",
       { class: "sheet-inputs", attrs: { id: "inputs", "aria-labelledby": "inputs-title" } },
-      h("div", { class: "sheet-head" }, h("h2", { class: "label", attrs: { id: "inputs-title" } }, "Your numbers"), h("span", { class: "label" }, "Monthly")),
+      h("div", { class: "sheet-head" }, h("h2", { class: "label", attrs: { id: "inputs-title" } }, "Your numbers")),
       h("p", { class: "sheet-note" }, "Every number here is an example. Replace each with your own."),
       ...INPUTS.map((spec) => inputControl(spec, state, update)),
     ),

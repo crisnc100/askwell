@@ -421,6 +421,9 @@
   .sheet-ledger td {
     padding-right: 18px;
   }
+  .sheet-ledger .total td {
+    font-size: 1.875rem;
+  }
   .sheet-range,
   .assumed {
     padding-left: 18px;
