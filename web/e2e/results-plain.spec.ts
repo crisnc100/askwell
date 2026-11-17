@@ -31,6 +31,16 @@ test("the three plain answers render with the measured numbers", async ({ page }
   const rightLine = page.locator('.line[data-line="right"]');
   await expect(rightLine.locator(".figure strong")).toHaveText(`${rightNow.n} of ${rightNow.of}`);
   await expect(rightLine).toContainText(`up from ${right(before, "ledgerline").n} before v0.3`);
+  // A question is a miss when it was missed in 2 or more of its 3 trials; of those, the
+  // ones turned down in every trial.
+  const outcomes = new Map<string, string[]>();
+  for (const m of now.misses as { item_id: string; outcome: string }[])
+    outcomes.set(m.item_id, [...(outcomes.get(m.item_id) ?? []), m.outcome]);
+  const missed = [...outcomes.values()].filter((o) => o.length >= 2);
+  expect(missed.length).toBe(rightNow.of - rightNow.n);
+  const refusedAll = missed.filter((o) => o.length === 3 && o.every((x) => x === "refused")).length;
+  await expect(rightLine.locator(".means")).toContainText(`(${refusedAll} of the ${missed.length} misses)`);
+  await expect(rightLine.locator(".means")).toContainText("get the right answer");
 
   const wrongLine = page.locator('.line[data-line="wrong"]');
   await expect(wrongLine.locator(".figure strong")).toHaveText(`About ${oneIn(wrong)}`);
@@ -39,6 +49,7 @@ test("the three plain answers render with the measured numbers", async ({ page }
   const unsureLine = page.locator('.line[data-line="unsure"]');
   await expect(unsureLine.locator(".figure strong")).toHaveText(`All ${refused.of / now.trials}`);
   await expect(unsureLine).toContainText(`in all ${now.trials} runs`);
+  await expect(unsureLine.locator(".means")).toContainText("private fields such as passwords");
 
   const compare = page.locator(".compare-ledger");
   await expect(compare).toContainText(`${right(now, "oneshot").n} of ${right(now, "oneshot").of}`);
